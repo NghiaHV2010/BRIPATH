@@ -1,0 +1,522 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model answers {
+  id                     Int                      @id @default(autoincrement())
+  answer                 String                   @db.VarChar(150)
+  embedding              Unsupported("vector")?
+  question_id            Int
+  questions              questions                @relation(fields: [question_id], references: [id])
+  personalityTestResults personalityTestResults[]
+}
+
+model applicants {
+  cv_id         Int
+  job_id        String
+  description   String?
+  apply_date    DateTime         @default(now())
+  verified_date DateTime
+  status        ApplicantsStatus @default(ang_ch_)
+  feedback      String?
+  cvs           cvs              @relation(fields: [cv_id], references: [id])
+  jobs          jobs             @relation(fields: [job_id], references: [id])
+
+  @@id([cv_id, job_id])
+}
+
+model awards {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(150)
+  description String?
+  start_date  DateTime? @db.Date
+  end_date    DateTime? @db.Date
+  cv_id       Int
+  cvs         cvs       @relation(fields: [cv_id], references: [id])
+}
+
+model blogs {
+  id              Int      @id @default(autoincrement())
+  title           String   @db.VarChar(255)
+  cover_image_url String
+  description_url String
+  created_at      DateTime @default(now())
+  updated_at      DateTime
+  user_id         String
+  users           users    @relation(fields: [user_id], references: [id])
+}
+
+model careerPathSteps {
+  id          Int         @id @default(autoincrement())
+  title       String      @db.VarChar(100)
+  description String?
+  resources   String?
+  career_id   Int
+  careerPaths careerPaths @relation(fields: [career_id], references: [id])
+}
+
+model careerPaths {
+  id                Int               @id @default(autoincrement())
+  title             String            @db.VarChar(150)
+  description       String?
+  resources         String?
+  level             String?           @db.VarChar(100)
+  estimate_duration String?           @db.VarChar(50)
+  user_id           String
+  jobspecialized_id Int               @unique
+  careerPathSteps   careerPathSteps[]
+  jobSpecialized    jobSpecialized    @relation(fields: [jobspecialized_id], references: [id])
+  users             users             @relation(fields: [user_id], references: [id])
+}
+
+model categories {
+  id            Int    @id @default(autoincrement())
+  category_name String @unique @db.VarChar(50)
+  jobs          jobs[]
+}
+
+model certificates {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(150)
+  link        String?
+  description String?
+  start_date  DateTime? @db.Date
+  end_date    DateTime? @db.Date
+  cv_id       Int
+  cvs         cvs       @relation(fields: [cv_id], references: [id])
+}
+
+model companies {
+  id                       String                     @id
+  company_name             String                     @unique @db.VarChar(150)
+  company_website          String?
+  address_street           String                     @db.VarChar(50)
+  address_ward             String                     @db.VarChar(50)
+  address_city             String                     @db.VarChar(50)
+  address_country          String                     @db.VarChar(50)
+  email                    String                     @unique @db.VarChar(50)
+  phone                    String                     @unique @db.VarChar(12)
+  business_certificate     String?
+  company_type             Company_Type               @default(H__kinh_doanh)
+  description              String?
+  logo_url                 String?
+  background_url           String?
+  employees                Int?
+  is_verified              Boolean                    @default(false)
+  fax_code                 String?                    @db.VarChar(20)
+  is_deleted               Boolean                    @default(false)
+  created_at               DateTime                   @default(now())
+  updated_at               DateTime
+  field_id                 Int?
+  label_id                 Int?
+  fields                   fields?                    @relation(fields: [field_id], references: [id])
+  users                    users                      @relation(fields: [id], references: [id])
+  companyLabels            companyLabels?             @relation(fields: [label_id], references: [id])
+  companyActivitiesHistory companyActivitiesHistory[]
+  companyNotifications     companyNotifications[]
+  feedbacks                feedbacks[]
+  followedCompanies        followedCompanies[]
+}
+
+model companyActivitiesHistory {
+  id            Int       @default(autoincrement())
+  activity_name String    @db.VarChar(100)
+  time          DateTime  @default(now())
+  company_id    String
+  companies     companies @relation(fields: [company_id], references: [id])
+
+  @@id([id, company_id])
+}
+
+model companyLabels {
+  id         Int         @id @default(autoincrement())
+  label_name String      @unique @db.VarChar(100)
+  companies  companies[]
+}
+
+model companyNotifications {
+  id         Int               @default(autoincrement())
+  company_id String
+  title      String            @db.VarChar(150)
+  content    String?           @db.VarChar(255)
+  type       NotificationsType @default(H__th_ng)
+  is_read    Boolean           @default(false)
+  sent_at    DateTime          @default(now())
+  read_at    DateTime?
+  companies  companies         @relation(fields: [company_id], references: [id])
+
+  @@id([id, company_id])
+}
+
+model cvs {
+  id             Int                    @id @default(autoincrement())
+  fullname       String                 @db.VarChar(50)
+  age            Int?
+  gender         String?                @db.VarChar(10)
+  address        String?                @db.VarChar(150)
+  email          String?                @db.VarChar(50)
+  introduction   String?
+  soft_skills    String[]
+  primary_skills String[]
+  phone          String?                @db.VarChar(12)
+  hobbies        String?
+  others         String?
+  embedding      Unsupported("vector")?
+  applicants     applicants[]
+  awards         awards[]
+  certificates   certificates[]
+  educations     educations[]
+  experiences    experiences[]
+  projects       projects[]
+  references     references[]
+}
+
+model educations {
+  id             Int       @id @default(autoincrement())
+  school         String    @db.VarChar(100)
+  graduated_type String?   @db.VarChar(50)
+  gpa            Float?    @db.Real
+  start_date     DateTime? @db.Date
+  end_date       DateTime? @db.Date
+  cv_id          Int
+  cvs            cvs       @relation(fields: [cv_id], references: [id])
+}
+
+model experiences {
+  id           Int       @id @default(autoincrement())
+  company_name String?   @db.VarChar(150)
+  title        String?   @db.VarChar(150)
+  description  String?
+  start_date   DateTime? @db.Date
+  end_date     DateTime? @db.Date
+  cv_id        Int
+  cvs          cvs       @relation(fields: [cv_id], references: [id])
+}
+
+model features {
+  id              Int              @id @default(autoincrement())
+  feature_name    String           @db.VarChar(100)
+  description     String?          @db.VarChar(255)
+  plan_id         Int?
+  membershipPlans membershipPlans? @relation(fields: [plan_id], references: [id])
+}
+
+model feedbacks {
+  user_id          String
+  company_id       String
+  description      String
+  stars            Float     @db.Real
+  work_environment String?
+  benefit          String?
+  created_at       DateTime  @default(now())
+  companies        companies @relation(fields: [company_id], references: [id])
+  users            users     @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, company_id])
+}
+
+model fields {
+  id         Int         @id @default(autoincrement())
+  field_name String      @unique @db.VarChar(100)
+  companies  companies[]
+}
+
+model followedCompanies {
+  user_id     String
+  company_id  String
+  followed_at DateTime  @default(now())
+  is_notified Boolean   @default(true)
+  companies   companies @relation(fields: [company_id], references: [id])
+  users       users     @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, company_id])
+}
+
+model jobCategories {
+  id             Int                    @id @default(autoincrement())
+  job_category   String                 @unique @db.VarChar(100)
+  description    String?                @db.VarChar(255)
+  embedding      Unsupported("vector")?
+  jobSpecialized jobSpecialized[]
+}
+
+model jobLabels {
+  id         Int    @id @default(autoincrement())
+  label_name String @unique @db.VarChar(50)
+  jobs       jobs[]
+}
+
+model jobSpecialized {
+  id             Int                    @id @default(autoincrement())
+  job_type       String                 @db.VarChar(100)
+  description    String?                @db.VarChar(150)
+  embedding      Unsupported("vector")?
+  jobcategory_id Int
+  careerPaths    careerPaths?
+  jobCategories  jobCategories          @relation(fields: [jobcategory_id], references: [id])
+}
+
+model jobs {
+  id           String                 @id
+  job_title    String                 @db.VarChar(150)
+  description  String
+  location     String?                @db.VarChar(150)
+  benefit      String?                @db.VarChar(255)
+  working_time String?                @db.VarChar(50)
+  salary       String[]               @default(["Thỏa thuận"])
+  currency     String?                @default("VND") @db.VarChar(3)
+  job_type     Job_Type?
+  status       Job_Status?
+  job_level    String                 @db.VarChar(50)
+  quantity     Int?
+  skill_tags   String[]
+  education    Education?
+  experience   String?
+  embedding    Unsupported("vector")?
+  start_date   DateTime               @default(now()) @db.Date
+  end_date     DateTime?              @db.Date
+  created_at   DateTime               @default(now())
+  updated_at   DateTime
+  category_id  Int?
+  label_id     Int?
+  applicants   applicants[]
+  categories   categories?            @relation(fields: [category_id], references: [id])
+  jobLabels    jobLabels?             @relation(fields: [label_id], references: [id])
+  savedJobs    savedJobs[]
+}
+
+model membershipPlans {
+  id            Int             @id @default(autoincrement())
+  plan_name     String          @db.VarChar(50)
+  description   String?
+  price         BigInt
+  duration_days Int             @db.SmallInt
+  is_active     Boolean         @default(true)
+  created_at    DateTime        @default(now())
+  updated_at    DateTime
+  features      features[]
+  subscriptions subscriptions[]
+}
+
+model messages {
+  id               Int      @default(autoincrement())
+  message_content  String?
+  response_content String?
+  created_at       DateTime @default(now())
+  user_id          String
+  users            users    @relation(fields: [user_id], references: [id])
+
+  @@id([id, user_id])
+}
+
+model payments {
+  id              String         @id
+  amount          BigInt
+  currency        String?        @db.VarChar(10)
+  payment_gateway PaymentGateway
+  payment_method  PaymentMethod
+  transaction_id  String?        @db.VarChar(100)
+  status          PaymentStatus
+  created_at      DateTime       @default(now())
+  user_id         String
+  users           users          @relation(fields: [user_id], references: [id])
+  subscriptions   subscriptions?
+}
+
+model personalityTestResults {
+  user_id     String
+  question_id Int
+  answer_id   Int
+  answers     answers   @relation(fields: [answer_id], references: [id])
+  questions   questions @relation(fields: [question_id], references: [id])
+  users       users     @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, question_id, answer_id])
+}
+
+model projects {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(150)
+  description String?
+  start_date  DateTime? @db.Date
+  end_date    DateTime? @db.Date
+  cv_id       Int
+  cvs         cvs       @relation(fields: [cv_id], references: [id])
+}
+
+model questions {
+  id                     Int                      @id @default(autoincrement())
+  question               String                   @unique @db.VarChar(100)
+  answers                answers[]
+  personalityTestResults personalityTestResults[]
+}
+
+model references {
+  id    Int     @id @default(autoincrement())
+  name  String  @db.VarChar(100)
+  phone String? @db.VarChar(12)
+  email String? @db.VarChar(50)
+  cv_id Int
+  cvs   cvs     @relation(fields: [cv_id], references: [id])
+}
+
+model roles {
+  id        Int     @id @default(autoincrement())
+  role_name String  @unique @db.VarChar(50)
+  users     users[]
+}
+
+model savedJobs {
+  user_id  String
+  job_id   String
+  saved_at DateTime @default(now())
+  jobs     jobs     @relation(fields: [job_id], references: [id])
+  users    users    @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, job_id])
+}
+
+model subscriptions {
+  id              String             @id
+  start_date      DateTime           @default(now())
+  end_date        DateTime
+  amount_paid     BigInt
+  is_extended     Boolean            @default(false)
+  status          SubscriptionStatus @default(C_n_h_n)
+  user_id         String
+  plan_id         Int
+  payment_id      String             @unique
+  payments        payments           @relation(fields: [payment_id], references: [id])
+  membershipPlans membershipPlans    @relation(fields: [plan_id], references: [id])
+  users           users              @relation(fields: [user_id], references: [id])
+}
+
+model userActivitiesHistory {
+  id            Int      @default(autoincrement())
+  activity_name String   @db.VarChar(100)
+  time          DateTime @default(now())
+  user_id       String
+  users         users    @relation(fields: [user_id], references: [id])
+
+  @@id([id, user_id])
+}
+
+model userNotifications {
+  id      Int               @default(autoincrement())
+  user_id String
+  title   String            @db.VarChar(150)
+  content String?           @db.VarChar(255)
+  type    NotificationsType @default(H__th_ng)
+  is_read Boolean           @default(false)
+  sent_at DateTime          @default(now())
+  read_at DateTime?
+  users   users             @relation(fields: [user_id], references: [id])
+
+  @@id([id, user_id])
+}
+
+model users {
+  id                     String                   @id
+  username               String                   @db.VarChar(100)
+  password               String                   @db.VarChar(255)
+  avatar_url             String?
+  email                  String                   @unique @db.VarChar(50)
+  phone                  String?                  @unique @db.VarChar(12)
+  address_street         String?                  @db.VarChar(50)
+  address_ward           String?                  @db.VarChar(50)
+  address_city           String?                  @db.VarChar(50)
+  address_country        String?                  @db.VarChar(50)
+  gender                 Gender?
+  is_deleted             Boolean                  @default(false)
+  created_at             DateTime                 @default(now())
+  updated_at             DateTime
+  role_id                Int
+  blogs                  blogs[]
+  careerPaths            careerPaths[]
+  companies              companies?
+  feedbacks              feedbacks[]
+  followedCompanies      followedCompanies[]
+  messages               messages[]
+  payments               payments[]
+  personalityTestResults personalityTestResults[]
+  savedJobs              savedJobs[]
+  subscriptions          subscriptions[]
+  userActivitiesHistory  userActivitiesHistory[]
+  userNotifications      userNotifications[]
+  roles                  roles                    @relation(fields: [role_id], references: [id])
+}
+
+enum ApplicantsStatus {
+  ang_ch_   @map("Đang chờ")
+  Ch_p_nh_n @map("Chấp nhận")
+  T__ch_i   @map("Từ chối")
+}
+
+enum Company_Type {
+  H__kinh_doanh @map("Hộ kinh doanh")
+  Doanh_nghi_p  @map("Doanh nghiệp")
+}
+
+enum Education {
+  C__nh_n                        @map("Cử nhân")
+  Th_c_s_                        @map("Thạc sĩ")
+  Ti_n_s_                        @map("Tiến sĩ")
+  Kh_c                           @map("Khác")
+  T_t_nghi_p_trung_h_c_ph__th_ng @map("Tốt nghiệp trung học phổ thông")
+}
+
+enum Gender {
+  Name
+  N_   @map("Nữ")
+  Kh_c @map("Khác")
+}
+
+enum Job_Status {
+  H_t_h_n @map("Hết hạn")
+  ang_m_  @map("Đang mở")
+}
+
+enum Job_Type {
+  Remote
+  Part_time @map("Part time")
+  Full_time @map("Full time")
+  Kh_c      @map("Khác")
+}
+
+enum NotificationsType {
+  H__th_ng     @map("Hệ thống")
+  G_i___ng_k_  @map("Gói đăng ký")
+  H__s_        @map("Hồ sơ")
+  ang_theo_d_i @map("Đang theo dõi")
+}
+
+enum PaymentGateway {
+  MoMo
+  Bank
+  ZaloPay
+  Stripe
+}
+
+enum PaymentMethod {
+  Th__ng_n_h_ng @map("Thẻ ngân hàng")
+  V___i_n_t_    @map("Ví điện tử")
+  Chuy_n_kho_n  @map("Chuyển khoản")
+  M__QR         @map("Mã QR")
+}
+
+enum PaymentStatus {
+  Th_nh_c_ng @map("Thành công")
+  Th_t_b_i   @map("Thất bại")
+}
+
+enum SubscriptionStatus {
+  C_n_h_n @map("Còn hạn")
+  H_t_h_n @map("Hết hạn")
+  h_y     @map("Đã hủy")
+}
