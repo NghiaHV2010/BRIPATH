@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
 
 # Environment variables
 .env
@@ -28,3 +29,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+src/generated/prisma
