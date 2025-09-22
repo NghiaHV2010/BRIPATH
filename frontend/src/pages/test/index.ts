@@ -1,0 +1,1 @@
+export { default as PersonalityQuizPage } from "./personalityQuizPage";

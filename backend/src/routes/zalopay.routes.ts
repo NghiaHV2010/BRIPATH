@@ -9,9 +9,9 @@ import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { generateZaloPaySignature } from '../utils/zalopay.utils';
 import config from '../config/env.config';
 
-const router = Router();
+const zaloPayRouter = Router();
 
-router.post('/create-order', validateCreateOrderRequest, async (req: Request, res: Response) => {
+zaloPayRouter.post('/create-order', validateCreateOrderRequest, async (req: Request, res: Response) => {
     try {
         const { app_user, amount, description, item, bank_code, embed_data } = req.body;
 
@@ -49,7 +49,7 @@ router.post('/create-order', validateCreateOrderRequest, async (req: Request, re
     }
 });
 
-router.get('/query-order/:app_trans_id', validateQueryOrderRequest, async (req: Request, res: Response) => {
+zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async (req: Request, res: Response) => {
     try {
         const { app_trans_id } = req.params;
 
@@ -57,7 +57,7 @@ router.get('/query-order/:app_trans_id', validateQueryOrderRequest, async (req: 
 
         if (result.return_code === 1) {
             const statusText = getOrderStatusText(result.status || 0);
-            
+
             res.status(HTTP_SUCCESS.OK).json({
                 success: true,
                 data: {
@@ -86,7 +86,7 @@ router.get('/query-order/:app_trans_id', validateQueryOrderRequest, async (req: 
 });
 
 
-router.post('/callback', async (req: Request, res: Response) => {
+zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
     let result: any = {};
 
     try {
@@ -137,4 +137,4 @@ function getOrderStatusText(status: number): string {
     }
 }
 
-export default router;
+export default zaloPayRouter;

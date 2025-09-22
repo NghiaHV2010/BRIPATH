@@ -1,9 +1,9 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import config from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute }, routes from './routes';
+import { authRoute, vnpayRoutes, zalopayRoutes } from './routes';
 import passport from './config/passport.config';
 
 const { PORT, FRONTEND_URL } = config;
@@ -22,7 +22,8 @@ app.use(passport.initialize());
 
 // App routes
 app.use(authRoute);
-app.use(routes);
+app.use(vnpayRoutes);
+app.use(zalopayRoutes);
 
 // App error middleware
 app.use(errorMiddleware);

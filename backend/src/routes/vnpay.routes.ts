@@ -6,12 +6,12 @@ import {
 } from '../middlewares/vnpay.middleware';
 import { VNPAY_RESPONSE_CODE } from '../types/vnpay.types';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { verifyReturnSignature, verifyIPNSignature, parseAmount, sortObject, generateVNPaySignature } from '../utils/vnpay.utils';
+import { verifyReturnSignature, parseAmount, sortObject, generateVNPaySignature } from '../utils/vnpay.utils';
 import config from '../config/env.config';
 
-const router = Router();
+const vnPayRouter = Router();
 
-router.post('/create-payment-url', validateCreateOrderRequest, async (req: Request, res: Response) => {
+vnPayRouter.post('/create-payment-url', validateCreateOrderRequest, async (req: Request, res: Response) => {
     try {
         const { amount, orderInfo, bankCode, locale, orderType } = req.body;
 
@@ -39,7 +39,7 @@ router.post('/create-payment-url', validateCreateOrderRequest, async (req: Reque
     }
 });
 
-router.get('/return', async (req: Request, res: Response) => {
+vnPayRouter.get('/return', async (req: Request, res: Response) => {
     try {
         const vnpParams = req.query;
         const isValidSignature = verifyReturnSignature(vnpParams as Record<string, any>);
@@ -83,7 +83,7 @@ router.get('/return', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/ipn', async (req: Request, res: Response) => {
+vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
     let result: any = {};
 
     try {
@@ -145,7 +145,7 @@ router.get('/ipn', async (req: Request, res: Response) => {
     }
 });
 
-router.post('/query', validateQueryOrderRequest, async (req: Request, res: Response) => {
+vnPayRouter.post('/query', validateQueryOrderRequest, async (req: Request, res: Response) => {
     try {
         const { orderId, transDate } = req.body;
 
@@ -187,4 +187,4 @@ router.post('/query', validateQueryOrderRequest, async (req: Request, res: Respo
 });
 
 
-export default router;
+export default vnPayRouter;
