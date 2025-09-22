@@ -118,3 +118,10 @@ export const googleLogin = (req: Request, res: Response) => {
         }
     });
 }
+
+
+const generateRandomCode = (): number => {
+    const minRange = 100000;
+    const maxRange = 999999
+    return Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
+}
