@@ -77,6 +77,37 @@
   }
 }
 
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.8s ease-out;
 }
@@ -109,6 +140,18 @@
   animation: shake 0.5s ease-in-out;
 }
 
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 input, textarea, select {
   color: #213547;
   background-color: #fff;
@@ -128,6 +171,19 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* Ensure full screen stability */
+#root {
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1 {

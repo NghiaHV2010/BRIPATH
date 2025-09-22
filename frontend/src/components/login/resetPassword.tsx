@@ -17,17 +17,17 @@ export default function ResetPassword({ onPasswordReset, email }: ResetPasswordP
     e.preventDefault();
     
     if (!newPassword || !confirmPassword) {
-      setError("Please fill in both password fields");
+      setError("Vui lòng điền vào cả hai trường mật khẩu");
       return;
     }
     
     if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      // Không cần set error ở đây vì đã có real-time validation
       return;
     }
     
@@ -47,9 +47,9 @@ export default function ResetPassword({ onPasswordReset, email }: ResetPasswordP
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Almost done!<br />
-              <span className="text-green-200">Create your new</span><br />
-              <span className="text-green-200">secure password</span>
+              Sắp xong rồi!<br />
+              <span className="text-green-200">Tạo mật khẩu mới</span><br />
+              <span className="text-green-200">bảo mật cho bạn</span>
             </h2>
           </div>
         </div>
@@ -65,19 +65,19 @@ export default function ResetPassword({ onPasswordReset, email }: ResetPasswordP
               <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4 animate-bounce-subtle">
                 🔑
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Create New Password</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Tạo mật khẩu mới</h2>
               <p className="text-gray-600 text-sm">
-                For account: <span className="font-medium">{email}</span><br />
-                Enter your new password below.
+                Cho tài khoản: <span className="font-medium">{email}</span><br />
+                Nhập mật khẩu mới của bạn bên dưới.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">New Password</label>
+                <label className="text-sm font-medium text-gray-700">Mật khẩu mới</label>
                 <Input
                   type="password"
-                  placeholder="Enter new password"
+                  placeholder="Nhập mật khẩu mới"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
@@ -86,25 +86,34 @@ export default function ResetPassword({ onPasswordReset, email }: ResetPasswordP
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+                <label className="text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
                 <Input
                   type="password"
-                  placeholder="Confirm new password"
+                  placeholder="Xác nhận mật khẩu mới"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
+                  className={`transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${
+                    confirmPassword && newPassword && confirmPassword !== newPassword 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : ''
+                  }`}
                   required
                 />
+                {confirmPassword && newPassword && confirmPassword !== newPassword && (
+                  <div className="text-red-500 text-sm animate-shake">
+                    Mật khẩu không khớp
+                  </div>
+                )}
               </div>
 
               <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium mb-1">Password requirements:</p>
+                <p className="font-medium mb-1">Yêu cầu mật khẩu:</p>
                 <ul className="space-y-1">
                   <li className={`${newPassword.length >= 6 ? 'text-green-600' : 'text-gray-400'}`}>
-                    • At least 6 characters
+                    • Ít nhất 6 ký tự
                   </li>
                   <li className={`${newPassword && confirmPassword && newPassword === confirmPassword ? 'text-green-600' : 'text-gray-400'}`}>
-                    • Passwords must match
+                    • Mật khẩu phải khớp nhau
                   </li>
                 </ul>
               </div>
@@ -121,17 +130,17 @@ export default function ResetPassword({ onPasswordReset, email }: ResetPasswordP
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Updating password...</span>
+                    <span>Đang cập nhật mật khẩu...</span>
                   </div>
                 ) : (
-                  "Update Password"
+                  "Cập nhật mật khẩu"
                 )}
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                Remember your password?{' '}
+                Nhớ lại mật khẩu?{' '}
                 <a href="/login" className="text-green-600 hover:underline font-medium transition-colors">
-                  Back to Login
+                  Quay lại đăng nhập
                 </a>
               </div>
             </form>

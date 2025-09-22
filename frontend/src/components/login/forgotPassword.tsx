@@ -14,11 +14,11 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setError("Please enter your email address");
+      setError("Vui lòng nhập địa chỉ email của bạn");
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address");
+      setError("Vui lòng nhập địa chỉ email hợp lệ");
       return;
     }
     
@@ -38,9 +38,9 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Forgot your password?<br />
-              <span className="text-orange-200">No worries!</span><br />
-              <span className="text-orange-200">We'll help you reset it</span>
+              Quên mật khẩu?<br />
+              <span className="text-orange-200">Đừng lo lắng!</span><br />
+              <span className="text-orange-200">Chúng tôi sẽ giúp bạn khôi phục</span>
             </h2>
           </div>
         </div>
@@ -56,18 +56,18 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-4 animate-bounce-subtle">
                 🔐
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Forgot Password?</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Quên mật khẩu?</h2>
               <p className="text-gray-600 text-sm">
-                Enter your email address and we'll send you a verification code to reset your password.
+                Nhập địa chỉ email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Email Address</label>
+                <label className="text-sm font-medium text-gray-700">Địa chỉ Email</label>
                 <Input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Nhập email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
@@ -87,17 +87,17 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Sending code...</span>
+                    <span>Đang gửi mã...</span>
                   </div>
                 ) : (
-                  "Send Reset Code"
+                  "Gửi mã khôi phục"
                 )}
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                Remember your password?{' '}
+                Nhớ lại mật khẩu?{' '}
                 <a href="/login" className="text-orange-600 hover:underline font-medium transition-colors">
-                  Back to Login
+                  Quay lại đăng nhập
                 </a>
               </div>
             </form>

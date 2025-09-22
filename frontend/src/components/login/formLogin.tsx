@@ -4,15 +4,15 @@ import { Button } from "../ui/button";
 import GoogleButton from "./googleButton";
 
 export default function FormLogin() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please enter email and password");
+    if (!username || !password) {
+      setError("Vui lòng nhập tên tài khoản và mật khẩu");
       return;
     }
     setError("");
@@ -20,7 +20,7 @@ export default function FormLogin() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsLoading(false);
-    alert("Login success!");
+    alert("Đăng nhập thành công!");
   };
 
   return (
@@ -32,9 +32,9 @@ export default function FormLogin() {
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Welcome.<br />
-              <span className="text-blue-200">Start your journey</span><br />
-              <span className="text-blue-200">with our website!</span>
+              Chào mừng.<br />
+              <span className="text-blue-200">Bắt đầu hành trình</span><br />
+              <span className="text-blue-200">cùng website của chúng tôi!</span>
             </h2>
           </div>
         </div>
@@ -51,17 +51,17 @@ export default function FormLogin() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4 animate-bounce-subtle">
                 👋
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Login to your account</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Đăng nhập vào tài khoản</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Email</label>
+                <label className="text-sm font-medium text-gray-700">Tên tài khoản</label>
                 <Input
-                  type="email"
-                  placeholder="example@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="Nhập tên tài khoản"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
@@ -69,12 +69,12 @@ export default function FormLogin() {
 
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-gray-700">Password</label>
-                  <a href="/forgot-password" className="text-sm text-blue-600 hover:underline transition-colors">Forgot?</a>
+                  <label className="text-sm font-medium text-gray-700">Mật khẩu</label>
+                  <a href="/forgot-password" className="text-sm text-blue-600 hover:underline transition-colors">Quên mật khẩu?</a>
                 </div>
                 <Input
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
@@ -94,10 +94,10 @@ export default function FormLogin() {
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Signing in...</span>
+                    <span>Đang đăng nhập...</span>
                   </div>
                 ) : (
-                  "Login now"
+                  "Đăng nhập ngay"
                 )}
               </Button>
 
@@ -106,16 +106,16 @@ export default function FormLogin() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-2 bg-white text-gray-500">Hoặc tiếp tục với</span>
                 </div>
               </div>
 
-              <GoogleButton onSuccess={() => alert("Google login success!")} />
+              <GoogleButton onSuccess={() => alert("Đăng nhập Google thành công!")} />
 
               <div className="text-center text-sm text-gray-600">
-                Don't have an Account?{' '}
+                Chưa có tài khoản?{' '}
                 <a href="/register" className="text-blue-600 hover:underline font-medium transition-colors">
-                  Sign Up
+                  Đăng ký ngay
                 </a>
               </div>
             </form>

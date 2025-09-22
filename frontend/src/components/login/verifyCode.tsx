@@ -39,7 +39,7 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (code.some(c => c === "")) {
-      setError("Please enter all 6 digits.");
+      setError("Vui lòng nhập đầy đủ 6 chữ số.");
       return;
     }
     setError("");
@@ -48,8 +48,8 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
     setIsLoading(false);
     onVerify?.(code.join(""));
     const message = type === 'password-reset' 
-      ? "Email verified successfully! You can now reset your password." 
-      : "Account verified successfully! Welcome to BRIPATH!";
+      ? "Xác minh email thành công! Bây giờ bạn có thể đặt lại mật khẩu." 
+      : "Tài khoản được xác minh thành công! Chào mừng đến với BRIPATH!";
     alert(message);
   };
 
@@ -58,8 +58,8 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsLoading(false);
     const message = type === 'password-reset'
-      ? "Password reset code sent!"
-      : "Verification code sent!";
+      ? "Đã gửi mã đặt lại mật khẩu!"
+      : "Đã gửi mã xác minh!";
     alert(message);
   };
 
@@ -97,15 +97,15 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
             <h2 className="text-5xl font-light leading-tight">
               {type === 'password-reset' ? (
                 <>
-                  Verify your email<br />
-                  <span className={getAccentColorClass()}>to reset your</span><br />
-                  <span className={getAccentColorClass()}>password</span>
+                  Xác minh email của bạn<br />
+                  <span className={getAccentColorClass()}>để đặt lại</span><br />
+                  <span className={getAccentColorClass()}>mật khẩu</span>
                 </>
               ) : (
                 <>
-                  You're almost in!<br />
-                  <span className={getAccentColorClass()}>Just one more step</span><br />
-                  <span className={getAccentColorClass()}>to get started</span>
+                  Bạn sắp vào rồi!<br />
+                  <span className={getAccentColorClass()}>Chỉ còn một bước nữa</span><br />
+                  <span className={getAccentColorClass()}>để bắt đầu</span>
                 </>
               )}
             </h2>
@@ -125,18 +125,18 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                {type === 'password-reset' ? 'Verify Your Email' : 'Verify Your Email'}
+                {type === 'password-reset' ? 'Xác minh Email của bạn' : 'Xác minh Email của bạn'}
               </h2>
               <p className="text-gray-600 text-sm mb-6">
                 {type === 'password-reset' ? (
                   <>
-                    We've sent a 6-digit verification code to {email ? <><strong>{email}</strong><br /></> : 'your email address.'}<br />
-                    Enter it below to proceed with password reset.
+                    Chúng tôi đã gửi mã xác minh 6 chữ số đến {email ? <><strong>{email}</strong><br /></> : 'địa chỉ email của bạn.'}<br />
+                    Nhập mã bên dưới để tiếp tục đặt lại mật khẩu.
                   </>
                 ) : (
                   <>
-                    We've sent a 6-digit verification code to your email address.<br />
-                    Please enter it below to complete your registration.
+                    Chúng tôi đã gửi mã xác minh 6 chữ số đến địa chỉ email của bạn.<br />
+                    Vui lòng nhập mã bên dưới để hoàn tất đăng ký.
                   </>
                 )}
               </p>
@@ -176,10 +176,10 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Verifying...</span>
+                    <span>Đang xác minh...</span>
                   </div>
                 ) : (
-                  "Verify Email"
+                  "Xác minh Email"
                 )}
               </Button>
 
@@ -190,22 +190,22 @@ export default function VerifyCode({ onVerify, type = 'registration', email }: V
                   className={`${getLinkClass()} text-sm font-medium transition-colors disabled:opacity-50`}
                   disabled={isLoading}
                 >
-                  Didn't receive the code? Resend
+                  Không nhận được mã? Gửi lại
                 </button>
                 
                 <div className="text-xs text-gray-500">
                   {type === 'password-reset' ? (
                     <>
-                      Want to change your email address?{' '}
+                      Muốn thay đổi địa chỉ email?{' '}
                       <a href="/forgot-password" className={`${getLinkClass()} hover:underline font-medium`}>
-                        Go back
+                        Quay lại
                       </a>
                     </>
                   ) : (
                     <>
-                      Want to change your email address?{' '}
+                      Muốn thay đổi địa chỉ email?{' '}
                       <a href="/register" className={`${getLinkClass()} hover:underline font-medium`}>
-                        Go back
+                        Quay lại
                       </a>
                     </>
                   )}
