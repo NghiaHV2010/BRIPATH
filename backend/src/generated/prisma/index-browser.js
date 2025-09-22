@@ -476,41 +476,41 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 exports.ApplicantsStatus = exports.$Enums.ApplicantsStatus = {
-  ang_ch_: 'ang_ch_',
-  Ch_p_nh_n: 'Ch_p_nh_n',
-  T__ch_i: 'T__ch_i'
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 exports.Company_Type = exports.$Enums.Company_Type = {
-  H__kinh_doanh: 'H__kinh_doanh',
-  Doanh_nghi_p: 'Doanh_nghi_p'
+  business_househole: 'business_househole',
+  business: 'business'
 };
 
 exports.NotificationsType = exports.$Enums.NotificationsType = {
-  H__th_ng: 'H__th_ng',
-  G_i___ng_k_: 'G_i___ng_k_',
-  H__s_: 'H__s_',
-  ang_theo_d_i: 'ang_theo_d_i'
+  system: 'system',
+  pricing_plan: 'pricing_plan',
+  applicant: 'applicant',
+  followed: 'followed'
 };
 
 exports.Job_Type = exports.$Enums.Job_Type = {
-  Remote: 'Remote',
-  Part_time: 'Part_time',
-  Full_time: 'Full_time',
-  Kh_c: 'Kh_c'
+  remote: 'remote',
+  part_time: 'part_time',
+  full_time: 'full_time',
+  others: 'others'
 };
 
 exports.Job_Status = exports.$Enums.Job_Status = {
-  H_t_h_n: 'H_t_h_n',
-  ang_m_: 'ang_m_'
+  over_due: 'over_due',
+  on_going: 'on_going'
 };
 
 exports.Education = exports.$Enums.Education = {
-  C__nh_n: 'C__nh_n',
-  Th_c_s_: 'Th_c_s_',
-  Ti_n_s_: 'Ti_n_s_',
-  Kh_c: 'Kh_c',
-  T_t_nghi_p_trung_h_c_ph__th_ng: 'T_t_nghi_p_trung_h_c_ph__th_ng'
+  bachelor: 'bachelor',
+  mastter: 'mastter',
+  phd: 'phd',
+  others: 'others',
+  highschool_graduate: 'highschool_graduate'
 };
 
 exports.PaymentGateway = exports.$Enums.PaymentGateway = {
@@ -521,27 +521,27 @@ exports.PaymentGateway = exports.$Enums.PaymentGateway = {
 };
 
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
-  Th__ng_n_h_ng: 'Th__ng_n_h_ng',
-  V___i_n_t_: 'V___i_n_t_',
-  Chuy_n_kho_n: 'Chuy_n_kho_n',
-  M__QR: 'M__QR'
+  bank_card: 'bank_card',
+  e_wallet: 'e_wallet',
+  bank_transfer: 'bank_transfer',
+  QR_Code: 'QR_Code'
 };
 
 exports.PaymentStatus = exports.$Enums.PaymentStatus = {
-  Th_nh_c_ng: 'Th_nh_c_ng',
-  Th_t_b_i: 'Th_t_b_i'
+  success: 'success',
+  failure: 'failure'
 };
 
 exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
-  C_n_h_n: 'C_n_h_n',
-  H_t_h_n: 'H_t_h_n',
-  h_y: 'h_y'
+  on_going: 'on_going',
+  over_date: 'over_date',
+  canceled: 'canceled'
 };
 
 exports.Gender = exports.$Enums.Gender = {
-  Name: 'Name',
-  N_: 'N_',
-  Kh_c: 'Kh_c'
+  male: 'male',
+  female: 'female',
+  others: 'others'
 };
 
 exports.Prisma.ModelName = {

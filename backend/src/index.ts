@@ -3,6 +3,7 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import config from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
+import { authRoute } from './routes';
 
 const { PORT, FRONTEND_URL } = config;
 
@@ -19,7 +20,7 @@ app.use(cors({
 
 
 // App routes
-
+app.use(authRoute);
 
 
 // App error middleware

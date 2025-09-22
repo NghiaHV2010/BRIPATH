@@ -199,65 +199,65 @@ export type users = $Result.DefaultSelection<Prisma.$usersPayload>
  */
 export namespace $Enums {
   export const ApplicantsStatus: {
-  ang_ch_: 'ang_ch_',
-  Ch_p_nh_n: 'Ch_p_nh_n',
-  T__ch_i: 'T__ch_i'
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 export type ApplicantsStatus = (typeof ApplicantsStatus)[keyof typeof ApplicantsStatus]
 
 
 export const Company_Type: {
-  H__kinh_doanh: 'H__kinh_doanh',
-  Doanh_nghi_p: 'Doanh_nghi_p'
+  business_househole: 'business_househole',
+  business: 'business'
 };
 
 export type Company_Type = (typeof Company_Type)[keyof typeof Company_Type]
 
 
 export const Education: {
-  C__nh_n: 'C__nh_n',
-  Th_c_s_: 'Th_c_s_',
-  Ti_n_s_: 'Ti_n_s_',
-  Kh_c: 'Kh_c',
-  T_t_nghi_p_trung_h_c_ph__th_ng: 'T_t_nghi_p_trung_h_c_ph__th_ng'
+  bachelor: 'bachelor',
+  mastter: 'mastter',
+  phd: 'phd',
+  others: 'others',
+  highschool_graduate: 'highschool_graduate'
 };
 
 export type Education = (typeof Education)[keyof typeof Education]
 
 
 export const Gender: {
-  Name: 'Name',
-  N_: 'N_',
-  Kh_c: 'Kh_c'
+  male: 'male',
+  female: 'female',
+  others: 'others'
 };
 
 export type Gender = (typeof Gender)[keyof typeof Gender]
 
 
 export const Job_Status: {
-  H_t_h_n: 'H_t_h_n',
-  ang_m_: 'ang_m_'
+  over_due: 'over_due',
+  on_going: 'on_going'
 };
 
 export type Job_Status = (typeof Job_Status)[keyof typeof Job_Status]
 
 
 export const Job_Type: {
-  Remote: 'Remote',
-  Part_time: 'Part_time',
-  Full_time: 'Full_time',
-  Kh_c: 'Kh_c'
+  remote: 'remote',
+  part_time: 'part_time',
+  full_time: 'full_time',
+  others: 'others'
 };
 
 export type Job_Type = (typeof Job_Type)[keyof typeof Job_Type]
 
 
 export const NotificationsType: {
-  H__th_ng: 'H__th_ng',
-  G_i___ng_k_: 'G_i___ng_k_',
-  H__s_: 'H__s_',
-  ang_theo_d_i: 'ang_theo_d_i'
+  system: 'system',
+  pricing_plan: 'pricing_plan',
+  applicant: 'applicant',
+  followed: 'followed'
 };
 
 export type NotificationsType = (typeof NotificationsType)[keyof typeof NotificationsType]
@@ -274,27 +274,27 @@ export type PaymentGateway = (typeof PaymentGateway)[keyof typeof PaymentGateway
 
 
 export const PaymentMethod: {
-  Th__ng_n_h_ng: 'Th__ng_n_h_ng',
-  V___i_n_t_: 'V___i_n_t_',
-  Chuy_n_kho_n: 'Chuy_n_kho_n',
-  M__QR: 'M__QR'
+  bank_card: 'bank_card',
+  e_wallet: 'e_wallet',
+  bank_transfer: 'bank_transfer',
+  QR_Code: 'QR_Code'
 };
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
 
 export const PaymentStatus: {
-  Th_nh_c_ng: 'Th_nh_c_ng',
-  Th_t_b_i: 'Th_t_b_i'
+  success: 'success',
+  failure: 'failure'
 };
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 
 export const SubscriptionStatus: {
-  C_n_h_n: 'C_n_h_n',
-  H_t_h_n: 'H_t_h_n',
-  h_y: 'h_y'
+  on_going: 'on_going',
+  over_date: 'over_date',
+  canceled: 'canceled'
 };
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
@@ -49311,7 +49311,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     users: usersCreateNestedOneWithoutBlogsInput
   }
 
@@ -49321,7 +49321,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     user_id: string
   }
 
@@ -49350,7 +49350,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     user_id: string
   }
 
@@ -49621,9 +49621,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
@@ -49632,7 +49632,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -49651,7 +49651,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -49719,7 +49719,7 @@ export namespace Prisma {
   }
 
   export type companiesCreateManyInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -49738,7 +49738,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
   }
@@ -50537,7 +50537,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -50555,7 +50555,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     applicants?: applicantsCreateNestedManyWithoutJobsInput
     categories?: categoriesCreateNestedOneWithoutJobsInput
     jobLabels?: jobLabelsCreateNestedOneWithoutJobsInput
@@ -50563,7 +50563,7 @@ export namespace Prisma {
   }
 
   export type jobsUncheckedCreateInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -50581,7 +50581,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
     label_id?: number | null
     applicants?: applicantsUncheckedCreateNestedManyWithoutJobsInput
@@ -50641,7 +50641,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateManyInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -50659,7 +50659,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
     label_id?: number | null
   }
@@ -50717,7 +50717,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     features?: featuresCreateNestedManyWithoutMembershipPlansInput
     subscriptions?: subscriptionsCreateNestedManyWithoutMembershipPlansInput
   }
@@ -50730,7 +50730,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     features?: featuresUncheckedCreateNestedManyWithoutMembershipPlansInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutMembershipPlansInput
   }
@@ -50768,7 +50768,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
   }
 
   export type membershipPlansUpdateManyMutationInput = {
@@ -50848,7 +50848,7 @@ export namespace Prisma {
   }
 
   export type paymentsCreateInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -50861,7 +50861,7 @@ export namespace Prisma {
   }
 
   export type paymentsUncheckedCreateInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -50900,7 +50900,7 @@ export namespace Prisma {
   }
 
   export type paymentsCreateManyInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -51202,7 +51202,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -51214,7 +51214,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsUncheckedCreateInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -51250,7 +51250,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateManyInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -51407,7 +51407,7 @@ export namespace Prisma {
   }
 
   export type usersCreateInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -51420,7 +51420,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -51437,7 +51437,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -51450,7 +51450,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -51527,7 +51527,7 @@ export namespace Prisma {
   }
 
   export type usersCreateManyInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -51540,7 +51540,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
   }
 
@@ -56674,7 +56674,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateWithoutApplicantsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -56692,14 +56692,14 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     categories?: categoriesCreateNestedOneWithoutJobsInput
     jobLabels?: jobLabelsCreateNestedOneWithoutJobsInput
     savedJobs?: savedJobsCreateNestedManyWithoutJobsInput
   }
 
   export type jobsUncheckedCreateWithoutApplicantsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -56717,7 +56717,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
     label_id?: number | null
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutJobsInput
@@ -56940,7 +56940,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutBlogsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -56953,7 +56953,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -56969,7 +56969,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutBlogsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -56982,7 +56982,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -57171,7 +57171,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutCareerPathsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -57184,7 +57184,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -57200,7 +57200,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutCareerPathsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -57213,7 +57213,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -57354,7 +57354,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateWithoutCategoriesInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -57372,14 +57372,14 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     applicants?: applicantsCreateNestedManyWithoutJobsInput
     jobLabels?: jobLabelsCreateNestedOneWithoutJobsInput
     savedJobs?: savedJobsCreateNestedManyWithoutJobsInput
   }
 
   export type jobsUncheckedCreateWithoutCategoriesInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -57397,7 +57397,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     label_id?: number | null
     applicants?: applicantsUncheckedCreateNestedManyWithoutJobsInput
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutJobsInput
@@ -57569,7 +57569,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutCompaniesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -57582,7 +57582,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -57598,7 +57598,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutCompaniesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -57611,7 +57611,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -57986,9 +57986,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
@@ -57996,7 +57996,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -58015,7 +58015,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
@@ -58114,9 +58114,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
@@ -58124,7 +58124,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutCompanyLabelsInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -58143,7 +58143,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
@@ -58224,9 +58224,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
@@ -58234,7 +58234,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutCompanyNotificationsInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -58253,7 +58253,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -58917,7 +58917,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     subscriptions?: subscriptionsCreateNestedManyWithoutMembershipPlansInput
   }
 
@@ -58929,7 +58929,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutMembershipPlansInput
   }
 
@@ -58991,9 +58991,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
@@ -59001,7 +59001,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutFeedbacksInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -59020,7 +59020,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -59034,7 +59034,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutFeedbacksInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -59047,7 +59047,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -59063,7 +59063,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutFeedbacksInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -59076,7 +59076,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -59251,8 +59251,8 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
-    users: usersCreateNestedOneWithoutCompaniesInput
+    updated_at?: Date | string
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
@@ -59261,7 +59261,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutFieldsInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -59280,7 +59280,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
@@ -59333,9 +59333,9 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users: usersCreateNestedOneWithoutCompaniesInput
+    users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
     companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
@@ -59343,7 +59343,7 @@ export namespace Prisma {
   }
 
   export type companiesUncheckedCreateWithoutFollowedCompaniesInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -59362,7 +59362,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -59376,7 +59376,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutFollowedCompaniesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -59389,7 +59389,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -59405,7 +59405,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutFollowedCompaniesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -59418,7 +59418,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -59624,7 +59624,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateWithoutJobLabelsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -59642,14 +59642,14 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     applicants?: applicantsCreateNestedManyWithoutJobsInput
     categories?: categoriesCreateNestedOneWithoutJobsInput
     savedJobs?: savedJobsCreateNestedManyWithoutJobsInput
   }
 
   export type jobsUncheckedCreateWithoutJobLabelsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -59667,7 +59667,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
     applicants?: applicantsUncheckedCreateNestedManyWithoutJobsInput
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutJobsInput
@@ -59974,7 +59974,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateWithoutMembershipPlansInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -59985,7 +59985,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsUncheckedCreateWithoutMembershipPlansInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -60063,7 +60063,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutMessagesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60076,7 +60076,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60092,7 +60092,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutMessagesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60105,7 +60105,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -60195,7 +60195,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutPaymentsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60208,7 +60208,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60224,7 +60224,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutPaymentsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60237,7 +60237,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -60258,7 +60258,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateWithoutPaymentsInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -60269,7 +60269,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsUncheckedCreateWithoutPaymentsInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -60419,7 +60419,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutPersonalityTestResultsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60432,7 +60432,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60448,7 +60448,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutPersonalityTestResultsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60461,7 +60461,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -60873,7 +60873,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutRolesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60886,7 +60886,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60902,7 +60902,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutRolesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -60915,7 +60915,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -60978,7 +60978,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateWithoutSavedJobsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -60996,14 +60996,14 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     applicants?: applicantsCreateNestedManyWithoutJobsInput
     categories?: categoriesCreateNestedOneWithoutJobsInput
     jobLabels?: jobLabelsCreateNestedOneWithoutJobsInput
   }
 
   export type jobsUncheckedCreateWithoutSavedJobsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -61021,7 +61021,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
     label_id?: number | null
     applicants?: applicantsUncheckedCreateNestedManyWithoutJobsInput
@@ -61033,7 +61033,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutSavedJobsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61046,7 +61046,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61062,7 +61062,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutSavedJobsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61075,7 +61075,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -61226,7 +61226,7 @@ export namespace Prisma {
   }
 
   export type paymentsCreateWithoutSubscriptionsInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -61238,7 +61238,7 @@ export namespace Prisma {
   }
 
   export type paymentsUncheckedCreateWithoutSubscriptionsInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -61261,7 +61261,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     features?: featuresCreateNestedManyWithoutMembershipPlansInput
   }
 
@@ -61273,7 +61273,7 @@ export namespace Prisma {
     duration_days: number
     is_active?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     features?: featuresUncheckedCreateNestedManyWithoutMembershipPlansInput
   }
 
@@ -61283,7 +61283,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutSubscriptionsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61296,7 +61296,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61312,7 +61312,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutSubscriptionsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61325,7 +61325,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -61484,7 +61484,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutUserActivitiesHistoryInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61497,7 +61497,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61513,7 +61513,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutUserActivitiesHistoryInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61526,7 +61526,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -61616,7 +61616,7 @@ export namespace Prisma {
   }
 
   export type usersCreateWithoutUserNotificationsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61629,7 +61629,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61645,7 +61645,7 @@ export namespace Prisma {
   }
 
   export type usersUncheckedCreateWithoutUserNotificationsInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -61658,7 +61658,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     role_id: number
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
@@ -61752,7 +61752,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
   }
 
   export type blogsUncheckedCreateWithoutUsersInput = {
@@ -61761,7 +61761,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
   }
 
   export type blogsCreateOrConnectWithoutUsersInput = {
@@ -61824,7 +61824,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
     companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
@@ -61852,7 +61852,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
     companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -61941,7 +61941,7 @@ export namespace Prisma {
   }
 
   export type paymentsCreateWithoutUsersInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -61953,7 +61953,7 @@ export namespace Prisma {
   }
 
   export type paymentsUncheckedCreateWithoutUsersInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -62015,7 +62015,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateWithoutUsersInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -62026,7 +62026,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsUncheckedCreateWithoutUsersInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -62500,7 +62500,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateManyCategoriesInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -62518,7 +62518,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     label_id?: number | null
   }
 
@@ -62720,7 +62720,7 @@ export namespace Prisma {
   }
 
   export type companiesCreateManyCompanyLabelsInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -62739,7 +62739,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     field_id?: number | null
   }
 
@@ -63054,7 +63054,7 @@ export namespace Prisma {
   }
 
   export type companiesCreateManyFieldsInput = {
-    id: string
+    id?: string
     company_name: string
     company_website?: string | null
     address_street: string
@@ -63073,7 +63073,7 @@ export namespace Prisma {
     fax_code?: string | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     label_id?: number | null
   }
 
@@ -63183,7 +63183,7 @@ export namespace Prisma {
   }
 
   export type jobsCreateManyJobLabelsInput = {
-    id: string
+    id?: string
     job_title: string
     description: string
     location?: string | null
@@ -63201,7 +63201,7 @@ export namespace Prisma {
     start_date?: Date | string
     end_date?: Date | string | null
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
     category_id?: number | null
   }
 
@@ -63341,7 +63341,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateManyMembershipPlansInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
@@ -63443,7 +63443,7 @@ export namespace Prisma {
   }
 
   export type usersCreateManyRolesInput = {
-    id: string
+    id?: string
     username: string
     password: string
     avatar_url?: string | null
@@ -63456,7 +63456,7 @@ export namespace Prisma {
     gender?: $Enums.Gender | null
     is_deleted?: boolean
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
   }
 
   export type usersUpdateWithoutRolesInput = {
@@ -63540,7 +63540,7 @@ export namespace Prisma {
     cover_image_url: string
     description_url: string
     created_at?: Date | string
-    updated_at: Date | string
+    updated_at?: Date | string
   }
 
   export type careerPathsCreateManyUsersInput = {
@@ -63576,7 +63576,7 @@ export namespace Prisma {
   }
 
   export type paymentsCreateManyUsersInput = {
-    id: string
+    id?: string
     amount: bigint | number
     currency?: string | null
     payment_gateway: $Enums.PaymentGateway
@@ -63597,7 +63597,7 @@ export namespace Prisma {
   }
 
   export type subscriptionsCreateManyUsersInput = {
-    id: string
+    id?: string
     start_date?: Date | string
     end_date: Date | string
     amount_paid: bigint | number
