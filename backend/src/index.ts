@@ -3,14 +3,13 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import config from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute } from './routes';
+import { authRoute }, routes from './routes';
 import passport from './config/passport.config';
 
 const { PORT, FRONTEND_URL } = config;
 
 const app = express();
 
-// App setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -23,7 +22,7 @@ app.use(passport.initialize());
 
 // App routes
 app.use(authRoute);
-
+app.use(routes);
 
 // App error middleware
 app.use(errorMiddleware);
