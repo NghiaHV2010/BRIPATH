@@ -99,19 +99,14 @@ router.post('/callback', async (req: Request, res: Response) => {
             return res.json(result);
         }
 
-        // Create MAC using Key2
         const mac = generateZaloPaySignature(dataStr, config.ZALOPAY_KEY2);
 
-        // Verify callback is from ZaloPay server
         if (reqMac !== mac) {
             result.return_code = -1;
             result.return_message = "mac not equal";
         } else {
-            // Payment successful - update order status
             let dataJson = JSON.parse(dataStr);
 
-            // Here you can update your database with the payment result
-            // Update order status = success where app_trans_id = dataJson["app_trans_id"]
 
             result.return_code = 1;
             result.return_message = "success";
@@ -122,7 +117,6 @@ router.post('/callback', async (req: Request, res: Response) => {
         result.return_message = ex.message;
     }
 
-    // Send response to ZaloPay server
     res.json(result);
 });
 
