@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express';
 import config from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { authRoute } from './routes';
+import passport from './config/passport.config';
 
 const { PORT, FRONTEND_URL } = config;
 
@@ -18,6 +19,7 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(passport.initialize());
 
 // App routes
 app.use(authRoute);

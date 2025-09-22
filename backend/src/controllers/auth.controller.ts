@@ -96,3 +96,25 @@ export const checkAuth = (req: Request, res: Response) => {
         data: req.user
     });
 }
+
+export const googleLogin = (req: Request, res: Response) => {
+    type userDTO = {
+        id: string;
+        username: string;
+        email: string;
+        avatar_url: string;
+    }
+
+    const user: userDTO = req.user as userDTO;
+
+    generateToken(user.id, res);
+
+    return res.status(HTTP_SUCCESS.OK).json({
+        data: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            avatar: user.avatar_url
+        }
+    });
+}
