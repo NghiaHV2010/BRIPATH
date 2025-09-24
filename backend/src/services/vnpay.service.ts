@@ -1,5 +1,4 @@
 import axios from 'axios';
-import config from '../config/env.config';
 import {
     VNPayCreateOrderResponse,
     VNPayQueryResponse,
@@ -10,18 +9,19 @@ import {
     createOrderData,
     createQueryData
 } from '../utils/vnpay.utils';
+import { VNPAY_API } from '../config/env.config';
 
 class VNPayService {
     private apiUrl: string;
 
     constructor() {
-        this.apiUrl = config.VNPAY_API;
+        this.apiUrl = VNPAY_API;
     }
 
     async createOrder(params: CreateOrderParams, req: any): Promise<VNPayCreateOrderResponse> {
         try {
             const orderData = createOrderData(params, req);
-            
+
             return {
                 vnp_TxnRef: orderData.vnp_TxnRef,
                 payment_url: orderData.payment_url

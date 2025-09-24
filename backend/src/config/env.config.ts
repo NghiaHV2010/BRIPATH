@@ -18,6 +18,10 @@ interface Config {
     REFRESH_SECRET: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
+    ARCJET_ENV: string;
+    ARCJET_KEY: string;
+    GMAIL_USER: string;
+    GMAIL_APP_PASSWORD: string;
 }
 
 dotenv.config();
@@ -39,7 +43,11 @@ const config: Config = {
     ACCESS_SECRET: process.env.ACCESS_SECRET!,
     REFRESH_SECRET: process.env.REFRESH_SECRET!,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
+    ARCJET_ENV: process.env.ARCJET_ENV || 'development',
+    ARCJET_KEY: process.env.ARCJET_KEY!,
+    GMAIL_USER: process.env.GMAIL_USER!,
+    GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD!
 };
 
 export const {
@@ -59,5 +67,10 @@ export const {
     ACCESS_SECRET,
     REFRESH_SECRET,
     GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET
+    GOOGLE_CLIENT_SECRET,
+    ARCJET_ENV,
+    ARCJET_KEY,
+    GMAIL_USER,
+    GMAIL_APP_PASSWORD
 } = config;
+

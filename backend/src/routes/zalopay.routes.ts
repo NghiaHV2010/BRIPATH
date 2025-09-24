@@ -7,7 +7,7 @@ import {
 import { ZALOPAY_ORDER_STATUS } from '../types/zalopay.types';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { generateZaloPaySignature } from '../utils/zalopay.utils';
-import config from '../config/env.config';
+import { ZALOPAY_KEY2 } from '../config/env.config';
 
 const zaloPayRouter = Router();
 
@@ -99,7 +99,7 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
             return res.json(result);
         }
 
-        const mac = generateZaloPaySignature(dataStr, config.ZALOPAY_KEY2);
+        const mac = generateZaloPaySignature(dataStr, ZALOPAY_KEY2);
 
         if (reqMac !== mac) {
             result.return_code = -1;

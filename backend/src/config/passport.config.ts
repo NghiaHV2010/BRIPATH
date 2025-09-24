@@ -1,10 +1,8 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20"
-import config from "./env.config";
+import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
 import { PrismaClient } from "../generated/prisma";
 import crypto from "crypto";
-
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = config;
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "./env.config";
 
 const prisma = new PrismaClient();
 
