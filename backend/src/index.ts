@@ -1,12 +1,10 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import config from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { authRoute, vnpayRoutes, zalopayRoutes } from './routes';
 import passport from './config/passport.config';
-
-const { PORT, FRONTEND_URL } = config;
+import { FRONTEND_URL, PORT } from './config/env.config';
 
 const app = express();
 

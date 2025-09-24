@@ -7,7 +7,7 @@ import {
 import { VNPAY_RESPONSE_CODE } from '../types/vnpay.types';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { verifyReturnSignature, parseAmount, sortObject, generateVNPaySignature } from '../utils/vnpay.utils';
-import config from '../config/env.config';
+import { VNPAY_HASH_SECRET } from '../config/env.config';
 
 const vnPayRouter = Router();
 
@@ -99,7 +99,7 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
         const sortedParams = sortObject(paramsCopy as Record<string, any>);
         const querystring = require('qs');
         const signData = querystring.stringify(sortedParams, { encode: false });
-        const signed = generateVNPaySignature(signData, config.VNPAY_HASH_SECRET);
+        const signed = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
 
         if (secureHash !== signed) {
             result.RspCode = VNPAY_RESPONSE_CODE.CHECKSUM_FAILED;

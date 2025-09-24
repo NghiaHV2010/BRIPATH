@@ -18,6 +18,10 @@ interface Config {
     REFRESH_SECRET: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
+    ARCJET_ENV: string;
+    ARCJET_KEY: string;
+    GMAIL_USER: string;
+    GMAIL_APP_PASSWORD: string;
 }
 
 dotenv.config();
@@ -33,14 +37,40 @@ const config: Config = {
     VNPAY_TMN_CODE: process.env.VNPAY_TMN_CODE || '',
     VNPAY_HASH_SECRET: process.env.VNPAY_HASH_SECRET || '',
     VNPAY_URL: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-    VNPAY_API: process.env.VNPAY_API || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction', 
-    VNPAY_RETURN_URL: process.env.VNPAY_RETURN_URL || 'http://localhost:3000/api/vnpay/return'
+    VNPAY_API: process.env.VNPAY_API || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction',
+    VNPAY_RETURN_URL: process.env.VNPAY_RETURN_URL || 'http://localhost:3000/api/vnpay/return',
     DATABASE_URL: process.env.DATABASE_URL!,
     ACCESS_SECRET: process.env.ACCESS_SECRET!,
     REFRESH_SECRET: process.env.REFRESH_SECRET!,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
+    ARCJET_ENV: process.env.ARCJET_ENV || 'development',
+    ARCJET_KEY: process.env.ARCJET_KEY!,
+    GMAIL_USER: process.env.GMAIL_USER!,
+    GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD!
 };
 
-export default config;
+export const {
+    PORT,
+    FRONTEND_URL,
+    ZALOPAY_APP_ID,
+    ZALOPAY_KEY1,
+    ZALOPAY_KEY2,
+    ZALOPAY_ENDPOINT,
+    ZALOPAY_CALLBACK_URL,
+    VNPAY_TMN_CODE,
+    VNPAY_HASH_SECRET,
+    VNPAY_URL,
+    VNPAY_API,
+    VNPAY_RETURN_URL,
+    DATABASE_URL,
+    ACCESS_SECRET,
+    REFRESH_SECRET,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    ARCJET_ENV,
+    ARCJET_KEY,
+    GMAIL_USER,
+    GMAIL_APP_PASSWORD
+} = config;
 

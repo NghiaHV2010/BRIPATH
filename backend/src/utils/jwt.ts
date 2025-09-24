@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Response } from "express";
-import config from '../config/env.config';
+import { ACCESS_SECRET, REFRESH_SECRET } from '../config/env.config';
 
 type cookieConfigResponse = {
     maxAge: number;
@@ -9,7 +9,6 @@ type cookieConfigResponse = {
     secure: boolean
 }
 
-const { ACCESS_SECRET, REFRESH_SECRET } = config;
 
 const accessTokenExpiryTimeInMiliSecond: number = 45 * 60 * 1000;
 
