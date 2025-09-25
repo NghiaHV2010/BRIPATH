@@ -2,25 +2,33 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import GoogleButton from "./googleButton";
+import { useAuthStore } from "../../store/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function FormLogin() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const login = useAuthStore((s) => s.login);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError("Vui lòng nhập tên tài khoản và mật khẩu");
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu");
       return;
     }
     setError("");
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    alert("Đăng nhập thành công!");
+    try {
+      await login(email, password);
+      navigate("/subscriptions");
+    } catch {
+      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,12 +64,12 @@ export default function FormLogin() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Tên tài khoản</label>
+                <label className="text-sm font-medium text-gray-700">Email</label>
                 <Input
-                  type="text"
-                  placeholder="Nhập tên tài khoản"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  type="email"
+                  placeholder="example@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
@@ -110,7 +118,7 @@ export default function FormLogin() {
                 </div>
               </div>
 
-              <GoogleButton onSuccess={() => alert("Đăng nhập Google thành công!")} />
+              <GoogleButton />
 
               <div className="text-center text-sm text-gray-600">
                 Chưa có tài khoản?{' '}
