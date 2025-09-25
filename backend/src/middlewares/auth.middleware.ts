@@ -1,13 +1,13 @@
+import { next } from './../../node_modules/effect/src/Cron';
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
 import jwt from "jsonwebtoken";
-import config from "../config/env.config";
 import { PrismaClient } from "../generated/prisma";
+import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
 
-const { ACCESS_SECRET, REFRESH_SECRET } = config;
 
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const prisma = new PrismaClient();
 
     let newAccessToken: string;
@@ -74,4 +74,37 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
-export default authMiddleware;
+export const emailVerifyMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.cookies?.data;
+
+    if (!user) {
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Please register again!"));
+    }
+
+    const userDecoded = jwt.verify(user, ACCESS_SECRET);
+
+    if (!userDecoded) {
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Please register again!"));
+    }
+
+    req.user = userDecoded;
+    next();
+}
+
+export const emailOTPMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    const otp = req.cookies?.otp;
+
+    if (!otp) {
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "OTP Timeout!"));
+    }
+
+    const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
+
+    if (!otpDecoded) {
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "OTP Timeout!"));
+    }
+
+    // @ts-ignore
+    req.otp = otpDecoded;
+    next();
+}

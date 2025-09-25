@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { ZALOPAY_APP_ID, ZALOPAY_KEY1 } from '../config/env.config';
 import {
     ZaloPayCreateOrderResponse,
     ZaloPayQueryOrderResponse,
@@ -13,6 +12,7 @@ import {
     parseAmount,
     generateZaloPaySignature
 } from '../utils/zalopay.utils';
+import { ZALOPAY_APP_ID, ZALOPAY_KEY1 } from '../config/env.config';
 
 class ZaloPayService {
     private endpoint: string;
@@ -20,17 +20,18 @@ class ZaloPayService {
     constructor() {
         this.endpoint = getZaloPayEndpoint();
     }
+    
     async createOrder(params: CreateOrderParams): Promise<ZaloPayCreateOrderResponse> {
         try {
             const orderData = createOrderData(params);
-            
+
             const response = await axios.post(`${this.endpoint}/create`, null, {
                 params: orderData,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
-            
+
             return {
                 ...response.data,
                 app_trans_id: orderData.app_trans_id
@@ -64,10 +65,6 @@ class ZaloPayService {
             throw new Error('Failed to query ZaloPay order');
         }
     }
-
-
-
-
 }
 
 export default new ZaloPayService();

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_URL, VNPAY_API, VNPAY_RETURN_URL } from '../config/env.config';
+import { VNPAY_HASH_SECRET, VNPAY_RETURN_URL, VNPAY_TMN_CODE, VNPAY_URL } from '../config/env.config';
 
 export const generateVNPaySignature = (data: string, secretKey: string): string => {
     return crypto
@@ -16,7 +16,7 @@ export const getCurrentTimestamp = (): string => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    
+
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
 };
 
@@ -25,26 +25,26 @@ export const generateOrderId = (): string => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    
+
     return `${hours}${minutes}${seconds}`;
 };
 
 export const sortObject = (obj: Record<string, any>): Record<string, any> => {
     const sorted: Record<string, any> = {};
     const str: string[] = [];
-    
+
     for (const key in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, key)) {
             str.push(encodeURIComponent(key));
         }
     }
-    
+
     str.sort();
-    
+
     for (let i = 0; i < str.length; i++) {
         sorted[str[i]] = encodeURIComponent(obj[str[i]]).replace(/%20/g, '+');
     }
-    
+
     return sorted;
 };
 
@@ -64,10 +64,10 @@ export const parseAmount = (amount: string): number => {
 
 export const getClientIP = (req: any): string => {
     return req.headers['x-forwarded-for'] ||
-           req.connection.remoteAddress ||
-           req.socket.remoteAddress ||
-           req.connection.socket.remoteAddress ||
-           '127.0.0.1';
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress ||
+        '127.0.0.1';
 };
 
 export const createOrderData = (params: {
@@ -80,7 +80,7 @@ export const createOrderData = (params: {
     const orderId = generateOrderId();
     const createDate = getCurrentTimestamp();
     const ipAddr = getClientIP(req);
-    
+
     const vnpParams: Record<string, any> = {
         vnp_Version: '2.1.0',
         vnp_Command: 'pay',
@@ -95,18 +95,18 @@ export const createOrderData = (params: {
         vnp_IpAddr: ipAddr,
         vnp_CreateDate: createDate
     };
-    
+
     if (params.bankCode && params.bankCode !== '') {
         vnpParams.vnp_BankCode = params.bankCode;
     }
-    
+
     const sortedParams = sortObject(vnpParams);
     const querystring = require('qs');
     const signData = querystring.stringify(sortedParams, { encode: false });
     const secureHash = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
     
     vnpParams.vnp_SecureHash = secureHash;
-    
+
     return {
         ...vnpParams,
         payment_url: createPaymentUrl(vnpParams)
@@ -119,18 +119,17 @@ export const createQueryData = (params: {
 }, req: any): Record<string, any> => {
     const now = new Date();
     // Tạo requestId unique với milliseconds để tránh trùng lặp
-    const requestId = now.getHours().toString().padStart(2, '0') + 
-                     now.getMinutes().toString().padStart(2, '0') + 
-                     now.getSeconds().toString().padStart(2, '0') +
-                     now.getMilliseconds().toString().padStart(3, '0');
+    const requestId = now.getHours().toString().padStart(2, '0') +
+        now.getMinutes().toString().padStart(2, '0') +
+        now.getSeconds().toString().padStart(2, '0') +
+        now.getMilliseconds().toString().padStart(3, '0');
     const createDate = getCurrentTimestamp();
     const ipAddr = getClientIP(req);
-    
+
     const orderInfo = `Truy van GD ma ${params.orderId}`;
     const data = `${requestId}|2.1.0|querydr|${VNPAY_TMN_CODE}|${params.orderId}|${params.transDate}|${createDate}|${ipAddr}|${orderInfo}`;
     const secureHash = generateVNPaySignature(data, VNPAY_HASH_SECRET);
-    
-    
+
     return {
         vnp_RequestId: requestId,
         vnp_Version: '2.1.0',
@@ -145,21 +144,19 @@ export const createQueryData = (params: {
     };
 };
 
-
 export const verifyReturnSignature = (params: Record<string, any>): boolean => {
     const secureHash = params.vnp_SecureHash;
     delete params.vnp_SecureHash;
     delete params.vnp_SecureHashType;
-    
+
     const sortedParams = sortObject(params);
     const querystring = require('qs');
     const signData = querystring.stringify(sortedParams, { encode: false });
     const signed = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
-    
+
     return secureHash === signed;
 };
 
 export const verifyIPNSignature = (params: Record<string, any>): boolean => {
     return verifyReturnSignature(params);
 };
-
