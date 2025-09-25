@@ -29,6 +29,11 @@ export type applicants = $Result.DefaultSelection<Prisma.$applicantsPayload>
  */
 export type awards = $Result.DefaultSelection<Prisma.$awardsPayload>
 /**
+ * Model languages
+ * 
+ */
+export type languages = $Result.DefaultSelection<Prisma.$languagesPayload>
+/**
  * Model blogs
  * 
  */
@@ -43,6 +48,11 @@ export type careerPathSteps = $Result.DefaultSelection<Prisma.$careerPathStepsPa
  * 
  */
 export type careerPaths = $Result.DefaultSelection<Prisma.$careerPathsPayload>
+/**
+ * Model reviews
+ * 
+ */
+export type reviews = $Result.DefaultSelection<Prisma.$reviewsPayload>
 /**
  * Model categories
  * 
@@ -59,20 +69,10 @@ export type certificates = $Result.DefaultSelection<Prisma.$certificatesPayload>
  */
 export type companies = $Result.DefaultSelection<Prisma.$companiesPayload>
 /**
- * Model companyActivitiesHistory
- * 
- */
-export type companyActivitiesHistory = $Result.DefaultSelection<Prisma.$companyActivitiesHistoryPayload>
-/**
  * Model companyLabels
  * 
  */
 export type companyLabels = $Result.DefaultSelection<Prisma.$companyLabelsPayload>
-/**
- * Model companyNotifications
- * 
- */
-export type companyNotifications = $Result.DefaultSelection<Prisma.$companyNotificationsPayload>
 /**
  * Model cvs
  * 
@@ -494,6 +494,16 @@ export class PrismaClient<
   get awards(): Prisma.awardsDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.languages`: Exposes CRUD operations for the **languages** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Languages
+    * const languages = await prisma.languages.findMany()
+    * ```
+    */
+  get languages(): Prisma.languagesDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.blogs`: Exposes CRUD operations for the **blogs** model.
     * Example usage:
     * ```ts
@@ -522,6 +532,16 @@ export class PrismaClient<
     * ```
     */
   get careerPaths(): Prisma.careerPathsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.reviews`: Exposes CRUD operations for the **reviews** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Reviews
+    * const reviews = await prisma.reviews.findMany()
+    * ```
+    */
+  get reviews(): Prisma.reviewsDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.categories`: Exposes CRUD operations for the **categories** model.
@@ -554,16 +574,6 @@ export class PrismaClient<
   get companies(): Prisma.companiesDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.companyActivitiesHistory`: Exposes CRUD operations for the **companyActivitiesHistory** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more CompanyActivitiesHistories
-    * const companyActivitiesHistories = await prisma.companyActivitiesHistory.findMany()
-    * ```
-    */
-  get companyActivitiesHistory(): Prisma.companyActivitiesHistoryDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.companyLabels`: Exposes CRUD operations for the **companyLabels** model.
     * Example usage:
     * ```ts
@@ -572,16 +582,6 @@ export class PrismaClient<
     * ```
     */
   get companyLabels(): Prisma.companyLabelsDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.companyNotifications`: Exposes CRUD operations for the **companyNotifications** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more CompanyNotifications
-    * const companyNotifications = await prisma.companyNotifications.findMany()
-    * ```
-    */
-  get companyNotifications(): Prisma.companyNotificationsDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cvs`: Exposes CRUD operations for the **cvs** model.
@@ -1265,15 +1265,15 @@ export namespace Prisma {
     answers: 'answers',
     applicants: 'applicants',
     awards: 'awards',
+    languages: 'languages',
     blogs: 'blogs',
     careerPathSteps: 'careerPathSteps',
     careerPaths: 'careerPaths',
+    reviews: 'reviews',
     categories: 'categories',
     certificates: 'certificates',
     companies: 'companies',
-    companyActivitiesHistory: 'companyActivitiesHistory',
     companyLabels: 'companyLabels',
-    companyNotifications: 'companyNotifications',
     cvs: 'cvs',
     educations: 'educations',
     experiences: 'experiences',
@@ -1316,7 +1316,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "answers" | "applicants" | "awards" | "blogs" | "careerPathSteps" | "careerPaths" | "categories" | "certificates" | "companies" | "companyActivitiesHistory" | "companyLabels" | "companyNotifications" | "cvs" | "educations" | "experiences" | "features" | "feedbacks" | "fields" | "followedCompanies" | "jobCategories" | "jobLabels" | "jobSpecialized" | "jobs" | "membershipPlans" | "messages" | "payments" | "personalityTestResults" | "projects" | "questions" | "references" | "roles" | "savedJobs" | "subscriptions" | "userActivitiesHistory" | "userNotifications" | "users"
+      modelProps: "answers" | "applicants" | "awards" | "languages" | "blogs" | "careerPathSteps" | "careerPaths" | "reviews" | "categories" | "certificates" | "companies" | "companyLabels" | "cvs" | "educations" | "experiences" | "features" | "feedbacks" | "fields" | "followedCompanies" | "jobCategories" | "jobLabels" | "jobSpecialized" | "jobs" | "membershipPlans" | "messages" | "payments" | "personalityTestResults" | "projects" | "questions" | "references" | "roles" | "savedJobs" | "subscriptions" | "userActivitiesHistory" | "userNotifications" | "users"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1542,6 +1542,80 @@ export namespace Prisma {
           }
         }
       }
+      languages: {
+        payload: Prisma.$languagesPayload<ExtArgs>
+        fields: Prisma.languagesFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.languagesFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.languagesFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          findFirst: {
+            args: Prisma.languagesFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.languagesFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          findMany: {
+            args: Prisma.languagesFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>[]
+          }
+          create: {
+            args: Prisma.languagesCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          createMany: {
+            args: Prisma.languagesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.languagesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>[]
+          }
+          delete: {
+            args: Prisma.languagesDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          update: {
+            args: Prisma.languagesUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          deleteMany: {
+            args: Prisma.languagesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.languagesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.languagesUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>[]
+          }
+          upsert: {
+            args: Prisma.languagesUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$languagesPayload>
+          }
+          aggregate: {
+            args: Prisma.LanguagesAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLanguages>
+          }
+          groupBy: {
+            args: Prisma.languagesGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LanguagesGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.languagesCountArgs<ExtArgs>
+            result: $Utils.Optional<LanguagesCountAggregateOutputType> | number
+          }
+        }
+      }
       blogs: {
         payload: Prisma.$blogsPayload<ExtArgs>
         fields: Prisma.blogsFieldRefs
@@ -1761,6 +1835,80 @@ export namespace Prisma {
           count: {
             args: Prisma.careerPathsCountArgs<ExtArgs>
             result: $Utils.Optional<CareerPathsCountAggregateOutputType> | number
+          }
+        }
+      }
+      reviews: {
+        payload: Prisma.$reviewsPayload<ExtArgs>
+        fields: Prisma.reviewsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.reviewsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.reviewsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          findFirst: {
+            args: Prisma.reviewsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.reviewsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          findMany: {
+            args: Prisma.reviewsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>[]
+          }
+          create: {
+            args: Prisma.reviewsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          createMany: {
+            args: Prisma.reviewsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.reviewsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>[]
+          }
+          delete: {
+            args: Prisma.reviewsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          update: {
+            args: Prisma.reviewsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          deleteMany: {
+            args: Prisma.reviewsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.reviewsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.reviewsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>[]
+          }
+          upsert: {
+            args: Prisma.reviewsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$reviewsPayload>
+          }
+          aggregate: {
+            args: Prisma.ReviewsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReviews>
+          }
+          groupBy: {
+            args: Prisma.reviewsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReviewsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.reviewsCountArgs<ExtArgs>
+            result: $Utils.Optional<ReviewsCountAggregateOutputType> | number
           }
         }
       }
@@ -1986,80 +2134,6 @@ export namespace Prisma {
           }
         }
       }
-      companyActivitiesHistory: {
-        payload: Prisma.$companyActivitiesHistoryPayload<ExtArgs>
-        fields: Prisma.companyActivitiesHistoryFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.companyActivitiesHistoryFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.companyActivitiesHistoryFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          findFirst: {
-            args: Prisma.companyActivitiesHistoryFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.companyActivitiesHistoryFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          findMany: {
-            args: Prisma.companyActivitiesHistoryFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>[]
-          }
-          create: {
-            args: Prisma.companyActivitiesHistoryCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          createMany: {
-            args: Prisma.companyActivitiesHistoryCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.companyActivitiesHistoryCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>[]
-          }
-          delete: {
-            args: Prisma.companyActivitiesHistoryDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          update: {
-            args: Prisma.companyActivitiesHistoryUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          deleteMany: {
-            args: Prisma.companyActivitiesHistoryDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.companyActivitiesHistoryUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.companyActivitiesHistoryUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>[]
-          }
-          upsert: {
-            args: Prisma.companyActivitiesHistoryUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyActivitiesHistoryPayload>
-          }
-          aggregate: {
-            args: Prisma.CompanyActivitiesHistoryAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateCompanyActivitiesHistory>
-          }
-          groupBy: {
-            args: Prisma.companyActivitiesHistoryGroupByArgs<ExtArgs>
-            result: $Utils.Optional<CompanyActivitiesHistoryGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.companyActivitiesHistoryCountArgs<ExtArgs>
-            result: $Utils.Optional<CompanyActivitiesHistoryCountAggregateOutputType> | number
-          }
-        }
-      }
       companyLabels: {
         payload: Prisma.$companyLabelsPayload<ExtArgs>
         fields: Prisma.companyLabelsFieldRefs
@@ -2131,80 +2205,6 @@ export namespace Prisma {
           count: {
             args: Prisma.companyLabelsCountArgs<ExtArgs>
             result: $Utils.Optional<CompanyLabelsCountAggregateOutputType> | number
-          }
-        }
-      }
-      companyNotifications: {
-        payload: Prisma.$companyNotificationsPayload<ExtArgs>
-        fields: Prisma.companyNotificationsFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.companyNotificationsFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.companyNotificationsFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          findFirst: {
-            args: Prisma.companyNotificationsFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.companyNotificationsFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          findMany: {
-            args: Prisma.companyNotificationsFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>[]
-          }
-          create: {
-            args: Prisma.companyNotificationsCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          createMany: {
-            args: Prisma.companyNotificationsCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.companyNotificationsCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>[]
-          }
-          delete: {
-            args: Prisma.companyNotificationsDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          update: {
-            args: Prisma.companyNotificationsUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          deleteMany: {
-            args: Prisma.companyNotificationsDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.companyNotificationsUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.companyNotificationsUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>[]
-          }
-          upsert: {
-            args: Prisma.companyNotificationsUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$companyNotificationsPayload>
-          }
-          aggregate: {
-            args: Prisma.CompanyNotificationsAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateCompanyNotifications>
-          }
-          groupBy: {
-            args: Prisma.companyNotificationsGroupByArgs<ExtArgs>
-            result: $Utils.Optional<CompanyNotificationsGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.companyNotificationsCountArgs<ExtArgs>
-            result: $Utils.Optional<CompanyNotificationsCountAggregateOutputType> | number
           }
         }
       }
@@ -4083,15 +4083,15 @@ export namespace Prisma {
     answers?: answersOmit
     applicants?: applicantsOmit
     awards?: awardsOmit
+    languages?: languagesOmit
     blogs?: blogsOmit
     careerPathSteps?: careerPathStepsOmit
     careerPaths?: careerPathsOmit
+    reviews?: reviewsOmit
     categories?: categoriesOmit
     certificates?: certificatesOmit
     companies?: companiesOmit
-    companyActivitiesHistory?: companyActivitiesHistoryOmit
     companyLabels?: companyLabelsOmit
-    companyNotifications?: companyNotificationsOmit
     cvs?: cvsOmit
     educations?: educationsOmit
     experiences?: experiencesOmit
@@ -4289,15 +4289,11 @@ export namespace Prisma {
    */
 
   export type CompaniesCountOutputType = {
-    companyActivitiesHistory: number
-    companyNotifications: number
     feedbacks: number
     followedCompanies: number
   }
 
   export type CompaniesCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companyActivitiesHistory?: boolean | CompaniesCountOutputTypeCountCompanyActivitiesHistoryArgs
-    companyNotifications?: boolean | CompaniesCountOutputTypeCountCompanyNotificationsArgs
     feedbacks?: boolean | CompaniesCountOutputTypeCountFeedbacksArgs
     followedCompanies?: boolean | CompaniesCountOutputTypeCountFollowedCompaniesArgs
   }
@@ -4311,20 +4307,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the CompaniesCountOutputType
      */
     select?: CompaniesCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * CompaniesCountOutputType without action
-   */
-  export type CompaniesCountOutputTypeCountCompanyActivitiesHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: companyActivitiesHistoryWhereInput
-  }
-
-  /**
-   * CompaniesCountOutputType without action
-   */
-  export type CompaniesCountOutputTypeCountCompanyNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: companyNotificationsWhereInput
   }
 
   /**
@@ -4385,6 +4367,7 @@ export namespace Prisma {
     experiences: number
     projects: number
     references: number
+    languages: number
   }
 
   export type CvsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4395,6 +4378,7 @@ export namespace Prisma {
     experiences?: boolean | CvsCountOutputTypeCountExperiencesArgs
     projects?: boolean | CvsCountOutputTypeCountProjectsArgs
     references?: boolean | CvsCountOutputTypeCountReferencesArgs
+    languages?: boolean | CvsCountOutputTypeCountLanguagesArgs
   }
 
   // Custom InputTypes
@@ -4455,6 +4439,13 @@ export namespace Prisma {
    */
   export type CvsCountOutputTypeCountReferencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: referencesWhereInput
+  }
+
+  /**
+   * CvsCountOutputType without action
+   */
+  export type CvsCountOutputTypeCountLanguagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: languagesWhereInput
   }
 
 
@@ -4707,6 +4698,7 @@ export namespace Prisma {
    */
 
   export type UsersCountOutputType = {
+    cvs: number
     blogs: number
     careerPaths: number
     feedbacks: number
@@ -4717,10 +4709,12 @@ export namespace Prisma {
     savedJobs: number
     subscriptions: number
     userActivitiesHistory: number
+    reviews: number
     userNotifications: number
   }
 
   export type UsersCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cvs?: boolean | UsersCountOutputTypeCountCvsArgs
     blogs?: boolean | UsersCountOutputTypeCountBlogsArgs
     careerPaths?: boolean | UsersCountOutputTypeCountCareerPathsArgs
     feedbacks?: boolean | UsersCountOutputTypeCountFeedbacksArgs
@@ -4731,6 +4725,7 @@ export namespace Prisma {
     savedJobs?: boolean | UsersCountOutputTypeCountSavedJobsArgs
     subscriptions?: boolean | UsersCountOutputTypeCountSubscriptionsArgs
     userActivitiesHistory?: boolean | UsersCountOutputTypeCountUserActivitiesHistoryArgs
+    reviews?: boolean | UsersCountOutputTypeCountReviewsArgs
     userNotifications?: boolean | UsersCountOutputTypeCountUserNotificationsArgs
   }
 
@@ -4743,6 +4738,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the UsersCountOutputType
      */
     select?: UsersCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UsersCountOutputType without action
+   */
+  export type UsersCountOutputTypeCountCvsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: cvsWhereInput
   }
 
   /**
@@ -4813,6 +4815,13 @@ export namespace Prisma {
    */
   export type UsersCountOutputTypeCountUserActivitiesHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: userActivitiesHistoryWhereInput
+  }
+
+  /**
+   * UsersCountOutputType without action
+   */
+  export type UsersCountOutputTypeCountReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: reviewsWhereInput
   }
 
   /**
@@ -8159,6 +8168,1102 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: awardsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model languages
+   */
+
+  export type AggregateLanguages = {
+    _count: LanguagesCountAggregateOutputType | null
+    _avg: LanguagesAvgAggregateOutputType | null
+    _sum: LanguagesSumAggregateOutputType | null
+    _min: LanguagesMinAggregateOutputType | null
+    _max: LanguagesMaxAggregateOutputType | null
+  }
+
+  export type LanguagesAvgAggregateOutputType = {
+    id: number | null
+    cv_id: number | null
+  }
+
+  export type LanguagesSumAggregateOutputType = {
+    id: number | null
+    cv_id: number | null
+  }
+
+  export type LanguagesMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    certificate: string | null
+    level: string | null
+    cv_id: number | null
+  }
+
+  export type LanguagesMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    certificate: string | null
+    level: string | null
+    cv_id: number | null
+  }
+
+  export type LanguagesCountAggregateOutputType = {
+    id: number
+    name: number
+    certificate: number
+    level: number
+    cv_id: number
+    _all: number
+  }
+
+
+  export type LanguagesAvgAggregateInputType = {
+    id?: true
+    cv_id?: true
+  }
+
+  export type LanguagesSumAggregateInputType = {
+    id?: true
+    cv_id?: true
+  }
+
+  export type LanguagesMinAggregateInputType = {
+    id?: true
+    name?: true
+    certificate?: true
+    level?: true
+    cv_id?: true
+  }
+
+  export type LanguagesMaxAggregateInputType = {
+    id?: true
+    name?: true
+    certificate?: true
+    level?: true
+    cv_id?: true
+  }
+
+  export type LanguagesCountAggregateInputType = {
+    id?: true
+    name?: true
+    certificate?: true
+    level?: true
+    cv_id?: true
+    _all?: true
+  }
+
+  export type LanguagesAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which languages to aggregate.
+     */
+    where?: languagesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of languages to fetch.
+     */
+    orderBy?: languagesOrderByWithRelationInput | languagesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: languagesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` languages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` languages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned languages
+    **/
+    _count?: true | LanguagesCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LanguagesAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LanguagesSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LanguagesMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LanguagesMaxAggregateInputType
+  }
+
+  export type GetLanguagesAggregateType<T extends LanguagesAggregateArgs> = {
+        [P in keyof T & keyof AggregateLanguages]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLanguages[P]>
+      : GetScalarType<T[P], AggregateLanguages[P]>
+  }
+
+
+
+
+  export type languagesGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: languagesWhereInput
+    orderBy?: languagesOrderByWithAggregationInput | languagesOrderByWithAggregationInput[]
+    by: LanguagesScalarFieldEnum[] | LanguagesScalarFieldEnum
+    having?: languagesScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LanguagesCountAggregateInputType | true
+    _avg?: LanguagesAvgAggregateInputType
+    _sum?: LanguagesSumAggregateInputType
+    _min?: LanguagesMinAggregateInputType
+    _max?: LanguagesMaxAggregateInputType
+  }
+
+  export type LanguagesGroupByOutputType = {
+    id: number
+    name: string
+    certificate: string | null
+    level: string | null
+    cv_id: number
+    _count: LanguagesCountAggregateOutputType | null
+    _avg: LanguagesAvgAggregateOutputType | null
+    _sum: LanguagesSumAggregateOutputType | null
+    _min: LanguagesMinAggregateOutputType | null
+    _max: LanguagesMaxAggregateOutputType | null
+  }
+
+  type GetLanguagesGroupByPayload<T extends languagesGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LanguagesGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LanguagesGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LanguagesGroupByOutputType[P]>
+            : GetScalarType<T[P], LanguagesGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type languagesSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    certificate?: boolean
+    level?: boolean
+    cv_id?: boolean
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["languages"]>
+
+  export type languagesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    certificate?: boolean
+    level?: boolean
+    cv_id?: boolean
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["languages"]>
+
+  export type languagesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    certificate?: boolean
+    level?: boolean
+    cv_id?: boolean
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["languages"]>
+
+  export type languagesSelectScalar = {
+    id?: boolean
+    name?: boolean
+    certificate?: boolean
+    level?: boolean
+    cv_id?: boolean
+  }
+
+  export type languagesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "certificate" | "level" | "cv_id", ExtArgs["result"]["languages"]>
+  export type languagesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }
+  export type languagesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }
+  export type languagesIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cvs?: boolean | cvsDefaultArgs<ExtArgs>
+  }
+
+  export type $languagesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "languages"
+    objects: {
+      cvs: Prisma.$cvsPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      certificate: string | null
+      level: string | null
+      cv_id: number
+    }, ExtArgs["result"]["languages"]>
+    composites: {}
+  }
+
+  type languagesGetPayload<S extends boolean | null | undefined | languagesDefaultArgs> = $Result.GetResult<Prisma.$languagesPayload, S>
+
+  type languagesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<languagesFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LanguagesCountAggregateInputType | true
+    }
+
+  export interface languagesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['languages'], meta: { name: 'languages' } }
+    /**
+     * Find zero or one Languages that matches the filter.
+     * @param {languagesFindUniqueArgs} args - Arguments to find a Languages
+     * @example
+     * // Get one Languages
+     * const languages = await prisma.languages.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends languagesFindUniqueArgs>(args: SelectSubset<T, languagesFindUniqueArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Languages that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {languagesFindUniqueOrThrowArgs} args - Arguments to find a Languages
+     * @example
+     * // Get one Languages
+     * const languages = await prisma.languages.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends languagesFindUniqueOrThrowArgs>(args: SelectSubset<T, languagesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Languages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesFindFirstArgs} args - Arguments to find a Languages
+     * @example
+     * // Get one Languages
+     * const languages = await prisma.languages.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends languagesFindFirstArgs>(args?: SelectSubset<T, languagesFindFirstArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Languages that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesFindFirstOrThrowArgs} args - Arguments to find a Languages
+     * @example
+     * // Get one Languages
+     * const languages = await prisma.languages.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends languagesFindFirstOrThrowArgs>(args?: SelectSubset<T, languagesFindFirstOrThrowArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Languages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Languages
+     * const languages = await prisma.languages.findMany()
+     * 
+     * // Get first 10 Languages
+     * const languages = await prisma.languages.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const languagesWithIdOnly = await prisma.languages.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends languagesFindManyArgs>(args?: SelectSubset<T, languagesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Languages.
+     * @param {languagesCreateArgs} args - Arguments to create a Languages.
+     * @example
+     * // Create one Languages
+     * const Languages = await prisma.languages.create({
+     *   data: {
+     *     // ... data to create a Languages
+     *   }
+     * })
+     * 
+     */
+    create<T extends languagesCreateArgs>(args: SelectSubset<T, languagesCreateArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Languages.
+     * @param {languagesCreateManyArgs} args - Arguments to create many Languages.
+     * @example
+     * // Create many Languages
+     * const languages = await prisma.languages.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends languagesCreateManyArgs>(args?: SelectSubset<T, languagesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Languages and returns the data saved in the database.
+     * @param {languagesCreateManyAndReturnArgs} args - Arguments to create many Languages.
+     * @example
+     * // Create many Languages
+     * const languages = await prisma.languages.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Languages and only return the `id`
+     * const languagesWithIdOnly = await prisma.languages.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends languagesCreateManyAndReturnArgs>(args?: SelectSubset<T, languagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Languages.
+     * @param {languagesDeleteArgs} args - Arguments to delete one Languages.
+     * @example
+     * // Delete one Languages
+     * const Languages = await prisma.languages.delete({
+     *   where: {
+     *     // ... filter to delete one Languages
+     *   }
+     * })
+     * 
+     */
+    delete<T extends languagesDeleteArgs>(args: SelectSubset<T, languagesDeleteArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Languages.
+     * @param {languagesUpdateArgs} args - Arguments to update one Languages.
+     * @example
+     * // Update one Languages
+     * const languages = await prisma.languages.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends languagesUpdateArgs>(args: SelectSubset<T, languagesUpdateArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Languages.
+     * @param {languagesDeleteManyArgs} args - Arguments to filter Languages to delete.
+     * @example
+     * // Delete a few Languages
+     * const { count } = await prisma.languages.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends languagesDeleteManyArgs>(args?: SelectSubset<T, languagesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Languages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Languages
+     * const languages = await prisma.languages.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends languagesUpdateManyArgs>(args: SelectSubset<T, languagesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Languages and returns the data updated in the database.
+     * @param {languagesUpdateManyAndReturnArgs} args - Arguments to update many Languages.
+     * @example
+     * // Update many Languages
+     * const languages = await prisma.languages.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Languages and only return the `id`
+     * const languagesWithIdOnly = await prisma.languages.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends languagesUpdateManyAndReturnArgs>(args: SelectSubset<T, languagesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Languages.
+     * @param {languagesUpsertArgs} args - Arguments to update or create a Languages.
+     * @example
+     * // Update or create a Languages
+     * const languages = await prisma.languages.upsert({
+     *   create: {
+     *     // ... data to create a Languages
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Languages we want to update
+     *   }
+     * })
+     */
+    upsert<T extends languagesUpsertArgs>(args: SelectSubset<T, languagesUpsertArgs<ExtArgs>>): Prisma__languagesClient<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Languages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesCountArgs} args - Arguments to filter Languages to count.
+     * @example
+     * // Count the number of Languages
+     * const count = await prisma.languages.count({
+     *   where: {
+     *     // ... the filter for the Languages we want to count
+     *   }
+     * })
+    **/
+    count<T extends languagesCountArgs>(
+      args?: Subset<T, languagesCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LanguagesCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Languages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LanguagesAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LanguagesAggregateArgs>(args: Subset<T, LanguagesAggregateArgs>): Prisma.PrismaPromise<GetLanguagesAggregateType<T>>
+
+    /**
+     * Group by Languages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {languagesGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends languagesGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: languagesGroupByArgs['orderBy'] }
+        : { orderBy?: languagesGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, languagesGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLanguagesGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the languages model
+   */
+  readonly fields: languagesFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for languages.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__languagesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cvs<T extends cvsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, cvsDefaultArgs<ExtArgs>>): Prisma__cvsClient<$Result.GetResult<Prisma.$cvsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the languages model
+   */
+  interface languagesFieldRefs {
+    readonly id: FieldRef<"languages", 'Int'>
+    readonly name: FieldRef<"languages", 'String'>
+    readonly certificate: FieldRef<"languages", 'String'>
+    readonly level: FieldRef<"languages", 'String'>
+    readonly cv_id: FieldRef<"languages", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * languages findUnique
+   */
+  export type languagesFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter, which languages to fetch.
+     */
+    where: languagesWhereUniqueInput
+  }
+
+  /**
+   * languages findUniqueOrThrow
+   */
+  export type languagesFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter, which languages to fetch.
+     */
+    where: languagesWhereUniqueInput
+  }
+
+  /**
+   * languages findFirst
+   */
+  export type languagesFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter, which languages to fetch.
+     */
+    where?: languagesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of languages to fetch.
+     */
+    orderBy?: languagesOrderByWithRelationInput | languagesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for languages.
+     */
+    cursor?: languagesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` languages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` languages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of languages.
+     */
+    distinct?: LanguagesScalarFieldEnum | LanguagesScalarFieldEnum[]
+  }
+
+  /**
+   * languages findFirstOrThrow
+   */
+  export type languagesFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter, which languages to fetch.
+     */
+    where?: languagesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of languages to fetch.
+     */
+    orderBy?: languagesOrderByWithRelationInput | languagesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for languages.
+     */
+    cursor?: languagesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` languages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` languages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of languages.
+     */
+    distinct?: LanguagesScalarFieldEnum | LanguagesScalarFieldEnum[]
+  }
+
+  /**
+   * languages findMany
+   */
+  export type languagesFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter, which languages to fetch.
+     */
+    where?: languagesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of languages to fetch.
+     */
+    orderBy?: languagesOrderByWithRelationInput | languagesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing languages.
+     */
+    cursor?: languagesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` languages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` languages.
+     */
+    skip?: number
+    distinct?: LanguagesScalarFieldEnum | LanguagesScalarFieldEnum[]
+  }
+
+  /**
+   * languages create
+   */
+  export type languagesCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * The data needed to create a languages.
+     */
+    data: XOR<languagesCreateInput, languagesUncheckedCreateInput>
+  }
+
+  /**
+   * languages createMany
+   */
+  export type languagesCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many languages.
+     */
+    data: languagesCreateManyInput | languagesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * languages createManyAndReturn
+   */
+  export type languagesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * The data used to create many languages.
+     */
+    data: languagesCreateManyInput | languagesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * languages update
+   */
+  export type languagesUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * The data needed to update a languages.
+     */
+    data: XOR<languagesUpdateInput, languagesUncheckedUpdateInput>
+    /**
+     * Choose, which languages to update.
+     */
+    where: languagesWhereUniqueInput
+  }
+
+  /**
+   * languages updateMany
+   */
+  export type languagesUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update languages.
+     */
+    data: XOR<languagesUpdateManyMutationInput, languagesUncheckedUpdateManyInput>
+    /**
+     * Filter which languages to update
+     */
+    where?: languagesWhereInput
+    /**
+     * Limit how many languages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * languages updateManyAndReturn
+   */
+  export type languagesUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * The data used to update languages.
+     */
+    data: XOR<languagesUpdateManyMutationInput, languagesUncheckedUpdateManyInput>
+    /**
+     * Filter which languages to update
+     */
+    where?: languagesWhereInput
+    /**
+     * Limit how many languages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * languages upsert
+   */
+  export type languagesUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * The filter to search for the languages to update in case it exists.
+     */
+    where: languagesWhereUniqueInput
+    /**
+     * In case the languages found by the `where` argument doesn't exist, create a new languages with this data.
+     */
+    create: XOR<languagesCreateInput, languagesUncheckedCreateInput>
+    /**
+     * In case the languages was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<languagesUpdateInput, languagesUncheckedUpdateInput>
+  }
+
+  /**
+   * languages delete
+   */
+  export type languagesDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    /**
+     * Filter which languages to delete.
+     */
+    where: languagesWhereUniqueInput
+  }
+
+  /**
+   * languages deleteMany
+   */
+  export type languagesDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which languages to delete
+     */
+    where?: languagesWhereInput
+    /**
+     * Limit how many languages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * languages without action
+   */
+  export type languagesDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
   }
 
 
@@ -11550,6 +12655,1115 @@ export namespace Prisma {
 
 
   /**
+   * Model reviews
+   */
+
+  export type AggregateReviews = {
+    _count: ReviewsCountAggregateOutputType | null
+    _avg: ReviewsAvgAggregateOutputType | null
+    _sum: ReviewsSumAggregateOutputType | null
+    _min: ReviewsMinAggregateOutputType | null
+    _max: ReviewsMaxAggregateOutputType | null
+  }
+
+  export type ReviewsAvgAggregateOutputType = {
+    id: number | null
+    stars: number | null
+  }
+
+  export type ReviewsSumAggregateOutputType = {
+    id: number | null
+    stars: number | null
+  }
+
+  export type ReviewsMinAggregateOutputType = {
+    id: number | null
+    content: string | null
+    stars: number | null
+    created_at: Date | null
+    updated_at: Date | null
+    user_id: string | null
+  }
+
+  export type ReviewsMaxAggregateOutputType = {
+    id: number | null
+    content: string | null
+    stars: number | null
+    created_at: Date | null
+    updated_at: Date | null
+    user_id: string | null
+  }
+
+  export type ReviewsCountAggregateOutputType = {
+    id: number
+    content: number
+    stars: number
+    created_at: number
+    updated_at: number
+    user_id: number
+    _all: number
+  }
+
+
+  export type ReviewsAvgAggregateInputType = {
+    id?: true
+    stars?: true
+  }
+
+  export type ReviewsSumAggregateInputType = {
+    id?: true
+    stars?: true
+  }
+
+  export type ReviewsMinAggregateInputType = {
+    id?: true
+    content?: true
+    stars?: true
+    created_at?: true
+    updated_at?: true
+    user_id?: true
+  }
+
+  export type ReviewsMaxAggregateInputType = {
+    id?: true
+    content?: true
+    stars?: true
+    created_at?: true
+    updated_at?: true
+    user_id?: true
+  }
+
+  export type ReviewsCountAggregateInputType = {
+    id?: true
+    content?: true
+    stars?: true
+    created_at?: true
+    updated_at?: true
+    user_id?: true
+    _all?: true
+  }
+
+  export type ReviewsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which reviews to aggregate.
+     */
+    where?: reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of reviews to fetch.
+     */
+    orderBy?: reviewsOrderByWithRelationInput | reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned reviews
+    **/
+    _count?: true | ReviewsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ReviewsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ReviewsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReviewsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReviewsMaxAggregateInputType
+  }
+
+  export type GetReviewsAggregateType<T extends ReviewsAggregateArgs> = {
+        [P in keyof T & keyof AggregateReviews]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReviews[P]>
+      : GetScalarType<T[P], AggregateReviews[P]>
+  }
+
+
+
+
+  export type reviewsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: reviewsWhereInput
+    orderBy?: reviewsOrderByWithAggregationInput | reviewsOrderByWithAggregationInput[]
+    by: ReviewsScalarFieldEnum[] | ReviewsScalarFieldEnum
+    having?: reviewsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReviewsCountAggregateInputType | true
+    _avg?: ReviewsAvgAggregateInputType
+    _sum?: ReviewsSumAggregateInputType
+    _min?: ReviewsMinAggregateInputType
+    _max?: ReviewsMaxAggregateInputType
+  }
+
+  export type ReviewsGroupByOutputType = {
+    id: number
+    content: string
+    stars: number
+    created_at: Date
+    updated_at: Date
+    user_id: string
+    _count: ReviewsCountAggregateOutputType | null
+    _avg: ReviewsAvgAggregateOutputType | null
+    _sum: ReviewsSumAggregateOutputType | null
+    _min: ReviewsMinAggregateOutputType | null
+    _max: ReviewsMaxAggregateOutputType | null
+  }
+
+  type GetReviewsGroupByPayload<T extends reviewsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReviewsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReviewsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReviewsGroupByOutputType[P]>
+            : GetScalarType<T[P], ReviewsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type reviewsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    content?: boolean
+    stars?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    user_id?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["reviews"]>
+
+  export type reviewsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    content?: boolean
+    stars?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    user_id?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["reviews"]>
+
+  export type reviewsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    content?: boolean
+    stars?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    user_id?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["reviews"]>
+
+  export type reviewsSelectScalar = {
+    id?: boolean
+    content?: boolean
+    stars?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    user_id?: boolean
+  }
+
+  export type reviewsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content" | "stars" | "created_at" | "updated_at" | "user_id", ExtArgs["result"]["reviews"]>
+  export type reviewsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+  export type reviewsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+  export type reviewsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+
+  export type $reviewsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "reviews"
+    objects: {
+      users: Prisma.$usersPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      content: string
+      stars: number
+      created_at: Date
+      updated_at: Date
+      user_id: string
+    }, ExtArgs["result"]["reviews"]>
+    composites: {}
+  }
+
+  type reviewsGetPayload<S extends boolean | null | undefined | reviewsDefaultArgs> = $Result.GetResult<Prisma.$reviewsPayload, S>
+
+  type reviewsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<reviewsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReviewsCountAggregateInputType | true
+    }
+
+  export interface reviewsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['reviews'], meta: { name: 'reviews' } }
+    /**
+     * Find zero or one Reviews that matches the filter.
+     * @param {reviewsFindUniqueArgs} args - Arguments to find a Reviews
+     * @example
+     * // Get one Reviews
+     * const reviews = await prisma.reviews.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends reviewsFindUniqueArgs>(args: SelectSubset<T, reviewsFindUniqueArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Reviews that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {reviewsFindUniqueOrThrowArgs} args - Arguments to find a Reviews
+     * @example
+     * // Get one Reviews
+     * const reviews = await prisma.reviews.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends reviewsFindUniqueOrThrowArgs>(args: SelectSubset<T, reviewsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Reviews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsFindFirstArgs} args - Arguments to find a Reviews
+     * @example
+     * // Get one Reviews
+     * const reviews = await prisma.reviews.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends reviewsFindFirstArgs>(args?: SelectSubset<T, reviewsFindFirstArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Reviews that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsFindFirstOrThrowArgs} args - Arguments to find a Reviews
+     * @example
+     * // Get one Reviews
+     * const reviews = await prisma.reviews.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends reviewsFindFirstOrThrowArgs>(args?: SelectSubset<T, reviewsFindFirstOrThrowArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Reviews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Reviews
+     * const reviews = await prisma.reviews.findMany()
+     * 
+     * // Get first 10 Reviews
+     * const reviews = await prisma.reviews.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const reviewsWithIdOnly = await prisma.reviews.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends reviewsFindManyArgs>(args?: SelectSubset<T, reviewsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Reviews.
+     * @param {reviewsCreateArgs} args - Arguments to create a Reviews.
+     * @example
+     * // Create one Reviews
+     * const Reviews = await prisma.reviews.create({
+     *   data: {
+     *     // ... data to create a Reviews
+     *   }
+     * })
+     * 
+     */
+    create<T extends reviewsCreateArgs>(args: SelectSubset<T, reviewsCreateArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Reviews.
+     * @param {reviewsCreateManyArgs} args - Arguments to create many Reviews.
+     * @example
+     * // Create many Reviews
+     * const reviews = await prisma.reviews.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends reviewsCreateManyArgs>(args?: SelectSubset<T, reviewsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Reviews and returns the data saved in the database.
+     * @param {reviewsCreateManyAndReturnArgs} args - Arguments to create many Reviews.
+     * @example
+     * // Create many Reviews
+     * const reviews = await prisma.reviews.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Reviews and only return the `id`
+     * const reviewsWithIdOnly = await prisma.reviews.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends reviewsCreateManyAndReturnArgs>(args?: SelectSubset<T, reviewsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Reviews.
+     * @param {reviewsDeleteArgs} args - Arguments to delete one Reviews.
+     * @example
+     * // Delete one Reviews
+     * const Reviews = await prisma.reviews.delete({
+     *   where: {
+     *     // ... filter to delete one Reviews
+     *   }
+     * })
+     * 
+     */
+    delete<T extends reviewsDeleteArgs>(args: SelectSubset<T, reviewsDeleteArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Reviews.
+     * @param {reviewsUpdateArgs} args - Arguments to update one Reviews.
+     * @example
+     * // Update one Reviews
+     * const reviews = await prisma.reviews.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends reviewsUpdateArgs>(args: SelectSubset<T, reviewsUpdateArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Reviews.
+     * @param {reviewsDeleteManyArgs} args - Arguments to filter Reviews to delete.
+     * @example
+     * // Delete a few Reviews
+     * const { count } = await prisma.reviews.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends reviewsDeleteManyArgs>(args?: SelectSubset<T, reviewsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Reviews
+     * const reviews = await prisma.reviews.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends reviewsUpdateManyArgs>(args: SelectSubset<T, reviewsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Reviews and returns the data updated in the database.
+     * @param {reviewsUpdateManyAndReturnArgs} args - Arguments to update many Reviews.
+     * @example
+     * // Update many Reviews
+     * const reviews = await prisma.reviews.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Reviews and only return the `id`
+     * const reviewsWithIdOnly = await prisma.reviews.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends reviewsUpdateManyAndReturnArgs>(args: SelectSubset<T, reviewsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Reviews.
+     * @param {reviewsUpsertArgs} args - Arguments to update or create a Reviews.
+     * @example
+     * // Update or create a Reviews
+     * const reviews = await prisma.reviews.upsert({
+     *   create: {
+     *     // ... data to create a Reviews
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Reviews we want to update
+     *   }
+     * })
+     */
+    upsert<T extends reviewsUpsertArgs>(args: SelectSubset<T, reviewsUpsertArgs<ExtArgs>>): Prisma__reviewsClient<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsCountArgs} args - Arguments to filter Reviews to count.
+     * @example
+     * // Count the number of Reviews
+     * const count = await prisma.reviews.count({
+     *   where: {
+     *     // ... the filter for the Reviews we want to count
+     *   }
+     * })
+    **/
+    count<T extends reviewsCountArgs>(
+      args?: Subset<T, reviewsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReviewsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReviewsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReviewsAggregateArgs>(args: Subset<T, ReviewsAggregateArgs>): Prisma.PrismaPromise<GetReviewsAggregateType<T>>
+
+    /**
+     * Group by Reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {reviewsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends reviewsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: reviewsGroupByArgs['orderBy'] }
+        : { orderBy?: reviewsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, reviewsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReviewsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the reviews model
+   */
+  readonly fields: reviewsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for reviews.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__reviewsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends usersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, usersDefaultArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the reviews model
+   */
+  interface reviewsFieldRefs {
+    readonly id: FieldRef<"reviews", 'Int'>
+    readonly content: FieldRef<"reviews", 'String'>
+    readonly stars: FieldRef<"reviews", 'Float'>
+    readonly created_at: FieldRef<"reviews", 'DateTime'>
+    readonly updated_at: FieldRef<"reviews", 'DateTime'>
+    readonly user_id: FieldRef<"reviews", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * reviews findUnique
+   */
+  export type reviewsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which reviews to fetch.
+     */
+    where: reviewsWhereUniqueInput
+  }
+
+  /**
+   * reviews findUniqueOrThrow
+   */
+  export type reviewsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which reviews to fetch.
+     */
+    where: reviewsWhereUniqueInput
+  }
+
+  /**
+   * reviews findFirst
+   */
+  export type reviewsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which reviews to fetch.
+     */
+    where?: reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of reviews to fetch.
+     */
+    orderBy?: reviewsOrderByWithRelationInput | reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for reviews.
+     */
+    cursor?: reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of reviews.
+     */
+    distinct?: ReviewsScalarFieldEnum | ReviewsScalarFieldEnum[]
+  }
+
+  /**
+   * reviews findFirstOrThrow
+   */
+  export type reviewsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which reviews to fetch.
+     */
+    where?: reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of reviews to fetch.
+     */
+    orderBy?: reviewsOrderByWithRelationInput | reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for reviews.
+     */
+    cursor?: reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of reviews.
+     */
+    distinct?: ReviewsScalarFieldEnum | ReviewsScalarFieldEnum[]
+  }
+
+  /**
+   * reviews findMany
+   */
+  export type reviewsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which reviews to fetch.
+     */
+    where?: reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of reviews to fetch.
+     */
+    orderBy?: reviewsOrderByWithRelationInput | reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing reviews.
+     */
+    cursor?: reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` reviews.
+     */
+    skip?: number
+    distinct?: ReviewsScalarFieldEnum | ReviewsScalarFieldEnum[]
+  }
+
+  /**
+   * reviews create
+   */
+  export type reviewsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a reviews.
+     */
+    data: XOR<reviewsCreateInput, reviewsUncheckedCreateInput>
+  }
+
+  /**
+   * reviews createMany
+   */
+  export type reviewsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many reviews.
+     */
+    data: reviewsCreateManyInput | reviewsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * reviews createManyAndReturn
+   */
+  export type reviewsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * The data used to create many reviews.
+     */
+    data: reviewsCreateManyInput | reviewsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * reviews update
+   */
+  export type reviewsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a reviews.
+     */
+    data: XOR<reviewsUpdateInput, reviewsUncheckedUpdateInput>
+    /**
+     * Choose, which reviews to update.
+     */
+    where: reviewsWhereUniqueInput
+  }
+
+  /**
+   * reviews updateMany
+   */
+  export type reviewsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update reviews.
+     */
+    data: XOR<reviewsUpdateManyMutationInput, reviewsUncheckedUpdateManyInput>
+    /**
+     * Filter which reviews to update
+     */
+    where?: reviewsWhereInput
+    /**
+     * Limit how many reviews to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * reviews updateManyAndReturn
+   */
+  export type reviewsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * The data used to update reviews.
+     */
+    data: XOR<reviewsUpdateManyMutationInput, reviewsUncheckedUpdateManyInput>
+    /**
+     * Filter which reviews to update
+     */
+    where?: reviewsWhereInput
+    /**
+     * Limit how many reviews to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * reviews upsert
+   */
+  export type reviewsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the reviews to update in case it exists.
+     */
+    where: reviewsWhereUniqueInput
+    /**
+     * In case the reviews found by the `where` argument doesn't exist, create a new reviews with this data.
+     */
+    create: XOR<reviewsCreateInput, reviewsUncheckedCreateInput>
+    /**
+     * In case the reviews was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<reviewsUpdateInput, reviewsUncheckedUpdateInput>
+  }
+
+  /**
+   * reviews delete
+   */
+  export type reviewsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    /**
+     * Filter which reviews to delete.
+     */
+    where: reviewsWhereUniqueInput
+  }
+
+  /**
+   * reviews deleteMany
+   */
+  export type reviewsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which reviews to delete
+     */
+    where?: reviewsWhereInput
+    /**
+     * Limit how many reviews to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * reviews without action
+   */
+  export type reviewsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model categories
    */
 
@@ -12797,7 +15011,7 @@ export namespace Prisma {
 
   export type CertificatesGroupByOutputType = {
     id: number
-    title: string
+    title: string | null
     link: string | null
     description: string | null
     start_date: Date | null
@@ -12885,7 +15099,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      title: string
+      title: string | null
       link: string | null
       description: string | null
       start_date: Date | null
@@ -14081,8 +16295,6 @@ export namespace Prisma {
     fields?: boolean | companies$fieldsArgs<ExtArgs>
     users?: boolean | usersDefaultArgs<ExtArgs>
     companyLabels?: boolean | companies$companyLabelsArgs<ExtArgs>
-    companyActivitiesHistory?: boolean | companies$companyActivitiesHistoryArgs<ExtArgs>
-    companyNotifications?: boolean | companies$companyNotificationsArgs<ExtArgs>
     feedbacks?: boolean | companies$feedbacksArgs<ExtArgs>
     followedCompanies?: boolean | companies$followedCompaniesArgs<ExtArgs>
     _count?: boolean | CompaniesCountOutputTypeDefaultArgs<ExtArgs>
@@ -14174,8 +16386,6 @@ export namespace Prisma {
     fields?: boolean | companies$fieldsArgs<ExtArgs>
     users?: boolean | usersDefaultArgs<ExtArgs>
     companyLabels?: boolean | companies$companyLabelsArgs<ExtArgs>
-    companyActivitiesHistory?: boolean | companies$companyActivitiesHistoryArgs<ExtArgs>
-    companyNotifications?: boolean | companies$companyNotificationsArgs<ExtArgs>
     feedbacks?: boolean | companies$feedbacksArgs<ExtArgs>
     followedCompanies?: boolean | companies$followedCompaniesArgs<ExtArgs>
     _count?: boolean | CompaniesCountOutputTypeDefaultArgs<ExtArgs>
@@ -14197,8 +16407,6 @@ export namespace Prisma {
       fields: Prisma.$fieldsPayload<ExtArgs> | null
       users: Prisma.$usersPayload<ExtArgs>
       companyLabels: Prisma.$companyLabelsPayload<ExtArgs> | null
-      companyActivitiesHistory: Prisma.$companyActivitiesHistoryPayload<ExtArgs>[]
-      companyNotifications: Prisma.$companyNotificationsPayload<ExtArgs>[]
       feedbacks: Prisma.$feedbacksPayload<ExtArgs>[]
       followedCompanies: Prisma.$followedCompaniesPayload<ExtArgs>[]
     }
@@ -14622,8 +16830,6 @@ export namespace Prisma {
     fields<T extends companies$fieldsArgs<ExtArgs> = {}>(args?: Subset<T, companies$fieldsArgs<ExtArgs>>): Prisma__fieldsClient<$Result.GetResult<Prisma.$fieldsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     users<T extends usersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, usersDefaultArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     companyLabels<T extends companies$companyLabelsArgs<ExtArgs> = {}>(args?: Subset<T, companies$companyLabelsArgs<ExtArgs>>): Prisma__companyLabelsClient<$Result.GetResult<Prisma.$companyLabelsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    companyActivitiesHistory<T extends companies$companyActivitiesHistoryArgs<ExtArgs> = {}>(args?: Subset<T, companies$companyActivitiesHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    companyNotifications<T extends companies$companyNotificationsArgs<ExtArgs> = {}>(args?: Subset<T, companies$companyNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     feedbacks<T extends companies$feedbacksArgs<ExtArgs> = {}>(args?: Subset<T, companies$feedbacksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$feedbacksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     followedCompanies<T extends companies$followedCompaniesArgs<ExtArgs> = {}>(args?: Subset<T, companies$followedCompaniesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$followedCompaniesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -15111,54 +17317,6 @@ export namespace Prisma {
   }
 
   /**
-   * companies.companyActivitiesHistory
-   */
-  export type companies$companyActivitiesHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    where?: companyActivitiesHistoryWhereInput
-    orderBy?: companyActivitiesHistoryOrderByWithRelationInput | companyActivitiesHistoryOrderByWithRelationInput[]
-    cursor?: companyActivitiesHistoryWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CompanyActivitiesHistoryScalarFieldEnum | CompanyActivitiesHistoryScalarFieldEnum[]
-  }
-
-  /**
-   * companies.companyNotifications
-   */
-  export type companies$companyNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    where?: companyNotificationsWhereInput
-    orderBy?: companyNotificationsOrderByWithRelationInput | companyNotificationsOrderByWithRelationInput[]
-    cursor?: companyNotificationsWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CompanyNotificationsScalarFieldEnum | CompanyNotificationsScalarFieldEnum[]
-  }
-
-  /**
    * companies.feedbacks
    */
   export type companies$feedbacksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -15222,1085 +17380,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: companiesInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model companyActivitiesHistory
-   */
-
-  export type AggregateCompanyActivitiesHistory = {
-    _count: CompanyActivitiesHistoryCountAggregateOutputType | null
-    _avg: CompanyActivitiesHistoryAvgAggregateOutputType | null
-    _sum: CompanyActivitiesHistorySumAggregateOutputType | null
-    _min: CompanyActivitiesHistoryMinAggregateOutputType | null
-    _max: CompanyActivitiesHistoryMaxAggregateOutputType | null
-  }
-
-  export type CompanyActivitiesHistoryAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CompanyActivitiesHistorySumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CompanyActivitiesHistoryMinAggregateOutputType = {
-    id: number | null
-    activity_name: string | null
-    time: Date | null
-    company_id: string | null
-  }
-
-  export type CompanyActivitiesHistoryMaxAggregateOutputType = {
-    id: number | null
-    activity_name: string | null
-    time: Date | null
-    company_id: string | null
-  }
-
-  export type CompanyActivitiesHistoryCountAggregateOutputType = {
-    id: number
-    activity_name: number
-    time: number
-    company_id: number
-    _all: number
-  }
-
-
-  export type CompanyActivitiesHistoryAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type CompanyActivitiesHistorySumAggregateInputType = {
-    id?: true
-  }
-
-  export type CompanyActivitiesHistoryMinAggregateInputType = {
-    id?: true
-    activity_name?: true
-    time?: true
-    company_id?: true
-  }
-
-  export type CompanyActivitiesHistoryMaxAggregateInputType = {
-    id?: true
-    activity_name?: true
-    time?: true
-    company_id?: true
-  }
-
-  export type CompanyActivitiesHistoryCountAggregateInputType = {
-    id?: true
-    activity_name?: true
-    time?: true
-    company_id?: true
-    _all?: true
-  }
-
-  export type CompanyActivitiesHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which companyActivitiesHistory to aggregate.
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyActivitiesHistories to fetch.
-     */
-    orderBy?: companyActivitiesHistoryOrderByWithRelationInput | companyActivitiesHistoryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: companyActivitiesHistoryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyActivitiesHistories from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyActivitiesHistories.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned companyActivitiesHistories
-    **/
-    _count?: true | CompanyActivitiesHistoryCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: CompanyActivitiesHistoryAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: CompanyActivitiesHistorySumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: CompanyActivitiesHistoryMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: CompanyActivitiesHistoryMaxAggregateInputType
-  }
-
-  export type GetCompanyActivitiesHistoryAggregateType<T extends CompanyActivitiesHistoryAggregateArgs> = {
-        [P in keyof T & keyof AggregateCompanyActivitiesHistory]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateCompanyActivitiesHistory[P]>
-      : GetScalarType<T[P], AggregateCompanyActivitiesHistory[P]>
-  }
-
-
-
-
-  export type companyActivitiesHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: companyActivitiesHistoryWhereInput
-    orderBy?: companyActivitiesHistoryOrderByWithAggregationInput | companyActivitiesHistoryOrderByWithAggregationInput[]
-    by: CompanyActivitiesHistoryScalarFieldEnum[] | CompanyActivitiesHistoryScalarFieldEnum
-    having?: companyActivitiesHistoryScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: CompanyActivitiesHistoryCountAggregateInputType | true
-    _avg?: CompanyActivitiesHistoryAvgAggregateInputType
-    _sum?: CompanyActivitiesHistorySumAggregateInputType
-    _min?: CompanyActivitiesHistoryMinAggregateInputType
-    _max?: CompanyActivitiesHistoryMaxAggregateInputType
-  }
-
-  export type CompanyActivitiesHistoryGroupByOutputType = {
-    id: number
-    activity_name: string
-    time: Date
-    company_id: string
-    _count: CompanyActivitiesHistoryCountAggregateOutputType | null
-    _avg: CompanyActivitiesHistoryAvgAggregateOutputType | null
-    _sum: CompanyActivitiesHistorySumAggregateOutputType | null
-    _min: CompanyActivitiesHistoryMinAggregateOutputType | null
-    _max: CompanyActivitiesHistoryMaxAggregateOutputType | null
-  }
-
-  type GetCompanyActivitiesHistoryGroupByPayload<T extends companyActivitiesHistoryGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<CompanyActivitiesHistoryGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof CompanyActivitiesHistoryGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], CompanyActivitiesHistoryGroupByOutputType[P]>
-            : GetScalarType<T[P], CompanyActivitiesHistoryGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type companyActivitiesHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    activity_name?: boolean
-    time?: boolean
-    company_id?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyActivitiesHistory"]>
-
-  export type companyActivitiesHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    activity_name?: boolean
-    time?: boolean
-    company_id?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyActivitiesHistory"]>
-
-  export type companyActivitiesHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    activity_name?: boolean
-    time?: boolean
-    company_id?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyActivitiesHistory"]>
-
-  export type companyActivitiesHistorySelectScalar = {
-    id?: boolean
-    activity_name?: boolean
-    time?: boolean
-    company_id?: boolean
-  }
-
-  export type companyActivitiesHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "activity_name" | "time" | "company_id", ExtArgs["result"]["companyActivitiesHistory"]>
-  export type companyActivitiesHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-  export type companyActivitiesHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-  export type companyActivitiesHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-
-  export type $companyActivitiesHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "companyActivitiesHistory"
-    objects: {
-      companies: Prisma.$companiesPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      activity_name: string
-      time: Date
-      company_id: string
-    }, ExtArgs["result"]["companyActivitiesHistory"]>
-    composites: {}
-  }
-
-  type companyActivitiesHistoryGetPayload<S extends boolean | null | undefined | companyActivitiesHistoryDefaultArgs> = $Result.GetResult<Prisma.$companyActivitiesHistoryPayload, S>
-
-  type companyActivitiesHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<companyActivitiesHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: CompanyActivitiesHistoryCountAggregateInputType | true
-    }
-
-  export interface companyActivitiesHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['companyActivitiesHistory'], meta: { name: 'companyActivitiesHistory' } }
-    /**
-     * Find zero or one CompanyActivitiesHistory that matches the filter.
-     * @param {companyActivitiesHistoryFindUniqueArgs} args - Arguments to find a CompanyActivitiesHistory
-     * @example
-     * // Get one CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends companyActivitiesHistoryFindUniqueArgs>(args: SelectSubset<T, companyActivitiesHistoryFindUniqueArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one CompanyActivitiesHistory that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {companyActivitiesHistoryFindUniqueOrThrowArgs} args - Arguments to find a CompanyActivitiesHistory
-     * @example
-     * // Get one CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends companyActivitiesHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, companyActivitiesHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CompanyActivitiesHistory that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryFindFirstArgs} args - Arguments to find a CompanyActivitiesHistory
-     * @example
-     * // Get one CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends companyActivitiesHistoryFindFirstArgs>(args?: SelectSubset<T, companyActivitiesHistoryFindFirstArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CompanyActivitiesHistory that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryFindFirstOrThrowArgs} args - Arguments to find a CompanyActivitiesHistory
-     * @example
-     * // Get one CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends companyActivitiesHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, companyActivitiesHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more CompanyActivitiesHistories that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all CompanyActivitiesHistories
-     * const companyActivitiesHistories = await prisma.companyActivitiesHistory.findMany()
-     * 
-     * // Get first 10 CompanyActivitiesHistories
-     * const companyActivitiesHistories = await prisma.companyActivitiesHistory.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const companyActivitiesHistoryWithIdOnly = await prisma.companyActivitiesHistory.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends companyActivitiesHistoryFindManyArgs>(args?: SelectSubset<T, companyActivitiesHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a CompanyActivitiesHistory.
-     * @param {companyActivitiesHistoryCreateArgs} args - Arguments to create a CompanyActivitiesHistory.
-     * @example
-     * // Create one CompanyActivitiesHistory
-     * const CompanyActivitiesHistory = await prisma.companyActivitiesHistory.create({
-     *   data: {
-     *     // ... data to create a CompanyActivitiesHistory
-     *   }
-     * })
-     * 
-     */
-    create<T extends companyActivitiesHistoryCreateArgs>(args: SelectSubset<T, companyActivitiesHistoryCreateArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many CompanyActivitiesHistories.
-     * @param {companyActivitiesHistoryCreateManyArgs} args - Arguments to create many CompanyActivitiesHistories.
-     * @example
-     * // Create many CompanyActivitiesHistories
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends companyActivitiesHistoryCreateManyArgs>(args?: SelectSubset<T, companyActivitiesHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many CompanyActivitiesHistories and returns the data saved in the database.
-     * @param {companyActivitiesHistoryCreateManyAndReturnArgs} args - Arguments to create many CompanyActivitiesHistories.
-     * @example
-     * // Create many CompanyActivitiesHistories
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many CompanyActivitiesHistories and only return the `id`
-     * const companyActivitiesHistoryWithIdOnly = await prisma.companyActivitiesHistory.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends companyActivitiesHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, companyActivitiesHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a CompanyActivitiesHistory.
-     * @param {companyActivitiesHistoryDeleteArgs} args - Arguments to delete one CompanyActivitiesHistory.
-     * @example
-     * // Delete one CompanyActivitiesHistory
-     * const CompanyActivitiesHistory = await prisma.companyActivitiesHistory.delete({
-     *   where: {
-     *     // ... filter to delete one CompanyActivitiesHistory
-     *   }
-     * })
-     * 
-     */
-    delete<T extends companyActivitiesHistoryDeleteArgs>(args: SelectSubset<T, companyActivitiesHistoryDeleteArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one CompanyActivitiesHistory.
-     * @param {companyActivitiesHistoryUpdateArgs} args - Arguments to update one CompanyActivitiesHistory.
-     * @example
-     * // Update one CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends companyActivitiesHistoryUpdateArgs>(args: SelectSubset<T, companyActivitiesHistoryUpdateArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more CompanyActivitiesHistories.
-     * @param {companyActivitiesHistoryDeleteManyArgs} args - Arguments to filter CompanyActivitiesHistories to delete.
-     * @example
-     * // Delete a few CompanyActivitiesHistories
-     * const { count } = await prisma.companyActivitiesHistory.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends companyActivitiesHistoryDeleteManyArgs>(args?: SelectSubset<T, companyActivitiesHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CompanyActivitiesHistories.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many CompanyActivitiesHistories
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends companyActivitiesHistoryUpdateManyArgs>(args: SelectSubset<T, companyActivitiesHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CompanyActivitiesHistories and returns the data updated in the database.
-     * @param {companyActivitiesHistoryUpdateManyAndReturnArgs} args - Arguments to update many CompanyActivitiesHistories.
-     * @example
-     * // Update many CompanyActivitiesHistories
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more CompanyActivitiesHistories and only return the `id`
-     * const companyActivitiesHistoryWithIdOnly = await prisma.companyActivitiesHistory.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends companyActivitiesHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, companyActivitiesHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one CompanyActivitiesHistory.
-     * @param {companyActivitiesHistoryUpsertArgs} args - Arguments to update or create a CompanyActivitiesHistory.
-     * @example
-     * // Update or create a CompanyActivitiesHistory
-     * const companyActivitiesHistory = await prisma.companyActivitiesHistory.upsert({
-     *   create: {
-     *     // ... data to create a CompanyActivitiesHistory
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the CompanyActivitiesHistory we want to update
-     *   }
-     * })
-     */
-    upsert<T extends companyActivitiesHistoryUpsertArgs>(args: SelectSubset<T, companyActivitiesHistoryUpsertArgs<ExtArgs>>): Prisma__companyActivitiesHistoryClient<$Result.GetResult<Prisma.$companyActivitiesHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of CompanyActivitiesHistories.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryCountArgs} args - Arguments to filter CompanyActivitiesHistories to count.
-     * @example
-     * // Count the number of CompanyActivitiesHistories
-     * const count = await prisma.companyActivitiesHistory.count({
-     *   where: {
-     *     // ... the filter for the CompanyActivitiesHistories we want to count
-     *   }
-     * })
-    **/
-    count<T extends companyActivitiesHistoryCountArgs>(
-      args?: Subset<T, companyActivitiesHistoryCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], CompanyActivitiesHistoryCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a CompanyActivitiesHistory.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CompanyActivitiesHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends CompanyActivitiesHistoryAggregateArgs>(args: Subset<T, CompanyActivitiesHistoryAggregateArgs>): Prisma.PrismaPromise<GetCompanyActivitiesHistoryAggregateType<T>>
-
-    /**
-     * Group by CompanyActivitiesHistory.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyActivitiesHistoryGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends companyActivitiesHistoryGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: companyActivitiesHistoryGroupByArgs['orderBy'] }
-        : { orderBy?: companyActivitiesHistoryGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, companyActivitiesHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanyActivitiesHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the companyActivitiesHistory model
-   */
-  readonly fields: companyActivitiesHistoryFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for companyActivitiesHistory.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__companyActivitiesHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    companies<T extends companiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, companiesDefaultArgs<ExtArgs>>): Prisma__companiesClient<$Result.GetResult<Prisma.$companiesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the companyActivitiesHistory model
-   */
-  interface companyActivitiesHistoryFieldRefs {
-    readonly id: FieldRef<"companyActivitiesHistory", 'Int'>
-    readonly activity_name: FieldRef<"companyActivitiesHistory", 'String'>
-    readonly time: FieldRef<"companyActivitiesHistory", 'DateTime'>
-    readonly company_id: FieldRef<"companyActivitiesHistory", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * companyActivitiesHistory findUnique
-   */
-  export type companyActivitiesHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter, which companyActivitiesHistory to fetch.
-     */
-    where: companyActivitiesHistoryWhereUniqueInput
-  }
-
-  /**
-   * companyActivitiesHistory findUniqueOrThrow
-   */
-  export type companyActivitiesHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter, which companyActivitiesHistory to fetch.
-     */
-    where: companyActivitiesHistoryWhereUniqueInput
-  }
-
-  /**
-   * companyActivitiesHistory findFirst
-   */
-  export type companyActivitiesHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter, which companyActivitiesHistory to fetch.
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyActivitiesHistories to fetch.
-     */
-    orderBy?: companyActivitiesHistoryOrderByWithRelationInput | companyActivitiesHistoryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for companyActivitiesHistories.
-     */
-    cursor?: companyActivitiesHistoryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyActivitiesHistories from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyActivitiesHistories.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of companyActivitiesHistories.
-     */
-    distinct?: CompanyActivitiesHistoryScalarFieldEnum | CompanyActivitiesHistoryScalarFieldEnum[]
-  }
-
-  /**
-   * companyActivitiesHistory findFirstOrThrow
-   */
-  export type companyActivitiesHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter, which companyActivitiesHistory to fetch.
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyActivitiesHistories to fetch.
-     */
-    orderBy?: companyActivitiesHistoryOrderByWithRelationInput | companyActivitiesHistoryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for companyActivitiesHistories.
-     */
-    cursor?: companyActivitiesHistoryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyActivitiesHistories from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyActivitiesHistories.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of companyActivitiesHistories.
-     */
-    distinct?: CompanyActivitiesHistoryScalarFieldEnum | CompanyActivitiesHistoryScalarFieldEnum[]
-  }
-
-  /**
-   * companyActivitiesHistory findMany
-   */
-  export type companyActivitiesHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter, which companyActivitiesHistories to fetch.
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyActivitiesHistories to fetch.
-     */
-    orderBy?: companyActivitiesHistoryOrderByWithRelationInput | companyActivitiesHistoryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing companyActivitiesHistories.
-     */
-    cursor?: companyActivitiesHistoryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyActivitiesHistories from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyActivitiesHistories.
-     */
-    skip?: number
-    distinct?: CompanyActivitiesHistoryScalarFieldEnum | CompanyActivitiesHistoryScalarFieldEnum[]
-  }
-
-  /**
-   * companyActivitiesHistory create
-   */
-  export type companyActivitiesHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * The data needed to create a companyActivitiesHistory.
-     */
-    data: XOR<companyActivitiesHistoryCreateInput, companyActivitiesHistoryUncheckedCreateInput>
-  }
-
-  /**
-   * companyActivitiesHistory createMany
-   */
-  export type companyActivitiesHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many companyActivitiesHistories.
-     */
-    data: companyActivitiesHistoryCreateManyInput | companyActivitiesHistoryCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * companyActivitiesHistory createManyAndReturn
-   */
-  export type companyActivitiesHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * The data used to create many companyActivitiesHistories.
-     */
-    data: companyActivitiesHistoryCreateManyInput | companyActivitiesHistoryCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * companyActivitiesHistory update
-   */
-  export type companyActivitiesHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * The data needed to update a companyActivitiesHistory.
-     */
-    data: XOR<companyActivitiesHistoryUpdateInput, companyActivitiesHistoryUncheckedUpdateInput>
-    /**
-     * Choose, which companyActivitiesHistory to update.
-     */
-    where: companyActivitiesHistoryWhereUniqueInput
-  }
-
-  /**
-   * companyActivitiesHistory updateMany
-   */
-  export type companyActivitiesHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update companyActivitiesHistories.
-     */
-    data: XOR<companyActivitiesHistoryUpdateManyMutationInput, companyActivitiesHistoryUncheckedUpdateManyInput>
-    /**
-     * Filter which companyActivitiesHistories to update
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * Limit how many companyActivitiesHistories to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * companyActivitiesHistory updateManyAndReturn
-   */
-  export type companyActivitiesHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * The data used to update companyActivitiesHistories.
-     */
-    data: XOR<companyActivitiesHistoryUpdateManyMutationInput, companyActivitiesHistoryUncheckedUpdateManyInput>
-    /**
-     * Filter which companyActivitiesHistories to update
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * Limit how many companyActivitiesHistories to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * companyActivitiesHistory upsert
-   */
-  export type companyActivitiesHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * The filter to search for the companyActivitiesHistory to update in case it exists.
-     */
-    where: companyActivitiesHistoryWhereUniqueInput
-    /**
-     * In case the companyActivitiesHistory found by the `where` argument doesn't exist, create a new companyActivitiesHistory with this data.
-     */
-    create: XOR<companyActivitiesHistoryCreateInput, companyActivitiesHistoryUncheckedCreateInput>
-    /**
-     * In case the companyActivitiesHistory was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<companyActivitiesHistoryUpdateInput, companyActivitiesHistoryUncheckedUpdateInput>
-  }
-
-  /**
-   * companyActivitiesHistory delete
-   */
-  export type companyActivitiesHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
-    /**
-     * Filter which companyActivitiesHistory to delete.
-     */
-    where: companyActivitiesHistoryWhereUniqueInput
-  }
-
-  /**
-   * companyActivitiesHistory deleteMany
-   */
-  export type companyActivitiesHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which companyActivitiesHistories to delete
-     */
-    where?: companyActivitiesHistoryWhereInput
-    /**
-     * Limit how many companyActivitiesHistories to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * companyActivitiesHistory without action
-   */
-  export type companyActivitiesHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyActivitiesHistory
-     */
-    select?: companyActivitiesHistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyActivitiesHistory
-     */
-    omit?: companyActivitiesHistoryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyActivitiesHistoryInclude<ExtArgs> | null
   }
 
 
@@ -17370,1137 +18449,6 @@ export namespace Prisma {
 
 
   /**
-   * Model companyNotifications
-   */
-
-  export type AggregateCompanyNotifications = {
-    _count: CompanyNotificationsCountAggregateOutputType | null
-    _avg: CompanyNotificationsAvgAggregateOutputType | null
-    _sum: CompanyNotificationsSumAggregateOutputType | null
-    _min: CompanyNotificationsMinAggregateOutputType | null
-    _max: CompanyNotificationsMaxAggregateOutputType | null
-  }
-
-  export type CompanyNotificationsAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CompanyNotificationsSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CompanyNotificationsMinAggregateOutputType = {
-    id: number | null
-    company_id: string | null
-    title: string | null
-    content: string | null
-    type: $Enums.NotificationsType | null
-    is_read: boolean | null
-    sent_at: Date | null
-    read_at: Date | null
-  }
-
-  export type CompanyNotificationsMaxAggregateOutputType = {
-    id: number | null
-    company_id: string | null
-    title: string | null
-    content: string | null
-    type: $Enums.NotificationsType | null
-    is_read: boolean | null
-    sent_at: Date | null
-    read_at: Date | null
-  }
-
-  export type CompanyNotificationsCountAggregateOutputType = {
-    id: number
-    company_id: number
-    title: number
-    content: number
-    type: number
-    is_read: number
-    sent_at: number
-    read_at: number
-    _all: number
-  }
-
-
-  export type CompanyNotificationsAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type CompanyNotificationsSumAggregateInputType = {
-    id?: true
-  }
-
-  export type CompanyNotificationsMinAggregateInputType = {
-    id?: true
-    company_id?: true
-    title?: true
-    content?: true
-    type?: true
-    is_read?: true
-    sent_at?: true
-    read_at?: true
-  }
-
-  export type CompanyNotificationsMaxAggregateInputType = {
-    id?: true
-    company_id?: true
-    title?: true
-    content?: true
-    type?: true
-    is_read?: true
-    sent_at?: true
-    read_at?: true
-  }
-
-  export type CompanyNotificationsCountAggregateInputType = {
-    id?: true
-    company_id?: true
-    title?: true
-    content?: true
-    type?: true
-    is_read?: true
-    sent_at?: true
-    read_at?: true
-    _all?: true
-  }
-
-  export type CompanyNotificationsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which companyNotifications to aggregate.
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyNotifications to fetch.
-     */
-    orderBy?: companyNotificationsOrderByWithRelationInput | companyNotificationsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: companyNotificationsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyNotifications from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyNotifications.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned companyNotifications
-    **/
-    _count?: true | CompanyNotificationsCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: CompanyNotificationsAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: CompanyNotificationsSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: CompanyNotificationsMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: CompanyNotificationsMaxAggregateInputType
-  }
-
-  export type GetCompanyNotificationsAggregateType<T extends CompanyNotificationsAggregateArgs> = {
-        [P in keyof T & keyof AggregateCompanyNotifications]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateCompanyNotifications[P]>
-      : GetScalarType<T[P], AggregateCompanyNotifications[P]>
-  }
-
-
-
-
-  export type companyNotificationsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: companyNotificationsWhereInput
-    orderBy?: companyNotificationsOrderByWithAggregationInput | companyNotificationsOrderByWithAggregationInput[]
-    by: CompanyNotificationsScalarFieldEnum[] | CompanyNotificationsScalarFieldEnum
-    having?: companyNotificationsScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: CompanyNotificationsCountAggregateInputType | true
-    _avg?: CompanyNotificationsAvgAggregateInputType
-    _sum?: CompanyNotificationsSumAggregateInputType
-    _min?: CompanyNotificationsMinAggregateInputType
-    _max?: CompanyNotificationsMaxAggregateInputType
-  }
-
-  export type CompanyNotificationsGroupByOutputType = {
-    id: number
-    company_id: string
-    title: string
-    content: string | null
-    type: $Enums.NotificationsType
-    is_read: boolean
-    sent_at: Date
-    read_at: Date | null
-    _count: CompanyNotificationsCountAggregateOutputType | null
-    _avg: CompanyNotificationsAvgAggregateOutputType | null
-    _sum: CompanyNotificationsSumAggregateOutputType | null
-    _min: CompanyNotificationsMinAggregateOutputType | null
-    _max: CompanyNotificationsMaxAggregateOutputType | null
-  }
-
-  type GetCompanyNotificationsGroupByPayload<T extends companyNotificationsGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<CompanyNotificationsGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof CompanyNotificationsGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], CompanyNotificationsGroupByOutputType[P]>
-            : GetScalarType<T[P], CompanyNotificationsGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type companyNotificationsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    company_id?: boolean
-    title?: boolean
-    content?: boolean
-    type?: boolean
-    is_read?: boolean
-    sent_at?: boolean
-    read_at?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyNotifications"]>
-
-  export type companyNotificationsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    company_id?: boolean
-    title?: boolean
-    content?: boolean
-    type?: boolean
-    is_read?: boolean
-    sent_at?: boolean
-    read_at?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyNotifications"]>
-
-  export type companyNotificationsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    company_id?: boolean
-    title?: boolean
-    content?: boolean
-    type?: boolean
-    is_read?: boolean
-    sent_at?: boolean
-    read_at?: boolean
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["companyNotifications"]>
-
-  export type companyNotificationsSelectScalar = {
-    id?: boolean
-    company_id?: boolean
-    title?: boolean
-    content?: boolean
-    type?: boolean
-    is_read?: boolean
-    sent_at?: boolean
-    read_at?: boolean
-  }
-
-  export type companyNotificationsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "company_id" | "title" | "content" | "type" | "is_read" | "sent_at" | "read_at", ExtArgs["result"]["companyNotifications"]>
-  export type companyNotificationsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-  export type companyNotificationsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-  export type companyNotificationsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    companies?: boolean | companiesDefaultArgs<ExtArgs>
-  }
-
-  export type $companyNotificationsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "companyNotifications"
-    objects: {
-      companies: Prisma.$companiesPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      company_id: string
-      title: string
-      content: string | null
-      type: $Enums.NotificationsType
-      is_read: boolean
-      sent_at: Date
-      read_at: Date | null
-    }, ExtArgs["result"]["companyNotifications"]>
-    composites: {}
-  }
-
-  type companyNotificationsGetPayload<S extends boolean | null | undefined | companyNotificationsDefaultArgs> = $Result.GetResult<Prisma.$companyNotificationsPayload, S>
-
-  type companyNotificationsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<companyNotificationsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: CompanyNotificationsCountAggregateInputType | true
-    }
-
-  export interface companyNotificationsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['companyNotifications'], meta: { name: 'companyNotifications' } }
-    /**
-     * Find zero or one CompanyNotifications that matches the filter.
-     * @param {companyNotificationsFindUniqueArgs} args - Arguments to find a CompanyNotifications
-     * @example
-     * // Get one CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends companyNotificationsFindUniqueArgs>(args: SelectSubset<T, companyNotificationsFindUniqueArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one CompanyNotifications that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {companyNotificationsFindUniqueOrThrowArgs} args - Arguments to find a CompanyNotifications
-     * @example
-     * // Get one CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends companyNotificationsFindUniqueOrThrowArgs>(args: SelectSubset<T, companyNotificationsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CompanyNotifications that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsFindFirstArgs} args - Arguments to find a CompanyNotifications
-     * @example
-     * // Get one CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends companyNotificationsFindFirstArgs>(args?: SelectSubset<T, companyNotificationsFindFirstArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CompanyNotifications that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsFindFirstOrThrowArgs} args - Arguments to find a CompanyNotifications
-     * @example
-     * // Get one CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends companyNotificationsFindFirstOrThrowArgs>(args?: SelectSubset<T, companyNotificationsFindFirstOrThrowArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more CompanyNotifications that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findMany()
-     * 
-     * // Get first 10 CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const companyNotificationsWithIdOnly = await prisma.companyNotifications.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends companyNotificationsFindManyArgs>(args?: SelectSubset<T, companyNotificationsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a CompanyNotifications.
-     * @param {companyNotificationsCreateArgs} args - Arguments to create a CompanyNotifications.
-     * @example
-     * // Create one CompanyNotifications
-     * const CompanyNotifications = await prisma.companyNotifications.create({
-     *   data: {
-     *     // ... data to create a CompanyNotifications
-     *   }
-     * })
-     * 
-     */
-    create<T extends companyNotificationsCreateArgs>(args: SelectSubset<T, companyNotificationsCreateArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many CompanyNotifications.
-     * @param {companyNotificationsCreateManyArgs} args - Arguments to create many CompanyNotifications.
-     * @example
-     * // Create many CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends companyNotificationsCreateManyArgs>(args?: SelectSubset<T, companyNotificationsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many CompanyNotifications and returns the data saved in the database.
-     * @param {companyNotificationsCreateManyAndReturnArgs} args - Arguments to create many CompanyNotifications.
-     * @example
-     * // Create many CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many CompanyNotifications and only return the `id`
-     * const companyNotificationsWithIdOnly = await prisma.companyNotifications.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends companyNotificationsCreateManyAndReturnArgs>(args?: SelectSubset<T, companyNotificationsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a CompanyNotifications.
-     * @param {companyNotificationsDeleteArgs} args - Arguments to delete one CompanyNotifications.
-     * @example
-     * // Delete one CompanyNotifications
-     * const CompanyNotifications = await prisma.companyNotifications.delete({
-     *   where: {
-     *     // ... filter to delete one CompanyNotifications
-     *   }
-     * })
-     * 
-     */
-    delete<T extends companyNotificationsDeleteArgs>(args: SelectSubset<T, companyNotificationsDeleteArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one CompanyNotifications.
-     * @param {companyNotificationsUpdateArgs} args - Arguments to update one CompanyNotifications.
-     * @example
-     * // Update one CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends companyNotificationsUpdateArgs>(args: SelectSubset<T, companyNotificationsUpdateArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more CompanyNotifications.
-     * @param {companyNotificationsDeleteManyArgs} args - Arguments to filter CompanyNotifications to delete.
-     * @example
-     * // Delete a few CompanyNotifications
-     * const { count } = await prisma.companyNotifications.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends companyNotificationsDeleteManyArgs>(args?: SelectSubset<T, companyNotificationsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CompanyNotifications.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends companyNotificationsUpdateManyArgs>(args: SelectSubset<T, companyNotificationsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CompanyNotifications and returns the data updated in the database.
-     * @param {companyNotificationsUpdateManyAndReturnArgs} args - Arguments to update many CompanyNotifications.
-     * @example
-     * // Update many CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more CompanyNotifications and only return the `id`
-     * const companyNotificationsWithIdOnly = await prisma.companyNotifications.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends companyNotificationsUpdateManyAndReturnArgs>(args: SelectSubset<T, companyNotificationsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one CompanyNotifications.
-     * @param {companyNotificationsUpsertArgs} args - Arguments to update or create a CompanyNotifications.
-     * @example
-     * // Update or create a CompanyNotifications
-     * const companyNotifications = await prisma.companyNotifications.upsert({
-     *   create: {
-     *     // ... data to create a CompanyNotifications
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the CompanyNotifications we want to update
-     *   }
-     * })
-     */
-    upsert<T extends companyNotificationsUpsertArgs>(args: SelectSubset<T, companyNotificationsUpsertArgs<ExtArgs>>): Prisma__companyNotificationsClient<$Result.GetResult<Prisma.$companyNotificationsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of CompanyNotifications.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsCountArgs} args - Arguments to filter CompanyNotifications to count.
-     * @example
-     * // Count the number of CompanyNotifications
-     * const count = await prisma.companyNotifications.count({
-     *   where: {
-     *     // ... the filter for the CompanyNotifications we want to count
-     *   }
-     * })
-    **/
-    count<T extends companyNotificationsCountArgs>(
-      args?: Subset<T, companyNotificationsCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], CompanyNotificationsCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a CompanyNotifications.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CompanyNotificationsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends CompanyNotificationsAggregateArgs>(args: Subset<T, CompanyNotificationsAggregateArgs>): Prisma.PrismaPromise<GetCompanyNotificationsAggregateType<T>>
-
-    /**
-     * Group by CompanyNotifications.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {companyNotificationsGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends companyNotificationsGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: companyNotificationsGroupByArgs['orderBy'] }
-        : { orderBy?: companyNotificationsGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, companyNotificationsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanyNotificationsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the companyNotifications model
-   */
-  readonly fields: companyNotificationsFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for companyNotifications.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__companyNotificationsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    companies<T extends companiesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, companiesDefaultArgs<ExtArgs>>): Prisma__companiesClient<$Result.GetResult<Prisma.$companiesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the companyNotifications model
-   */
-  interface companyNotificationsFieldRefs {
-    readonly id: FieldRef<"companyNotifications", 'Int'>
-    readonly company_id: FieldRef<"companyNotifications", 'String'>
-    readonly title: FieldRef<"companyNotifications", 'String'>
-    readonly content: FieldRef<"companyNotifications", 'String'>
-    readonly type: FieldRef<"companyNotifications", 'NotificationsType'>
-    readonly is_read: FieldRef<"companyNotifications", 'Boolean'>
-    readonly sent_at: FieldRef<"companyNotifications", 'DateTime'>
-    readonly read_at: FieldRef<"companyNotifications", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * companyNotifications findUnique
-   */
-  export type companyNotificationsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter, which companyNotifications to fetch.
-     */
-    where: companyNotificationsWhereUniqueInput
-  }
-
-  /**
-   * companyNotifications findUniqueOrThrow
-   */
-  export type companyNotificationsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter, which companyNotifications to fetch.
-     */
-    where: companyNotificationsWhereUniqueInput
-  }
-
-  /**
-   * companyNotifications findFirst
-   */
-  export type companyNotificationsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter, which companyNotifications to fetch.
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyNotifications to fetch.
-     */
-    orderBy?: companyNotificationsOrderByWithRelationInput | companyNotificationsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for companyNotifications.
-     */
-    cursor?: companyNotificationsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyNotifications from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyNotifications.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of companyNotifications.
-     */
-    distinct?: CompanyNotificationsScalarFieldEnum | CompanyNotificationsScalarFieldEnum[]
-  }
-
-  /**
-   * companyNotifications findFirstOrThrow
-   */
-  export type companyNotificationsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter, which companyNotifications to fetch.
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyNotifications to fetch.
-     */
-    orderBy?: companyNotificationsOrderByWithRelationInput | companyNotificationsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for companyNotifications.
-     */
-    cursor?: companyNotificationsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyNotifications from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyNotifications.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of companyNotifications.
-     */
-    distinct?: CompanyNotificationsScalarFieldEnum | CompanyNotificationsScalarFieldEnum[]
-  }
-
-  /**
-   * companyNotifications findMany
-   */
-  export type companyNotificationsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter, which companyNotifications to fetch.
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of companyNotifications to fetch.
-     */
-    orderBy?: companyNotificationsOrderByWithRelationInput | companyNotificationsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing companyNotifications.
-     */
-    cursor?: companyNotificationsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` companyNotifications from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` companyNotifications.
-     */
-    skip?: number
-    distinct?: CompanyNotificationsScalarFieldEnum | CompanyNotificationsScalarFieldEnum[]
-  }
-
-  /**
-   * companyNotifications create
-   */
-  export type companyNotificationsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * The data needed to create a companyNotifications.
-     */
-    data: XOR<companyNotificationsCreateInput, companyNotificationsUncheckedCreateInput>
-  }
-
-  /**
-   * companyNotifications createMany
-   */
-  export type companyNotificationsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many companyNotifications.
-     */
-    data: companyNotificationsCreateManyInput | companyNotificationsCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * companyNotifications createManyAndReturn
-   */
-  export type companyNotificationsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * The data used to create many companyNotifications.
-     */
-    data: companyNotificationsCreateManyInput | companyNotificationsCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * companyNotifications update
-   */
-  export type companyNotificationsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * The data needed to update a companyNotifications.
-     */
-    data: XOR<companyNotificationsUpdateInput, companyNotificationsUncheckedUpdateInput>
-    /**
-     * Choose, which companyNotifications to update.
-     */
-    where: companyNotificationsWhereUniqueInput
-  }
-
-  /**
-   * companyNotifications updateMany
-   */
-  export type companyNotificationsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update companyNotifications.
-     */
-    data: XOR<companyNotificationsUpdateManyMutationInput, companyNotificationsUncheckedUpdateManyInput>
-    /**
-     * Filter which companyNotifications to update
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * Limit how many companyNotifications to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * companyNotifications updateManyAndReturn
-   */
-  export type companyNotificationsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * The data used to update companyNotifications.
-     */
-    data: XOR<companyNotificationsUpdateManyMutationInput, companyNotificationsUncheckedUpdateManyInput>
-    /**
-     * Filter which companyNotifications to update
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * Limit how many companyNotifications to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * companyNotifications upsert
-   */
-  export type companyNotificationsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * The filter to search for the companyNotifications to update in case it exists.
-     */
-    where: companyNotificationsWhereUniqueInput
-    /**
-     * In case the companyNotifications found by the `where` argument doesn't exist, create a new companyNotifications with this data.
-     */
-    create: XOR<companyNotificationsCreateInput, companyNotificationsUncheckedCreateInput>
-    /**
-     * In case the companyNotifications was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<companyNotificationsUpdateInput, companyNotificationsUncheckedUpdateInput>
-  }
-
-  /**
-   * companyNotifications delete
-   */
-  export type companyNotificationsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-    /**
-     * Filter which companyNotifications to delete.
-     */
-    where: companyNotificationsWhereUniqueInput
-  }
-
-  /**
-   * companyNotifications deleteMany
-   */
-  export type companyNotificationsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which companyNotifications to delete
-     */
-    where?: companyNotificationsWhereInput
-    /**
-     * Limit how many companyNotifications to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * companyNotifications without action
-   */
-  export type companyNotificationsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the companyNotifications
-     */
-    select?: companyNotificationsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the companyNotifications
-     */
-    omit?: companyNotificationsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: companyNotificationsInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model cvs
    */
 
@@ -18533,6 +18481,9 @@ export namespace Prisma {
     phone: string | null
     hobbies: string | null
     others: string | null
+    apply_job: string | null
+    career_goal: string | null
+    users_id: string | null
   }
 
   export type CvsMaxAggregateOutputType = {
@@ -18546,6 +18497,9 @@ export namespace Prisma {
     phone: string | null
     hobbies: string | null
     others: string | null
+    apply_job: string | null
+    career_goal: string | null
+    users_id: string | null
   }
 
   export type CvsCountAggregateOutputType = {
@@ -18561,6 +18515,9 @@ export namespace Prisma {
     phone: number
     hobbies: number
     others: number
+    apply_job: number
+    career_goal: number
+    users_id: number
     _all: number
   }
 
@@ -18586,6 +18543,9 @@ export namespace Prisma {
     phone?: true
     hobbies?: true
     others?: true
+    apply_job?: true
+    career_goal?: true
+    users_id?: true
   }
 
   export type CvsMaxAggregateInputType = {
@@ -18599,6 +18559,9 @@ export namespace Prisma {
     phone?: true
     hobbies?: true
     others?: true
+    apply_job?: true
+    career_goal?: true
+    users_id?: true
   }
 
   export type CvsCountAggregateInputType = {
@@ -18614,6 +18577,9 @@ export namespace Prisma {
     phone?: true
     hobbies?: true
     others?: true
+    apply_job?: true
+    career_goal?: true
+    users_id?: true
     _all?: true
   }
 
@@ -18716,6 +18682,9 @@ export namespace Prisma {
     phone: string | null
     hobbies: string | null
     others: string | null
+    apply_job: string | null
+    career_goal: string | null
+    users_id: string
     _count: CvsCountAggregateOutputType | null
     _avg: CvsAvgAggregateOutputType | null
     _sum: CvsSumAggregateOutputType | null
@@ -18750,6 +18719,9 @@ export namespace Prisma {
     phone?: boolean
     hobbies?: boolean
     others?: boolean
+    apply_job?: boolean
+    career_goal?: boolean
+    users_id?: boolean
     applicants?: boolean | cvs$applicantsArgs<ExtArgs>
     awards?: boolean | cvs$awardsArgs<ExtArgs>
     certificates?: boolean | cvs$certificatesArgs<ExtArgs>
@@ -18757,6 +18729,8 @@ export namespace Prisma {
     experiences?: boolean | cvs$experiencesArgs<ExtArgs>
     projects?: boolean | cvs$projectsArgs<ExtArgs>
     references?: boolean | cvs$referencesArgs<ExtArgs>
+    languages?: boolean | cvs$languagesArgs<ExtArgs>
+    users?: boolean | usersDefaultArgs<ExtArgs>
     _count?: boolean | CvsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cvs"]>
 
@@ -18773,6 +18747,10 @@ export namespace Prisma {
     phone?: boolean
     hobbies?: boolean
     others?: boolean
+    apply_job?: boolean
+    career_goal?: boolean
+    users_id?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cvs"]>
 
   export type cvsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -18788,6 +18766,10 @@ export namespace Prisma {
     phone?: boolean
     hobbies?: boolean
     others?: boolean
+    apply_job?: boolean
+    career_goal?: boolean
+    users_id?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cvs"]>
 
   export type cvsSelectScalar = {
@@ -18803,9 +18785,12 @@ export namespace Prisma {
     phone?: boolean
     hobbies?: boolean
     others?: boolean
+    apply_job?: boolean
+    career_goal?: boolean
+    users_id?: boolean
   }
 
-  export type cvsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullname" | "age" | "gender" | "address" | "email" | "introduction" | "soft_skills" | "primary_skills" | "phone" | "hobbies" | "others", ExtArgs["result"]["cvs"]>
+  export type cvsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullname" | "age" | "gender" | "address" | "email" | "introduction" | "soft_skills" | "primary_skills" | "phone" | "hobbies" | "others" | "apply_job" | "career_goal" | "users_id", ExtArgs["result"]["cvs"]>
   export type cvsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applicants?: boolean | cvs$applicantsArgs<ExtArgs>
     awards?: boolean | cvs$awardsArgs<ExtArgs>
@@ -18814,10 +18799,16 @@ export namespace Prisma {
     experiences?: boolean | cvs$experiencesArgs<ExtArgs>
     projects?: boolean | cvs$projectsArgs<ExtArgs>
     references?: boolean | cvs$referencesArgs<ExtArgs>
+    languages?: boolean | cvs$languagesArgs<ExtArgs>
+    users?: boolean | usersDefaultArgs<ExtArgs>
     _count?: boolean | CvsCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type cvsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type cvsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type cvsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+  export type cvsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
 
   export type $cvsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "cvs"
@@ -18829,6 +18820,8 @@ export namespace Prisma {
       experiences: Prisma.$experiencesPayload<ExtArgs>[]
       projects: Prisma.$projectsPayload<ExtArgs>[]
       references: Prisma.$referencesPayload<ExtArgs>[]
+      languages: Prisma.$languagesPayload<ExtArgs>[]
+      users: Prisma.$usersPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -18843,6 +18836,9 @@ export namespace Prisma {
       phone: string | null
       hobbies: string | null
       others: string | null
+      apply_job: string | null
+      career_goal: string | null
+      users_id: string
     }, ExtArgs["result"]["cvs"]>
     composites: {}
   }
@@ -19244,6 +19240,8 @@ export namespace Prisma {
     experiences<T extends cvs$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, cvs$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$experiencesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     projects<T extends cvs$projectsArgs<ExtArgs> = {}>(args?: Subset<T, cvs$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     references<T extends cvs$referencesArgs<ExtArgs> = {}>(args?: Subset<T, cvs$referencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$referencesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    languages<T extends cvs$languagesArgs<ExtArgs> = {}>(args?: Subset<T, cvs$languagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$languagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    users<T extends usersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, usersDefaultArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19285,6 +19283,9 @@ export namespace Prisma {
     readonly phone: FieldRef<"cvs", 'String'>
     readonly hobbies: FieldRef<"cvs", 'String'>
     readonly others: FieldRef<"cvs", 'String'>
+    readonly apply_job: FieldRef<"cvs", 'String'>
+    readonly career_goal: FieldRef<"cvs", 'String'>
+    readonly users_id: FieldRef<"cvs", 'String'>
   }
     
 
@@ -19534,6 +19535,10 @@ export namespace Prisma {
      */
     data: cvsCreateManyInput | cvsCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: cvsIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -19604,6 +19609,10 @@ export namespace Prisma {
      * Limit how many cvs to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: cvsIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -19841,6 +19850,30 @@ export namespace Prisma {
   }
 
   /**
+   * cvs.languages
+   */
+  export type cvs$languagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the languages
+     */
+    select?: languagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the languages
+     */
+    omit?: languagesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: languagesInclude<ExtArgs> | null
+    where?: languagesWhereInput
+    orderBy?: languagesOrderByWithRelationInput | languagesOrderByWithRelationInput[]
+    cursor?: languagesWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LanguagesScalarFieldEnum | LanguagesScalarFieldEnum[]
+  }
+
+  /**
    * cvs without action
    */
   export type cvsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20046,7 +20079,7 @@ export namespace Prisma {
 
   export type EducationsGroupByOutputType = {
     id: number
-    school: string
+    school: string | null
     graduated_type: string | null
     gpa: number | null
     start_date: Date | null
@@ -20134,7 +20167,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      school: string
+      school: string | null
       graduated_type: string | null
       gpa: number | null
       start_date: Date | null
@@ -44685,6 +44718,7 @@ export namespace Prisma {
     created_at?: boolean
     updated_at?: boolean
     role_id?: boolean
+    cvs?: boolean | users$cvsArgs<ExtArgs>
     blogs?: boolean | users$blogsArgs<ExtArgs>
     careerPaths?: boolean | users$careerPathsArgs<ExtArgs>
     companies?: boolean | users$companiesArgs<ExtArgs>
@@ -44696,6 +44730,7 @@ export namespace Prisma {
     savedJobs?: boolean | users$savedJobsArgs<ExtArgs>
     subscriptions?: boolean | users$subscriptionsArgs<ExtArgs>
     userActivitiesHistory?: boolean | users$userActivitiesHistoryArgs<ExtArgs>
+    reviews?: boolean | users$reviewsArgs<ExtArgs>
     userNotifications?: boolean | users$userNotificationsArgs<ExtArgs>
     roles?: boolean | rolesDefaultArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -44759,6 +44794,7 @@ export namespace Prisma {
 
   export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "avatar_url" | "email" | "phone" | "address_street" | "address_ward" | "address_city" | "address_country" | "gender" | "is_deleted" | "created_at" | "updated_at" | "role_id", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cvs?: boolean | users$cvsArgs<ExtArgs>
     blogs?: boolean | users$blogsArgs<ExtArgs>
     careerPaths?: boolean | users$careerPathsArgs<ExtArgs>
     companies?: boolean | users$companiesArgs<ExtArgs>
@@ -44770,6 +44806,7 @@ export namespace Prisma {
     savedJobs?: boolean | users$savedJobsArgs<ExtArgs>
     subscriptions?: boolean | users$subscriptionsArgs<ExtArgs>
     userActivitiesHistory?: boolean | users$userActivitiesHistoryArgs<ExtArgs>
+    reviews?: boolean | users$reviewsArgs<ExtArgs>
     userNotifications?: boolean | users$userNotificationsArgs<ExtArgs>
     roles?: boolean | rolesDefaultArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -44784,6 +44821,7 @@ export namespace Prisma {
   export type $usersPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "users"
     objects: {
+      cvs: Prisma.$cvsPayload<ExtArgs>[]
       blogs: Prisma.$blogsPayload<ExtArgs>[]
       careerPaths: Prisma.$careerPathsPayload<ExtArgs>[]
       companies: Prisma.$companiesPayload<ExtArgs> | null
@@ -44795,6 +44833,7 @@ export namespace Prisma {
       savedJobs: Prisma.$savedJobsPayload<ExtArgs>[]
       subscriptions: Prisma.$subscriptionsPayload<ExtArgs>[]
       userActivitiesHistory: Prisma.$userActivitiesHistoryPayload<ExtArgs>[]
+      reviews: Prisma.$reviewsPayload<ExtArgs>[]
       userNotifications: Prisma.$userNotificationsPayload<ExtArgs>[]
       roles: Prisma.$rolesPayload<ExtArgs>
     }
@@ -45208,6 +45247,7 @@ export namespace Prisma {
    */
   export interface Prisma__usersClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    cvs<T extends users$cvsArgs<ExtArgs> = {}>(args?: Subset<T, users$cvsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cvsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     blogs<T extends users$blogsArgs<ExtArgs> = {}>(args?: Subset<T, users$blogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$blogsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     careerPaths<T extends users$careerPathsArgs<ExtArgs> = {}>(args?: Subset<T, users$careerPathsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$careerPathsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     companies<T extends users$companiesArgs<ExtArgs> = {}>(args?: Subset<T, users$companiesArgs<ExtArgs>>): Prisma__companiesClient<$Result.GetResult<Prisma.$companiesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -45219,6 +45259,7 @@ export namespace Prisma {
     savedJobs<T extends users$savedJobsArgs<ExtArgs> = {}>(args?: Subset<T, users$savedJobsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$savedJobsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends users$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, users$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$subscriptionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     userActivitiesHistory<T extends users$userActivitiesHistoryArgs<ExtArgs> = {}>(args?: Subset<T, users$userActivitiesHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userActivitiesHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    reviews<T extends users$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, users$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     userNotifications<T extends users$userNotificationsArgs<ExtArgs> = {}>(args?: Subset<T, users$userNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userNotificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     roles<T extends rolesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, rolesDefaultArgs<ExtArgs>>): Prisma__rolesClient<$Result.GetResult<Prisma.$rolesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -45661,6 +45702,30 @@ export namespace Prisma {
   }
 
   /**
+   * users.cvs
+   */
+  export type users$cvsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the cvs
+     */
+    select?: cvsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the cvs
+     */
+    omit?: cvsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: cvsInclude<ExtArgs> | null
+    where?: cvsWhereInput
+    orderBy?: cvsOrderByWithRelationInput | cvsOrderByWithRelationInput[]
+    cursor?: cvsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CvsScalarFieldEnum | CvsScalarFieldEnum[]
+  }
+
+  /**
    * users.blogs
    */
   export type users$blogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -45920,6 +45985,30 @@ export namespace Prisma {
   }
 
   /**
+   * users.reviews
+   */
+  export type users$reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the reviews
+     */
+    select?: reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the reviews
+     */
+    omit?: reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: reviewsInclude<ExtArgs> | null
+    where?: reviewsWhereInput
+    orderBy?: reviewsOrderByWithRelationInput | reviewsOrderByWithRelationInput[]
+    cursor?: reviewsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ReviewsScalarFieldEnum | ReviewsScalarFieldEnum[]
+  }
+
+  /**
    * users.userNotifications
    */
   export type users$userNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -46010,6 +46099,17 @@ export namespace Prisma {
   export type AwardsScalarFieldEnum = (typeof AwardsScalarFieldEnum)[keyof typeof AwardsScalarFieldEnum]
 
 
+  export const LanguagesScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    certificate: 'certificate',
+    level: 'level',
+    cv_id: 'cv_id'
+  };
+
+  export type LanguagesScalarFieldEnum = (typeof LanguagesScalarFieldEnum)[keyof typeof LanguagesScalarFieldEnum]
+
+
   export const BlogsScalarFieldEnum: {
     id: 'id',
     title: 'title',
@@ -46046,6 +46146,18 @@ export namespace Prisma {
   };
 
   export type CareerPathsScalarFieldEnum = (typeof CareerPathsScalarFieldEnum)[keyof typeof CareerPathsScalarFieldEnum]
+
+
+  export const ReviewsScalarFieldEnum: {
+    id: 'id',
+    content: 'content',
+    stars: 'stars',
+    created_at: 'created_at',
+    updated_at: 'updated_at',
+    user_id: 'user_id'
+  };
+
+  export type ReviewsScalarFieldEnum = (typeof ReviewsScalarFieldEnum)[keyof typeof ReviewsScalarFieldEnum]
 
 
   export const CategoriesScalarFieldEnum: {
@@ -46097,36 +46209,12 @@ export namespace Prisma {
   export type CompaniesScalarFieldEnum = (typeof CompaniesScalarFieldEnum)[keyof typeof CompaniesScalarFieldEnum]
 
 
-  export const CompanyActivitiesHistoryScalarFieldEnum: {
-    id: 'id',
-    activity_name: 'activity_name',
-    time: 'time',
-    company_id: 'company_id'
-  };
-
-  export type CompanyActivitiesHistoryScalarFieldEnum = (typeof CompanyActivitiesHistoryScalarFieldEnum)[keyof typeof CompanyActivitiesHistoryScalarFieldEnum]
-
-
   export const CompanyLabelsScalarFieldEnum: {
     id: 'id',
     label_name: 'label_name'
   };
 
   export type CompanyLabelsScalarFieldEnum = (typeof CompanyLabelsScalarFieldEnum)[keyof typeof CompanyLabelsScalarFieldEnum]
-
-
-  export const CompanyNotificationsScalarFieldEnum: {
-    id: 'id',
-    company_id: 'company_id',
-    title: 'title',
-    content: 'content',
-    type: 'type',
-    is_read: 'is_read',
-    sent_at: 'sent_at',
-    read_at: 'read_at'
-  };
-
-  export type CompanyNotificationsScalarFieldEnum = (typeof CompanyNotificationsScalarFieldEnum)[keyof typeof CompanyNotificationsScalarFieldEnum]
 
 
   export const CvsScalarFieldEnum: {
@@ -46141,7 +46229,10 @@ export namespace Prisma {
     primary_skills: 'primary_skills',
     phone: 'phone',
     hobbies: 'hobbies',
-    others: 'others'
+    others: 'others',
+    apply_job: 'apply_job',
+    career_goal: 'career_goal',
+    users_id: 'users_id'
   };
 
   export type CvsScalarFieldEnum = (typeof CvsScalarFieldEnum)[keyof typeof CvsScalarFieldEnum]
@@ -46511,6 +46602,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Company_Type'
    */
   export type EnumCompany_TypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Company_Type'>
@@ -46528,34 +46633,6 @@ export namespace Prisma {
    * Reference to a field of type 'Boolean'
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
-   * Reference to a field of type 'NotificationsType'
-   */
-  export type EnumNotificationsTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationsType'>
-    
-
-
-  /**
-   * Reference to a field of type 'NotificationsType[]'
-   */
-  export type ListEnumNotificationsTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationsType[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -46668,6 +46745,20 @@ export namespace Prisma {
    * Reference to a field of type 'SubscriptionStatus[]'
    */
   export type ListEnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'NotificationsType'
+   */
+  export type EnumNotificationsTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationsType'>
+    
+
+
+  /**
+   * Reference to a field of type 'NotificationsType[]'
+   */
+  export type ListEnumNotificationsTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationsType[]'>
     
 
 
@@ -46869,6 +46960,63 @@ export namespace Prisma {
     start_date?: DateTimeNullableWithAggregatesFilter<"awards"> | Date | string | null
     end_date?: DateTimeNullableWithAggregatesFilter<"awards"> | Date | string | null
     cv_id?: IntWithAggregatesFilter<"awards"> | number
+  }
+
+  export type languagesWhereInput = {
+    AND?: languagesWhereInput | languagesWhereInput[]
+    OR?: languagesWhereInput[]
+    NOT?: languagesWhereInput | languagesWhereInput[]
+    id?: IntFilter<"languages"> | number
+    name?: StringFilter<"languages"> | string
+    certificate?: StringNullableFilter<"languages"> | string | null
+    level?: StringNullableFilter<"languages"> | string | null
+    cv_id?: IntFilter<"languages"> | number
+    cvs?: XOR<CvsScalarRelationFilter, cvsWhereInput>
+  }
+
+  export type languagesOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    certificate?: SortOrderInput | SortOrder
+    level?: SortOrderInput | SortOrder
+    cv_id?: SortOrder
+    cvs?: cvsOrderByWithRelationInput
+  }
+
+  export type languagesWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: languagesWhereInput | languagesWhereInput[]
+    OR?: languagesWhereInput[]
+    NOT?: languagesWhereInput | languagesWhereInput[]
+    name?: StringFilter<"languages"> | string
+    certificate?: StringNullableFilter<"languages"> | string | null
+    level?: StringNullableFilter<"languages"> | string | null
+    cv_id?: IntFilter<"languages"> | number
+    cvs?: XOR<CvsScalarRelationFilter, cvsWhereInput>
+  }, "id">
+
+  export type languagesOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    certificate?: SortOrderInput | SortOrder
+    level?: SortOrderInput | SortOrder
+    cv_id?: SortOrder
+    _count?: languagesCountOrderByAggregateInput
+    _avg?: languagesAvgOrderByAggregateInput
+    _max?: languagesMaxOrderByAggregateInput
+    _min?: languagesMinOrderByAggregateInput
+    _sum?: languagesSumOrderByAggregateInput
+  }
+
+  export type languagesScalarWhereWithAggregatesInput = {
+    AND?: languagesScalarWhereWithAggregatesInput | languagesScalarWhereWithAggregatesInput[]
+    OR?: languagesScalarWhereWithAggregatesInput[]
+    NOT?: languagesScalarWhereWithAggregatesInput | languagesScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"languages"> | number
+    name?: StringWithAggregatesFilter<"languages"> | string
+    certificate?: StringNullableWithAggregatesFilter<"languages"> | string | null
+    level?: StringNullableWithAggregatesFilter<"languages"> | string | null
+    cv_id?: IntWithAggregatesFilter<"languages"> | number
   }
 
   export type blogsWhereInput = {
@@ -47073,6 +47221,68 @@ export namespace Prisma {
     jobspecialized_id?: IntWithAggregatesFilter<"careerPaths"> | number
   }
 
+  export type reviewsWhereInput = {
+    AND?: reviewsWhereInput | reviewsWhereInput[]
+    OR?: reviewsWhereInput[]
+    NOT?: reviewsWhereInput | reviewsWhereInput[]
+    id?: IntFilter<"reviews"> | number
+    content?: StringFilter<"reviews"> | string
+    stars?: FloatFilter<"reviews"> | number
+    created_at?: DateTimeFilter<"reviews"> | Date | string
+    updated_at?: DateTimeFilter<"reviews"> | Date | string
+    user_id?: StringFilter<"reviews"> | string
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+  }
+
+  export type reviewsOrderByWithRelationInput = {
+    id?: SortOrder
+    content?: SortOrder
+    stars?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    user_id?: SortOrder
+    users?: usersOrderByWithRelationInput
+  }
+
+  export type reviewsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: reviewsWhereInput | reviewsWhereInput[]
+    OR?: reviewsWhereInput[]
+    NOT?: reviewsWhereInput | reviewsWhereInput[]
+    content?: StringFilter<"reviews"> | string
+    stars?: FloatFilter<"reviews"> | number
+    created_at?: DateTimeFilter<"reviews"> | Date | string
+    updated_at?: DateTimeFilter<"reviews"> | Date | string
+    user_id?: StringFilter<"reviews"> | string
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+  }, "id">
+
+  export type reviewsOrderByWithAggregationInput = {
+    id?: SortOrder
+    content?: SortOrder
+    stars?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    user_id?: SortOrder
+    _count?: reviewsCountOrderByAggregateInput
+    _avg?: reviewsAvgOrderByAggregateInput
+    _max?: reviewsMaxOrderByAggregateInput
+    _min?: reviewsMinOrderByAggregateInput
+    _sum?: reviewsSumOrderByAggregateInput
+  }
+
+  export type reviewsScalarWhereWithAggregatesInput = {
+    AND?: reviewsScalarWhereWithAggregatesInput | reviewsScalarWhereWithAggregatesInput[]
+    OR?: reviewsScalarWhereWithAggregatesInput[]
+    NOT?: reviewsScalarWhereWithAggregatesInput | reviewsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"reviews"> | number
+    content?: StringWithAggregatesFilter<"reviews"> | string
+    stars?: FloatWithAggregatesFilter<"reviews"> | number
+    created_at?: DateTimeWithAggregatesFilter<"reviews"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"reviews"> | Date | string
+    user_id?: StringWithAggregatesFilter<"reviews"> | string
+  }
+
   export type categoriesWhereInput = {
     AND?: categoriesWhereInput | categoriesWhereInput[]
     OR?: categoriesWhereInput[]
@@ -47120,7 +47330,7 @@ export namespace Prisma {
     OR?: certificatesWhereInput[]
     NOT?: certificatesWhereInput | certificatesWhereInput[]
     id?: IntFilter<"certificates"> | number
-    title?: StringFilter<"certificates"> | string
+    title?: StringNullableFilter<"certificates"> | string | null
     link?: StringNullableFilter<"certificates"> | string | null
     description?: StringNullableFilter<"certificates"> | string | null
     start_date?: DateTimeNullableFilter<"certificates"> | Date | string | null
@@ -47131,7 +47341,7 @@ export namespace Prisma {
 
   export type certificatesOrderByWithRelationInput = {
     id?: SortOrder
-    title?: SortOrder
+    title?: SortOrderInput | SortOrder
     link?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     start_date?: SortOrderInput | SortOrder
@@ -47145,7 +47355,7 @@ export namespace Prisma {
     AND?: certificatesWhereInput | certificatesWhereInput[]
     OR?: certificatesWhereInput[]
     NOT?: certificatesWhereInput | certificatesWhereInput[]
-    title?: StringFilter<"certificates"> | string
+    title?: StringNullableFilter<"certificates"> | string | null
     link?: StringNullableFilter<"certificates"> | string | null
     description?: StringNullableFilter<"certificates"> | string | null
     start_date?: DateTimeNullableFilter<"certificates"> | Date | string | null
@@ -47156,7 +47366,7 @@ export namespace Prisma {
 
   export type certificatesOrderByWithAggregationInput = {
     id?: SortOrder
-    title?: SortOrder
+    title?: SortOrderInput | SortOrder
     link?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     start_date?: SortOrderInput | SortOrder
@@ -47174,7 +47384,7 @@ export namespace Prisma {
     OR?: certificatesScalarWhereWithAggregatesInput[]
     NOT?: certificatesScalarWhereWithAggregatesInput | certificatesScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"certificates"> | number
-    title?: StringWithAggregatesFilter<"certificates"> | string
+    title?: StringNullableWithAggregatesFilter<"certificates"> | string | null
     link?: StringNullableWithAggregatesFilter<"certificates"> | string | null
     description?: StringNullableWithAggregatesFilter<"certificates"> | string | null
     start_date?: DateTimeNullableWithAggregatesFilter<"certificates"> | Date | string | null
@@ -47211,8 +47421,6 @@ export namespace Prisma {
     fields?: XOR<FieldsNullableScalarRelationFilter, fieldsWhereInput> | null
     users?: XOR<UsersScalarRelationFilter, usersWhereInput>
     companyLabels?: XOR<CompanyLabelsNullableScalarRelationFilter, companyLabelsWhereInput> | null
-    companyActivitiesHistory?: CompanyActivitiesHistoryListRelationFilter
-    companyNotifications?: CompanyNotificationsListRelationFilter
     feedbacks?: FeedbacksListRelationFilter
     followedCompanies?: FollowedCompaniesListRelationFilter
   }
@@ -47243,8 +47451,6 @@ export namespace Prisma {
     fields?: fieldsOrderByWithRelationInput
     users?: usersOrderByWithRelationInput
     companyLabels?: companyLabelsOrderByWithRelationInput
-    companyActivitiesHistory?: companyActivitiesHistoryOrderByRelationAggregateInput
-    companyNotifications?: companyNotificationsOrderByRelationAggregateInput
     feedbacks?: feedbacksOrderByRelationAggregateInput
     followedCompanies?: followedCompaniesOrderByRelationAggregateInput
   }
@@ -47278,8 +47484,6 @@ export namespace Prisma {
     fields?: XOR<FieldsNullableScalarRelationFilter, fieldsWhereInput> | null
     users?: XOR<UsersScalarRelationFilter, usersWhereInput>
     companyLabels?: XOR<CompanyLabelsNullableScalarRelationFilter, companyLabelsWhereInput> | null
-    companyActivitiesHistory?: CompanyActivitiesHistoryListRelationFilter
-    companyNotifications?: CompanyNotificationsListRelationFilter
     feedbacks?: FeedbacksListRelationFilter
     followedCompanies?: FollowedCompaniesListRelationFilter
   }, "id" | "company_name" | "email" | "phone">
@@ -47342,59 +47546,6 @@ export namespace Prisma {
     label_id?: IntNullableWithAggregatesFilter<"companies"> | number | null
   }
 
-  export type companyActivitiesHistoryWhereInput = {
-    AND?: companyActivitiesHistoryWhereInput | companyActivitiesHistoryWhereInput[]
-    OR?: companyActivitiesHistoryWhereInput[]
-    NOT?: companyActivitiesHistoryWhereInput | companyActivitiesHistoryWhereInput[]
-    id?: IntFilter<"companyActivitiesHistory"> | number
-    activity_name?: StringFilter<"companyActivitiesHistory"> | string
-    time?: DateTimeFilter<"companyActivitiesHistory"> | Date | string
-    company_id?: StringFilter<"companyActivitiesHistory"> | string
-    companies?: XOR<CompaniesScalarRelationFilter, companiesWhereInput>
-  }
-
-  export type companyActivitiesHistoryOrderByWithRelationInput = {
-    id?: SortOrder
-    activity_name?: SortOrder
-    time?: SortOrder
-    company_id?: SortOrder
-    companies?: companiesOrderByWithRelationInput
-  }
-
-  export type companyActivitiesHistoryWhereUniqueInput = Prisma.AtLeast<{
-    id_company_id?: companyActivitiesHistoryIdCompany_idCompoundUniqueInput
-    AND?: companyActivitiesHistoryWhereInput | companyActivitiesHistoryWhereInput[]
-    OR?: companyActivitiesHistoryWhereInput[]
-    NOT?: companyActivitiesHistoryWhereInput | companyActivitiesHistoryWhereInput[]
-    id?: IntFilter<"companyActivitiesHistory"> | number
-    activity_name?: StringFilter<"companyActivitiesHistory"> | string
-    time?: DateTimeFilter<"companyActivitiesHistory"> | Date | string
-    company_id?: StringFilter<"companyActivitiesHistory"> | string
-    companies?: XOR<CompaniesScalarRelationFilter, companiesWhereInput>
-  }, "id_company_id">
-
-  export type companyActivitiesHistoryOrderByWithAggregationInput = {
-    id?: SortOrder
-    activity_name?: SortOrder
-    time?: SortOrder
-    company_id?: SortOrder
-    _count?: companyActivitiesHistoryCountOrderByAggregateInput
-    _avg?: companyActivitiesHistoryAvgOrderByAggregateInput
-    _max?: companyActivitiesHistoryMaxOrderByAggregateInput
-    _min?: companyActivitiesHistoryMinOrderByAggregateInput
-    _sum?: companyActivitiesHistorySumOrderByAggregateInput
-  }
-
-  export type companyActivitiesHistoryScalarWhereWithAggregatesInput = {
-    AND?: companyActivitiesHistoryScalarWhereWithAggregatesInput | companyActivitiesHistoryScalarWhereWithAggregatesInput[]
-    OR?: companyActivitiesHistoryScalarWhereWithAggregatesInput[]
-    NOT?: companyActivitiesHistoryScalarWhereWithAggregatesInput | companyActivitiesHistoryScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"companyActivitiesHistory"> | number
-    activity_name?: StringWithAggregatesFilter<"companyActivitiesHistory"> | string
-    time?: DateTimeWithAggregatesFilter<"companyActivitiesHistory"> | Date | string
-    company_id?: StringWithAggregatesFilter<"companyActivitiesHistory"> | string
-  }
-
   export type companyLabelsWhereInput = {
     AND?: companyLabelsWhereInput | companyLabelsWhereInput[]
     OR?: companyLabelsWhereInput[]
@@ -47437,79 +47588,6 @@ export namespace Prisma {
     label_name?: StringWithAggregatesFilter<"companyLabels"> | string
   }
 
-  export type companyNotificationsWhereInput = {
-    AND?: companyNotificationsWhereInput | companyNotificationsWhereInput[]
-    OR?: companyNotificationsWhereInput[]
-    NOT?: companyNotificationsWhereInput | companyNotificationsWhereInput[]
-    id?: IntFilter<"companyNotifications"> | number
-    company_id?: StringFilter<"companyNotifications"> | string
-    title?: StringFilter<"companyNotifications"> | string
-    content?: StringNullableFilter<"companyNotifications"> | string | null
-    type?: EnumNotificationsTypeFilter<"companyNotifications"> | $Enums.NotificationsType
-    is_read?: BoolFilter<"companyNotifications"> | boolean
-    sent_at?: DateTimeFilter<"companyNotifications"> | Date | string
-    read_at?: DateTimeNullableFilter<"companyNotifications"> | Date | string | null
-    companies?: XOR<CompaniesScalarRelationFilter, companiesWhereInput>
-  }
-
-  export type companyNotificationsOrderByWithRelationInput = {
-    id?: SortOrder
-    company_id?: SortOrder
-    title?: SortOrder
-    content?: SortOrderInput | SortOrder
-    type?: SortOrder
-    is_read?: SortOrder
-    sent_at?: SortOrder
-    read_at?: SortOrderInput | SortOrder
-    companies?: companiesOrderByWithRelationInput
-  }
-
-  export type companyNotificationsWhereUniqueInput = Prisma.AtLeast<{
-    id_company_id?: companyNotificationsIdCompany_idCompoundUniqueInput
-    AND?: companyNotificationsWhereInput | companyNotificationsWhereInput[]
-    OR?: companyNotificationsWhereInput[]
-    NOT?: companyNotificationsWhereInput | companyNotificationsWhereInput[]
-    id?: IntFilter<"companyNotifications"> | number
-    company_id?: StringFilter<"companyNotifications"> | string
-    title?: StringFilter<"companyNotifications"> | string
-    content?: StringNullableFilter<"companyNotifications"> | string | null
-    type?: EnumNotificationsTypeFilter<"companyNotifications"> | $Enums.NotificationsType
-    is_read?: BoolFilter<"companyNotifications"> | boolean
-    sent_at?: DateTimeFilter<"companyNotifications"> | Date | string
-    read_at?: DateTimeNullableFilter<"companyNotifications"> | Date | string | null
-    companies?: XOR<CompaniesScalarRelationFilter, companiesWhereInput>
-  }, "id_company_id">
-
-  export type companyNotificationsOrderByWithAggregationInput = {
-    id?: SortOrder
-    company_id?: SortOrder
-    title?: SortOrder
-    content?: SortOrderInput | SortOrder
-    type?: SortOrder
-    is_read?: SortOrder
-    sent_at?: SortOrder
-    read_at?: SortOrderInput | SortOrder
-    _count?: companyNotificationsCountOrderByAggregateInput
-    _avg?: companyNotificationsAvgOrderByAggregateInput
-    _max?: companyNotificationsMaxOrderByAggregateInput
-    _min?: companyNotificationsMinOrderByAggregateInput
-    _sum?: companyNotificationsSumOrderByAggregateInput
-  }
-
-  export type companyNotificationsScalarWhereWithAggregatesInput = {
-    AND?: companyNotificationsScalarWhereWithAggregatesInput | companyNotificationsScalarWhereWithAggregatesInput[]
-    OR?: companyNotificationsScalarWhereWithAggregatesInput[]
-    NOT?: companyNotificationsScalarWhereWithAggregatesInput | companyNotificationsScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"companyNotifications"> | number
-    company_id?: StringWithAggregatesFilter<"companyNotifications"> | string
-    title?: StringWithAggregatesFilter<"companyNotifications"> | string
-    content?: StringNullableWithAggregatesFilter<"companyNotifications"> | string | null
-    type?: EnumNotificationsTypeWithAggregatesFilter<"companyNotifications"> | $Enums.NotificationsType
-    is_read?: BoolWithAggregatesFilter<"companyNotifications"> | boolean
-    sent_at?: DateTimeWithAggregatesFilter<"companyNotifications"> | Date | string
-    read_at?: DateTimeNullableWithAggregatesFilter<"companyNotifications"> | Date | string | null
-  }
-
   export type cvsWhereInput = {
     AND?: cvsWhereInput | cvsWhereInput[]
     OR?: cvsWhereInput[]
@@ -47526,6 +47604,9 @@ export namespace Prisma {
     phone?: StringNullableFilter<"cvs"> | string | null
     hobbies?: StringNullableFilter<"cvs"> | string | null
     others?: StringNullableFilter<"cvs"> | string | null
+    apply_job?: StringNullableFilter<"cvs"> | string | null
+    career_goal?: StringNullableFilter<"cvs"> | string | null
+    users_id?: StringFilter<"cvs"> | string
     applicants?: ApplicantsListRelationFilter
     awards?: AwardsListRelationFilter
     certificates?: CertificatesListRelationFilter
@@ -47533,6 +47614,8 @@ export namespace Prisma {
     experiences?: ExperiencesListRelationFilter
     projects?: ProjectsListRelationFilter
     references?: ReferencesListRelationFilter
+    languages?: LanguagesListRelationFilter
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
   }
 
   export type cvsOrderByWithRelationInput = {
@@ -47548,6 +47631,9 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     hobbies?: SortOrderInput | SortOrder
     others?: SortOrderInput | SortOrder
+    apply_job?: SortOrderInput | SortOrder
+    career_goal?: SortOrderInput | SortOrder
+    users_id?: SortOrder
     applicants?: applicantsOrderByRelationAggregateInput
     awards?: awardsOrderByRelationAggregateInput
     certificates?: certificatesOrderByRelationAggregateInput
@@ -47555,6 +47641,8 @@ export namespace Prisma {
     experiences?: experiencesOrderByRelationAggregateInput
     projects?: projectsOrderByRelationAggregateInput
     references?: referencesOrderByRelationAggregateInput
+    languages?: languagesOrderByRelationAggregateInput
+    users?: usersOrderByWithRelationInput
   }
 
   export type cvsWhereUniqueInput = Prisma.AtLeast<{
@@ -47573,6 +47661,9 @@ export namespace Prisma {
     phone?: StringNullableFilter<"cvs"> | string | null
     hobbies?: StringNullableFilter<"cvs"> | string | null
     others?: StringNullableFilter<"cvs"> | string | null
+    apply_job?: StringNullableFilter<"cvs"> | string | null
+    career_goal?: StringNullableFilter<"cvs"> | string | null
+    users_id?: StringFilter<"cvs"> | string
     applicants?: ApplicantsListRelationFilter
     awards?: AwardsListRelationFilter
     certificates?: CertificatesListRelationFilter
@@ -47580,6 +47671,8 @@ export namespace Prisma {
     experiences?: ExperiencesListRelationFilter
     projects?: ProjectsListRelationFilter
     references?: ReferencesListRelationFilter
+    languages?: LanguagesListRelationFilter
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
   }, "id">
 
   export type cvsOrderByWithAggregationInput = {
@@ -47595,6 +47688,9 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     hobbies?: SortOrderInput | SortOrder
     others?: SortOrderInput | SortOrder
+    apply_job?: SortOrderInput | SortOrder
+    career_goal?: SortOrderInput | SortOrder
+    users_id?: SortOrder
     _count?: cvsCountOrderByAggregateInput
     _avg?: cvsAvgOrderByAggregateInput
     _max?: cvsMaxOrderByAggregateInput
@@ -47618,6 +47714,9 @@ export namespace Prisma {
     phone?: StringNullableWithAggregatesFilter<"cvs"> | string | null
     hobbies?: StringNullableWithAggregatesFilter<"cvs"> | string | null
     others?: StringNullableWithAggregatesFilter<"cvs"> | string | null
+    apply_job?: StringNullableWithAggregatesFilter<"cvs"> | string | null
+    career_goal?: StringNullableWithAggregatesFilter<"cvs"> | string | null
+    users_id?: StringWithAggregatesFilter<"cvs"> | string
   }
 
   export type educationsWhereInput = {
@@ -47625,7 +47724,7 @@ export namespace Prisma {
     OR?: educationsWhereInput[]
     NOT?: educationsWhereInput | educationsWhereInput[]
     id?: IntFilter<"educations"> | number
-    school?: StringFilter<"educations"> | string
+    school?: StringNullableFilter<"educations"> | string | null
     graduated_type?: StringNullableFilter<"educations"> | string | null
     gpa?: FloatNullableFilter<"educations"> | number | null
     start_date?: DateTimeNullableFilter<"educations"> | Date | string | null
@@ -47636,7 +47735,7 @@ export namespace Prisma {
 
   export type educationsOrderByWithRelationInput = {
     id?: SortOrder
-    school?: SortOrder
+    school?: SortOrderInput | SortOrder
     graduated_type?: SortOrderInput | SortOrder
     gpa?: SortOrderInput | SortOrder
     start_date?: SortOrderInput | SortOrder
@@ -47650,7 +47749,7 @@ export namespace Prisma {
     AND?: educationsWhereInput | educationsWhereInput[]
     OR?: educationsWhereInput[]
     NOT?: educationsWhereInput | educationsWhereInput[]
-    school?: StringFilter<"educations"> | string
+    school?: StringNullableFilter<"educations"> | string | null
     graduated_type?: StringNullableFilter<"educations"> | string | null
     gpa?: FloatNullableFilter<"educations"> | number | null
     start_date?: DateTimeNullableFilter<"educations"> | Date | string | null
@@ -47661,7 +47760,7 @@ export namespace Prisma {
 
   export type educationsOrderByWithAggregationInput = {
     id?: SortOrder
-    school?: SortOrder
+    school?: SortOrderInput | SortOrder
     graduated_type?: SortOrderInput | SortOrder
     gpa?: SortOrderInput | SortOrder
     start_date?: SortOrderInput | SortOrder
@@ -47679,7 +47778,7 @@ export namespace Prisma {
     OR?: educationsScalarWhereWithAggregatesInput[]
     NOT?: educationsScalarWhereWithAggregatesInput | educationsScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"educations"> | number
-    school?: StringWithAggregatesFilter<"educations"> | string
+    school?: StringNullableWithAggregatesFilter<"educations"> | string | null
     graduated_type?: StringNullableWithAggregatesFilter<"educations"> | string | null
     gpa?: FloatNullableWithAggregatesFilter<"educations"> | number | null
     start_date?: DateTimeNullableWithAggregatesFilter<"educations"> | Date | string | null
@@ -49013,6 +49112,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeFilter<"users"> | Date | string
     role_id?: IntFilter<"users"> | number
+    cvs?: CvsListRelationFilter
     blogs?: BlogsListRelationFilter
     careerPaths?: CareerPathsListRelationFilter
     companies?: XOR<CompaniesNullableScalarRelationFilter, companiesWhereInput> | null
@@ -49024,6 +49124,7 @@ export namespace Prisma {
     savedJobs?: SavedJobsListRelationFilter
     subscriptions?: SubscriptionsListRelationFilter
     userActivitiesHistory?: UserActivitiesHistoryListRelationFilter
+    reviews?: ReviewsListRelationFilter
     userNotifications?: UserNotificationsListRelationFilter
     roles?: XOR<RolesScalarRelationFilter, rolesWhereInput>
   }
@@ -49044,6 +49145,7 @@ export namespace Prisma {
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
+    cvs?: cvsOrderByRelationAggregateInput
     blogs?: blogsOrderByRelationAggregateInput
     careerPaths?: careerPathsOrderByRelationAggregateInput
     companies?: companiesOrderByWithRelationInput
@@ -49055,6 +49157,7 @@ export namespace Prisma {
     savedJobs?: savedJobsOrderByRelationAggregateInput
     subscriptions?: subscriptionsOrderByRelationAggregateInput
     userActivitiesHistory?: userActivitiesHistoryOrderByRelationAggregateInput
+    reviews?: reviewsOrderByRelationAggregateInput
     userNotifications?: userNotificationsOrderByRelationAggregateInput
     roles?: rolesOrderByWithRelationInput
   }
@@ -49078,6 +49181,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeFilter<"users"> | Date | string
     role_id?: IntFilter<"users"> | number
+    cvs?: CvsListRelationFilter
     blogs?: BlogsListRelationFilter
     careerPaths?: CareerPathsListRelationFilter
     companies?: XOR<CompaniesNullableScalarRelationFilter, companiesWhereInput> | null
@@ -49089,6 +49193,7 @@ export namespace Prisma {
     savedJobs?: SavedJobsListRelationFilter
     subscriptions?: SubscriptionsListRelationFilter
     userActivitiesHistory?: UserActivitiesHistoryListRelationFilter
+    reviews?: ReviewsListRelationFilter
     userNotifications?: UserNotificationsListRelationFilter
     roles?: XOR<RolesScalarRelationFilter, rolesWhereInput>
   }, "id" | "email" | "phone">
@@ -49306,6 +49411,58 @@ export namespace Prisma {
     cv_id?: IntFieldUpdateOperationsInput | number
   }
 
+  export type languagesCreateInput = {
+    name: string
+    certificate?: string | null
+    level?: string | null
+    cvs: cvsCreateNestedOneWithoutLanguagesInput
+  }
+
+  export type languagesUncheckedCreateInput = {
+    id?: number
+    name: string
+    certificate?: string | null
+    level?: string | null
+    cv_id: number
+  }
+
+  export type languagesUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+    cvs?: cvsUpdateOneRequiredWithoutLanguagesNestedInput
+  }
+
+  export type languagesUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+    cv_id?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type languagesCreateManyInput = {
+    id?: number
+    name: string
+    certificate?: string | null
+    level?: string | null
+    cv_id: number
+  }
+
+  export type languagesUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type languagesUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+    cv_id?: IntFieldUpdateOperationsInput | number
+  }
+
   export type blogsCreateInput = {
     title: string
     cover_image_url: string
@@ -49500,6 +49657,65 @@ export namespace Prisma {
     jobspecialized_id?: IntFieldUpdateOperationsInput | number
   }
 
+  export type reviewsCreateInput = {
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+    users: usersCreateNestedOneWithoutReviewsInput
+  }
+
+  export type reviewsUncheckedCreateInput = {
+    id?: number
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+    user_id: string
+  }
+
+  export type reviewsUpdateInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: usersUpdateOneRequiredWithoutReviewsNestedInput
+  }
+
+  export type reviewsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    user_id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type reviewsCreateManyInput = {
+    id?: number
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+    user_id: string
+  }
+
+  export type reviewsUpdateManyMutationInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type reviewsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    user_id?: StringFieldUpdateOperationsInput | string
+  }
+
   export type categoriesCreateInput = {
     category_name: string
     jobs?: jobsCreateNestedManyWithoutCategoriesInput
@@ -49537,7 +49753,7 @@ export namespace Prisma {
   }
 
   export type certificatesCreateInput = {
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -49547,7 +49763,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedCreateInput = {
     id?: number
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -49556,7 +49772,7 @@ export namespace Prisma {
   }
 
   export type certificatesUpdateInput = {
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49566,7 +49782,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49576,7 +49792,7 @@ export namespace Prisma {
 
   export type certificatesCreateManyInput = {
     id?: number
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -49585,7 +49801,7 @@ export namespace Prisma {
   }
 
   export type certificatesUpdateManyMutationInput = {
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49594,7 +49810,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49625,8 +49841,6 @@ export namespace Prisma {
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
   }
@@ -49654,8 +49868,6 @@ export namespace Prisma {
     updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
   }
@@ -49683,8 +49895,6 @@ export namespace Prisma {
     fields?: fieldsUpdateOneWithoutCompaniesNestedInput
     users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
     companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
   }
@@ -49712,8 +49922,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     field_id?: NullableIntFieldUpdateOperationsInput | number | null
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
   }
@@ -49790,54 +49998,6 @@ export namespace Prisma {
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
-  export type companyActivitiesHistoryCreateInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-    companies: companiesCreateNestedOneWithoutCompanyActivitiesHistoryInput
-  }
-
-  export type companyActivitiesHistoryUncheckedCreateInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-    company_id: string
-  }
-
-  export type companyActivitiesHistoryUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-    companies?: companiesUpdateOneRequiredWithoutCompanyActivitiesHistoryNestedInput
-  }
-
-  export type companyActivitiesHistoryUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-    company_id?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type companyActivitiesHistoryCreateManyInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-    company_id: string
-  }
-
-  export type companyActivitiesHistoryUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type companyActivitiesHistoryUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-    company_id?: StringFieldUpdateOperationsInput | string
-  }
-
   export type companyLabelsCreateInput = {
     label_name: string
     companies?: companiesCreateNestedManyWithoutCompanyLabelsInput
@@ -49874,82 +50034,6 @@ export namespace Prisma {
     label_name?: StringFieldUpdateOperationsInput | string
   }
 
-  export type companyNotificationsCreateInput = {
-    id?: number
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-    companies: companiesCreateNestedOneWithoutCompanyNotificationsInput
-  }
-
-  export type companyNotificationsUncheckedCreateInput = {
-    id?: number
-    company_id: string
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-  }
-
-  export type companyNotificationsUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    companies?: companiesUpdateOneRequiredWithoutCompanyNotificationsNestedInput
-  }
-
-  export type companyNotificationsUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    company_id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type companyNotificationsCreateManyInput = {
-    id?: number
-    company_id: string
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-  }
-
-  export type companyNotificationsUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type companyNotificationsUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    company_id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
   export type cvsCreateInput = {
     fullname: string
     age?: number | null
@@ -49962,6 +50046,8 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
@@ -49969,6 +50055,8 @@ export namespace Prisma {
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateInput = {
@@ -49984,6 +50072,9 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
@@ -49991,6 +50082,7 @@ export namespace Prisma {
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsUpdateInput = {
@@ -50005,6 +50097,8 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
@@ -50012,6 +50106,8 @@ export namespace Prisma {
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateInput = {
@@ -50027,6 +50123,9 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
@@ -50034,6 +50133,7 @@ export namespace Prisma {
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type cvsCreateManyInput = {
@@ -50049,6 +50149,9 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
   }
 
   export type cvsUpdateManyMutationInput = {
@@ -50063,6 +50166,8 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type cvsUncheckedUpdateManyInput = {
@@ -50078,10 +50183,13 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
   }
 
   export type educationsCreateInput = {
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -50091,7 +50199,7 @@ export namespace Prisma {
 
   export type educationsUncheckedCreateInput = {
     id?: number
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -50100,7 +50208,7 @@ export namespace Prisma {
   }
 
   export type educationsUpdateInput = {
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -50110,7 +50218,7 @@ export namespace Prisma {
 
   export type educationsUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -50120,7 +50228,7 @@ export namespace Prisma {
 
   export type educationsCreateManyInput = {
     id?: number
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -50129,7 +50237,7 @@ export namespace Prisma {
   }
 
   export type educationsUpdateManyMutationInput = {
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -50138,7 +50246,7 @@ export namespace Prisma {
 
   export type educationsUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -51421,6 +51529,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -51432,6 +51541,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -51452,6 +51562,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -51463,6 +51574,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -51481,6 +51593,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -51492,6 +51605,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -51512,6 +51626,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -51523,6 +51638,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -51877,6 +51993,40 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type languagesCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    certificate?: SortOrder
+    level?: SortOrder
+    cv_id?: SortOrder
+  }
+
+  export type languagesAvgOrderByAggregateInput = {
+    id?: SortOrder
+    cv_id?: SortOrder
+  }
+
+  export type languagesMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    certificate?: SortOrder
+    level?: SortOrder
+    cv_id?: SortOrder
+  }
+
+  export type languagesMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    certificate?: SortOrder
+    level?: SortOrder
+    cv_id?: SortOrder
+  }
+
+  export type languagesSumOrderByAggregateInput = {
+    id?: SortOrder
+    cv_id?: SortOrder
+  }
+
   export type UsersScalarRelationFilter = {
     is?: usersWhereInput
     isNot?: usersWhereInput
@@ -52017,6 +52167,70 @@ export namespace Prisma {
     jobspecialized_id?: SortOrder
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type reviewsCountOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    stars?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    user_id?: SortOrder
+  }
+
+  export type reviewsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    stars?: SortOrder
+  }
+
+  export type reviewsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    stars?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    user_id?: SortOrder
+  }
+
+  export type reviewsMinOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    stars?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    user_id?: SortOrder
+  }
+
+  export type reviewsSumOrderByAggregateInput = {
+    id?: SortOrder
+    stars?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type JobsListRelationFilter = {
     every?: jobsWhereInput
     some?: jobsWhereInput
@@ -52123,18 +52337,6 @@ export namespace Prisma {
     isNot?: companyLabelsWhereInput | null
   }
 
-  export type CompanyActivitiesHistoryListRelationFilter = {
-    every?: companyActivitiesHistoryWhereInput
-    some?: companyActivitiesHistoryWhereInput
-    none?: companyActivitiesHistoryWhereInput
-  }
-
-  export type CompanyNotificationsListRelationFilter = {
-    every?: companyNotificationsWhereInput
-    some?: companyNotificationsWhereInput
-    none?: companyNotificationsWhereInput
-  }
-
   export type FeedbacksListRelationFilter = {
     every?: feedbacksWhereInput
     some?: feedbacksWhereInput
@@ -52145,14 +52347,6 @@ export namespace Prisma {
     every?: followedCompaniesWhereInput
     some?: followedCompaniesWhereInput
     none?: followedCompaniesWhereInput
-  }
-
-  export type companyActivitiesHistoryOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type companyNotificationsOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type feedbacksOrderByRelationAggregateInput = {
@@ -52284,45 +52478,6 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type CompaniesScalarRelationFilter = {
-    is?: companiesWhereInput
-    isNot?: companiesWhereInput
-  }
-
-  export type companyActivitiesHistoryIdCompany_idCompoundUniqueInput = {
-    id: number
-    company_id: string
-  }
-
-  export type companyActivitiesHistoryCountOrderByAggregateInput = {
-    id?: SortOrder
-    activity_name?: SortOrder
-    time?: SortOrder
-    company_id?: SortOrder
-  }
-
-  export type companyActivitiesHistoryAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type companyActivitiesHistoryMaxOrderByAggregateInput = {
-    id?: SortOrder
-    activity_name?: SortOrder
-    time?: SortOrder
-    company_id?: SortOrder
-  }
-
-  export type companyActivitiesHistoryMinOrderByAggregateInput = {
-    id?: SortOrder
-    activity_name?: SortOrder
-    time?: SortOrder
-    company_id?: SortOrder
-  }
-
-  export type companyActivitiesHistorySumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
   export type CompaniesListRelationFilter = {
     every?: companiesWhereInput
     some?: companiesWhereInput
@@ -52354,69 +52509,6 @@ export namespace Prisma {
 
   export type companyLabelsSumOrderByAggregateInput = {
     id?: SortOrder
-  }
-
-  export type EnumNotificationsTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumNotificationsTypeFilter<$PrismaModel> | $Enums.NotificationsType
-  }
-
-  export type companyNotificationsIdCompany_idCompoundUniqueInput = {
-    id: number
-    company_id: string
-  }
-
-  export type companyNotificationsCountOrderByAggregateInput = {
-    id?: SortOrder
-    company_id?: SortOrder
-    title?: SortOrder
-    content?: SortOrder
-    type?: SortOrder
-    is_read?: SortOrder
-    sent_at?: SortOrder
-    read_at?: SortOrder
-  }
-
-  export type companyNotificationsAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type companyNotificationsMaxOrderByAggregateInput = {
-    id?: SortOrder
-    company_id?: SortOrder
-    title?: SortOrder
-    content?: SortOrder
-    type?: SortOrder
-    is_read?: SortOrder
-    sent_at?: SortOrder
-    read_at?: SortOrder
-  }
-
-  export type companyNotificationsMinOrderByAggregateInput = {
-    id?: SortOrder
-    company_id?: SortOrder
-    title?: SortOrder
-    content?: SortOrder
-    type?: SortOrder
-    is_read?: SortOrder
-    sent_at?: SortOrder
-    read_at?: SortOrder
-  }
-
-  export type companyNotificationsSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type EnumNotificationsTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationsType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumNotificationsTypeFilter<$PrismaModel>
-    _max?: NestedEnumNotificationsTypeFilter<$PrismaModel>
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -52469,6 +52561,12 @@ export namespace Prisma {
     none?: referencesWhereInput
   }
 
+  export type LanguagesListRelationFilter = {
+    every?: languagesWhereInput
+    some?: languagesWhereInput
+    none?: languagesWhereInput
+  }
+
   export type applicantsOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -52497,6 +52595,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type languagesOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type cvsCountOrderByAggregateInput = {
     id?: SortOrder
     fullname?: SortOrder
@@ -52510,6 +52612,9 @@ export namespace Prisma {
     phone?: SortOrder
     hobbies?: SortOrder
     others?: SortOrder
+    apply_job?: SortOrder
+    career_goal?: SortOrder
+    users_id?: SortOrder
   }
 
   export type cvsAvgOrderByAggregateInput = {
@@ -52528,6 +52633,9 @@ export namespace Prisma {
     phone?: SortOrder
     hobbies?: SortOrder
     others?: SortOrder
+    apply_job?: SortOrder
+    career_goal?: SortOrder
+    users_id?: SortOrder
   }
 
   export type cvsMinOrderByAggregateInput = {
@@ -52541,6 +52649,9 @@ export namespace Prisma {
     phone?: SortOrder
     hobbies?: SortOrder
     others?: SortOrder
+    apply_job?: SortOrder
+    career_goal?: SortOrder
+    users_id?: SortOrder
   }
 
   export type cvsSumOrderByAggregateInput = {
@@ -52693,15 +52804,9 @@ export namespace Prisma {
     plan_id?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
+  export type CompaniesScalarRelationFilter = {
+    is?: companiesWhereInput
+    isNot?: companiesWhereInput
   }
 
   export type feedbacksUser_idCompany_idCompoundUniqueInput = {
@@ -52745,22 +52850,6 @@ export namespace Prisma {
 
   export type feedbacksSumOrderByAggregateInput = {
     stars?: SortOrder
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type fieldsCountOrderByAggregateInput = {
@@ -53598,6 +53687,13 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type EnumNotificationsTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationsTypeFilter<$PrismaModel> | $Enums.NotificationsType
+  }
+
   export type userNotificationsIdUser_idCompoundUniqueInput = {
     id: number
     user_id: string
@@ -53644,11 +53740,27 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type EnumNotificationsTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationsType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNotificationsTypeFilter<$PrismaModel>
+    _max?: NestedEnumNotificationsTypeFilter<$PrismaModel>
+  }
+
   export type EnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     not?: NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
+  }
+
+  export type CvsListRelationFilter = {
+    every?: cvsWhereInput
+    some?: cvsWhereInput
+    none?: cvsWhereInput
   }
 
   export type BlogsListRelationFilter = {
@@ -53686,6 +53798,12 @@ export namespace Prisma {
     none?: userActivitiesHistoryWhereInput
   }
 
+  export type ReviewsListRelationFilter = {
+    every?: reviewsWhereInput
+    some?: reviewsWhereInput
+    none?: reviewsWhereInput
+  }
+
   export type UserNotificationsListRelationFilter = {
     every?: userNotificationsWhereInput
     some?: userNotificationsWhereInput
@@ -53695,6 +53813,10 @@ export namespace Prisma {
   export type RolesScalarRelationFilter = {
     is?: rolesWhereInput
     isNot?: rolesWhereInput
+  }
+
+  export type cvsOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type blogsOrderByRelationAggregateInput = {
@@ -53714,6 +53836,10 @@ export namespace Prisma {
   }
 
   export type userActivitiesHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type reviewsOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -53919,6 +54045,20 @@ export namespace Prisma {
     update?: XOR<XOR<cvsUpdateToOneWithWhereWithoutAwardsInput, cvsUpdateWithoutAwardsInput>, cvsUncheckedUpdateWithoutAwardsInput>
   }
 
+  export type cvsCreateNestedOneWithoutLanguagesInput = {
+    create?: XOR<cvsCreateWithoutLanguagesInput, cvsUncheckedCreateWithoutLanguagesInput>
+    connectOrCreate?: cvsCreateOrConnectWithoutLanguagesInput
+    connect?: cvsWhereUniqueInput
+  }
+
+  export type cvsUpdateOneRequiredWithoutLanguagesNestedInput = {
+    create?: XOR<cvsCreateWithoutLanguagesInput, cvsUncheckedCreateWithoutLanguagesInput>
+    connectOrCreate?: cvsCreateOrConnectWithoutLanguagesInput
+    upsert?: cvsUpsertWithoutLanguagesInput
+    connect?: cvsWhereUniqueInput
+    update?: XOR<XOR<cvsUpdateToOneWithWhereWithoutLanguagesInput, cvsUpdateWithoutLanguagesInput>, cvsUncheckedUpdateWithoutLanguagesInput>
+  }
+
   export type usersCreateNestedOneWithoutBlogsInput = {
     create?: XOR<usersCreateWithoutBlogsInput, usersUncheckedCreateWithoutBlogsInput>
     connectOrCreate?: usersCreateOrConnectWithoutBlogsInput
@@ -54017,6 +54157,28 @@ export namespace Prisma {
     deleteMany?: careerPathStepsScalarWhereInput | careerPathStepsScalarWhereInput[]
   }
 
+  export type usersCreateNestedOneWithoutReviewsInput = {
+    create?: XOR<usersCreateWithoutReviewsInput, usersUncheckedCreateWithoutReviewsInput>
+    connectOrCreate?: usersCreateOrConnectWithoutReviewsInput
+    connect?: usersWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type usersUpdateOneRequiredWithoutReviewsNestedInput = {
+    create?: XOR<usersCreateWithoutReviewsInput, usersUncheckedCreateWithoutReviewsInput>
+    connectOrCreate?: usersCreateOrConnectWithoutReviewsInput
+    upsert?: usersUpsertWithoutReviewsInput
+    connect?: usersWhereUniqueInput
+    update?: XOR<XOR<usersUpdateToOneWithWhereWithoutReviewsInput, usersUpdateWithoutReviewsInput>, usersUncheckedUpdateWithoutReviewsInput>
+  }
+
   export type jobsCreateNestedManyWithoutCategoriesInput = {
     create?: XOR<jobsCreateWithoutCategoriesInput, jobsUncheckedCreateWithoutCategoriesInput> | jobsCreateWithoutCategoriesInput[] | jobsUncheckedCreateWithoutCategoriesInput[]
     connectOrCreate?: jobsCreateOrConnectWithoutCategoriesInput | jobsCreateOrConnectWithoutCategoriesInput[]
@@ -54091,20 +54253,6 @@ export namespace Prisma {
     connect?: companyLabelsWhereUniqueInput
   }
 
-  export type companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput = {
-    create?: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput> | companyActivitiesHistoryCreateWithoutCompaniesInput[] | companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput | companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput[]
-    createMany?: companyActivitiesHistoryCreateManyCompaniesInputEnvelope
-    connect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-  }
-
-  export type companyNotificationsCreateNestedManyWithoutCompaniesInput = {
-    create?: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput> | companyNotificationsCreateWithoutCompaniesInput[] | companyNotificationsUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyNotificationsCreateOrConnectWithoutCompaniesInput | companyNotificationsCreateOrConnectWithoutCompaniesInput[]
-    createMany?: companyNotificationsCreateManyCompaniesInputEnvelope
-    connect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-  }
-
   export type feedbacksCreateNestedManyWithoutCompaniesInput = {
     create?: XOR<feedbacksCreateWithoutCompaniesInput, feedbacksUncheckedCreateWithoutCompaniesInput> | feedbacksCreateWithoutCompaniesInput[] | feedbacksUncheckedCreateWithoutCompaniesInput[]
     connectOrCreate?: feedbacksCreateOrConnectWithoutCompaniesInput | feedbacksCreateOrConnectWithoutCompaniesInput[]
@@ -54117,20 +54265,6 @@ export namespace Prisma {
     connectOrCreate?: followedCompaniesCreateOrConnectWithoutCompaniesInput | followedCompaniesCreateOrConnectWithoutCompaniesInput[]
     createMany?: followedCompaniesCreateManyCompaniesInputEnvelope
     connect?: followedCompaniesWhereUniqueInput | followedCompaniesWhereUniqueInput[]
-  }
-
-  export type companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput = {
-    create?: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput> | companyActivitiesHistoryCreateWithoutCompaniesInput[] | companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput | companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput[]
-    createMany?: companyActivitiesHistoryCreateManyCompaniesInputEnvelope
-    connect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-  }
-
-  export type companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput = {
-    create?: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput> | companyNotificationsCreateWithoutCompaniesInput[] | companyNotificationsUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyNotificationsCreateOrConnectWithoutCompaniesInput | companyNotificationsCreateOrConnectWithoutCompaniesInput[]
-    createMany?: companyNotificationsCreateManyCompaniesInputEnvelope
-    connect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
   }
 
   export type feedbacksUncheckedCreateNestedManyWithoutCompaniesInput = {
@@ -54191,34 +54325,6 @@ export namespace Prisma {
     update?: XOR<XOR<companyLabelsUpdateToOneWithWhereWithoutCompaniesInput, companyLabelsUpdateWithoutCompaniesInput>, companyLabelsUncheckedUpdateWithoutCompaniesInput>
   }
 
-  export type companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput = {
-    create?: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput> | companyActivitiesHistoryCreateWithoutCompaniesInput[] | companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput | companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput[]
-    upsert?: companyActivitiesHistoryUpsertWithWhereUniqueWithoutCompaniesInput | companyActivitiesHistoryUpsertWithWhereUniqueWithoutCompaniesInput[]
-    createMany?: companyActivitiesHistoryCreateManyCompaniesInputEnvelope
-    set?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    disconnect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    delete?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    connect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    update?: companyActivitiesHistoryUpdateWithWhereUniqueWithoutCompaniesInput | companyActivitiesHistoryUpdateWithWhereUniqueWithoutCompaniesInput[]
-    updateMany?: companyActivitiesHistoryUpdateManyWithWhereWithoutCompaniesInput | companyActivitiesHistoryUpdateManyWithWhereWithoutCompaniesInput[]
-    deleteMany?: companyActivitiesHistoryScalarWhereInput | companyActivitiesHistoryScalarWhereInput[]
-  }
-
-  export type companyNotificationsUpdateManyWithoutCompaniesNestedInput = {
-    create?: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput> | companyNotificationsCreateWithoutCompaniesInput[] | companyNotificationsUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyNotificationsCreateOrConnectWithoutCompaniesInput | companyNotificationsCreateOrConnectWithoutCompaniesInput[]
-    upsert?: companyNotificationsUpsertWithWhereUniqueWithoutCompaniesInput | companyNotificationsUpsertWithWhereUniqueWithoutCompaniesInput[]
-    createMany?: companyNotificationsCreateManyCompaniesInputEnvelope
-    set?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    disconnect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    delete?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    connect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    update?: companyNotificationsUpdateWithWhereUniqueWithoutCompaniesInput | companyNotificationsUpdateWithWhereUniqueWithoutCompaniesInput[]
-    updateMany?: companyNotificationsUpdateManyWithWhereWithoutCompaniesInput | companyNotificationsUpdateManyWithWhereWithoutCompaniesInput[]
-    deleteMany?: companyNotificationsScalarWhereInput | companyNotificationsScalarWhereInput[]
-  }
-
   export type feedbacksUpdateManyWithoutCompaniesNestedInput = {
     create?: XOR<feedbacksCreateWithoutCompaniesInput, feedbacksUncheckedCreateWithoutCompaniesInput> | feedbacksCreateWithoutCompaniesInput[] | feedbacksUncheckedCreateWithoutCompaniesInput[]
     connectOrCreate?: feedbacksCreateOrConnectWithoutCompaniesInput | feedbacksCreateOrConnectWithoutCompaniesInput[]
@@ -54247,34 +54353,6 @@ export namespace Prisma {
     deleteMany?: followedCompaniesScalarWhereInput | followedCompaniesScalarWhereInput[]
   }
 
-  export type companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput = {
-    create?: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput> | companyActivitiesHistoryCreateWithoutCompaniesInput[] | companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput | companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput[]
-    upsert?: companyActivitiesHistoryUpsertWithWhereUniqueWithoutCompaniesInput | companyActivitiesHistoryUpsertWithWhereUniqueWithoutCompaniesInput[]
-    createMany?: companyActivitiesHistoryCreateManyCompaniesInputEnvelope
-    set?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    disconnect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    delete?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    connect?: companyActivitiesHistoryWhereUniqueInput | companyActivitiesHistoryWhereUniqueInput[]
-    update?: companyActivitiesHistoryUpdateWithWhereUniqueWithoutCompaniesInput | companyActivitiesHistoryUpdateWithWhereUniqueWithoutCompaniesInput[]
-    updateMany?: companyActivitiesHistoryUpdateManyWithWhereWithoutCompaniesInput | companyActivitiesHistoryUpdateManyWithWhereWithoutCompaniesInput[]
-    deleteMany?: companyActivitiesHistoryScalarWhereInput | companyActivitiesHistoryScalarWhereInput[]
-  }
-
-  export type companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput = {
-    create?: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput> | companyNotificationsCreateWithoutCompaniesInput[] | companyNotificationsUncheckedCreateWithoutCompaniesInput[]
-    connectOrCreate?: companyNotificationsCreateOrConnectWithoutCompaniesInput | companyNotificationsCreateOrConnectWithoutCompaniesInput[]
-    upsert?: companyNotificationsUpsertWithWhereUniqueWithoutCompaniesInput | companyNotificationsUpsertWithWhereUniqueWithoutCompaniesInput[]
-    createMany?: companyNotificationsCreateManyCompaniesInputEnvelope
-    set?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    disconnect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    delete?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    connect?: companyNotificationsWhereUniqueInput | companyNotificationsWhereUniqueInput[]
-    update?: companyNotificationsUpdateWithWhereUniqueWithoutCompaniesInput | companyNotificationsUpdateWithWhereUniqueWithoutCompaniesInput[]
-    updateMany?: companyNotificationsUpdateManyWithWhereWithoutCompaniesInput | companyNotificationsUpdateManyWithWhereWithoutCompaniesInput[]
-    deleteMany?: companyNotificationsScalarWhereInput | companyNotificationsScalarWhereInput[]
-  }
-
   export type feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput = {
     create?: XOR<feedbacksCreateWithoutCompaniesInput, feedbacksUncheckedCreateWithoutCompaniesInput> | feedbacksCreateWithoutCompaniesInput[] | feedbacksUncheckedCreateWithoutCompaniesInput[]
     connectOrCreate?: feedbacksCreateOrConnectWithoutCompaniesInput | feedbacksCreateOrConnectWithoutCompaniesInput[]
@@ -54301,20 +54379,6 @@ export namespace Prisma {
     update?: followedCompaniesUpdateWithWhereUniqueWithoutCompaniesInput | followedCompaniesUpdateWithWhereUniqueWithoutCompaniesInput[]
     updateMany?: followedCompaniesUpdateManyWithWhereWithoutCompaniesInput | followedCompaniesUpdateManyWithWhereWithoutCompaniesInput[]
     deleteMany?: followedCompaniesScalarWhereInput | followedCompaniesScalarWhereInput[]
-  }
-
-  export type companiesCreateNestedOneWithoutCompanyActivitiesHistoryInput = {
-    create?: XOR<companiesCreateWithoutCompanyActivitiesHistoryInput, companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput>
-    connectOrCreate?: companiesCreateOrConnectWithoutCompanyActivitiesHistoryInput
-    connect?: companiesWhereUniqueInput
-  }
-
-  export type companiesUpdateOneRequiredWithoutCompanyActivitiesHistoryNestedInput = {
-    create?: XOR<companiesCreateWithoutCompanyActivitiesHistoryInput, companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput>
-    connectOrCreate?: companiesCreateOrConnectWithoutCompanyActivitiesHistoryInput
-    upsert?: companiesUpsertWithoutCompanyActivitiesHistoryInput
-    connect?: companiesWhereUniqueInput
-    update?: XOR<XOR<companiesUpdateToOneWithWhereWithoutCompanyActivitiesHistoryInput, companiesUpdateWithoutCompanyActivitiesHistoryInput>, companiesUncheckedUpdateWithoutCompanyActivitiesHistoryInput>
   }
 
   export type companiesCreateNestedManyWithoutCompanyLabelsInput = {
@@ -54357,24 +54421,6 @@ export namespace Prisma {
     update?: companiesUpdateWithWhereUniqueWithoutCompanyLabelsInput | companiesUpdateWithWhereUniqueWithoutCompanyLabelsInput[]
     updateMany?: companiesUpdateManyWithWhereWithoutCompanyLabelsInput | companiesUpdateManyWithWhereWithoutCompanyLabelsInput[]
     deleteMany?: companiesScalarWhereInput | companiesScalarWhereInput[]
-  }
-
-  export type companiesCreateNestedOneWithoutCompanyNotificationsInput = {
-    create?: XOR<companiesCreateWithoutCompanyNotificationsInput, companiesUncheckedCreateWithoutCompanyNotificationsInput>
-    connectOrCreate?: companiesCreateOrConnectWithoutCompanyNotificationsInput
-    connect?: companiesWhereUniqueInput
-  }
-
-  export type EnumNotificationsTypeFieldUpdateOperationsInput = {
-    set?: $Enums.NotificationsType
-  }
-
-  export type companiesUpdateOneRequiredWithoutCompanyNotificationsNestedInput = {
-    create?: XOR<companiesCreateWithoutCompanyNotificationsInput, companiesUncheckedCreateWithoutCompanyNotificationsInput>
-    connectOrCreate?: companiesCreateOrConnectWithoutCompanyNotificationsInput
-    upsert?: companiesUpsertWithoutCompanyNotificationsInput
-    connect?: companiesWhereUniqueInput
-    update?: XOR<XOR<companiesUpdateToOneWithWhereWithoutCompanyNotificationsInput, companiesUpdateWithoutCompanyNotificationsInput>, companiesUncheckedUpdateWithoutCompanyNotificationsInput>
   }
 
   export type cvsCreatesoft_skillsInput = {
@@ -54434,6 +54480,19 @@ export namespace Prisma {
     connect?: referencesWhereUniqueInput | referencesWhereUniqueInput[]
   }
 
+  export type languagesCreateNestedManyWithoutCvsInput = {
+    create?: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput> | languagesCreateWithoutCvsInput[] | languagesUncheckedCreateWithoutCvsInput[]
+    connectOrCreate?: languagesCreateOrConnectWithoutCvsInput | languagesCreateOrConnectWithoutCvsInput[]
+    createMany?: languagesCreateManyCvsInputEnvelope
+    connect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+  }
+
+  export type usersCreateNestedOneWithoutCvsInput = {
+    create?: XOR<usersCreateWithoutCvsInput, usersUncheckedCreateWithoutCvsInput>
+    connectOrCreate?: usersCreateOrConnectWithoutCvsInput
+    connect?: usersWhereUniqueInput
+  }
+
   export type applicantsUncheckedCreateNestedManyWithoutCvsInput = {
     create?: XOR<applicantsCreateWithoutCvsInput, applicantsUncheckedCreateWithoutCvsInput> | applicantsCreateWithoutCvsInput[] | applicantsUncheckedCreateWithoutCvsInput[]
     connectOrCreate?: applicantsCreateOrConnectWithoutCvsInput | applicantsCreateOrConnectWithoutCvsInput[]
@@ -54481,6 +54540,13 @@ export namespace Prisma {
     connectOrCreate?: referencesCreateOrConnectWithoutCvsInput | referencesCreateOrConnectWithoutCvsInput[]
     createMany?: referencesCreateManyCvsInputEnvelope
     connect?: referencesWhereUniqueInput | referencesWhereUniqueInput[]
+  }
+
+  export type languagesUncheckedCreateNestedManyWithoutCvsInput = {
+    create?: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput> | languagesCreateWithoutCvsInput[] | languagesUncheckedCreateWithoutCvsInput[]
+    connectOrCreate?: languagesCreateOrConnectWithoutCvsInput | languagesCreateOrConnectWithoutCvsInput[]
+    createMany?: languagesCreateManyCvsInputEnvelope
+    connect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
   }
 
   export type cvsUpdatesoft_skillsInput = {
@@ -54591,6 +54657,28 @@ export namespace Prisma {
     deleteMany?: referencesScalarWhereInput | referencesScalarWhereInput[]
   }
 
+  export type languagesUpdateManyWithoutCvsNestedInput = {
+    create?: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput> | languagesCreateWithoutCvsInput[] | languagesUncheckedCreateWithoutCvsInput[]
+    connectOrCreate?: languagesCreateOrConnectWithoutCvsInput | languagesCreateOrConnectWithoutCvsInput[]
+    upsert?: languagesUpsertWithWhereUniqueWithoutCvsInput | languagesUpsertWithWhereUniqueWithoutCvsInput[]
+    createMany?: languagesCreateManyCvsInputEnvelope
+    set?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    disconnect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    delete?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    connect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    update?: languagesUpdateWithWhereUniqueWithoutCvsInput | languagesUpdateWithWhereUniqueWithoutCvsInput[]
+    updateMany?: languagesUpdateManyWithWhereWithoutCvsInput | languagesUpdateManyWithWhereWithoutCvsInput[]
+    deleteMany?: languagesScalarWhereInput | languagesScalarWhereInput[]
+  }
+
+  export type usersUpdateOneRequiredWithoutCvsNestedInput = {
+    create?: XOR<usersCreateWithoutCvsInput, usersUncheckedCreateWithoutCvsInput>
+    connectOrCreate?: usersCreateOrConnectWithoutCvsInput
+    upsert?: usersUpsertWithoutCvsInput
+    connect?: usersWhereUniqueInput
+    update?: XOR<XOR<usersUpdateToOneWithWhereWithoutCvsInput, usersUpdateWithoutCvsInput>, usersUncheckedUpdateWithoutCvsInput>
+  }
+
   export type applicantsUncheckedUpdateManyWithoutCvsNestedInput = {
     create?: XOR<applicantsCreateWithoutCvsInput, applicantsUncheckedCreateWithoutCvsInput> | applicantsCreateWithoutCvsInput[] | applicantsUncheckedCreateWithoutCvsInput[]
     connectOrCreate?: applicantsCreateOrConnectWithoutCvsInput | applicantsCreateOrConnectWithoutCvsInput[]
@@ -54689,6 +54777,20 @@ export namespace Prisma {
     deleteMany?: referencesScalarWhereInput | referencesScalarWhereInput[]
   }
 
+  export type languagesUncheckedUpdateManyWithoutCvsNestedInput = {
+    create?: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput> | languagesCreateWithoutCvsInput[] | languagesUncheckedCreateWithoutCvsInput[]
+    connectOrCreate?: languagesCreateOrConnectWithoutCvsInput | languagesCreateOrConnectWithoutCvsInput[]
+    upsert?: languagesUpsertWithWhereUniqueWithoutCvsInput | languagesUpsertWithWhereUniqueWithoutCvsInput[]
+    createMany?: languagesCreateManyCvsInputEnvelope
+    set?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    disconnect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    delete?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    connect?: languagesWhereUniqueInput | languagesWhereUniqueInput[]
+    update?: languagesUpdateWithWhereUniqueWithoutCvsInput | languagesUpdateWithWhereUniqueWithoutCvsInput[]
+    updateMany?: languagesUpdateManyWithWhereWithoutCvsInput | languagesUpdateManyWithWhereWithoutCvsInput[]
+    deleteMany?: languagesScalarWhereInput | languagesScalarWhereInput[]
+  }
+
   export type cvsCreateNestedOneWithoutEducationsInput = {
     create?: XOR<cvsCreateWithoutEducationsInput, cvsUncheckedCreateWithoutEducationsInput>
     connectOrCreate?: cvsCreateOrConnectWithoutEducationsInput
@@ -54751,14 +54853,6 @@ export namespace Prisma {
     create?: XOR<usersCreateWithoutFeedbacksInput, usersUncheckedCreateWithoutFeedbacksInput>
     connectOrCreate?: usersCreateOrConnectWithoutFeedbacksInput
     connect?: usersWhereUniqueInput
-  }
-
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type companiesUpdateOneRequiredWithoutFeedbacksNestedInput = {
@@ -55577,12 +55671,23 @@ export namespace Prisma {
     connect?: usersWhereUniqueInput
   }
 
+  export type EnumNotificationsTypeFieldUpdateOperationsInput = {
+    set?: $Enums.NotificationsType
+  }
+
   export type usersUpdateOneRequiredWithoutUserNotificationsNestedInput = {
     create?: XOR<usersCreateWithoutUserNotificationsInput, usersUncheckedCreateWithoutUserNotificationsInput>
     connectOrCreate?: usersCreateOrConnectWithoutUserNotificationsInput
     upsert?: usersUpsertWithoutUserNotificationsInput
     connect?: usersWhereUniqueInput
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutUserNotificationsInput, usersUpdateWithoutUserNotificationsInput>, usersUncheckedUpdateWithoutUserNotificationsInput>
+  }
+
+  export type cvsCreateNestedManyWithoutUsersInput = {
+    create?: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput> | cvsCreateWithoutUsersInput[] | cvsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: cvsCreateOrConnectWithoutUsersInput | cvsCreateOrConnectWithoutUsersInput[]
+    createMany?: cvsCreateManyUsersInputEnvelope
+    connect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
   }
 
   export type blogsCreateNestedManyWithoutUsersInput = {
@@ -55661,6 +55766,13 @@ export namespace Prisma {
     connect?: userActivitiesHistoryWhereUniqueInput | userActivitiesHistoryWhereUniqueInput[]
   }
 
+  export type reviewsCreateNestedManyWithoutUsersInput = {
+    create?: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput> | reviewsCreateWithoutUsersInput[] | reviewsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: reviewsCreateOrConnectWithoutUsersInput | reviewsCreateOrConnectWithoutUsersInput[]
+    createMany?: reviewsCreateManyUsersInputEnvelope
+    connect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+  }
+
   export type userNotificationsCreateNestedManyWithoutUsersInput = {
     create?: XOR<userNotificationsCreateWithoutUsersInput, userNotificationsUncheckedCreateWithoutUsersInput> | userNotificationsCreateWithoutUsersInput[] | userNotificationsUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: userNotificationsCreateOrConnectWithoutUsersInput | userNotificationsCreateOrConnectWithoutUsersInput[]
@@ -55672,6 +55784,13 @@ export namespace Prisma {
     create?: XOR<rolesCreateWithoutUsersInput, rolesUncheckedCreateWithoutUsersInput>
     connectOrCreate?: rolesCreateOrConnectWithoutUsersInput
     connect?: rolesWhereUniqueInput
+  }
+
+  export type cvsUncheckedCreateNestedManyWithoutUsersInput = {
+    create?: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput> | cvsCreateWithoutUsersInput[] | cvsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: cvsCreateOrConnectWithoutUsersInput | cvsCreateOrConnectWithoutUsersInput[]
+    createMany?: cvsCreateManyUsersInputEnvelope
+    connect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
   }
 
   export type blogsUncheckedCreateNestedManyWithoutUsersInput = {
@@ -55750,6 +55869,13 @@ export namespace Prisma {
     connect?: userActivitiesHistoryWhereUniqueInput | userActivitiesHistoryWhereUniqueInput[]
   }
 
+  export type reviewsUncheckedCreateNestedManyWithoutUsersInput = {
+    create?: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput> | reviewsCreateWithoutUsersInput[] | reviewsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: reviewsCreateOrConnectWithoutUsersInput | reviewsCreateOrConnectWithoutUsersInput[]
+    createMany?: reviewsCreateManyUsersInputEnvelope
+    connect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+  }
+
   export type userNotificationsUncheckedCreateNestedManyWithoutUsersInput = {
     create?: XOR<userNotificationsCreateWithoutUsersInput, userNotificationsUncheckedCreateWithoutUsersInput> | userNotificationsCreateWithoutUsersInput[] | userNotificationsUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: userNotificationsCreateOrConnectWithoutUsersInput | userNotificationsCreateOrConnectWithoutUsersInput[]
@@ -55759,6 +55885,20 @@ export namespace Prisma {
 
   export type NullableEnumGenderFieldUpdateOperationsInput = {
     set?: $Enums.Gender | null
+  }
+
+  export type cvsUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput> | cvsCreateWithoutUsersInput[] | cvsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: cvsCreateOrConnectWithoutUsersInput | cvsCreateOrConnectWithoutUsersInput[]
+    upsert?: cvsUpsertWithWhereUniqueWithoutUsersInput | cvsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: cvsCreateManyUsersInputEnvelope
+    set?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    disconnect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    delete?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    connect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    update?: cvsUpdateWithWhereUniqueWithoutUsersInput | cvsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: cvsUpdateManyWithWhereWithoutUsersInput | cvsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: cvsScalarWhereInput | cvsScalarWhereInput[]
   }
 
   export type blogsUpdateManyWithoutUsersNestedInput = {
@@ -55911,6 +56051,20 @@ export namespace Prisma {
     deleteMany?: userActivitiesHistoryScalarWhereInput | userActivitiesHistoryScalarWhereInput[]
   }
 
+  export type reviewsUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput> | reviewsCreateWithoutUsersInput[] | reviewsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: reviewsCreateOrConnectWithoutUsersInput | reviewsCreateOrConnectWithoutUsersInput[]
+    upsert?: reviewsUpsertWithWhereUniqueWithoutUsersInput | reviewsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: reviewsCreateManyUsersInputEnvelope
+    set?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    disconnect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    delete?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    connect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    update?: reviewsUpdateWithWhereUniqueWithoutUsersInput | reviewsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: reviewsUpdateManyWithWhereWithoutUsersInput | reviewsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: reviewsScalarWhereInput | reviewsScalarWhereInput[]
+  }
+
   export type userNotificationsUpdateManyWithoutUsersNestedInput = {
     create?: XOR<userNotificationsCreateWithoutUsersInput, userNotificationsUncheckedCreateWithoutUsersInput> | userNotificationsCreateWithoutUsersInput[] | userNotificationsUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: userNotificationsCreateOrConnectWithoutUsersInput | userNotificationsCreateOrConnectWithoutUsersInput[]
@@ -55931,6 +56085,20 @@ export namespace Prisma {
     upsert?: rolesUpsertWithoutUsersInput
     connect?: rolesWhereUniqueInput
     update?: XOR<XOR<rolesUpdateToOneWithWhereWithoutUsersInput, rolesUpdateWithoutUsersInput>, rolesUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type cvsUncheckedUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput> | cvsCreateWithoutUsersInput[] | cvsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: cvsCreateOrConnectWithoutUsersInput | cvsCreateOrConnectWithoutUsersInput[]
+    upsert?: cvsUpsertWithWhereUniqueWithoutUsersInput | cvsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: cvsCreateManyUsersInputEnvelope
+    set?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    disconnect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    delete?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    connect?: cvsWhereUniqueInput | cvsWhereUniqueInput[]
+    update?: cvsUpdateWithWhereUniqueWithoutUsersInput | cvsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: cvsUpdateManyWithWhereWithoutUsersInput | cvsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: cvsScalarWhereInput | cvsScalarWhereInput[]
   }
 
   export type blogsUncheckedUpdateManyWithoutUsersNestedInput = {
@@ -56081,6 +56249,20 @@ export namespace Prisma {
     update?: userActivitiesHistoryUpdateWithWhereUniqueWithoutUsersInput | userActivitiesHistoryUpdateWithWhereUniqueWithoutUsersInput[]
     updateMany?: userActivitiesHistoryUpdateManyWithWhereWithoutUsersInput | userActivitiesHistoryUpdateManyWithWhereWithoutUsersInput[]
     deleteMany?: userActivitiesHistoryScalarWhereInput | userActivitiesHistoryScalarWhereInput[]
+  }
+
+  export type reviewsUncheckedUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput> | reviewsCreateWithoutUsersInput[] | reviewsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: reviewsCreateOrConnectWithoutUsersInput | reviewsCreateOrConnectWithoutUsersInput[]
+    upsert?: reviewsUpsertWithWhereUniqueWithoutUsersInput | reviewsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: reviewsCreateManyUsersInputEnvelope
+    set?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    disconnect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    delete?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    connect?: reviewsWhereUniqueInput | reviewsWhereUniqueInput[]
+    update?: reviewsUpdateWithWhereUniqueWithoutUsersInput | reviewsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: reviewsUpdateManyWithWhereWithoutUsersInput | reviewsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: reviewsScalarWhereInput | reviewsScalarWhereInput[]
   }
 
   export type userNotificationsUncheckedUpdateManyWithoutUsersNestedInput = {
@@ -56275,6 +56457,22 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type NestedEnumCompany_TypeFilter<$PrismaModel = never> = {
     equals?: $Enums.Company_Type | EnumCompany_TypeFieldRefInput<$PrismaModel>
     in?: $Enums.Company_Type[] | ListEnumCompany_TypeFieldRefInput<$PrismaModel>
@@ -56332,23 +56530,6 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type NestedEnumNotificationsTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumNotificationsTypeFilter<$PrismaModel> | $Enums.NotificationsType
-  }
-
-  export type NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationsType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumNotificationsTypeFilter<$PrismaModel>
-    _max?: NestedEnumNotificationsTypeFilter<$PrismaModel>
-  }
-
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -56363,22 +56544,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type NestedEnumJob_TypeNullableFilter<$PrismaModel = never> = {
@@ -56527,6 +56692,23 @@ export namespace Prisma {
     _max?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumNotificationsTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationsTypeFilter<$PrismaModel> | $Enums.NotificationsType
+  }
+
+  export type NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationsType | EnumNotificationsTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationsType[] | ListEnumNotificationsTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationsTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationsType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNotificationsTypeFilter<$PrismaModel>
+    _max?: NestedEnumNotificationsTypeFilter<$PrismaModel>
+  }
+
   export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
@@ -56639,12 +56821,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutApplicantsInput = {
@@ -56660,12 +56846,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutApplicantsInput = {
@@ -56751,12 +56941,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutApplicantsInput = {
@@ -56772,12 +56966,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type jobsUpsertWithoutApplicantsInput = {
@@ -56853,12 +57051,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutAwardsInput = {
@@ -56874,12 +57076,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutAwardsInput = {
@@ -56910,12 +57116,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutAwardsInput = {
@@ -56931,7 +57141,125 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
+    certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
+    educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
+    experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
+    projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
+    references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
+  }
+
+  export type cvsCreateWithoutLanguagesInput = {
+    fullname: string
+    age?: number | null
+    gender?: string | null
+    address?: string | null
+    email?: string | null
+    introduction?: string | null
+    soft_skills?: cvsCreatesoft_skillsInput | string[]
+    primary_skills?: cvsCreateprimary_skillsInput | string[]
+    phone?: string | null
+    hobbies?: string | null
+    others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    applicants?: applicantsCreateNestedManyWithoutCvsInput
+    awards?: awardsCreateNestedManyWithoutCvsInput
+    certificates?: certificatesCreateNestedManyWithoutCvsInput
+    educations?: educationsCreateNestedManyWithoutCvsInput
+    experiences?: experiencesCreateNestedManyWithoutCvsInput
+    projects?: projectsCreateNestedManyWithoutCvsInput
+    references?: referencesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
+  }
+
+  export type cvsUncheckedCreateWithoutLanguagesInput = {
+    id?: number
+    fullname: string
+    age?: number | null
+    gender?: string | null
+    address?: string | null
+    email?: string | null
+    introduction?: string | null
+    soft_skills?: cvsCreatesoft_skillsInput | string[]
+    primary_skills?: cvsCreateprimary_skillsInput | string[]
+    phone?: string | null
+    hobbies?: string | null
+    others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
+    applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
+    awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
+    certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
+    educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
+    experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
+    projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
+    references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+  }
+
+  export type cvsCreateOrConnectWithoutLanguagesInput = {
+    where: cvsWhereUniqueInput
+    create: XOR<cvsCreateWithoutLanguagesInput, cvsUncheckedCreateWithoutLanguagesInput>
+  }
+
+  export type cvsUpsertWithoutLanguagesInput = {
+    update: XOR<cvsUpdateWithoutLanguagesInput, cvsUncheckedUpdateWithoutLanguagesInput>
+    create: XOR<cvsCreateWithoutLanguagesInput, cvsUncheckedCreateWithoutLanguagesInput>
+    where?: cvsWhereInput
+  }
+
+  export type cvsUpdateToOneWithWhereWithoutLanguagesInput = {
+    where?: cvsWhereInput
+    data: XOR<cvsUpdateWithoutLanguagesInput, cvsUncheckedUpdateWithoutLanguagesInput>
+  }
+
+  export type cvsUpdateWithoutLanguagesInput = {
+    fullname?: StringFieldUpdateOperationsInput | string
+    age?: NullableIntFieldUpdateOperationsInput | number | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    introduction?: NullableStringFieldUpdateOperationsInput | string | null
+    soft_skills?: cvsUpdatesoft_skillsInput | string[]
+    primary_skills?: cvsUpdateprimary_skillsInput | string[]
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    hobbies?: NullableStringFieldUpdateOperationsInput | string | null
+    others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    applicants?: applicantsUpdateManyWithoutCvsNestedInput
+    awards?: awardsUpdateManyWithoutCvsNestedInput
+    certificates?: certificatesUpdateManyWithoutCvsNestedInput
+    educations?: educationsUpdateManyWithoutCvsNestedInput
+    experiences?: experiencesUpdateManyWithoutCvsNestedInput
+    projects?: projectsUpdateManyWithoutCvsNestedInput
+    references?: referencesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
+  }
+
+  export type cvsUncheckedUpdateWithoutLanguagesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullname?: StringFieldUpdateOperationsInput | string
+    age?: NullableIntFieldUpdateOperationsInput | number | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    introduction?: NullableStringFieldUpdateOperationsInput | string | null
+    soft_skills?: cvsUpdatesoft_skillsInput | string[]
+    primary_skills?: cvsUpdateprimary_skillsInput | string[]
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    hobbies?: NullableStringFieldUpdateOperationsInput | string | null
+    others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
+    applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
+    awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
@@ -56954,6 +57282,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -56964,6 +57293,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -56984,6 +57314,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutUsersInput
@@ -56994,6 +57325,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -57028,6 +57360,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
     feedbacks?: feedbacksUpdateManyWithoutUsersNestedInput
@@ -57038,6 +57371,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -57058,6 +57392,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutUsersNestedInput
@@ -57068,6 +57403,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -57185,6 +57521,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -57195,6 +57532,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -57215,6 +57553,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutUsersInput
@@ -57225,6 +57564,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -57310,6 +57650,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
     feedbacks?: feedbacksUpdateManyWithoutUsersNestedInput
@@ -57320,6 +57661,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -57340,7 +57682,149 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
+    companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
+    feedbacks?: feedbacksUncheckedUpdateManyWithoutUsersNestedInput
+    followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutUsersNestedInput
+    messages?: messagesUncheckedUpdateManyWithoutUsersNestedInput
+    payments?: paymentsUncheckedUpdateManyWithoutUsersNestedInput
+    personalityTestResults?: personalityTestResultsUncheckedUpdateManyWithoutUsersNestedInput
+    savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
+    subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
+    userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
+    userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
+  }
+
+  export type usersCreateWithoutReviewsInput = {
+    id?: string
+    username: string
+    password: string
+    avatar_url?: string | null
+    email: string
+    phone?: string | null
+    address_street?: string | null
+    address_ward?: string | null
+    address_city?: string | null
+    address_country?: string | null
+    gender?: $Enums.Gender | null
+    is_deleted?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
+    blogs?: blogsCreateNestedManyWithoutUsersInput
+    careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
+    companies?: companiesCreateNestedOneWithoutUsersInput
+    feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
+    followedCompanies?: followedCompaniesCreateNestedManyWithoutUsersInput
+    messages?: messagesCreateNestedManyWithoutUsersInput
+    payments?: paymentsCreateNestedManyWithoutUsersInput
+    personalityTestResults?: personalityTestResultsCreateNestedManyWithoutUsersInput
+    savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
+    subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
+    userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
+    roles: rolesCreateNestedOneWithoutUsersInput
+  }
+
+  export type usersUncheckedCreateWithoutReviewsInput = {
+    id?: string
+    username: string
+    password: string
+    avatar_url?: string | null
+    email: string
+    phone?: string | null
+    address_street?: string | null
+    address_ward?: string | null
+    address_city?: string | null
+    address_country?: string | null
+    gender?: $Enums.Gender | null
+    is_deleted?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
+    blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
+    careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
+    companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
+    feedbacks?: feedbacksUncheckedCreateNestedManyWithoutUsersInput
+    followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutUsersInput
+    messages?: messagesUncheckedCreateNestedManyWithoutUsersInput
+    payments?: paymentsUncheckedCreateNestedManyWithoutUsersInput
+    personalityTestResults?: personalityTestResultsUncheckedCreateNestedManyWithoutUsersInput
+    savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
+    subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
+    userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersCreateOrConnectWithoutReviewsInput = {
+    where: usersWhereUniqueInput
+    create: XOR<usersCreateWithoutReviewsInput, usersUncheckedCreateWithoutReviewsInput>
+  }
+
+  export type usersUpsertWithoutReviewsInput = {
+    update: XOR<usersUpdateWithoutReviewsInput, usersUncheckedUpdateWithoutReviewsInput>
+    create: XOR<usersCreateWithoutReviewsInput, usersUncheckedCreateWithoutReviewsInput>
+    where?: usersWhereInput
+  }
+
+  export type usersUpdateToOneWithWhereWithoutReviewsInput = {
+    where?: usersWhereInput
+    data: XOR<usersUpdateWithoutReviewsInput, usersUncheckedUpdateWithoutReviewsInput>
+  }
+
+  export type usersUpdateWithoutReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address_street?: NullableStringFieldUpdateOperationsInput | string | null
+    address_ward?: NullableStringFieldUpdateOperationsInput | string | null
+    address_city?: NullableStringFieldUpdateOperationsInput | string | null
+    address_country?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
+    blogs?: blogsUpdateManyWithoutUsersNestedInput
+    careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
+    companies?: companiesUpdateOneWithoutUsersNestedInput
+    feedbacks?: feedbacksUpdateManyWithoutUsersNestedInput
+    followedCompanies?: followedCompaniesUpdateManyWithoutUsersNestedInput
+    messages?: messagesUpdateManyWithoutUsersNestedInput
+    payments?: paymentsUpdateManyWithoutUsersNestedInput
+    personalityTestResults?: personalityTestResultsUpdateManyWithoutUsersNestedInput
+    savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
+    subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
+    userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
+    roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
+  }
+
+  export type usersUncheckedUpdateWithoutReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address_street?: NullableStringFieldUpdateOperationsInput | string | null
+    address_ward?: NullableStringFieldUpdateOperationsInput | string | null
+    address_city?: NullableStringFieldUpdateOperationsInput | string | null
+    address_country?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
+    blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
+    careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutUsersNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutUsersNestedInput
@@ -57468,12 +57952,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutCertificatesInput = {
@@ -57489,12 +57977,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutCertificatesInput = {
@@ -57525,12 +58017,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutCertificatesInput = {
@@ -57546,12 +58042,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type fieldsCreateWithoutCompaniesInput = {
@@ -57583,6 +58083,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
@@ -57593,6 +58094,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -57613,6 +58115,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutUsersInput
@@ -57623,6 +58126,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -57643,58 +58147,6 @@ export namespace Prisma {
   export type companyLabelsCreateOrConnectWithoutCompaniesInput = {
     where: companyLabelsWhereUniqueInput
     create: XOR<companyLabelsCreateWithoutCompaniesInput, companyLabelsUncheckedCreateWithoutCompaniesInput>
-  }
-
-  export type companyActivitiesHistoryCreateWithoutCompaniesInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-  }
-
-  export type companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-  }
-
-  export type companyActivitiesHistoryCreateOrConnectWithoutCompaniesInput = {
-    where: companyActivitiesHistoryWhereUniqueInput
-    create: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput>
-  }
-
-  export type companyActivitiesHistoryCreateManyCompaniesInputEnvelope = {
-    data: companyActivitiesHistoryCreateManyCompaniesInput | companyActivitiesHistoryCreateManyCompaniesInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type companyNotificationsCreateWithoutCompaniesInput = {
-    id?: number
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-  }
-
-  export type companyNotificationsUncheckedCreateWithoutCompaniesInput = {
-    id?: number
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-  }
-
-  export type companyNotificationsCreateOrConnectWithoutCompaniesInput = {
-    where: companyNotificationsWhereUniqueInput
-    create: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput>
-  }
-
-  export type companyNotificationsCreateManyCompaniesInputEnvelope = {
-    data: companyNotificationsCreateManyCompaniesInput | companyNotificationsCreateManyCompaniesInput[]
-    skipDuplicates?: boolean
   }
 
   export type feedbacksCreateWithoutCompaniesInput = {
@@ -57793,6 +58245,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     feedbacks?: feedbacksUpdateManyWithoutUsersNestedInput
@@ -57803,6 +58256,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -57823,6 +58277,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutUsersNestedInput
@@ -57833,6 +58288,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -57854,62 +58310,6 @@ export namespace Prisma {
   export type companyLabelsUncheckedUpdateWithoutCompaniesInput = {
     id?: IntFieldUpdateOperationsInput | number
     label_name?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type companyActivitiesHistoryUpsertWithWhereUniqueWithoutCompaniesInput = {
-    where: companyActivitiesHistoryWhereUniqueInput
-    update: XOR<companyActivitiesHistoryUpdateWithoutCompaniesInput, companyActivitiesHistoryUncheckedUpdateWithoutCompaniesInput>
-    create: XOR<companyActivitiesHistoryCreateWithoutCompaniesInput, companyActivitiesHistoryUncheckedCreateWithoutCompaniesInput>
-  }
-
-  export type companyActivitiesHistoryUpdateWithWhereUniqueWithoutCompaniesInput = {
-    where: companyActivitiesHistoryWhereUniqueInput
-    data: XOR<companyActivitiesHistoryUpdateWithoutCompaniesInput, companyActivitiesHistoryUncheckedUpdateWithoutCompaniesInput>
-  }
-
-  export type companyActivitiesHistoryUpdateManyWithWhereWithoutCompaniesInput = {
-    where: companyActivitiesHistoryScalarWhereInput
-    data: XOR<companyActivitiesHistoryUpdateManyMutationInput, companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesInput>
-  }
-
-  export type companyActivitiesHistoryScalarWhereInput = {
-    AND?: companyActivitiesHistoryScalarWhereInput | companyActivitiesHistoryScalarWhereInput[]
-    OR?: companyActivitiesHistoryScalarWhereInput[]
-    NOT?: companyActivitiesHistoryScalarWhereInput | companyActivitiesHistoryScalarWhereInput[]
-    id?: IntFilter<"companyActivitiesHistory"> | number
-    activity_name?: StringFilter<"companyActivitiesHistory"> | string
-    time?: DateTimeFilter<"companyActivitiesHistory"> | Date | string
-    company_id?: StringFilter<"companyActivitiesHistory"> | string
-  }
-
-  export type companyNotificationsUpsertWithWhereUniqueWithoutCompaniesInput = {
-    where: companyNotificationsWhereUniqueInput
-    update: XOR<companyNotificationsUpdateWithoutCompaniesInput, companyNotificationsUncheckedUpdateWithoutCompaniesInput>
-    create: XOR<companyNotificationsCreateWithoutCompaniesInput, companyNotificationsUncheckedCreateWithoutCompaniesInput>
-  }
-
-  export type companyNotificationsUpdateWithWhereUniqueWithoutCompaniesInput = {
-    where: companyNotificationsWhereUniqueInput
-    data: XOR<companyNotificationsUpdateWithoutCompaniesInput, companyNotificationsUncheckedUpdateWithoutCompaniesInput>
-  }
-
-  export type companyNotificationsUpdateManyWithWhereWithoutCompaniesInput = {
-    where: companyNotificationsScalarWhereInput
-    data: XOR<companyNotificationsUpdateManyMutationInput, companyNotificationsUncheckedUpdateManyWithoutCompaniesInput>
-  }
-
-  export type companyNotificationsScalarWhereInput = {
-    AND?: companyNotificationsScalarWhereInput | companyNotificationsScalarWhereInput[]
-    OR?: companyNotificationsScalarWhereInput[]
-    NOT?: companyNotificationsScalarWhereInput | companyNotificationsScalarWhereInput[]
-    id?: IntFilter<"companyNotifications"> | number
-    company_id?: StringFilter<"companyNotifications"> | string
-    title?: StringFilter<"companyNotifications"> | string
-    content?: StringNullableFilter<"companyNotifications"> | string | null
-    type?: EnumNotificationsTypeFilter<"companyNotifications"> | $Enums.NotificationsType
-    is_read?: BoolFilter<"companyNotifications"> | boolean
-    sent_at?: DateTimeFilter<"companyNotifications"> | Date | string
-    read_at?: DateTimeNullableFilter<"companyNotifications"> | Date | string | null
   }
 
   export type feedbacksUpsertWithWhereUniqueWithoutCompaniesInput = {
@@ -57967,134 +58367,6 @@ export namespace Prisma {
     is_notified?: BoolFilter<"followedCompanies"> | boolean
   }
 
-  export type companiesCreateWithoutCompanyActivitiesHistoryInput = {
-    company_name: string
-    company_website?: string | null
-    address_street: string
-    address_ward: string
-    address_city: string
-    address_country: string
-    email: string
-    phone: string
-    business_certificate?: string | null
-    company_type?: $Enums.Company_Type
-    description?: string | null
-    logo_url?: string | null
-    background_url?: string | null
-    employees?: number | null
-    is_verified?: boolean
-    fax_code?: string | null
-    is_deleted?: boolean
-    created_at?: Date | string
-    updated_at?: Date | string
-    fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users?: usersCreateNestedOneWithoutCompaniesInput
-    companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
-    feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
-    followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
-  }
-
-  export type companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput = {
-    id?: string
-    company_name: string
-    company_website?: string | null
-    address_street: string
-    address_ward: string
-    address_city: string
-    address_country: string
-    email: string
-    phone: string
-    business_certificate?: string | null
-    company_type?: $Enums.Company_Type
-    description?: string | null
-    logo_url?: string | null
-    background_url?: string | null
-    employees?: number | null
-    is_verified?: boolean
-    fax_code?: string | null
-    is_deleted?: boolean
-    created_at?: Date | string
-    updated_at?: Date | string
-    field_id?: number | null
-    label_id?: number | null
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
-    feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
-    followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
-  }
-
-  export type companiesCreateOrConnectWithoutCompanyActivitiesHistoryInput = {
-    where: companiesWhereUniqueInput
-    create: XOR<companiesCreateWithoutCompanyActivitiesHistoryInput, companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput>
-  }
-
-  export type companiesUpsertWithoutCompanyActivitiesHistoryInput = {
-    update: XOR<companiesUpdateWithoutCompanyActivitiesHistoryInput, companiesUncheckedUpdateWithoutCompanyActivitiesHistoryInput>
-    create: XOR<companiesCreateWithoutCompanyActivitiesHistoryInput, companiesUncheckedCreateWithoutCompanyActivitiesHistoryInput>
-    where?: companiesWhereInput
-  }
-
-  export type companiesUpdateToOneWithWhereWithoutCompanyActivitiesHistoryInput = {
-    where?: companiesWhereInput
-    data: XOR<companiesUpdateWithoutCompanyActivitiesHistoryInput, companiesUncheckedUpdateWithoutCompanyActivitiesHistoryInput>
-  }
-
-  export type companiesUpdateWithoutCompanyActivitiesHistoryInput = {
-    company_name?: StringFieldUpdateOperationsInput | string
-    company_website?: NullableStringFieldUpdateOperationsInput | string | null
-    address_street?: StringFieldUpdateOperationsInput | string
-    address_ward?: StringFieldUpdateOperationsInput | string
-    address_city?: StringFieldUpdateOperationsInput | string
-    address_country?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    business_certificate?: NullableStringFieldUpdateOperationsInput | string | null
-    company_type?: EnumCompany_TypeFieldUpdateOperationsInput | $Enums.Company_Type
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
-    background_url?: NullableStringFieldUpdateOperationsInput | string | null
-    employees?: NullableIntFieldUpdateOperationsInput | number | null
-    is_verified?: BoolFieldUpdateOperationsInput | boolean
-    fax_code?: NullableStringFieldUpdateOperationsInput | string | null
-    is_deleted?: BoolFieldUpdateOperationsInput | boolean
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    fields?: fieldsUpdateOneWithoutCompaniesNestedInput
-    users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
-    companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
-    feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
-    followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
-  }
-
-  export type companiesUncheckedUpdateWithoutCompanyActivitiesHistoryInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    company_name?: StringFieldUpdateOperationsInput | string
-    company_website?: NullableStringFieldUpdateOperationsInput | string | null
-    address_street?: StringFieldUpdateOperationsInput | string
-    address_ward?: StringFieldUpdateOperationsInput | string
-    address_city?: StringFieldUpdateOperationsInput | string
-    address_country?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    business_certificate?: NullableStringFieldUpdateOperationsInput | string | null
-    company_type?: EnumCompany_TypeFieldUpdateOperationsInput | $Enums.Company_Type
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
-    background_url?: NullableStringFieldUpdateOperationsInput | string | null
-    employees?: NullableIntFieldUpdateOperationsInput | number | null
-    is_verified?: BoolFieldUpdateOperationsInput | boolean
-    fax_code?: NullableStringFieldUpdateOperationsInput | string | null
-    is_deleted?: BoolFieldUpdateOperationsInput | boolean
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    field_id?: NullableIntFieldUpdateOperationsInput | number | null
-    label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
-    feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
-    followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
-  }
-
   export type companiesCreateWithoutCompanyLabelsInput = {
     company_name: string
     company_website?: string | null
@@ -58117,8 +58389,6 @@ export namespace Prisma {
     updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     users?: usersCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
   }
@@ -58145,8 +58415,6 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     field_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
   }
@@ -58205,134 +58473,6 @@ export namespace Prisma {
     label_id?: IntNullableFilter<"companies"> | number | null
   }
 
-  export type companiesCreateWithoutCompanyNotificationsInput = {
-    company_name: string
-    company_website?: string | null
-    address_street: string
-    address_ward: string
-    address_city: string
-    address_country: string
-    email: string
-    phone: string
-    business_certificate?: string | null
-    company_type?: $Enums.Company_Type
-    description?: string | null
-    logo_url?: string | null
-    background_url?: string | null
-    employees?: number | null
-    is_verified?: boolean
-    fax_code?: string | null
-    is_deleted?: boolean
-    created_at?: Date | string
-    updated_at?: Date | string
-    fields?: fieldsCreateNestedOneWithoutCompaniesInput
-    users?: usersCreateNestedOneWithoutCompaniesInput
-    companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
-    followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
-  }
-
-  export type companiesUncheckedCreateWithoutCompanyNotificationsInput = {
-    id?: string
-    company_name: string
-    company_website?: string | null
-    address_street: string
-    address_ward: string
-    address_city: string
-    address_country: string
-    email: string
-    phone: string
-    business_certificate?: string | null
-    company_type?: $Enums.Company_Type
-    description?: string | null
-    logo_url?: string | null
-    background_url?: string | null
-    employees?: number | null
-    is_verified?: boolean
-    fax_code?: string | null
-    is_deleted?: boolean
-    created_at?: Date | string
-    updated_at?: Date | string
-    field_id?: number | null
-    label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
-    followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
-  }
-
-  export type companiesCreateOrConnectWithoutCompanyNotificationsInput = {
-    where: companiesWhereUniqueInput
-    create: XOR<companiesCreateWithoutCompanyNotificationsInput, companiesUncheckedCreateWithoutCompanyNotificationsInput>
-  }
-
-  export type companiesUpsertWithoutCompanyNotificationsInput = {
-    update: XOR<companiesUpdateWithoutCompanyNotificationsInput, companiesUncheckedUpdateWithoutCompanyNotificationsInput>
-    create: XOR<companiesCreateWithoutCompanyNotificationsInput, companiesUncheckedCreateWithoutCompanyNotificationsInput>
-    where?: companiesWhereInput
-  }
-
-  export type companiesUpdateToOneWithWhereWithoutCompanyNotificationsInput = {
-    where?: companiesWhereInput
-    data: XOR<companiesUpdateWithoutCompanyNotificationsInput, companiesUncheckedUpdateWithoutCompanyNotificationsInput>
-  }
-
-  export type companiesUpdateWithoutCompanyNotificationsInput = {
-    company_name?: StringFieldUpdateOperationsInput | string
-    company_website?: NullableStringFieldUpdateOperationsInput | string | null
-    address_street?: StringFieldUpdateOperationsInput | string
-    address_ward?: StringFieldUpdateOperationsInput | string
-    address_city?: StringFieldUpdateOperationsInput | string
-    address_country?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    business_certificate?: NullableStringFieldUpdateOperationsInput | string | null
-    company_type?: EnumCompany_TypeFieldUpdateOperationsInput | $Enums.Company_Type
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
-    background_url?: NullableStringFieldUpdateOperationsInput | string | null
-    employees?: NullableIntFieldUpdateOperationsInput | number | null
-    is_verified?: BoolFieldUpdateOperationsInput | boolean
-    fax_code?: NullableStringFieldUpdateOperationsInput | string | null
-    is_deleted?: BoolFieldUpdateOperationsInput | boolean
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    fields?: fieldsUpdateOneWithoutCompaniesNestedInput
-    users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
-    companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
-    followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
-  }
-
-  export type companiesUncheckedUpdateWithoutCompanyNotificationsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    company_name?: StringFieldUpdateOperationsInput | string
-    company_website?: NullableStringFieldUpdateOperationsInput | string | null
-    address_street?: StringFieldUpdateOperationsInput | string
-    address_ward?: StringFieldUpdateOperationsInput | string
-    address_city?: StringFieldUpdateOperationsInput | string
-    address_country?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    business_certificate?: NullableStringFieldUpdateOperationsInput | string | null
-    company_type?: EnumCompany_TypeFieldUpdateOperationsInput | $Enums.Company_Type
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
-    background_url?: NullableStringFieldUpdateOperationsInput | string | null
-    employees?: NullableIntFieldUpdateOperationsInput | number | null
-    is_verified?: BoolFieldUpdateOperationsInput | boolean
-    fax_code?: NullableStringFieldUpdateOperationsInput | string | null
-    is_deleted?: BoolFieldUpdateOperationsInput | boolean
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    field_id?: NullableIntFieldUpdateOperationsInput | number | null
-    label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
-    followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
-  }
-
   export type applicantsCreateWithoutCvsInput = {
     description?: string | null
     apply_date?: Date | string
@@ -58387,7 +58527,7 @@ export namespace Prisma {
   }
 
   export type certificatesCreateWithoutCvsInput = {
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -58396,7 +58536,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedCreateWithoutCvsInput = {
     id?: number
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -58414,7 +58554,7 @@ export namespace Prisma {
   }
 
   export type educationsCreateWithoutCvsInput = {
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -58423,7 +58563,7 @@ export namespace Prisma {
 
   export type educationsUncheckedCreateWithoutCvsInput = {
     id?: number
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -58515,6 +58655,96 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type languagesCreateWithoutCvsInput = {
+    name: string
+    certificate?: string | null
+    level?: string | null
+  }
+
+  export type languagesUncheckedCreateWithoutCvsInput = {
+    id?: number
+    name: string
+    certificate?: string | null
+    level?: string | null
+  }
+
+  export type languagesCreateOrConnectWithoutCvsInput = {
+    where: languagesWhereUniqueInput
+    create: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput>
+  }
+
+  export type languagesCreateManyCvsInputEnvelope = {
+    data: languagesCreateManyCvsInput | languagesCreateManyCvsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type usersCreateWithoutCvsInput = {
+    id?: string
+    username: string
+    password: string
+    avatar_url?: string | null
+    email: string
+    phone?: string | null
+    address_street?: string | null
+    address_ward?: string | null
+    address_city?: string | null
+    address_country?: string | null
+    gender?: $Enums.Gender | null
+    is_deleted?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    blogs?: blogsCreateNestedManyWithoutUsersInput
+    careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
+    companies?: companiesCreateNestedOneWithoutUsersInput
+    feedbacks?: feedbacksCreateNestedManyWithoutUsersInput
+    followedCompanies?: followedCompaniesCreateNestedManyWithoutUsersInput
+    messages?: messagesCreateNestedManyWithoutUsersInput
+    payments?: paymentsCreateNestedManyWithoutUsersInput
+    personalityTestResults?: personalityTestResultsCreateNestedManyWithoutUsersInput
+    savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
+    subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
+    userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
+    userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
+    roles: rolesCreateNestedOneWithoutUsersInput
+  }
+
+  export type usersUncheckedCreateWithoutCvsInput = {
+    id?: string
+    username: string
+    password: string
+    avatar_url?: string | null
+    email: string
+    phone?: string | null
+    address_street?: string | null
+    address_ward?: string | null
+    address_city?: string | null
+    address_country?: string | null
+    gender?: $Enums.Gender | null
+    is_deleted?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    role_id: number
+    blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
+    careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
+    companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
+    feedbacks?: feedbacksUncheckedCreateNestedManyWithoutUsersInput
+    followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutUsersInput
+    messages?: messagesUncheckedCreateNestedManyWithoutUsersInput
+    payments?: paymentsUncheckedCreateNestedManyWithoutUsersInput
+    personalityTestResults?: personalityTestResultsUncheckedCreateNestedManyWithoutUsersInput
+    savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
+    subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
+    userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
+    userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersCreateOrConnectWithoutCvsInput = {
+    where: usersWhereUniqueInput
+    create: XOR<usersCreateWithoutCvsInput, usersUncheckedCreateWithoutCvsInput>
+  }
+
   export type applicantsUpsertWithWhereUniqueWithoutCvsInput = {
     where: applicantsWhereUniqueInput
     update: XOR<applicantsUpdateWithoutCvsInput, applicantsUncheckedUpdateWithoutCvsInput>
@@ -58593,7 +58823,7 @@ export namespace Prisma {
     OR?: certificatesScalarWhereInput[]
     NOT?: certificatesScalarWhereInput | certificatesScalarWhereInput[]
     id?: IntFilter<"certificates"> | number
-    title?: StringFilter<"certificates"> | string
+    title?: StringNullableFilter<"certificates"> | string | null
     link?: StringNullableFilter<"certificates"> | string | null
     description?: StringNullableFilter<"certificates"> | string | null
     start_date?: DateTimeNullableFilter<"certificates"> | Date | string | null
@@ -58622,7 +58852,7 @@ export namespace Prisma {
     OR?: educationsScalarWhereInput[]
     NOT?: educationsScalarWhereInput | educationsScalarWhereInput[]
     id?: IntFilter<"educations"> | number
-    school?: StringFilter<"educations"> | string
+    school?: StringNullableFilter<"educations"> | string | null
     graduated_type?: StringNullableFilter<"educations"> | string | null
     gpa?: FloatNullableFilter<"educations"> | number | null
     start_date?: DateTimeNullableFilter<"educations"> | Date | string | null
@@ -58714,6 +58944,106 @@ export namespace Prisma {
     cv_id?: IntFilter<"references"> | number
   }
 
+  export type languagesUpsertWithWhereUniqueWithoutCvsInput = {
+    where: languagesWhereUniqueInput
+    update: XOR<languagesUpdateWithoutCvsInput, languagesUncheckedUpdateWithoutCvsInput>
+    create: XOR<languagesCreateWithoutCvsInput, languagesUncheckedCreateWithoutCvsInput>
+  }
+
+  export type languagesUpdateWithWhereUniqueWithoutCvsInput = {
+    where: languagesWhereUniqueInput
+    data: XOR<languagesUpdateWithoutCvsInput, languagesUncheckedUpdateWithoutCvsInput>
+  }
+
+  export type languagesUpdateManyWithWhereWithoutCvsInput = {
+    where: languagesScalarWhereInput
+    data: XOR<languagesUpdateManyMutationInput, languagesUncheckedUpdateManyWithoutCvsInput>
+  }
+
+  export type languagesScalarWhereInput = {
+    AND?: languagesScalarWhereInput | languagesScalarWhereInput[]
+    OR?: languagesScalarWhereInput[]
+    NOT?: languagesScalarWhereInput | languagesScalarWhereInput[]
+    id?: IntFilter<"languages"> | number
+    name?: StringFilter<"languages"> | string
+    certificate?: StringNullableFilter<"languages"> | string | null
+    level?: StringNullableFilter<"languages"> | string | null
+    cv_id?: IntFilter<"languages"> | number
+  }
+
+  export type usersUpsertWithoutCvsInput = {
+    update: XOR<usersUpdateWithoutCvsInput, usersUncheckedUpdateWithoutCvsInput>
+    create: XOR<usersCreateWithoutCvsInput, usersUncheckedCreateWithoutCvsInput>
+    where?: usersWhereInput
+  }
+
+  export type usersUpdateToOneWithWhereWithoutCvsInput = {
+    where?: usersWhereInput
+    data: XOR<usersUpdateWithoutCvsInput, usersUncheckedUpdateWithoutCvsInput>
+  }
+
+  export type usersUpdateWithoutCvsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address_street?: NullableStringFieldUpdateOperationsInput | string | null
+    address_ward?: NullableStringFieldUpdateOperationsInput | string | null
+    address_city?: NullableStringFieldUpdateOperationsInput | string | null
+    address_country?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    blogs?: blogsUpdateManyWithoutUsersNestedInput
+    careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
+    companies?: companiesUpdateOneWithoutUsersNestedInput
+    feedbacks?: feedbacksUpdateManyWithoutUsersNestedInput
+    followedCompanies?: followedCompaniesUpdateManyWithoutUsersNestedInput
+    messages?: messagesUpdateManyWithoutUsersNestedInput
+    payments?: paymentsUpdateManyWithoutUsersNestedInput
+    personalityTestResults?: personalityTestResultsUpdateManyWithoutUsersNestedInput
+    savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
+    subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
+    userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
+    userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
+    roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
+  }
+
+  export type usersUncheckedUpdateWithoutCvsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address_street?: NullableStringFieldUpdateOperationsInput | string | null
+    address_ward?: NullableStringFieldUpdateOperationsInput | string | null
+    address_city?: NullableStringFieldUpdateOperationsInput | string | null
+    address_country?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    role_id?: IntFieldUpdateOperationsInput | number
+    blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
+    careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
+    companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
+    feedbacks?: feedbacksUncheckedUpdateManyWithoutUsersNestedInput
+    followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutUsersNestedInput
+    messages?: messagesUncheckedUpdateManyWithoutUsersNestedInput
+    payments?: paymentsUncheckedUpdateManyWithoutUsersNestedInput
+    personalityTestResults?: personalityTestResultsUncheckedUpdateManyWithoutUsersNestedInput
+    savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
+    subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
+    userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
+    userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
+  }
+
   export type cvsCreateWithoutEducationsInput = {
     fullname: string
     age?: number | null
@@ -58726,12 +59056,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutEducationsInput = {
@@ -58747,12 +59081,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutEducationsInput = {
@@ -58783,12 +59121,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutEducationsInput = {
@@ -58804,12 +59146,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type cvsCreateWithoutExperiencesInput = {
@@ -58824,12 +59170,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutExperiencesInput = {
@@ -58845,12 +59195,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutExperiencesInput = {
@@ -58881,12 +59235,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutExperiencesInput = {
@@ -58902,12 +59260,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type membershipPlansCreateWithoutFeaturesInput = {
@@ -58995,8 +59357,6 @@ export namespace Prisma {
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
   }
 
@@ -59023,8 +59383,6 @@ export namespace Prisma {
     updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
   }
 
@@ -59048,6 +59406,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -59058,6 +59417,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -59078,6 +59438,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -59088,6 +59449,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -59130,8 +59492,6 @@ export namespace Prisma {
     fields?: fieldsUpdateOneWithoutCompaniesNestedInput
     users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
     companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
   }
 
@@ -59158,8 +59518,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     field_id?: NullableIntFieldUpdateOperationsInput | number | null
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
   }
 
@@ -59189,6 +59547,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -59199,6 +59558,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -59219,6 +59579,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -59229,6 +59590,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -59254,8 +59616,6 @@ export namespace Prisma {
     updated_at?: Date | string
     users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
   }
@@ -59282,8 +59642,6 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
   }
@@ -59337,8 +59695,6 @@ export namespace Prisma {
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     users?: usersCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
   }
 
@@ -59365,8 +59721,6 @@ export namespace Prisma {
     updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
   }
 
@@ -59390,6 +59744,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -59400,6 +59755,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -59420,6 +59776,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -59430,6 +59787,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -59472,8 +59830,6 @@ export namespace Prisma {
     fields?: fieldsUpdateOneWithoutCompaniesNestedInput
     users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
     companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
   }
 
@@ -59500,8 +59856,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     field_id?: NullableIntFieldUpdateOperationsInput | number | null
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
   }
 
@@ -59531,6 +59885,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -59541,6 +59896,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -59561,6 +59917,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -59571,6 +59928,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -60077,6 +60435,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60087,6 +60446,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -60107,6 +60467,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -60117,6 +60478,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -60151,6 +60513,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -60161,6 +60524,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -60181,6 +60545,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -60191,6 +60556,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -60209,6 +60575,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60219,6 +60586,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -60239,6 +60607,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -60249,6 +60618,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -60310,6 +60680,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -60320,6 +60691,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -60340,6 +60712,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -60350,6 +60723,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -60433,6 +60807,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60443,6 +60818,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -60463,6 +60839,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -60473,6 +60850,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -60551,6 +60929,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -60561,6 +60940,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -60581,6 +60961,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -60591,6 +60972,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -60606,12 +60988,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutProjectsInput = {
@@ -60627,12 +61013,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutProjectsInput = {
@@ -60663,12 +61053,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutProjectsInput = {
@@ -60684,12 +61078,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type answersCreateWithoutQuestionsInput = {
@@ -60786,12 +61184,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
     applicants?: applicantsCreateNestedManyWithoutCvsInput
     awards?: awardsCreateNestedManyWithoutCvsInput
     certificates?: certificatesCreateNestedManyWithoutCvsInput
     educations?: educationsCreateNestedManyWithoutCvsInput
     experiences?: experiencesCreateNestedManyWithoutCvsInput
     projects?: projectsCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+    users: usersCreateNestedOneWithoutCvsInput
   }
 
   export type cvsUncheckedCreateWithoutReferencesInput = {
@@ -60807,12 +61209,16 @@ export namespace Prisma {
     phone?: string | null
     hobbies?: string | null
     others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    users_id: string
     applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
     awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
     certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
     educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
     experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
     projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
   }
 
   export type cvsCreateOrConnectWithoutReferencesInput = {
@@ -60843,12 +61249,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
     applicants?: applicantsUpdateManyWithoutCvsNestedInput
     awards?: awardsUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUpdateManyWithoutCvsNestedInput
     educations?: educationsUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUpdateManyWithoutCvsNestedInput
     projects?: projectsUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+    users?: usersUpdateOneRequiredWithoutCvsNestedInput
   }
 
   export type cvsUncheckedUpdateWithoutReferencesInput = {
@@ -60864,12 +61274,16 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     hobbies?: NullableStringFieldUpdateOperationsInput | string | null
     others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    users_id?: StringFieldUpdateOperationsInput | string
     applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
     awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
     certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
     educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
     experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
     projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
   }
 
   export type usersCreateWithoutRolesInput = {
@@ -60887,6 +61301,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -60898,6 +61313,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
   }
 
@@ -60916,6 +61332,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -60927,6 +61344,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -61047,6 +61465,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61057,6 +61476,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -61077,6 +61497,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -61087,6 +61508,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -61182,6 +61604,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -61192,6 +61615,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -61212,6 +61636,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -61222,6 +61647,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -61297,6 +61723,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61307,6 +61734,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsCreateNestedManyWithoutUsersInput
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -61327,6 +61755,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -61337,6 +61766,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedCreateNestedManyWithoutUsersInput
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -61440,6 +61870,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -61450,6 +61881,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUpdateManyWithoutUsersNestedInput
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -61470,6 +61902,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -61480,6 +61913,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedUpdateManyWithoutUsersNestedInput
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -61498,6 +61932,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61508,6 +61943,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsCreateNestedManyWithoutUsersInput
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
@@ -61528,6 +61964,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -61538,6 +61975,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedCreateNestedManyWithoutUsersInput
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
     userNotifications?: userNotificationsUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -61572,6 +62010,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -61582,6 +62021,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUpdateManyWithoutUsersNestedInput
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
@@ -61602,6 +62042,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -61612,6 +62053,7 @@ export namespace Prisma {
     personalityTestResults?: personalityTestResultsUncheckedUpdateManyWithoutUsersNestedInput
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -61630,6 +62072,7 @@ export namespace Prisma {
     is_deleted?: boolean
     created_at?: Date | string
     updated_at?: Date | string
+    cvs?: cvsCreateNestedManyWithoutUsersInput
     blogs?: blogsCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsCreateNestedManyWithoutUsersInput
     companies?: companiesCreateNestedOneWithoutUsersInput
@@ -61641,6 +62084,7 @@ export namespace Prisma {
     savedJobs?: savedJobsCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryCreateNestedManyWithoutUsersInput
+    reviews?: reviewsCreateNestedManyWithoutUsersInput
     roles: rolesCreateNestedOneWithoutUsersInput
   }
 
@@ -61660,6 +62104,7 @@ export namespace Prisma {
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
+    cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
     blogs?: blogsUncheckedCreateNestedManyWithoutUsersInput
     careerPaths?: careerPathsUncheckedCreateNestedManyWithoutUsersInput
     companies?: companiesUncheckedCreateNestedOneWithoutUsersInput
@@ -61671,6 +62116,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedCreateNestedManyWithoutUsersInput
     subscriptions?: subscriptionsUncheckedCreateNestedManyWithoutUsersInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedCreateNestedManyWithoutUsersInput
+    reviews?: reviewsUncheckedCreateNestedManyWithoutUsersInput
   }
 
   export type usersCreateOrConnectWithoutUserNotificationsInput = {
@@ -61704,6 +62150,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -61715,6 +62162,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     roles?: rolesUpdateOneRequiredWithoutUsersNestedInput
   }
 
@@ -61734,6 +62182,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -61745,6 +62194,66 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
+  }
+
+  export type cvsCreateWithoutUsersInput = {
+    fullname: string
+    age?: number | null
+    gender?: string | null
+    address?: string | null
+    email?: string | null
+    introduction?: string | null
+    soft_skills?: cvsCreatesoft_skillsInput | string[]
+    primary_skills?: cvsCreateprimary_skillsInput | string[]
+    phone?: string | null
+    hobbies?: string | null
+    others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    applicants?: applicantsCreateNestedManyWithoutCvsInput
+    awards?: awardsCreateNestedManyWithoutCvsInput
+    certificates?: certificatesCreateNestedManyWithoutCvsInput
+    educations?: educationsCreateNestedManyWithoutCvsInput
+    experiences?: experiencesCreateNestedManyWithoutCvsInput
+    projects?: projectsCreateNestedManyWithoutCvsInput
+    references?: referencesCreateNestedManyWithoutCvsInput
+    languages?: languagesCreateNestedManyWithoutCvsInput
+  }
+
+  export type cvsUncheckedCreateWithoutUsersInput = {
+    id?: number
+    fullname: string
+    age?: number | null
+    gender?: string | null
+    address?: string | null
+    email?: string | null
+    introduction?: string | null
+    soft_skills?: cvsCreatesoft_skillsInput | string[]
+    primary_skills?: cvsCreateprimary_skillsInput | string[]
+    phone?: string | null
+    hobbies?: string | null
+    others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
+    applicants?: applicantsUncheckedCreateNestedManyWithoutCvsInput
+    awards?: awardsUncheckedCreateNestedManyWithoutCvsInput
+    certificates?: certificatesUncheckedCreateNestedManyWithoutCvsInput
+    educations?: educationsUncheckedCreateNestedManyWithoutCvsInput
+    experiences?: experiencesUncheckedCreateNestedManyWithoutCvsInput
+    projects?: projectsUncheckedCreateNestedManyWithoutCvsInput
+    references?: referencesUncheckedCreateNestedManyWithoutCvsInput
+    languages?: languagesUncheckedCreateNestedManyWithoutCvsInput
+  }
+
+  export type cvsCreateOrConnectWithoutUsersInput = {
+    where: cvsWhereUniqueInput
+    create: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput>
+  }
+
+  export type cvsCreateManyUsersInputEnvelope = {
+    data: cvsCreateManyUsersInput | cvsCreateManyUsersInput[]
+    skipDuplicates?: boolean
   }
 
   export type blogsCreateWithoutUsersInput = {
@@ -61827,8 +62336,6 @@ export namespace Prisma {
     updated_at?: Date | string
     fields?: fieldsCreateNestedOneWithoutCompaniesInput
     companyLabels?: companyLabelsCreateNestedOneWithoutCompaniesInput
-    companyActivitiesHistory?: companyActivitiesHistoryCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesCreateNestedManyWithoutCompaniesInput
   }
@@ -61855,8 +62362,6 @@ export namespace Prisma {
     updated_at?: Date | string
     field_id?: number | null
     label_id?: number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedCreateNestedManyWithoutCompaniesInput
-    companyNotifications?: companyNotificationsUncheckedCreateNestedManyWithoutCompaniesInput
     feedbacks?: feedbacksUncheckedCreateNestedManyWithoutCompaniesInput
     followedCompanies?: followedCompaniesUncheckedCreateNestedManyWithoutCompaniesInput
   }
@@ -62068,6 +62573,31 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type reviewsCreateWithoutUsersInput = {
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type reviewsUncheckedCreateWithoutUsersInput = {
+    id?: number
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type reviewsCreateOrConnectWithoutUsersInput = {
+    where: reviewsWhereUniqueInput
+    create: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput>
+  }
+
+  export type reviewsCreateManyUsersInputEnvelope = {
+    data: reviewsCreateManyUsersInput | reviewsCreateManyUsersInput[]
+    skipDuplicates?: boolean
+  }
+
   export type userNotificationsCreateWithoutUsersInput = {
     id?: number
     title: string
@@ -62110,6 +62640,43 @@ export namespace Prisma {
   export type rolesCreateOrConnectWithoutUsersInput = {
     where: rolesWhereUniqueInput
     create: XOR<rolesCreateWithoutUsersInput, rolesUncheckedCreateWithoutUsersInput>
+  }
+
+  export type cvsUpsertWithWhereUniqueWithoutUsersInput = {
+    where: cvsWhereUniqueInput
+    update: XOR<cvsUpdateWithoutUsersInput, cvsUncheckedUpdateWithoutUsersInput>
+    create: XOR<cvsCreateWithoutUsersInput, cvsUncheckedCreateWithoutUsersInput>
+  }
+
+  export type cvsUpdateWithWhereUniqueWithoutUsersInput = {
+    where: cvsWhereUniqueInput
+    data: XOR<cvsUpdateWithoutUsersInput, cvsUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type cvsUpdateManyWithWhereWithoutUsersInput = {
+    where: cvsScalarWhereInput
+    data: XOR<cvsUpdateManyMutationInput, cvsUncheckedUpdateManyWithoutUsersInput>
+  }
+
+  export type cvsScalarWhereInput = {
+    AND?: cvsScalarWhereInput | cvsScalarWhereInput[]
+    OR?: cvsScalarWhereInput[]
+    NOT?: cvsScalarWhereInput | cvsScalarWhereInput[]
+    id?: IntFilter<"cvs"> | number
+    fullname?: StringFilter<"cvs"> | string
+    age?: IntNullableFilter<"cvs"> | number | null
+    gender?: StringNullableFilter<"cvs"> | string | null
+    address?: StringNullableFilter<"cvs"> | string | null
+    email?: StringNullableFilter<"cvs"> | string | null
+    introduction?: StringNullableFilter<"cvs"> | string | null
+    soft_skills?: StringNullableListFilter<"cvs">
+    primary_skills?: StringNullableListFilter<"cvs">
+    phone?: StringNullableFilter<"cvs"> | string | null
+    hobbies?: StringNullableFilter<"cvs"> | string | null
+    others?: StringNullableFilter<"cvs"> | string | null
+    apply_job?: StringNullableFilter<"cvs"> | string | null
+    career_goal?: StringNullableFilter<"cvs"> | string | null
+    users_id?: StringFilter<"cvs"> | string
   }
 
   export type blogsUpsertWithWhereUniqueWithoutUsersInput = {
@@ -62204,8 +62771,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     fields?: fieldsUpdateOneWithoutCompaniesNestedInput
     companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
   }
@@ -62232,8 +62797,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     field_id?: NullableIntFieldUpdateOperationsInput | number | null
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
   }
@@ -62400,6 +62963,34 @@ export namespace Prisma {
     activity_name?: StringFilter<"userActivitiesHistory"> | string
     time?: DateTimeFilter<"userActivitiesHistory"> | Date | string
     user_id?: StringFilter<"userActivitiesHistory"> | string
+  }
+
+  export type reviewsUpsertWithWhereUniqueWithoutUsersInput = {
+    where: reviewsWhereUniqueInput
+    update: XOR<reviewsUpdateWithoutUsersInput, reviewsUncheckedUpdateWithoutUsersInput>
+    create: XOR<reviewsCreateWithoutUsersInput, reviewsUncheckedCreateWithoutUsersInput>
+  }
+
+  export type reviewsUpdateWithWhereUniqueWithoutUsersInput = {
+    where: reviewsWhereUniqueInput
+    data: XOR<reviewsUpdateWithoutUsersInput, reviewsUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type reviewsUpdateManyWithWhereWithoutUsersInput = {
+    where: reviewsScalarWhereInput
+    data: XOR<reviewsUpdateManyMutationInput, reviewsUncheckedUpdateManyWithoutUsersInput>
+  }
+
+  export type reviewsScalarWhereInput = {
+    AND?: reviewsScalarWhereInput | reviewsScalarWhereInput[]
+    OR?: reviewsScalarWhereInput[]
+    NOT?: reviewsScalarWhereInput | reviewsScalarWhereInput[]
+    id?: IntFilter<"reviews"> | number
+    content?: StringFilter<"reviews"> | string
+    stars?: FloatFilter<"reviews"> | number
+    created_at?: DateTimeFilter<"reviews"> | Date | string
+    updated_at?: DateTimeFilter<"reviews"> | Date | string
+    user_id?: StringFilter<"reviews"> | string
   }
 
   export type userNotificationsUpsertWithWhereUniqueWithoutUsersInput = {
@@ -62595,22 +63186,6 @@ export namespace Prisma {
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
-  export type companyActivitiesHistoryCreateManyCompaniesInput = {
-    id?: number
-    activity_name: string
-    time?: Date | string
-  }
-
-  export type companyNotificationsCreateManyCompaniesInput = {
-    id?: number
-    title: string
-    content?: string | null
-    type?: $Enums.NotificationsType
-    is_read?: boolean
-    sent_at?: Date | string
-    read_at?: Date | string | null
-  }
-
   export type feedbacksCreateManyCompaniesInput = {
     user_id: string
     description: string
@@ -62624,54 +63199,6 @@ export namespace Prisma {
     user_id: string
     followed_at?: Date | string
     is_notified?: boolean
-  }
-
-  export type companyActivitiesHistoryUpdateWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type companyActivitiesHistoryUncheckedUpdateWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    activity_name?: StringFieldUpdateOperationsInput | string
-    time?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type companyNotificationsUpdateWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type companyNotificationsUncheckedUpdateWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type companyNotificationsUncheckedUpdateManyWithoutCompaniesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumNotificationsTypeFieldUpdateOperationsInput | $Enums.NotificationsType
-    is_read?: BoolFieldUpdateOperationsInput | boolean
-    sent_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    read_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type feedbacksUpdateWithoutCompaniesInput = {
@@ -62765,8 +63292,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     fields?: fieldsUpdateOneWithoutCompaniesNestedInput
     users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
   }
@@ -62793,8 +63318,6 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     field_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
   }
@@ -62842,7 +63365,7 @@ export namespace Prisma {
 
   export type certificatesCreateManyCvsInput = {
     id?: number
-    title: string
+    title?: string | null
     link?: string | null
     description?: string | null
     start_date?: Date | string | null
@@ -62851,7 +63374,7 @@ export namespace Prisma {
 
   export type educationsCreateManyCvsInput = {
     id?: number
-    school: string
+    school?: string | null
     graduated_type?: string | null
     gpa?: number | null
     start_date?: Date | string | null
@@ -62880,6 +63403,13 @@ export namespace Prisma {
     name: string
     phone?: string | null
     email?: string | null
+  }
+
+  export type languagesCreateManyCvsInput = {
+    id?: number
+    name: string
+    certificate?: string | null
+    level?: string | null
   }
 
   export type applicantsUpdateWithoutCvsInput = {
@@ -62933,7 +63463,7 @@ export namespace Prisma {
   }
 
   export type certificatesUpdateWithoutCvsInput = {
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62942,7 +63472,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedUpdateWithoutCvsInput = {
     id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62951,7 +63481,7 @@ export namespace Prisma {
 
   export type certificatesUncheckedUpdateManyWithoutCvsInput = {
     id?: IntFieldUpdateOperationsInput | number
-    title?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     link?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62959,7 +63489,7 @@ export namespace Prisma {
   }
 
   export type educationsUpdateWithoutCvsInput = {
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62968,7 +63498,7 @@ export namespace Prisma {
 
   export type educationsUncheckedUpdateWithoutCvsInput = {
     id?: IntFieldUpdateOperationsInput | number
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62977,7 +63507,7 @@ export namespace Prisma {
 
   export type educationsUncheckedUpdateManyWithoutCvsInput = {
     id?: IntFieldUpdateOperationsInput | number
-    school?: StringFieldUpdateOperationsInput | string
+    school?: NullableStringFieldUpdateOperationsInput | string | null
     graduated_type?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -63053,6 +63583,26 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type languagesUpdateWithoutCvsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type languagesUncheckedUpdateWithoutCvsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type languagesUncheckedUpdateManyWithoutCvsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    certificate?: NullableStringFieldUpdateOperationsInput | string | null
+    level?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type companiesCreateManyFieldsInput = {
     id?: string
     company_name: string
@@ -63099,8 +63649,6 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: usersUpdateOneRequiredWithoutCompaniesNestedInput
     companyLabels?: companyLabelsUpdateOneWithoutCompaniesNestedInput
-    companyActivitiesHistory?: companyActivitiesHistoryUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUpdateManyWithoutCompaniesNestedInput
   }
@@ -63127,8 +63675,6 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     label_id?: NullableIntFieldUpdateOperationsInput | number | null
-    companyActivitiesHistory?: companyActivitiesHistoryUncheckedUpdateManyWithoutCompaniesNestedInput
-    companyNotifications?: companyNotificationsUncheckedUpdateManyWithoutCompaniesNestedInput
     feedbacks?: feedbacksUncheckedUpdateManyWithoutCompaniesNestedInput
     followedCompanies?: followedCompaniesUncheckedUpdateManyWithoutCompaniesNestedInput
   }
@@ -63474,6 +64020,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUpdateManyWithoutUsersNestedInput
     blogs?: blogsUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUpdateManyWithoutUsersNestedInput
     companies?: companiesUpdateOneWithoutUsersNestedInput
@@ -63485,6 +64032,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUpdateManyWithoutUsersNestedInput
   }
 
@@ -63503,6 +64051,7 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
     blogs?: blogsUncheckedUpdateManyWithoutUsersNestedInput
     careerPaths?: careerPathsUncheckedUpdateManyWithoutUsersNestedInput
     companies?: companiesUncheckedUpdateOneWithoutUsersNestedInput
@@ -63514,6 +64063,7 @@ export namespace Prisma {
     savedJobs?: savedJobsUncheckedUpdateManyWithoutUsersNestedInput
     subscriptions?: subscriptionsUncheckedUpdateManyWithoutUsersNestedInput
     userActivitiesHistory?: userActivitiesHistoryUncheckedUpdateManyWithoutUsersNestedInput
+    reviews?: reviewsUncheckedUpdateManyWithoutUsersNestedInput
     userNotifications?: userNotificationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -63532,6 +64082,23 @@ export namespace Prisma {
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type cvsCreateManyUsersInput = {
+    id?: number
+    fullname: string
+    age?: number | null
+    gender?: string | null
+    address?: string | null
+    email?: string | null
+    introduction?: string | null
+    soft_skills?: cvsCreatesoft_skillsInput | string[]
+    primary_skills?: cvsCreateprimary_skillsInput | string[]
+    phone?: string | null
+    hobbies?: string | null
+    others?: string | null
+    apply_job?: string | null
+    career_goal?: string | null
   }
 
   export type blogsCreateManyUsersInput = {
@@ -63613,6 +64180,14 @@ export namespace Prisma {
     time?: Date | string
   }
 
+  export type reviewsCreateManyUsersInput = {
+    id?: number
+    content: string
+    stars: number
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
   export type userNotificationsCreateManyUsersInput = {
     id?: number
     title: string
@@ -63621,6 +64196,72 @@ export namespace Prisma {
     is_read?: boolean
     sent_at?: Date | string
     read_at?: Date | string | null
+  }
+
+  export type cvsUpdateWithoutUsersInput = {
+    fullname?: StringFieldUpdateOperationsInput | string
+    age?: NullableIntFieldUpdateOperationsInput | number | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    introduction?: NullableStringFieldUpdateOperationsInput | string | null
+    soft_skills?: cvsUpdatesoft_skillsInput | string[]
+    primary_skills?: cvsUpdateprimary_skillsInput | string[]
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    hobbies?: NullableStringFieldUpdateOperationsInput | string | null
+    others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    applicants?: applicantsUpdateManyWithoutCvsNestedInput
+    awards?: awardsUpdateManyWithoutCvsNestedInput
+    certificates?: certificatesUpdateManyWithoutCvsNestedInput
+    educations?: educationsUpdateManyWithoutCvsNestedInput
+    experiences?: experiencesUpdateManyWithoutCvsNestedInput
+    projects?: projectsUpdateManyWithoutCvsNestedInput
+    references?: referencesUpdateManyWithoutCvsNestedInput
+    languages?: languagesUpdateManyWithoutCvsNestedInput
+  }
+
+  export type cvsUncheckedUpdateWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullname?: StringFieldUpdateOperationsInput | string
+    age?: NullableIntFieldUpdateOperationsInput | number | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    introduction?: NullableStringFieldUpdateOperationsInput | string | null
+    soft_skills?: cvsUpdatesoft_skillsInput | string[]
+    primary_skills?: cvsUpdateprimary_skillsInput | string[]
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    hobbies?: NullableStringFieldUpdateOperationsInput | string | null
+    others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
+    applicants?: applicantsUncheckedUpdateManyWithoutCvsNestedInput
+    awards?: awardsUncheckedUpdateManyWithoutCvsNestedInput
+    certificates?: certificatesUncheckedUpdateManyWithoutCvsNestedInput
+    educations?: educationsUncheckedUpdateManyWithoutCvsNestedInput
+    experiences?: experiencesUncheckedUpdateManyWithoutCvsNestedInput
+    projects?: projectsUncheckedUpdateManyWithoutCvsNestedInput
+    references?: referencesUncheckedUpdateManyWithoutCvsNestedInput
+    languages?: languagesUncheckedUpdateManyWithoutCvsNestedInput
+  }
+
+  export type cvsUncheckedUpdateManyWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullname?: StringFieldUpdateOperationsInput | string
+    age?: NullableIntFieldUpdateOperationsInput | number | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    introduction?: NullableStringFieldUpdateOperationsInput | string | null
+    soft_skills?: cvsUpdatesoft_skillsInput | string[]
+    primary_skills?: cvsUpdateprimary_skillsInput | string[]
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    hobbies?: NullableStringFieldUpdateOperationsInput | string | null
+    others?: NullableStringFieldUpdateOperationsInput | string | null
+    apply_job?: NullableStringFieldUpdateOperationsInput | string | null
+    career_goal?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type blogsUpdateWithoutUsersInput = {
@@ -63860,6 +64501,29 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     activity_name?: StringFieldUpdateOperationsInput | string
     time?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type reviewsUpdateWithoutUsersInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type reviewsUncheckedUpdateWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type reviewsUncheckedUpdateManyWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    content?: StringFieldUpdateOperationsInput | string
+    stars?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type userNotificationsUpdateWithoutUsersInput = {

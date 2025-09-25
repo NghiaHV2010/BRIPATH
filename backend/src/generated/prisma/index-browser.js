@@ -145,6 +145,14 @@ exports.Prisma.AwardsScalarFieldEnum = {
   cv_id: 'cv_id'
 };
 
+exports.Prisma.LanguagesScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  certificate: 'certificate',
+  level: 'level',
+  cv_id: 'cv_id'
+};
+
 exports.Prisma.BlogsScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -172,6 +180,15 @@ exports.Prisma.CareerPathsScalarFieldEnum = {
   estimate_duration: 'estimate_duration',
   user_id: 'user_id',
   jobspecialized_id: 'jobspecialized_id'
+};
+
+exports.Prisma.ReviewsScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  stars: 'stars',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  user_id: 'user_id'
 };
 
 exports.Prisma.CategoriesScalarFieldEnum = {
@@ -214,27 +231,9 @@ exports.Prisma.CompaniesScalarFieldEnum = {
   label_id: 'label_id'
 };
 
-exports.Prisma.CompanyActivitiesHistoryScalarFieldEnum = {
-  id: 'id',
-  activity_name: 'activity_name',
-  time: 'time',
-  company_id: 'company_id'
-};
-
 exports.Prisma.CompanyLabelsScalarFieldEnum = {
   id: 'id',
   label_name: 'label_name'
-};
-
-exports.Prisma.CompanyNotificationsScalarFieldEnum = {
-  id: 'id',
-  company_id: 'company_id',
-  title: 'title',
-  content: 'content',
-  type: 'type',
-  is_read: 'is_read',
-  sent_at: 'sent_at',
-  read_at: 'read_at'
 };
 
 exports.Prisma.CvsScalarFieldEnum = {
@@ -249,7 +248,10 @@ exports.Prisma.CvsScalarFieldEnum = {
   primary_skills: 'primary_skills',
   phone: 'phone',
   hobbies: 'hobbies',
-  others: 'others'
+  others: 'others',
+  apply_job: 'apply_job',
+  career_goal: 'career_goal',
+  users_id: 'users_id'
 };
 
 exports.Prisma.EducationsScalarFieldEnum = {
@@ -486,13 +488,6 @@ exports.Company_Type = exports.$Enums.Company_Type = {
   business: 'business'
 };
 
-exports.NotificationsType = exports.$Enums.NotificationsType = {
-  system: 'system',
-  pricing_plan: 'pricing_plan',
-  applicant: 'applicant',
-  followed: 'followed'
-};
-
 exports.Job_Type = exports.$Enums.Job_Type = {
   remote: 'remote',
   part_time: 'part_time',
@@ -538,6 +533,13 @@ exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
   canceled: 'canceled'
 };
 
+exports.NotificationsType = exports.$Enums.NotificationsType = {
+  system: 'system',
+  pricing_plan: 'pricing_plan',
+  applicant: 'applicant',
+  followed: 'followed'
+};
+
 exports.Gender = exports.$Enums.Gender = {
   male: 'male',
   female: 'female',
@@ -548,15 +550,15 @@ exports.Prisma.ModelName = {
   answers: 'answers',
   applicants: 'applicants',
   awards: 'awards',
+  languages: 'languages',
   blogs: 'blogs',
   careerPathSteps: 'careerPathSteps',
   careerPaths: 'careerPaths',
+  reviews: 'reviews',
   categories: 'categories',
   certificates: 'certificates',
   companies: 'companies',
-  companyActivitiesHistory: 'companyActivitiesHistory',
   companyLabels: 'companyLabels',
-  companyNotifications: 'companyNotifications',
   cvs: 'cvs',
   educations: 'educations',
   experiences: 'experiences',

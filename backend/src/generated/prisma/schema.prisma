@@ -25,20 +25,29 @@ model applicants {
   verified_date DateTime
   status        ApplicantsStatus @default(pending)
   feedback      String?
-  cvs           cvs              @relation(fields: [cv_id], references: [id])
-  jobs          jobs             @relation(fields: [job_id], references: [id])
+  cvs           cvs              @relation(fields: [cv_id], references: [id], onDelete: Cascade)
+  jobs          jobs             @relation(fields: [job_id], references: [id], onDelete: Cascade)
 
   @@id([cv_id, job_id])
 }
 
 model awards {
   id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(150)
-  description String?
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
   start_date  DateTime? @db.Date
   end_date    DateTime? @db.Date
   cv_id       Int
-  cvs         cvs       @relation(fields: [cv_id], references: [id])
+  cvs         cvs       @relation(fields: [cv_id], references: [id], onDelete: Cascade)
+}
+
+model languages {
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(100)
+  certificate String? @db.Text
+  level       String? @db.VarChar(50)
+  cv_id       Int
+  cvs         cvs     @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model blogs {
@@ -75,6 +84,16 @@ model careerPaths {
   users             users             @relation(fields: [user_id], references: [id])
 }
 
+model reviews {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.VarChar(255)
+  stars      Float    @db.Real
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user_id    String
+  users      users    @relation(fields: [user_id], references: [id])
+}
+
 model categories {
   id            Int    @id @default(autoincrement())
   category_name String @unique @db.VarChar(50)
@@ -83,55 +102,43 @@ model categories {
 
 model certificates {
   id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(150)
-  link        String?
-  description String?
+  title       String?   @db.VarChar(255)
+  link        String?   @db.Text
+  description String?   @db.Text
   start_date  DateTime? @db.Date
   end_date    DateTime? @db.Date
   cv_id       Int
-  cvs         cvs       @relation(fields: [cv_id], references: [id])
+  cvs         cvs       @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model companies {
-  id                       String                     @id @default(uuid())
-  company_name             String                     @unique @db.VarChar(150)
-  company_website          String?
-  address_street           String                     @db.VarChar(50)
-  address_ward             String                     @db.VarChar(50)
-  address_city             String                     @db.VarChar(50)
-  address_country          String                     @db.VarChar(50)
-  email                    String                     @unique @db.VarChar(50)
-  phone                    String                     @unique @db.VarChar(12)
-  business_certificate     String?
-  company_type             Company_Type               @default(business_househole)
-  description              String?
-  logo_url                 String?
-  background_url           String?
-  employees                Int?
-  is_verified              Boolean                    @default(false)
-  fax_code                 String?                    @db.VarChar(20)
-  is_deleted               Boolean                    @default(false)
-  created_at               DateTime                   @default(now())
-  updated_at               DateTime                   @updatedAt
-  field_id                 Int?
-  label_id                 Int?
-  fields                   fields?                    @relation(fields: [field_id], references: [id])
-  users                    users                      @relation(fields: [id], references: [id])
-  companyLabels            companyLabels?             @relation(fields: [label_id], references: [id])
-  companyActivitiesHistory companyActivitiesHistory[]
-  companyNotifications     companyNotifications[]
-  feedbacks                feedbacks[]
-  followedCompanies        followedCompanies[]
-}
-
-model companyActivitiesHistory {
-  id            Int       @default(autoincrement())
-  activity_name String    @db.VarChar(100)
-  time          DateTime  @default(now())
-  company_id    String
-  companies     companies @relation(fields: [company_id], references: [id])
-
-  @@id([id, company_id])
+  id                   String              @id @default(uuid())
+  company_name         String              @unique @db.VarChar(150)
+  company_website      String?
+  address_street       String              @db.VarChar(50)
+  address_ward         String              @db.VarChar(50)
+  address_city         String              @db.VarChar(50)
+  address_country      String              @db.VarChar(50)
+  email                String              @unique @db.VarChar(50)
+  phone                String              @unique @db.VarChar(12)
+  business_certificate String?
+  company_type         Company_Type        @default(business_househole)
+  description          String?
+  logo_url             String?
+  background_url       String?
+  employees            Int?
+  is_verified          Boolean             @default(false)
+  fax_code             String?             @db.VarChar(20)
+  is_deleted           Boolean             @default(false)
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  field_id             Int?
+  label_id             Int?
+  fields               fields?             @relation(fields: [field_id], references: [id])
+  users                users               @relation(fields: [id], references: [id])
+  companyLabels        companyLabels?      @relation(fields: [label_id], references: [id])
+  feedbacks            feedbacks[]
+  followedCompanies    followedCompanies[]
 }
 
 model companyLabels {
@@ -140,33 +147,22 @@ model companyLabels {
   companies  companies[]
 }
 
-model companyNotifications {
-  id         Int               @default(autoincrement())
-  company_id String
-  title      String            @db.VarChar(150)
-  content    String?           @db.VarChar(255)
-  type       NotificationsType @default(system)
-  is_read    Boolean           @default(false)
-  sent_at    DateTime          @default(now())
-  read_at    DateTime?
-  companies  companies         @relation(fields: [company_id], references: [id])
-
-  @@id([id, company_id])
-}
-
 model cvs {
   id             Int                    @id @default(autoincrement())
   fullname       String                 @db.VarChar(50)
   age            Int?
   gender         String?                @db.VarChar(10)
-  address        String?                @db.VarChar(150)
+  address        String?                @db.VarChar(200)
   email          String?                @db.VarChar(50)
-  introduction   String?
+  introduction   String?                @db.Text
   soft_skills    String[]
   primary_skills String[]
   phone          String?                @db.VarChar(12)
-  hobbies        String?
-  others         String?
+  hobbies        String?                @db.Text
+  others         String?                @db.Text
+  apply_job      String?                @db.VarChar(50)
+  career_goal    String?                @db.Text
+  users_id       String
   embedding      Unsupported("vector")?
   applicants     applicants[]
   awards         awards[]
@@ -175,28 +171,30 @@ model cvs {
   experiences    experiences[]
   projects       projects[]
   references     references[]
+  languages      languages[]
+  users          users                  @relation(fields: [users_id], references: [id])
 }
 
 model educations {
   id             Int       @id @default(autoincrement())
-  school         String    @db.VarChar(100)
-  graduated_type String?   @db.VarChar(50)
+  school         String?   @db.VarChar(150)
+  graduated_type String?   @db.VarChar(250)
   gpa            Float?    @db.Real
   start_date     DateTime? @db.Date
   end_date       DateTime? @db.Date
   cv_id          Int
-  cvs            cvs       @relation(fields: [cv_id], references: [id])
+  cvs            cvs       @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model experiences {
   id           Int       @id @default(autoincrement())
-  company_name String?   @db.VarChar(150)
-  title        String?   @db.VarChar(150)
-  description  String?
+  company_name String?   @db.VarChar(255)
+  title        String?   @db.VarChar(255)
+  description  String?   @db.Text
   start_date   DateTime? @db.Date
   end_date     DateTime? @db.Date
   cv_id        Int
-  cvs          cvs       @relation(fields: [cv_id], references: [id])
+  cvs          cvs       @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model features {
@@ -342,12 +340,12 @@ model personalityTestResults {
 
 model projects {
   id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(150)
-  description String?
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
   start_date  DateTime? @db.Date
   end_date    DateTime? @db.Date
   cv_id       Int
-  cvs         cvs       @relation(fields: [cv_id], references: [id])
+  cvs         cvs       @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model questions {
@@ -363,7 +361,7 @@ model references {
   phone String? @db.VarChar(12)
   email String? @db.VarChar(50)
   cv_id Int
-  cvs   cvs     @relation(fields: [cv_id], references: [id])
+  cvs   cvs     @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
 model roles {
@@ -437,6 +435,7 @@ model users {
   created_at             DateTime                 @default(now())
   updated_at             DateTime                 @updatedAt
   role_id                Int
+  cvs                    cvs[]
   blogs                  blogs[]
   careerPaths            careerPaths[]
   companies              companies?
@@ -448,6 +447,7 @@ model users {
   savedJobs              savedJobs[]
   subscriptions          subscriptions[]
   userActivitiesHistory  userActivitiesHistory[]
+  reviews                reviews[]
   userNotifications      userNotifications[]
   roles                  roles                    @relation(fields: [role_id], references: [id])
 }
