@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import { PORT, FRONTEND_URL } from './config/env.config';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute, vnpayRoutes, zalopayRoutes, paymentRoutes } from './routes';
+import { authRoute, vnpayRoutes, zalopayRoutes, paymentRoutes, dashboardRoutes } from './routes';
 import passport from './config/passport.config';
 
 
@@ -24,6 +24,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/vnpay', vnpayRoutes);
 app.use('/api/zalopay', zalopayRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // App error middleware
 app.use(errorMiddleware);
