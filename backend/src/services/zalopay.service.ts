@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '../config/env.config';
+import { ZALOPAY_APP_ID, ZALOPAY_KEY1 } from '../config/env.config';
 import {
     ZaloPayCreateOrderResponse,
     ZaloPayQueryOrderResponse,
@@ -44,13 +44,13 @@ class ZaloPayService {
     async queryOrder(app_trans_id: string): Promise<ZaloPayQueryOrderResponse> {
         try {
             const postData: any = {
-                app_id: config.ZALOPAY_APP_ID,
+                app_id: ZALOPAY_APP_ID,
                 app_trans_id
             };
 
             // Query order MAC format: appid|app_trans_id|key1
-            const macData = `${postData.app_id}|${postData.app_trans_id}|${config.ZALOPAY_KEY1}`;
-            postData.mac = generateZaloPaySignature(macData, config.ZALOPAY_KEY1);
+            const macData = `${postData.app_id}|${postData.app_trans_id}|${ZALOPAY_KEY1}`;
+            postData.mac = generateZaloPaySignature(macData, ZALOPAY_KEY1);
 
             const response = await axios.post(`${this.endpoint}/query`, postData, {
                 headers: {

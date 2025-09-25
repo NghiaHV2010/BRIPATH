@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import config from '../config/env.config';
+import { VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_URL, VNPAY_API, VNPAY_RETURN_URL } from '../config/env.config';
 
 export const generateVNPaySignature = (data: string, secretKey: string): string => {
     return crypto
@@ -51,7 +51,7 @@ export const sortObject = (obj: Record<string, any>): Record<string, any> => {
 export const createPaymentUrl = (params: Record<string, any>): string => {
     const sortedParams = sortObject(params);
     const querystring = require('qs');
-    return config.VNPAY_URL + '?' + querystring.stringify(sortedParams, { encode: false });
+    return VNPAY_URL + '?' + querystring.stringify(sortedParams, { encode: false });
 };
 
 export const formatAmount = (amount: number): number => {
@@ -84,14 +84,14 @@ export const createOrderData = (params: {
     const vnpParams: Record<string, any> = {
         vnp_Version: '2.1.0',
         vnp_Command: 'pay',
-        vnp_TmnCode: config.VNPAY_TMN_CODE,
+        vnp_TmnCode: VNPAY_TMN_CODE,
         vnp_Locale: params.locale || 'vn',
         vnp_CurrCode: 'VND',
         vnp_TxnRef: orderId,
         vnp_OrderInfo: params.orderInfo || `Thanh toan cho ma GD: ${orderId}`,
         vnp_OrderType: params.orderType || 'other',
         vnp_Amount: formatAmount(params.amount),
-        vnp_ReturnUrl: config.VNPAY_RETURN_URL,
+        vnp_ReturnUrl: VNPAY_RETURN_URL,
         vnp_IpAddr: ipAddr,
         vnp_CreateDate: createDate
     };
@@ -103,7 +103,7 @@ export const createOrderData = (params: {
     const sortedParams = sortObject(vnpParams);
     const querystring = require('qs');
     const signData = querystring.stringify(sortedParams, { encode: false });
-    const secureHash = generateVNPaySignature(signData, config.VNPAY_HASH_SECRET);
+    const secureHash = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
     
     vnpParams.vnp_SecureHash = secureHash;
     
@@ -127,15 +127,15 @@ export const createQueryData = (params: {
     const ipAddr = getClientIP(req);
     
     const orderInfo = `Truy van GD ma ${params.orderId}`;
-    const data = `${requestId}|2.1.0|querydr|${config.VNPAY_TMN_CODE}|${params.orderId}|${params.transDate}|${createDate}|${ipAddr}|${orderInfo}`;
-    const secureHash = generateVNPaySignature(data, config.VNPAY_HASH_SECRET);
+    const data = `${requestId}|2.1.0|querydr|${VNPAY_TMN_CODE}|${params.orderId}|${params.transDate}|${createDate}|${ipAddr}|${orderInfo}`;
+    const secureHash = generateVNPaySignature(data, VNPAY_HASH_SECRET);
     
     
     return {
         vnp_RequestId: requestId,
         vnp_Version: '2.1.0',
         vnp_Command: 'querydr',
-        vnp_TmnCode: config.VNPAY_TMN_CODE,
+        vnp_TmnCode: VNPAY_TMN_CODE,
         vnp_TxnRef: params.orderId,
         vnp_OrderInfo: orderInfo,
         vnp_TransactionDate: params.transDate,
@@ -154,7 +154,7 @@ export const verifyReturnSignature = (params: Record<string, any>): boolean => {
     const sortedParams = sortObject(params);
     const querystring = require('qs');
     const signData = querystring.stringify(sortedParams, { encode: false });
-    const signed = generateVNPaySignature(signData, config.VNPAY_HASH_SECRET);
+    const signed = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
     
     return secureHash === signed;
 };

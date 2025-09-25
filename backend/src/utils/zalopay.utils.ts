@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import config from '../config/env.config';
+import { ZALOPAY_APP_ID, ZALOPAY_KEY1, ZALOPAY_ENDPOINT, ZALOPAY_CALLBACK_URL } from '../config/env.config';
 export const generateZaloPaySignature = (data: string, key: string): string => {
     return crypto
         .createHmac('sha256', key)
@@ -39,7 +39,7 @@ export const parseAmount = (amount: number): number => {
 
 
 export const getZaloPayEndpoint = (): string => {
-    return config.ZALOPAY_ENDPOINT;
+    return ZALOPAY_ENDPOINT;
 };
 
 export const createOrderData = (params: {
@@ -59,7 +59,7 @@ export const createOrderData = (params: {
         const items = [{}];
         
         const order: any = {
-            app_id: config.ZALOPAY_APP_ID,
+            app_id: ZALOPAY_APP_ID,
             app_trans_id,
             app_user: params.app_user,
             app_time,
@@ -68,12 +68,12 @@ export const createOrderData = (params: {
             amount: params.amount,
             description: params.description,
             bank_code: params.bank_code || 'zalopayapp',
-            callback_url: config.ZALOPAY_CALLBACK_URL
+            callback_url: ZALOPAY_CALLBACK_URL
         };
         
         // Create MAC using format: appid|app_trans_id|appuser|amount|apptime|embeddata|item
         const macData = `${order.app_id}|${order.app_trans_id}|${order.app_user}|${order.amount}|${order.app_time}|${order.embed_data}|${order.item}`;
-        order.mac = generateZaloPaySignature(macData, config.ZALOPAY_KEY1);
+        order.mac = generateZaloPaySignature(macData, ZALOPAY_KEY1);
         
         return order;
     } catch (error) {
