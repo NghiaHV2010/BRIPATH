@@ -44473,6 +44473,7 @@ export namespace Prisma {
     address_country: string | null
     gender: $Enums.Gender | null
     is_deleted: boolean | null
+    last_loggedIn: Date | null
     created_at: Date | null
     updated_at: Date | null
     role_id: number | null
@@ -44491,6 +44492,7 @@ export namespace Prisma {
     address_country: string | null
     gender: $Enums.Gender | null
     is_deleted: boolean | null
+    last_loggedIn: Date | null
     created_at: Date | null
     updated_at: Date | null
     role_id: number | null
@@ -44509,6 +44511,7 @@ export namespace Prisma {
     address_country: number
     gender: number
     is_deleted: number
+    last_loggedIn: number
     created_at: number
     updated_at: number
     role_id: number
@@ -44537,6 +44540,7 @@ export namespace Prisma {
     address_country?: true
     gender?: true
     is_deleted?: true
+    last_loggedIn?: true
     created_at?: true
     updated_at?: true
     role_id?: true
@@ -44555,6 +44559,7 @@ export namespace Prisma {
     address_country?: true
     gender?: true
     is_deleted?: true
+    last_loggedIn?: true
     created_at?: true
     updated_at?: true
     role_id?: true
@@ -44573,6 +44578,7 @@ export namespace Prisma {
     address_country?: true
     gender?: true
     is_deleted?: true
+    last_loggedIn?: true
     created_at?: true
     updated_at?: true
     role_id?: true
@@ -44678,6 +44684,7 @@ export namespace Prisma {
     address_country: string | null
     gender: $Enums.Gender | null
     is_deleted: boolean
+    last_loggedIn: Date | null
     created_at: Date
     updated_at: Date
     role_id: number
@@ -44715,6 +44722,7 @@ export namespace Prisma {
     address_country?: boolean
     gender?: boolean
     is_deleted?: boolean
+    last_loggedIn?: boolean
     created_at?: boolean
     updated_at?: boolean
     role_id?: boolean
@@ -44749,6 +44757,7 @@ export namespace Prisma {
     address_country?: boolean
     gender?: boolean
     is_deleted?: boolean
+    last_loggedIn?: boolean
     created_at?: boolean
     updated_at?: boolean
     role_id?: boolean
@@ -44768,6 +44777,7 @@ export namespace Prisma {
     address_country?: boolean
     gender?: boolean
     is_deleted?: boolean
+    last_loggedIn?: boolean
     created_at?: boolean
     updated_at?: boolean
     role_id?: boolean
@@ -44787,12 +44797,13 @@ export namespace Prisma {
     address_country?: boolean
     gender?: boolean
     is_deleted?: boolean
+    last_loggedIn?: boolean
     created_at?: boolean
     updated_at?: boolean
     role_id?: boolean
   }
 
-  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "avatar_url" | "email" | "phone" | "address_street" | "address_ward" | "address_city" | "address_country" | "gender" | "is_deleted" | "created_at" | "updated_at" | "role_id", ExtArgs["result"]["users"]>
+  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "avatar_url" | "email" | "phone" | "address_street" | "address_ward" | "address_city" | "address_country" | "gender" | "is_deleted" | "last_loggedIn" | "created_at" | "updated_at" | "role_id", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cvs?: boolean | users$cvsArgs<ExtArgs>
     blogs?: boolean | users$blogsArgs<ExtArgs>
@@ -44850,6 +44861,7 @@ export namespace Prisma {
       address_country: string | null
       gender: $Enums.Gender | null
       is_deleted: boolean
+      last_loggedIn: Date | null
       created_at: Date
       updated_at: Date
       role_id: number
@@ -45303,6 +45315,7 @@ export namespace Prisma {
     readonly address_country: FieldRef<"users", 'String'>
     readonly gender: FieldRef<"users", 'Gender'>
     readonly is_deleted: FieldRef<"users", 'Boolean'>
+    readonly last_loggedIn: FieldRef<"users", 'DateTime'>
     readonly created_at: FieldRef<"users", 'DateTime'>
     readonly updated_at: FieldRef<"users", 'DateTime'>
     readonly role_id: FieldRef<"users", 'Int'>
@@ -46508,6 +46521,7 @@ export namespace Prisma {
     address_country: 'address_country',
     gender: 'gender',
     is_deleted: 'is_deleted',
+    last_loggedIn: 'last_loggedIn',
     created_at: 'created_at',
     updated_at: 'updated_at',
     role_id: 'role_id'
@@ -49109,6 +49123,7 @@ export namespace Prisma {
     address_country?: StringNullableFilter<"users"> | string | null
     gender?: EnumGenderNullableFilter<"users"> | $Enums.Gender | null
     is_deleted?: BoolFilter<"users"> | boolean
+    last_loggedIn?: DateTimeNullableFilter<"users"> | Date | string | null
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeFilter<"users"> | Date | string
     role_id?: IntFilter<"users"> | number
@@ -49142,6 +49157,7 @@ export namespace Prisma {
     address_country?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     is_deleted?: SortOrder
+    last_loggedIn?: SortOrderInput | SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
@@ -49178,6 +49194,7 @@ export namespace Prisma {
     address_country?: StringNullableFilter<"users"> | string | null
     gender?: EnumGenderNullableFilter<"users"> | $Enums.Gender | null
     is_deleted?: BoolFilter<"users"> | boolean
+    last_loggedIn?: DateTimeNullableFilter<"users"> | Date | string | null
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeFilter<"users"> | Date | string
     role_id?: IntFilter<"users"> | number
@@ -49211,6 +49228,7 @@ export namespace Prisma {
     address_country?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     is_deleted?: SortOrder
+    last_loggedIn?: SortOrderInput | SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
@@ -49237,6 +49255,7 @@ export namespace Prisma {
     address_country?: StringNullableWithAggregatesFilter<"users"> | string | null
     gender?: EnumGenderNullableWithAggregatesFilter<"users"> | $Enums.Gender | null
     is_deleted?: BoolWithAggregatesFilter<"users"> | boolean
+    last_loggedIn?: DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
     created_at?: DateTimeWithAggregatesFilter<"users"> | Date | string
     updated_at?: DateTimeWithAggregatesFilter<"users"> | Date | string
     role_id?: IntWithAggregatesFilter<"users"> | number
@@ -51527,6 +51546,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -51559,6 +51579,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -51591,6 +51612,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -51623,6 +51645,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -51655,6 +51678,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -51673,6 +51697,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -51690,6 +51715,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -53860,6 +53886,7 @@ export namespace Prisma {
     address_country?: SortOrder
     gender?: SortOrder
     is_deleted?: SortOrder
+    last_loggedIn?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
@@ -53882,6 +53909,7 @@ export namespace Prisma {
     address_country?: SortOrder
     gender?: SortOrder
     is_deleted?: SortOrder
+    last_loggedIn?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
@@ -53900,6 +53928,7 @@ export namespace Prisma {
     address_country?: SortOrder
     gender?: SortOrder
     is_deleted?: SortOrder
+    last_loggedIn?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     role_id?: SortOrder
@@ -57280,6 +57309,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -57311,6 +57341,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -57358,6 +57389,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -57389,6 +57421,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -57519,6 +57552,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -57550,6 +57584,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -57648,6 +57683,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -57679,6 +57715,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -57710,6 +57747,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -57741,6 +57779,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -57788,6 +57827,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -57819,6 +57859,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -58081,6 +58122,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -58112,6 +58154,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -58243,6 +58286,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -58274,6 +58318,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -58691,6 +58736,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     blogs?: blogsCreateNestedManyWithoutUsersInput
@@ -58722,6 +58768,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -58995,6 +59042,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     blogs?: blogsUpdateManyWithoutUsersNestedInput
@@ -59026,6 +59074,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -59404,6 +59453,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -59435,6 +59485,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -59545,6 +59596,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -59576,6 +59628,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -59742,6 +59795,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -59773,6 +59827,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -59883,6 +59938,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -59914,6 +59970,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -60433,6 +60490,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -60464,6 +60522,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -60511,6 +60570,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -60542,6 +60602,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -60573,6 +60634,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -60604,6 +60666,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -60678,6 +60741,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -60709,6 +60773,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -60805,6 +60870,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -60836,6 +60902,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -60927,6 +60994,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -60958,6 +61026,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -61299,6 +61368,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -61330,6 +61400,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsUncheckedCreateNestedManyWithoutUsersInput
@@ -61390,6 +61461,7 @@ export namespace Prisma {
     address_country?: StringNullableFilter<"users"> | string | null
     gender?: EnumGenderNullableFilter<"users"> | $Enums.Gender | null
     is_deleted?: BoolFilter<"users"> | boolean
+    last_loggedIn?: DateTimeNullableFilter<"users"> | Date | string | null
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeFilter<"users"> | Date | string
     role_id?: IntFilter<"users"> | number
@@ -61463,6 +61535,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -61494,6 +61567,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -61602,6 +61676,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -61633,6 +61708,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -61721,6 +61797,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -61752,6 +61829,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -61868,6 +61946,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -61899,6 +61978,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -61930,6 +62010,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -61961,6 +62042,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -62008,6 +62090,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -62039,6 +62122,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -62070,6 +62154,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     cvs?: cvsCreateNestedManyWithoutUsersInput
@@ -62101,6 +62186,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
     role_id: number
@@ -62148,6 +62234,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -62179,6 +62266,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     role_id?: IntFieldUpdateOperationsInput | number
@@ -64001,6 +64089,7 @@ export namespace Prisma {
     address_country?: string | null
     gender?: $Enums.Gender | null
     is_deleted?: boolean
+    last_loggedIn?: Date | string | null
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -64018,6 +64107,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUpdateManyWithoutUsersNestedInput
@@ -64049,6 +64139,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     cvs?: cvsUncheckedUpdateManyWithoutUsersNestedInput
@@ -64080,6 +64171,7 @@ export namespace Prisma {
     address_country?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     is_deleted?: BoolFieldUpdateOperationsInput | boolean
+    last_loggedIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }

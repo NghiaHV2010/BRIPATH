@@ -6,6 +6,7 @@ import { authRoute, cvRouter, vnpayRoutes, zalopayRoutes } from './routes';
 import passport from './config/passport.config';
 import { FRONTEND_URL, PORT } from './config/env.config';
 import fileUpload from "express-fileupload";
+import "./jobs/subscriptionReminder";
 
 const app = express();
 

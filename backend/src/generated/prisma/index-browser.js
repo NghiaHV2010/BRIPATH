@@ -458,6 +458,7 @@ exports.Prisma.UsersScalarFieldEnum = {
   address_country: 'address_country',
   gender: 'gender',
   is_deleted: 'is_deleted',
+  last_loggedIn: 'last_loggedIn',
   created_at: 'created_at',
   updated_at: 'updated_at',
   role_id: 'role_id'

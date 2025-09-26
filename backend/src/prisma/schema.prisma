@@ -432,6 +432,7 @@ model users {
   address_country        String?                  @db.VarChar(50)
   gender                 Gender?
   is_deleted             Boolean                  @default(false)
+  last_loggedIn          DateTime?
   created_at             DateTime                 @default(now())
   updated_at             DateTime                 @updatedAt
   role_id                Int
