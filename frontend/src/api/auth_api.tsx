@@ -22,4 +22,9 @@ export const sendRegisterEmail = async () => {
   return res.data;
 };
 
+export const verifyRegisterEmail = async (token: string) => {
+  const res = await axios.get(`${BASE_URL}/register/email/${token}`, { withCredentials: true });
+  return res.data;
+};
+
 export const getGoogleLoginUrl = () => `${BASE_URL}/login/google`;

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import { ForgotPasswordPage, LoginPage, RegisterPage, PersonalityQuizPage, SubscriptionPlansPage, SubscriptionDetailPage } from './pages';
+import { ForgotPasswordPage, LoginPage, RegisterPage, EmailVerificationPage, PersonalityQuizPage, SubscriptionPlansPage, SubscriptionDetailPage } from './pages';
 
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/register/email/:token" element={<EmailVerificationPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/quiz" element={<PersonalityQuizPage />} />
       <Route path="/subscriptions" element={<SubscriptionPlansPage />} />

@@ -4,12 +4,43 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
+import jwt from "jsonwebtoken";
+import { ACCESS_SECRET, GMAIL_USER } from "../config/env.config";
+import crypto from "crypto";
+import transporter from "../config/nodemailer.config";
+import emailTemplate from "../constants/emailTemplate";
 
 const prisma = new PrismaClient();
 
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * Validate email
+ * @param email - chuỗi email cần validate
+ * @returns true nếu email hợp lệ, false nếu không
+ */
+export function validateEmail(email: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email.trim());
+}
+
+export const validateRegisterInput = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { username, email, password } = req.body;
+
+        if (!username || !email || !password) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Please fill all data!"));
+        }
+
+        if (username.length < 6) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Username is too short!"));
+        }
+
+        if (password.length < 8) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Password is not secure! (Minium lenght is 8)"));
+        }
+
+        if (!validateEmail(email)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Email is invalid pattern!"));
+        }
 
         const isExisted = await prisma.users.findFirst({
             where: {
@@ -24,23 +55,97 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
             return next(errorHandler(HTTP_ERROR.CONFLICT, "Email is already existed!"));
         }
 
+        const data = jwt.sign({ username, email, password }, ACCESS_SECRET, { expiresIn: "30m" });
+
+        res.cookie("data", data, {
+            maxAge: 30 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            message: "Successfully!"
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const sendOTP = async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.user as { email: string };
+
+    const buf = crypto.randomBytes(32);
+    const otp = jwt.sign({ otp: buf.toString('hex') }, ACCESS_SECRET, { expiresIn: "5m" });
+
+    const url = `http://localhost:5173/register/email/${otp}`;
+
+    transporter.sendMail({
+        from: GMAIL_USER,
+        to: `${email}`,
+        subject: "BRIPATH - Email Verification",
+        html: emailTemplate(url)
+    },
+        (error, info) => {
+            if (error) return console.log(error, 'Error sending email');
+
+            res.cookie("otp", otp, {
+                maxAge: 5 * 60 * 1000,
+                httpOnly: true,
+                sameSite: "strict",
+                secure: false
+            });
+
+            res.status(HTTP_SUCCESS.OK).json({
+                message: "Email has sent to your mailbox"
+            })
+        }
+    );
+}
+
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        type user = {
+            email: string,
+            username: string,
+            password: string,
+        }
+
+        const { email, username, password }: user = req.user as user;
+
+        const { otp }: { otp: string } = req.params as { otp: string };
+
+        if (!otp) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP invalid!"));
+        }
+
+        const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
+
+
+        // @ts-ignore
+        if (req.otp.otp !== otpDecoded.otp) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP invalid!"));
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password, salt);
 
-        const user = await prisma.users.create({
-            data: {
-                username,
-                email,
-                password: hashPassword,
-                role_id: 1
-            }
+        await prisma.$transaction(async (tx) => {
+            const user = await tx.users.create({
+                data: {
+                    username,
+                    email,
+                    password: hashPassword,
+                    role_id: 1
+                }
+            });
         });
 
-        if (user) {
-            return res.status(HTTP_SUCCESS.CREATED).json({
-                message: "Register Successfully!"
-            });
-        }
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            message: "Register Successfully!"
+        });
+
     } catch (error) {
         next(error);
     }
@@ -117,11 +222,4 @@ export const googleLogin = (req: Request, res: Response) => {
             avatar: user.avatar_url
         }
     });
-}
-
-
-const generateRandomCode = (): number => {
-    const minRange = 100000;
-    const maxRange = 999999
-    return Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
 }
