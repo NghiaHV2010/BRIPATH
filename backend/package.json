@@ -15,6 +15,7 @@
   "dependencies": {
     "@arcjet/inspect": "^1.0.0-beta.12",
     "@arcjet/node": "^1.0.0-beta.12",
+    "@google/genai": "^1.20.0",
     "@prisma/client": "^6.16.2",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
@@ -24,6 +25,7 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

@@ -30,7 +30,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             }
 
             //@ts-ignore
-            userId = refreshToken.userId;
+            userId = refreshTokenDecoded.userId;
 
             newAccessToken = jwt.sign({ userId }, ACCESS_SECRET, {
                 expiresIn: "45m"
@@ -63,7 +63,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         });
 
         if (!user) {
-            next(errorHandler(HTTP_ERROR.NOT_FOUND, "User not found!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "User not found!"));
         }
 
         //@ts-ignore

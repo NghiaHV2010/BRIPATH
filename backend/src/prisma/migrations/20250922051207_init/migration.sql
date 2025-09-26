@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- CreateEnum
 CREATE TYPE "bripath"."ApplicantsStatus" AS ENUM ('Đang chờ', 'Chấp nhận', 'Từ chối');
 

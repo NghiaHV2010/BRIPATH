@@ -104,7 +104,7 @@ export const createOrderData = (params: {
     const querystring = require('qs');
     const signData = querystring.stringify(sortedParams, { encode: false });
     const secureHash = generateVNPaySignature(signData, VNPAY_HASH_SECRET);
-
+    
     vnpParams.vnp_SecureHash = secureHash;
 
     return {
@@ -130,7 +130,6 @@ export const createQueryData = (params: {
     const data = `${requestId}|2.1.0|querydr|${VNPAY_TMN_CODE}|${params.orderId}|${params.transDate}|${createDate}|${ipAddr}|${orderInfo}`;
     const secureHash = generateVNPaySignature(data, VNPAY_HASH_SECRET);
 
-
     return {
         vnp_RequestId: requestId,
         vnp_Version: '2.1.0',
@@ -144,7 +143,6 @@ export const createQueryData = (params: {
         vnp_SecureHash: secureHash
     };
 };
-
 
 export const verifyReturnSignature = (params: Record<string, any>): boolean => {
     const secureHash = params.vnp_SecureHash;
@@ -162,4 +160,3 @@ export const verifyReturnSignature = (params: Record<string, any>): boolean => {
 export const verifyIPNSignature = (params: Record<string, any>): boolean => {
     return verifyReturnSignature(params);
 };
-

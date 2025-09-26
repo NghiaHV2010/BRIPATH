@@ -5,22 +5,12 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET, GMAIL_USER } from "../config/env.config";
+import { ACCESS_SECRET } from "../config/env.config";
 import crypto from "crypto";
-import transporter from "../config/nodemailer.config";
 import emailTemplate from "../constants/emailTemplate";
+import { sendEmail, validateEmail } from "../utils";
 
 const prisma = new PrismaClient();
-
-/**
- * Validate email
- * @param email - chuỗi email cần validate
- * @returns true nếu email hợp lệ, false nếu không
- */
-export function validateEmail(email: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email.trim());
-}
 
 export const validateRegisterInput = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -77,31 +67,27 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
     const { email } = req.user as { email: string };
 
     const buf = crypto.randomBytes(32);
-    const otp = jwt.sign({ otp: buf.toString('hex') }, ACCESS_SECRET, { expiresIn: "5m" });
+    const otp = jwt.sign({ otp: buf.toString('hex') }, ACCESS_SECRET, { expiresIn: "10m" });
 
     const url = `http://localhost:5173/register/email/${otp}`;
 
-    transporter.sendMail({
-        from: GMAIL_USER,
-        to: `${email}`,
-        subject: "BRIPATH - Email Verification",
-        html: emailTemplate(url)
-    },
-        (error, info) => {
-            if (error) return console.log(error, 'Error sending email');
+    try {
+        sendEmail(email, "BRIPATH - Verify Email", emailTemplate(url));
 
-            res.cookie("otp", otp, {
-                maxAge: 5 * 60 * 1000,
-                httpOnly: true,
-                sameSite: "strict",
-                secure: false
-            });
+        res.cookie("otp", otp, {
+            maxAge: 10 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false
+        });
 
-            res.status(HTTP_SUCCESS.OK).json({
-                message: "Email has sent to your mailbox"
-            })
-        }
-    );
+        res.status(HTTP_SUCCESS.OK).json({
+            message: "Email has sent to your mailbox"
+        })
+    } catch (error) {
+        next(error);
+    }
+
 }
 
 export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
@@ -122,7 +108,6 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
 
         const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
 
-
         // @ts-ignore
         if (req.otp.otp !== otpDecoded.otp) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP invalid!"));
@@ -142,6 +127,10 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
             });
         });
 
+        res.cookie("data", '', { maxAge: 0 });
+
+        res.cookie("otp", '', { maxAge: 0 });
+
         return res.status(HTTP_SUCCESS.CREATED).json({
             message: "Register Successfully!"
         });
@@ -155,7 +144,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const { email, password } = req.body;
 
-        const user = await prisma.users.findFirst({
+        let user = await prisma.users.findFirst({
             where: {
                 email
             }
@@ -170,6 +159,15 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         if (!isPasswordValid) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid Credentials!"));
         }
+
+        user = await prisma.users.update({
+            where: {
+                email
+            },
+            data: {
+                last_loggedIn: new Date()
+            }
+        });
 
         generateToken(user.id, res);
 
