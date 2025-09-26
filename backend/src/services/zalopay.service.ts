@@ -20,6 +20,7 @@ class ZaloPayService {
     constructor() {
         this.endpoint = getZaloPayEndpoint();
     }
+    
     async createOrder(params: CreateOrderParams): Promise<ZaloPayCreateOrderResponse> {
         try {
             const orderData = createOrderData(params);
@@ -64,10 +65,6 @@ class ZaloPayService {
             throw new Error('Failed to query ZaloPay order');
         }
     }
-
-
-
-
 }
 
 export default new ZaloPayService();

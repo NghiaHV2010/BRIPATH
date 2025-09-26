@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { ZALOPAY_APP_ID, ZALOPAY_CALLBACK_URL, ZALOPAY_ENDPOINT, ZALOPAY_KEY1 } from '../config/env.config';
+
 export const generateZaloPaySignature = (data: string, key: string): string => {
     return crypto
         .createHmac('sha256', key)
@@ -28,7 +29,6 @@ export const createMac = (data: Record<string, any>, key: string): string => {
     return generateZaloPaySignature(macData, key);
 };
 
-
 export const formatAmount = (amount: number): number => {
     return Math.round(amount * 100);
 };
@@ -36,7 +36,6 @@ export const formatAmount = (amount: number): number => {
 export const parseAmount = (amount: number): number => {
     return amount / 100;
 };
-
 
 export const getZaloPayEndpoint = (): string => {
     return ZALOPAY_ENDPOINT;

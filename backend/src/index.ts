@@ -2,7 +2,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute, cvRouter, vnpayRoutes, zalopayRoutes } from './routes';
+import { authRoute,cvRouter, vnpayRoutes, zalopayRoutes, paymentRoutes, dashboardRoutes } from './routes';
 import passport from './config/passport.config';
 import { FRONTEND_URL, PORT } from './config/env.config';
 import fileUpload from "express-fileupload";
@@ -23,10 +23,12 @@ app.use(fileUpload());
 app.use(passport.initialize());
 
 // App routes
-app.use(authRoute);
-app.use(vnpayRoutes);
-app.use(cvRouter);
-app.use(zalopayRoutes);
+app.use('/api', authRoute);
+app.use('/api/vnpay', vnpayRoutes);
+app.use('/api/zalopay', zalopayRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api', cvRouter);
 
 // App error middleware
 app.use(errorMiddleware);

@@ -1,17 +1,11 @@
-import { Router, Request, Response } from 'express';
-import {
-    validateCreateOrderRequest,
-    validateQueryOrderRequest
-} from '../middlewares/vnpay.middleware';
+import { Request, Response, NextFunction } from 'express';
+import VNPayService from '../services/vnpay.service';
 import { VNPAY_RESPONSE_CODE } from '../types/vnpay.types';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { verifyReturnSignature, parseAmount, sortObject, generateVNPaySignature } from '../utils/vnpay.utils';
 import { VNPAY_HASH_SECRET } from '../config/env.config';
-import VNPayService from '../services/vnpay.service';
 
-const vnPayRouter = Router();
-
-vnPayRouter.post('/create-payment-url', validateCreateOrderRequest, async (req: Request, res: Response) => {
+export const createPaymentUrl = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { amount, orderInfo, bankCode, locale, orderType } = req.body;
 
@@ -25,18 +19,18 @@ vnPayRouter.post('/create-payment-url', validateCreateOrderRequest, async (req: 
 
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: result
+            data: {
+                vnp_TxnRef: result.vnp_TxnRef,
+                payment_url: result.payment_url
+            }
         });
     } catch (error) {
         console.error('Create payment URL error:', error);
-        res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        next(error);
     }
-});
+};
 
-vnPayRouter.get('/return', async (req: Request, res: Response) => {
+export const handleReturn = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const vnpParams = req.query;
         const isValidSignature = verifyReturnSignature(vnpParams as Record<string, any>);
@@ -72,14 +66,11 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('VNPay return error:', error);
-        res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        next(error);
     }
-});
+};
 
-vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
+export const handleIPN = async (req: Request, res: Response, next: NextFunction) => {
     let result: any = {};
 
     try {
@@ -139,9 +130,9 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
         result.Message = 'Internal error';
         res.status(200).json(result);
     }
-});
+};
 
-vnPayRouter.post('/query', validateQueryOrderRequest, async (req: Request, res: Response) => {
+export const queryOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { orderId, transDate } = req.body;
 
@@ -175,11 +166,6 @@ vnPayRouter.post('/query', validateQueryOrderRequest, async (req: Request, res: 
         }
     } catch (error) {
         console.error('Query order error:', error);
-        res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        next(error);
     }
-});
-
-export default vnPayRouter;
+};
