@@ -9,7 +9,6 @@ type cookieConfigResponse = {
     secure: boolean
 }
 
-
 const accessTokenExpiryTimeInMiliSecond: number = 45 * 60 * 1000;
 
 const refreshTokenExpiryTimeInMiliSecond: number = 24 * 60 * 60 * 1000;

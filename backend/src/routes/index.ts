@@ -4,3 +4,5 @@ export { default as authRoute } from "./auth.routes";
 export { default as paymentRoutes } from './payment.routes';
 export { default as dashboardRoutes } from './dashboard.routes';
 export { default as cvRouter } from "./cv.routes";
+export { default as userRouter } from "./user.routes";
+export { default as companyRouter } from "./company.routes";

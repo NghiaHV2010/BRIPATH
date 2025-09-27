@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { deleteCV, getUserCV, uploadCV } from "../controllers/cv.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { authenticationMiddleware } from "../middlewares/auth.middleware";
 
 const cvRouter = Router();
 
-cvRouter.post('/cv/upload', authMiddleware, uploadCV);
+cvRouter.post('/cv/upload', authenticationMiddleware, uploadCV);
 
-cvRouter.get('/cv', authMiddleware, getUserCV);
+cvRouter.get('/cv', authenticationMiddleware, getUserCV);
 
-cvRouter.delete('/cv/:id', authMiddleware, deleteCV);
+cvRouter.delete('/cv/:id', authenticationMiddleware, deleteCV);
 
 export default cvRouter;
