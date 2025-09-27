@@ -30,24 +30,41 @@ export default function FormRegister() {
       return;
     }
     if (password !== confirmPassword) {
-      // Không cần set error ở đây vì đã có real-time validation
       return;
     }
     setError("");
     setIsLoading(true);
+    
     try {
       // Step 1: Check if account exists with username/email/password
+      console.log('Step 1: Validating registration...', { username, email });
       await doRegisterValidate(username, email, password);
+      console.log('Step 1: Validation successful');
       
       // Step 2: If validation passes, immediately send verification email
+      console.log('Step 2: Sending verification email...');
       await doSendRegisterEmail();
+      console.log('Step 2: Email sent successfully');
       
       // Set initial cooldown when email is sent
       const cooldownEnd = Date.now() + 5 * 60 * 1000; // 5 minutes
       localStorage.setItem(`verifyEmailCooldown_${email}`, cooldownEnd.toString());
       setStep('sent');
-    } catch {
-      setError(storeError || 'Đăng ký thất bại');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      
+      // Wait a bit for store to update, then get the error
+      setTimeout(() => {
+        const currentStoreError = storeError;
+        console.log('Store error:', currentStoreError);
+        
+        if (currentStoreError) {
+          setError(currentStoreError);
+        } else {
+          // Fallback error message
+          setError('Đăng ký thất bại. Vui lòng kiểm tra thông tin và thử lại.');
+        }
+      }, 200);
     } finally {
       setIsLoading(false);
     }

@@ -219,6 +219,7 @@ export function SubscriptionCard({ plan, billingCycle, onSelect }: SubscriptionC
 
         {/* CTA Button */}
         <Button
+          variant="custom"
           onClick={() => onSelect(plan.id)}
           className={`w-full py-3 lg:py-4 text-base lg:text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg ${
             plan.tier === 'gold' 

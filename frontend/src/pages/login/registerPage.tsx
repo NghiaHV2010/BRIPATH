@@ -1,5 +1,10 @@
 import FormRegister from "../../components/login/formRegister";
+import { Layout } from "../../components";
 
 export default function RegisterPage() {
-  return <FormRegister />;
+  return (
+    <Layout showNavbar={false}>
+      <FormRegister />
+    </Layout>
+  );
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://localhost:3000/api";
 
 export const login = async (email: string, password: string) => {
   const res = await axios.post(`${BASE_URL}/login`, { email, password }, { withCredentials: true });
@@ -23,7 +23,9 @@ export const sendRegisterEmail = async () => {
 };
 
 export const verifyRegisterEmail = async (token: string) => {
-  const res = await axios.get(`${BASE_URL}/register/email/${token}`, { withCredentials: true });
+  console.log('🔐 Verifying token:', token);
+  const res = await axios.get(`${BASE_URL}/register/email/${token}`);
+  console.log('✅ Verification success:', res.data);
   return res.data;
 };
 

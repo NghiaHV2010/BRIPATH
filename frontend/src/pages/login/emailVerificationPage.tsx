@@ -10,21 +10,29 @@ export default function EmailVerificationPage() {
 
   useEffect(() => {
     const verifyEmail = async () => {
+      console.log('🔍 Raw URL:', window.location.href);
+      console.log('🎯 Token from useParams:', token);
+      console.log('📏 Token length:', token?.length);
+      
       if (!token) {
+        console.error('❌ No token found in URL params');
         setStatus('error');
         setError('Token không hợp lệ');
         return;
       }
 
       try {
-        await verifyRegisterEmail(token);
+        console.log('🚀 Starting verification...');
+        const result = await verifyRegisterEmail(token);
+        console.log('✅ Verification result:', result);
         setStatus('success');
         
         // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate('/login');
         }, 3000);
-      } catch {
+      } catch (error) {
+        console.error('❌ Verification error:', error);
         setStatus('error');
         setError('Xác minh thất bại. Token có thể đã hết hạn hoặc không hợp lệ.');
       }

@@ -16,7 +16,7 @@ export default function FormLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Vui lòng nhập email và mật khẩu");
+      setError("Vui lòng nhập tên đăng nhập và mật khẩu");
       return;
     }
     setError("");
@@ -64,10 +64,10 @@ export default function FormLogin() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Email</label>
+                <label className="text-sm font-medium text-gray-700">Tên tài khoản</label>
                 <Input
-                  type="email"
-                  placeholder="example@gmail.com"
+                  type="text"
+                  placeholder="Nhập tên tài khoản"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"

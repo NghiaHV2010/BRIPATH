@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+/* Force immediate scroll to top */
+html, body {
+  scroll-behavior: auto !important;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ensure full screen stability and scroll to top */
+#root {
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Force scroll to top on page transitions */
+* {
+  scroll-behavior: auto !important;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -173,17 +203,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-}
-
-html {
-  overflow-x: hidden;
-}
-
-/* Ensure full screen stability */
-#root {
-  width: 100vw;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
 h1 {
