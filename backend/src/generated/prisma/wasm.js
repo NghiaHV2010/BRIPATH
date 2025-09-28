@@ -568,7 +568,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ADMIN\\Downloads\\BRIPATH\\backend\\src\\generated\\prisma",
+      "value": "D:\\Se8\\EXE201\\BRIPATH\\backend\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -582,7 +582,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ADMIN\\Downloads\\BRIPATH\\backend\\src\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\Se8\\EXE201\\BRIPATH\\backend\\src\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
