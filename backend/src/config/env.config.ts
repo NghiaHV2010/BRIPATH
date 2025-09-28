@@ -23,6 +23,7 @@ interface Config {
     GMAIL_USER: string;
     GMAIL_APP_PASSWORD: string;
     GEMINI_API_KEY: string;
+    OPENAI_API_KEY: string;
 }
 
 dotenv.config();
@@ -49,7 +50,8 @@ const config: Config = {
     ARCJET_KEY: process.env.ARCJET_KEY!,
     GMAIL_USER: process.env.GMAIL_USER!,
     GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD!,
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY!
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY!
 };
 
 export const {
@@ -74,6 +76,7 @@ export const {
     ARCJET_KEY,
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
-    GEMINI_API_KEY
+    GEMINI_API_KEY,
+    OPENAI_API_KEY
 } = config;
 

@@ -22,7 +22,7 @@ model applicants {
   job_id        String
   description   String?
   apply_date    DateTime         @default(now())
-  verified_date DateTime
+  verified_date DateTime?
   status        ApplicantsStatus @default(pending)
   feedback      String?
   cvs           cvs              @relation(fields: [cv_id], references: [id], onDelete: Cascade)
@@ -119,8 +119,8 @@ model companies {
   address_ward         String              @db.VarChar(50)
   address_city         String              @db.VarChar(50)
   address_country      String              @db.VarChar(50)
-  email                String              @unique @db.VarChar(50)
-  phone                String              @unique @db.VarChar(12)
+  email                String?             @unique @db.VarChar(50)
+  phone                String?             @unique @db.VarChar(12)
   business_certificate String?
   company_type         Company_Type        @default(business_househole)
   description          String?
@@ -128,17 +128,20 @@ model companies {
   background_url       String?
   employees            Int?
   is_verified          Boolean             @default(false)
-  fax_code             String?             @db.VarChar(20)
+  email_verified       Boolean             @default(false)
+  phone_verified       Boolean             @default(false)
+  fax_code             String?             @unique @db.VarChar(10)
   is_deleted           Boolean             @default(false)
   created_at           DateTime            @default(now())
   updated_at           DateTime            @updatedAt
   field_id             Int?
   label_id             Int?
   fields               fields?             @relation(fields: [field_id], references: [id])
-  users                users               @relation(fields: [id], references: [id])
+  users                users?
   companyLabels        companyLabels?      @relation(fields: [label_id], references: [id])
   feedbacks            feedbacks[]
   followedCompanies    followedCompanies[]
+  jobs                 jobs[]
 }
 
 model companyLabels {
@@ -283,6 +286,8 @@ model jobs {
   updated_at   DateTime               @updatedAt
   category_id  Int?
   label_id     Int?
+  company_id   String
+  companies    companies              @relation(fields: [company_id], references: [id])
   applicants   applicants[]
   categories   categories?            @relation(fields: [category_id], references: [id])
   jobLabels    jobLabels?             @relation(fields: [label_id], references: [id])
@@ -436,10 +441,12 @@ model users {
   created_at             DateTime                 @default(now())
   updated_at             DateTime                 @updatedAt
   role_id                Int
+  phone_verified         Boolean                  @default(false)
+  company_id             String?                  @unique
   cvs                    cvs[]
   blogs                  blogs[]
   careerPaths            careerPaths[]
-  companies              companies?
+  companies              companies?               @relation(fields: [company_id], references: [id], onDelete: Cascade)
   feedbacks              feedbacks[]
   followedCompanies      followedCompanies[]
   messages               messages[]

@@ -6,10 +6,9 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "../generated/prisma";
 import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
 
+const prisma = new PrismaClient();
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const prisma = new PrismaClient();
-
+export const authenticationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     let newAccessToken: string;
     let userId: string;
 
@@ -107,4 +106,33 @@ export const emailOTPMiddleware = async (req: Request, res: Response, next: Next
     // @ts-ignore
     req.otp = otpDecoded;
     next();
+}
+
+export const authorizationMiddleware = (role: string) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            // @ts-ignore
+            const user_id = req.user.id;
+
+            const user = await prisma.users.findFirst({
+                where: {
+                    id: user_id
+                },
+                include: {
+                    roles: true
+                }
+            });
+
+            console.log(user);
+
+
+            if (user?.roles.role_name !== role) {
+                return next(errorHandler(HTTP_ERROR.FORBIDDEN, "You don't have permission to do this request"));
+            }
+
+            next();
+        } catch (error) {
+            next(error);
+        }
+    }
 }

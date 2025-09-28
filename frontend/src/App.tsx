@@ -18,8 +18,13 @@ import {
   UploadCVPageWrapper,
   ProfilePageWrapper,
 } from "./pages";
+import { useAuthStore } from "./store/auth";
+import { Loader } from "lucide-react";
 
 function App() {
+  // @ts-expect-error
+  const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
+
   // Force scroll to top on app load/reload with multiple methods
   useEffect(() => {
     // Method 1: Immediate scroll
@@ -49,6 +54,18 @@ function App() {
       window.removeEventListener("load", handleLoad);
     };
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <Routes>

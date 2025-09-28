@@ -260,3 +260,178 @@ export const getPaymentStats = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getUserAccessStats = async (req: Request, res: Response) => {
+    try {
+        const { period = '30' } = req.query; // days
+        const days = parseInt(period as string);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        // Tổng số user đã từng đăng nhập
+        const totalUsersLoggedIn = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    not: null
+                },
+                is_deleted: false
+            }
+        });
+
+        // Số user đã đăng nhập trong khoảng thời gian
+        const usersLoggedInInPeriod = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    gte: startDate
+                },
+                is_deleted: false
+            }
+        });
+
+        // Số user đăng nhập hôm nay
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const usersLoggedInToday = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    gte: today,
+                    lt: tomorrow
+                },
+                is_deleted: false
+            }
+        });
+
+        // Số user đăng nhập tuần này
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const usersLoggedInThisWeek = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    gte: startOfWeek
+                },
+                is_deleted: false
+            }
+        });
+
+        // Số user đăng nhập tháng này
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const usersLoggedInThisMonth = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    gte: startOfMonth
+                },
+                is_deleted: false
+            }
+        });
+
+        // Thống kê theo ngày (7 ngày gần nhất)
+        const dailyUserStats = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const nextDate = new Date(date);
+            nextDate.setDate(nextDate.getDate() + 1);
+
+            const usersLoggedInOnDay = await prisma.users.count({
+                where: {
+                    last_loggedIn: {
+                        gte: date,
+                        lt: nextDate
+                    },
+                    is_deleted: false
+                }
+            });
+
+            dailyUserStats.push({
+                date: date.toLocaleDateString('vi-VN', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                }),
+                users: usersLoggedInOnDay,
+                fullDate: date.toISOString().split('T')[0]
+            });
+        }
+
+        // Thống kê theo tháng (12 tháng gần nhất)
+        const monthlyUserStats = [];
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const nextDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
+
+            const usersLoggedInInMonth = await prisma.users.count({
+                where: {
+                    last_loggedIn: {
+                        gte: date,
+                        lt: nextDate
+                    },
+                    is_deleted: false
+                }
+            });
+
+            monthlyUserStats.push({
+                month: date.toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }),
+                users: usersLoggedInInMonth,
+                year: date.getFullYear(),
+                monthNumber: date.getMonth() + 1
+            });
+        }
+
+        // User mới đăng ký trong tháng này
+        const newUsersThisMonth = await prisma.users.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth
+                },
+                is_deleted: false
+            }
+        });
+
+        // Tổng số user (không xóa)
+        const totalActiveUsers = await prisma.users.count({
+            where: {
+                is_deleted: false
+            }
+        });
+
+        // Tỷ lệ user hoạt động
+        const activeUserRate = totalActiveUsers > 0 ? (totalUsersLoggedIn / totalActiveUsers) * 100 : 0;
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: {
+                overview: {
+                    totalUsersLoggedIn,
+                    totalActiveUsers,
+                    activeUserRate: Math.round(activeUserRate * 100) / 100,
+                    newUsersThisMonth
+                },
+                periodStats: {
+                    period: `${days} days`,
+                    usersLoggedInInPeriod,
+                    usersLoggedInToday,
+                    usersLoggedInThisWeek,
+                    usersLoggedInThisMonth
+                },
+                dailyStats: dailyUserStats,
+                monthlyStats: monthlyUserStats,
+                summary: {
+                    activeUserText: `${totalUsersLoggedIn.toLocaleString()} / ${totalActiveUsers.toLocaleString()} users`,
+                    activityRateText: `${activeUserRate.toFixed(1)}% users active`,
+                    periodText: `${usersLoggedInInPeriod.toLocaleString()} users in last ${days} days`
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Dashboard user access stats error:', error);
+        res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};

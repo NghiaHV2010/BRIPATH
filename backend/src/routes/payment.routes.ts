@@ -6,13 +6,13 @@ import {
     updatePayment,
     deletePayment
 } from '../controllers/payment.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { authenticationMiddleware } from '../middlewares/auth.middleware';
 import { validateCreatePaymentRequest, validateUpdatePaymentRequest } from '../middlewares/payment.middleware';
 
 const paymentRouter = Router();
 
 // Apply auth middleware to all routes
-paymentRouter.use(authMiddleware);
+paymentRouter.use(authenticationMiddleware);
 
 // Payment routes
 paymentRouter.post('/', validateCreatePaymentRequest, createPayment);
