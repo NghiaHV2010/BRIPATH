@@ -6,3 +6,4 @@ export { default as dashboardRoutes } from './dashboard.routes';
 export { default as cvRouter } from "./cv.routes";
 export { default as userRouter } from "./user.routes";
 export { default as companyRouter } from "./company.routes";
+export { default as jobRouter } from "./job.routes";
