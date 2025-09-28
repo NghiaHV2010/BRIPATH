@@ -33,4 +33,6 @@ src/constants/prompt.ts
 *.sln
 *.sw?
 
-src/generated/prisma
+src/generated/*
+
+training.jsonl
