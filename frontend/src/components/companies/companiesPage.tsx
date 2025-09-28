@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
+import { CompanyCarousel } from "../ui";
 
 interface Company {
   id: number;
@@ -372,313 +373,319 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-4">
-            Danh sách công ty
-          </h1>
-          <p className="text-gray-600 text-base">
-            Khám phá các công ty hàng đầu và tìm kiếm cơ hội nghề nghiệp phù hợp
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Featured Companies Carousel */}
+      <CompanyCarousel companies={companies} />
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            {/* Search - Ô tìm kiếm lớn hơn */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Tìm kiếm
-              </label>
-              <input
-                type="text"
-                placeholder="Tên công ty, mô tả..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
+      <div className="py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-xl font-bold text-gray-900 mb-4">
+              Danh sách công ty
+            </h1>
+            <p className="text-gray-600 text-base">
+              Khám phá các công ty hàng đầu và tìm kiếm cơ hội nghề nghiệp phù
+              hợp
+            </p>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              {/* Search - Ô tìm kiếm lớn hơn */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Tìm kiếm
+                </label>
+                <input
+                  type="text"
+                  placeholder="Tên công ty, mô tả..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+
+              {/* Industry Filter - Input với datalist */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Ngành nghề
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nhập hoặc chọn ngành..."
+                  value={industryInput}
+                  onChange={(e) => setIndustryInput(e.target.value)}
+                  list="industries"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <datalist id="industries">
+                  <option value="" />
+                  {industries.map((industry) => (
+                    <option key={industry} value={industry} />
+                  ))}
+                </datalist>
+              </div>
+
+              {/* Location Filter - Input với datalist */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Địa điểm
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nhập hoặc chọn địa điểm..."
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  list="locations"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <datalist id="locations">
+                  <option value="" />
+                  {locations.map((location) => (
+                    <option key={location} value={location} />
+                  ))}
+                </datalist>
+              </div>
+
+              {/* Company Size Filter */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Quy mô công ty
+                </label>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  <option value="">Tất cả quy mô</option>
+                  {companySizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-2">
+                  Sắp xếp
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  <option value="default">Mặc định (mới nhất)</option>
+                  <option value="newest">Công ty mới thêm</option>
+                  <option value="name-asc">Tên A-Z</option>
+                  <option value="name-desc">Tên Z-A</option>
+                  <option value="rating-high">Đánh giá cao → thấp</option>
+                  <option value="rating-low">Đánh giá thấp → cao</option>
+                </select>
+              </div>
             </div>
 
-            {/* Industry Filter - Input với datalist */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Ngành nghề
-              </label>
-              <input
-                type="text"
-                placeholder="Nhập hoặc chọn ngành..."
-                value={industryInput}
-                onChange={(e) => setIndustryInput(e.target.value)}
-                list="industries"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
-              <datalist id="industries">
-                <option value="" />
-                {industries.map((industry) => (
-                  <option key={industry} value={industry} />
-                ))}
-              </datalist>
-            </div>
-
-            {/* Location Filter - Input với datalist */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Địa điểm
-              </label>
-              <input
-                type="text"
-                placeholder="Nhập hoặc chọn địa điểm..."
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                list="locations"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
-              <datalist id="locations">
-                <option value="" />
-                {locations.map((location) => (
-                  <option key={location} value={location} />
-                ))}
-              </datalist>
-            </div>
-
-            {/* Company Size Filter */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Quy mô công ty
-              </label>
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            {/* Clear Filters Button */}
+            <div className="mt-4 flex justify-end">
+              <Button
+                onClick={() => {
+                  setSearchTerm("");
+                  setIndustryInput("");
+                  setLocationInput("");
+                  setSelectedSize("");
+                  setSortBy("default");
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
               >
-                <option value="">Tất cả quy mô</option>
-                {companySizes.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Sắp xếp
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
-                <option value="default">Mặc định (mới nhất)</option>
-                <option value="newest">Công ty mới thêm</option>
-                <option value="name-asc">Tên A-Z</option>
-                <option value="name-desc">Tên Z-A</option>
-                <option value="rating-high">Đánh giá cao → thấp</option>
-                <option value="rating-low">Đánh giá thấp → cao</option>
-              </select>
+                🗑️ Xóa bộ lọc
+              </Button>
             </div>
           </div>
 
-          {/* Clear Filters Button */}
-          <div className="mt-4 flex justify-end">
-            <Button
-              onClick={() => {
-                setSearchTerm("");
-                setIndustryInput("");
-                setLocationInput("");
-                setSelectedSize("");
-                setSortBy("default");
-              }}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
-            >
-              🗑️ Xóa bộ lọc
-            </Button>
+          {/* Results Info */}
+          <div className="mb-6">
+            <p className="text-gray-600 text-sm">
+              Hiển thị {startIndex + 1}-
+              {Math.min(endIndex, filteredCompanies.length)} trong tổng số{" "}
+              {filteredCompanies.length} công ty
+            </p>
           </div>
-        </div>
 
-        {/* Results Info */}
-        <div className="mb-6">
-          <p className="text-gray-600 text-sm">
-            Hiển thị {startIndex + 1}-
-            {Math.min(endIndex, filteredCompanies.length)} trong tổng số{" "}
-            {filteredCompanies.length} công ty
-          </p>
-        </div>
+          {/* Companies Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {currentCompanies.map((company) => (
+              <div
+                key={company.id}
+                onClick={() => handleCompanyClick(company.id)}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 cursor-pointer border border-gray-200 hover:border-blue-300"
+              >
+                <div className="flex items-start space-x-4">
+                  {/* Logo */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={company.logo}
+                      alt={`${company.name} logo`}
+                      className="w-16 h-16 rounded-lg object-cover bg-gray-100"
+                    />
+                  </div>
 
-        {/* Companies Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {currentCompanies.map((company) => (
-            <div
-              key={company.id}
-              onClick={() => handleCompanyClick(company.id)}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 cursor-pointer border border-gray-200 hover:border-blue-300"
-            >
-              <div className="flex items-start space-x-4">
-                {/* Logo */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    className="w-16 h-16 rounded-lg object-cover bg-gray-100"
-                  />
-                </div>
-
-                {/* Company Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {company.name}
-                    </h3>
-                    <div className="flex items-center space-x-1">
-                      {renderStars(company.rating)}
+                  {/* Company Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        {company.name}
+                      </h3>
+                      <div className="flex items-center space-x-1">
+                        {renderStars(company.rating)}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                      {company.industry}
-                    </span>
-                    <span className="flex items-center">
-                      <svg
-                        className="w-3 h-3 mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      {company.location}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-600 text-xs mb-3 line-clamp-2">
-                    {company.description}
-                  </p>
-
-                  {/* Benefits và Experience/Salary Info */}
-                  <div className="mb-3">
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {company.benefits.slice(0, 3).map((benefit, index) => (
-                        <span
-                          key={index}
-                          className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full"
+                    <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                        {company.industry}
+                      </span>
+                      <span className="flex items-center">
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          {benefit}
-                        </span>
-                      ))}
-                      {company.benefits.length > 3 && (
-                        <span className="text-xs text-gray-500">
-                          +{company.benefits.length - 3} khác
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span className="flex items-center">
-                        💼 {company.experienceRequired}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {company.location}
                       </span>
-                      <span className="flex items-center">
-                        💰 {company.salaryRange}
-                      </span>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>{company.size}</span>
-                    <span className="flex items-center">
-                      <span className="text-yellow-500 font-medium">
-                        {company.rating}
+                    <p className="text-gray-600 text-xs mb-3 line-clamp-2">
+                      {company.description}
+                    </p>
+
+                    {/* Benefits và Experience/Salary Info */}
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {company.benefits.slice(0, 3).map((benefit, index) => (
+                          <span
+                            key={index}
+                            className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full"
+                          >
+                            {benefit}
+                          </span>
+                        ))}
+                        {company.benefits.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{company.benefits.length - 3} khác
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-4 text-xs text-gray-500">
+                        <span className="flex items-center">
+                          💼 {company.experienceRequired}
+                        </span>
+                        <span className="flex items-center">
+                          💰 {company.salaryRange}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{company.size}</span>
+                      <span className="flex items-center">
+                        <span className="text-yellow-500 font-medium">
+                          {company.rating}
+                        </span>
+                        <span className="mx-1">•</span>
+                        <span>{company.reviewCount} đánh giá</span>
                       </span>
-                      <span className="mx-1">•</span>
-                      <span>{company.reviewCount} đánh giá</span>
-                    </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center space-x-4">
-            <Button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              ← Trước
-            </Button>
-
-            <div className="flex space-x-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
-            </div>
-
-            <Button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              Tiếp →
-            </Button>
+            ))}
           </div>
-        )}
 
-        {/* No Results */}
-        {filteredCompanies.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-4">
+              <Button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M19 11H5m14-4H5m14-4H5m14-4H5"
-                />
-              </svg>
+                ← Trước
+              </Button>
+
+              <div className="flex space-x-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-md text-xs font-medium transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+              </div>
+
+              <Button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                Tiếp →
+              </Button>
             </div>
-            <h3 className="text-base font-medium text-gray-900 mb-2">
-              Không tìm thấy công ty nào
-            </h3>
-            <p className="text-gray-500 text-sm">
-              Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
-            </p>
-          </div>
-        )}
+          )}
+
+          {/* No Results */}
+          {filteredCompanies.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="w-12 h-12 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M19 11H5m14-4H5m14-4H5m14-4H5"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-base font-medium text-gray-900 mb-2">
+                Không tìm thấy công ty nào
+              </h3>
+              <p className="text-gray-500 text-sm">
+                Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

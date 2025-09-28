@@ -14,6 +14,7 @@ function getErrorMessage(e: unknown, fallback: string): string {
 type User = {
 	username?: string;
 	email?: string;
+	avatar?: string;
 	// add more fields as backend returns
 };
 

@@ -16,6 +16,7 @@ import {
   CompaniesPageWrapper,
   JobsPageWrapper,
   UploadCVPageWrapper,
+  ProfilePageWrapper,
 } from "./pages";
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
       <Route path="/companies" element={<CompaniesPageWrapper />} />
       <Route path="/jobs" element={<JobsPageWrapper />} />
       <Route path="/upload-cv" element={<UploadCVPageWrapper />} />
+      <Route path="/profile" element={<ProfilePageWrapper />} />
       <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
       <Route
         path="/subscriptions/:planId"
