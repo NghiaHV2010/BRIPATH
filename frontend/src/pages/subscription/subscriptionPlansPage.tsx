@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SubscriptionCard } from "../../components/subscription/subscriptionCard";
 import type { SubscriptionPlan } from "../../components/subscription/subscriptionCard";
 import { Button } from "../../components/ui/button";
+import { Layout } from "../../components";
 
 // Sample data - bạn có thể chỉnh sửa thông tin này
 const subscriptionPlans: SubscriptionPlan[] = [
@@ -85,17 +86,19 @@ export default function SubscriptionPlansPage() {
   const navigate = useNavigate();
 
   const handlePlanSelect = (planId: string) => {
+    window.scrollTo(0, 0);
     navigate(`/subscriptions/${planId}`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
+    <Layout>
+      <div className="min-h-screen bg-white">
+        {/* Background Effects */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-100/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-100/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Header Section */}
@@ -113,7 +116,11 @@ export default function SubscriptionPlansPage() {
           <div className="bg-white/50 backdrop-blur-sm rounded-full p-2 border border-white/20 shadow-lg">
             <div className="flex space-x-2">
               <Button
-                onClick={() => setBillingCycle('monthly')}
+                variant="custom"
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  setBillingCycle('monthly');
+                }}
                 className={`px-6 py-2 rounded-full transition-all duration-300 ${
                   billingCycle === 'monthly'
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
@@ -123,7 +130,11 @@ export default function SubscriptionPlansPage() {
                 Thanh toán hàng tháng
               </Button>
               <Button
-                onClick={() => setBillingCycle('yearly')}
+                variant="custom"
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  setBillingCycle('yearly');
+                }}
                 className={`px-6 py-2 rounded-full transition-all duration-300 relative ${
                   billingCycle === 'yearly'
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
@@ -200,6 +211,7 @@ export default function SubscriptionPlansPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

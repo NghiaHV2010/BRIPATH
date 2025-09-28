@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 
 interface QuizQuestion {
@@ -155,6 +155,24 @@ export default function PersonalityQuiz() {
   const [selectedAnswers, setSelectedAnswers] = useState<{ [questionId: number]: string[] }>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [results, setResults] = useState<{ career: string; match: number; description: string }[]>([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  
+  const quizSectionRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const startQuiz = () => {
+    setShowQuiz(true);
+    setTimeout(() => {
+      quizSectionRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
+  };
 
   const handleAnswerSelect = (questionId: number, optionId: string) => {
     const currentSelections = selectedAnswers[questionId] || [];
@@ -175,6 +193,7 @@ export default function PersonalityQuiz() {
   };
 
   const nextQuestion = () => {
+    window.scrollTo(0, 0);
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -183,6 +202,7 @@ export default function PersonalityQuiz() {
   };
 
   const previousQuestion = () => {
+    window.scrollTo(0, 0);
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
@@ -207,6 +227,7 @@ export default function PersonalityQuiz() {
     const careerRecommendations = generateCareerRecommendations(fieldCounts);
     setResults(careerRecommendations);
     setIsCompleted(true);
+    window.scrollTo(0, 0);
   };
 
   const generateCareerRecommendations = (fieldCounts: { [field: string]: number }) => {
@@ -298,24 +319,27 @@ export default function PersonalityQuiz() {
     setSelectedAnswers({});
     setIsCompleted(false);
     setResults([]);
+    setShowQuiz(false);
+    window.scrollTo(0, 0);
   };
 
   if (isCompleted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-4xl w-full">
-          {/* Header */}
-          <div className="text-center mb-12 animate-fade-in">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-6 animate-bounce-subtle shadow-2xl">
-              <span className="text-3xl">🎯</span>
+          <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-3xl p-8 shadow-2xl">
+            {/* Header */}
+            <div className="text-center mb-12 animate-fade-in">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-6 animate-bounce-subtle shadow-2xl">
+                <span className="text-3xl">🎯</span>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4">
+                Nghề nghiệp phù hợp với bạn!
+              </h1>
+              <p className="text-base text-purple-200 max-w-2xl mx-auto">
+                Dựa trên AI phân tích câu trả lời của bạn, đây là 3 ngành nghề được gợi ý hàng đầu
+              </p>
             </div>
-            <h1 className="text-5xl font-bold text-white mb-4">
-              Nghề nghiệp phù hợp với bạn!
-            </h1>
-            <p className="text-xl text-purple-200 max-w-2xl mx-auto">
-              Dựa trên AI phân tích câu trả lời của bạn, đây là 3 ngành nghề được gợi ý hàng đầu
-            </p>
-          </div>
 
           {/* Career Cards */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -326,7 +350,7 @@ export default function PersonalityQuiz() {
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
                     index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' : 
                     index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600' : 
                     'bg-gradient-to-br from-orange-400 to-orange-600'
@@ -334,14 +358,14 @@ export default function PersonalityQuiz() {
                     #{index + 1}
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-lg font-bold text-white">
                       {Math.round(result.match)}%
                     </div>
                     <div className="text-sm text-purple-200">phù hợp</div>
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold text-white mb-4">
+                <h3 className="text-lg font-bold text-white mb-4">
                   {result.career}
                 </h3>
                 
@@ -371,13 +395,13 @@ export default function PersonalityQuiz() {
             <div className="flex justify-center space-x-6">
               <Button 
                 onClick={restartQuiz}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-2xl"
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-2xl"
               >
                 🔄 Làm lại trắc nghiệm
               </Button>
               <Button 
-                onClick={() => window.location.href = '/'}
-                className="px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white text-lg font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-2xl"
+                onClick={() => window.location.href = '/quiz'}
+                className="px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-2xl"
               >
                 🏠 Về trang chủ
               </Button>
@@ -386,6 +410,7 @@ export default function PersonalityQuiz() {
             <p className="text-purple-300 text-sm">
               Kết quả này chỉ mang tính chất tham khảo. Hãy khám phá thêm để tìm ra con đường phù hợp nhất!
             </p>
+          </div>
           </div>
         </div>
       </div>
@@ -397,32 +422,85 @@ export default function PersonalityQuiz() {
   const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
-      {/* Background Effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
+    <div className="min-h-screen bg-white">
+      {/* Landing Section */}
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-4xl w-full text-center">
+          {/* Hero Content */}
+          <div className="mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-6 shadow-lg">
+              <span className="text-3xl">🎯</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Trắc nghiệm nghề nghiệp
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+              Khám phá con đường sự nghiệp phù hợp với bạn thông qua trắc nghiệm thông minh được hỗ trợ bởi AI. 
+              Chỉ mất 5-10 phút để có được gợi ý nghề nghiệp cá nhân hóa.
+            </p>
+          </div>
 
-      <div className="relative z-10 max-w-4xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-            Trắc nghiệm nghề nghiệp
-          </h1>
-          <p className="text-xl text-purple-200">
-            Khám phá nghề nghiệp phù hợp với bạn qua AI
+          {/* Features */}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-xl">🧠</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Thông minh</h3>
+              <p className="text-gray-600 text-sm">Phân tích tính cách và sở thích để đưa ra gợi ý chính xác</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-xl">⚡</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nhanh chóng</h3>
+              <p className="text-gray-600 text-sm">Chỉ 10 câu hỏi đơn giản, hoàn thành trong 5 phút</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-xl">🎯</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Cá nhân hóa</h3>
+              <p className="text-gray-600 text-sm">Kết quả được tùy chỉnh riêng cho từng người dùng</p>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <Button 
+            onClick={startQuiz}
+            className="px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+          >
+            🚀 Làm bài trắc nghiệm ngay
+          </Button>
+          
+          <p className="text-gray-500 text-sm mt-4">
+            Hoàn toàn miễn phí • Không cần đăng ký
           </p>
         </div>
+      </div>
+
+      {/* Quiz Section */}
+      {showQuiz && (
+        <div ref={quizSectionRef} className="min-h-screen bg-white flex items-center justify-center p-4">
+          {/* Background Effects */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-20 w-80 h-80 bg-pink-500/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl animate-pulse delay-500"></div>
+          </div>
+
+          <div className="relative z-10 max-w-6xl w-full">
+            {/* Quiz Area with Gradient Background */}
+            <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-3xl p-8 shadow-2xl">{/* Header */}
+    
 
         {/* Progress Section */}
         <div className="mb-8 animate-fade-in-up">
           <div className="flex justify-between items-center mb-4">
-            <div className="text-white/80 text-lg font-medium">
+            <div className="text-white/80 text-sm font-medium">
               Câu hỏi {currentQuestion + 1} / {quizQuestions.length}
             </div>
-            <div className="text-white/80 text-lg font-medium">
+            <div className="text-white/80 text-sm font-medium">
               {Math.round(progress)}% hoàn thành
             </div>
           </div>
@@ -434,18 +512,18 @@ export default function PersonalityQuiz() {
           </div>
         </div>
 
-        {/* Main Quiz Card */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl animate-fade-in-up">
-          {/* Question */}
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 leading-tight">
-              {question.question}
-            </h2>
-            <div className="flex items-center space-x-3 text-purple-200">
-              <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
-              <span className="text-lg">Chọn tối đa 3 đáp án phù hợp nhất với bạn</span>
+          {/* Main Quiz Card */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl animate-fade-in-up">
+            {/* Question */}
+            <div className="mb-10">
+              <h2 className="text-lg md:text-xl font-bold text-white mb-6 leading-tight">
+                {question.question}
+              </h2>
+              <div className="flex items-center space-x-3 text-purple-200">
+                <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
+                <span className="text-sm">Chọn tối đa 3 đáp án phù hợp nhất với bạn</span>
+              </div>
             </div>
-          </div>
 
           {/* Options Grid */}
           <div className="grid md:grid-cols-2 gap-5 mb-10">
@@ -470,7 +548,7 @@ export default function PersonalityQuiz() {
                       <div className="w-2.5 h-2.5 rounded-full bg-white animate-scale-in"></div>
                     )}
                   </div>
-                  <span className={`font-medium text-lg transition-all duration-200 leading-relaxed ${
+                  <span className={`font-medium text-sm transition-all duration-200 leading-relaxed ${
                     currentSelections.includes(option.id) ? 'text-white' : 'text-white/90 group-hover:text-white'
                   }`}>
                     {option.text}
@@ -495,7 +573,7 @@ export default function PersonalityQuiz() {
                   ></div>
                 ))}
               </div>
-              <span className="text-white/80 text-lg font-medium ml-3">
+              <span className="text-white/80 text-sm font-medium ml-3">
                 {currentSelections.length}/3 đã chọn
               </span>
             </div>
@@ -506,7 +584,7 @@ export default function PersonalityQuiz() {
             <Button
               onClick={previousQuestion}
               disabled={currentQuestion === 0}
-              className="flex-1 bg-white/20 hover:bg-white/30 text-white py-4 text-lg rounded-2xl font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-white/30"
+              className="flex-1 bg-white/20 hover:bg-white/30 text-white py-4 text-sm rounded-2xl font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-white/30"
             >
               ← Câu trước
             </Button>
@@ -514,7 +592,7 @@ export default function PersonalityQuiz() {
             <Button
               onClick={nextQuestion}
               disabled={currentSelections.length === 0}
-              className="flex-1 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-600 hover:via-blue-700 hover:to-purple-700 text-white py-4 text-lg rounded-2xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
+              className="flex-1 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-600 hover:via-blue-700 hover:to-purple-700 text-white py-4 text-sm rounded-2xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl"
             >
               {currentQuestion === quizQuestions.length - 1 ? 'Xem kết quả 🎯' : 'Câu tiếp →'}
             </Button>
@@ -523,11 +601,14 @@ export default function PersonalityQuiz() {
 
         {/* Fun Facts */}
         <div className="mt-8 text-center animate-fade-in">
-          <p className="text-purple-300/70 text-lg">
+          <p className="text-purple-300/70 text-sm">
             💡 Mẹo: Hãy chọn những đáp án phản ánh đúng nhất sở thích và điểm mạnh của bạn!
           </p>
         </div>
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,1 @@
+export { default as ProfilePageWrapper } from "./profilePageWrapper";

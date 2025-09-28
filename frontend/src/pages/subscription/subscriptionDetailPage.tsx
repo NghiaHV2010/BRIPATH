@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { PaymentMethodSelector, PaymentSuccess } from "../../components/subscription/paymentMethod";
+import { Layout } from "../../components/layout";
 import type { PaymentMethod } from "../../components/subscription/paymentMethod";
 import type { SubscriptionPlan } from "../../components/subscription/subscriptionCard";
 
@@ -181,12 +182,13 @@ export default function SubscriptionDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <Layout>
+      <div className="min-h-screen bg-white">
+        {/* Background Effects */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-100/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Back Button */}
@@ -352,6 +354,7 @@ export default function SubscriptionDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

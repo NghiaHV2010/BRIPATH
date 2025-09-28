@@ -1,9 +1,8 @@
 import { useState } from "react";
 import ForgotPassword from "../../components/login/forgotPassword";
-import VerifyCode from "../../components/login/verifyCode";
-import ResetPassword from "../../components/login/resetPassword";
+import { Button } from "../../components/ui/button";
 
-type Step = 'forgot' | 'verify' | 'reset' | 'success';
+type Step = 'forgot' | 'sent' | 'success';
 
 export default function ForgotPasswordPage() {
   const [currentStep, setCurrentStep] = useState<Step>('forgot');
@@ -11,20 +10,8 @@ export default function ForgotPasswordPage() {
 
   const handleEmailSubmit = (submittedEmail: string) => {
     setEmail(submittedEmail);
-    setCurrentStep('verify');
-  };
-
-  const handleVerificationSuccess = () => {
-    setCurrentStep('reset');
-  };
-
-  const handlePasswordReset = () => {
-    setCurrentStep('success');
-    
-    // Redirect to login page after 3 seconds
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 3000);
+    // Backend will send the reset link via email and handle redirect after click
+    setCurrentStep('sent');
   };
 
   if (currentStep === 'success') {
@@ -54,23 +41,30 @@ export default function ForgotPasswordPage() {
     );
   }
 
+  if (currentStep === 'sent') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-400 via-red-500 to-pink-600">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-6">📧</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Đã gửi email đặt lại mật khẩu</h2>
+          <p className="text-gray-600 mb-6">
+            Chúng tôi đã gửi một liên kết đặt lại mật khẩu đến {email || 'email của bạn'}. Vui lòng kiểm tra hộp thư và nhấp vào liên kết để tiếp tục.
+          </p>
+          <Button
+            onClick={() => (window.location.href = '/login')}
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-all duration-200"
+          >
+            Quay lại đăng nhập
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {currentStep === 'forgot' && (
         <ForgotPassword onEmailSubmit={handleEmailSubmit} />
-      )}
-      {currentStep === 'verify' && (
-        <VerifyCode 
-          onVerify={handleVerificationSuccess} 
-          type="password-reset"
-          email={email}
-        />
-      )}
-      {currentStep === 'reset' && (
-        <ResetPassword 
-          onPasswordReset={handlePasswordReset}
-          email={email}
-        />
       )}
     </div>
   );
