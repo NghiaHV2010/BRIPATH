@@ -14,10 +14,20 @@ import {
   QuizTestPageWrapper,
   QuizResultsPageWrapper,
   CompaniesPageWrapper,
+  CompanyDetailsPageWrapper,
   JobsPageWrapper,
+  JobDetailsPageWrapper,
   UploadCVPageWrapper,
   ProfilePageWrapper,
+  HomePage,
 } from "./pages";
+import { useAuthStore } from "./store/auth";
+import GuestOnly from "./components/auth/GuestOnly";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import SettingsPage from "./pages/settings/settingsPage";
+import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
+import SavedJobsPage from "./pages/jobs/savedJobsPage";
+import { Loader } from "lucide-react";
 import { useAuthStore } from './store/auth';
 import { Loader } from 'lucide-react';
 import VerifySMS from "./components/VerifySMS";
@@ -25,7 +35,6 @@ import LoginGoogle from "./components/LoginGoogle";
 
 
 function App() {
-  // @ts-ignore
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
 
   // Force scroll to top on app load/reload with multiple methods
@@ -64,14 +73,31 @@ function App() {
 
   if (isCheckingAuth && !authUser) {
     return (
-      <div className='flex items-center justify-center h-screen'>
-        <Loader className='size-10 animate-spin' />
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
       </div>
-    )
+    );
   }
 
   return (
     <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/login"
+        element={
+          <GuestOnly>
+            <LoginPage />
+          </GuestOnly>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <GuestOnly>
+            <RegisterPage />
+          </GuestOnly>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/sms" element={<VerifySMS />} />
       <Route path="/test" element={<LoginGoogle />} />
@@ -85,9 +111,38 @@ function App() {
       <Route path="/quiz/test" element={<QuizTestPageWrapper />} />
       <Route path="/quiz/results" element={<QuizResultsPageWrapper />} />
       <Route path="/companies" element={<CompaniesPageWrapper />} />
+      <Route
+        path="/companies/:companyId"
+        element={<CompanyDetailsPageWrapper />}
+      />
       <Route path="/jobs" element={<JobsPageWrapper />} />
+      <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
       <Route path="/upload-cv" element={<UploadCVPageWrapper />} />
       <Route path="/profile" element={<ProfilePageWrapper />} />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/jobs/applied"
+        element={
+          <ProtectedRoute>
+            <AppliedJobsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/jobs/saved"
+        element={
+          <ProtectedRoute>
+            <SavedJobsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
       <Route
         path="/subscriptions/:planId"

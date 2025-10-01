@@ -1,6 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
+import { useEffect, useRef, useState } from "react";
+import {
+  User as UserIcon,
+  LogOut,
+  Settings,
+  FileText,
+  Bookmark,
+  Briefcase,
+} from "lucide-react";
 
 interface NavbarProps {
   className?: string;
@@ -8,16 +17,41 @@ interface NavbarProps {
 
 export default function Navbar({ className = "" }: NavbarProps) {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  // Align with updated store keys: authUser instead of user/isAuthenticated
+  const authUser = useAuthStore((s) => s.authUser);
+  const logout = useAuthStore((s) => s.logout);
+  const [openMenu, setOpenMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const isAuthenticated = !!authUser;
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logout?.();
+      setOpenMenu(false);
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
+
+  // Close on outside click or ESC
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenu(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenMenu(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, []);
 
   return (
     <nav
@@ -68,67 +102,28 @@ export default function Navbar({ className = "" }: NavbarProps) {
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <>
-                {/* Notification Bell */}
-                <button className="relative p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-gray-100 transition-colors">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-5 5-5-5h5V3h5v14z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                    />
-                  </svg>
-                  {/* Notification Badge */}
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-
-                {/* User Avatar/Profile */}
-                <Link
-                  to="/profile"
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors group"
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setOpenMenu((o) => !o)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  aria-haspopup="menu"
+                  aria-expanded={openMenu}
                 >
-                  {user && "avatar" in user && user.avatar ? (
+                  {authUser?.avatar_url ? (
                     <img
-                      src={user.avatar}
-                      alt="Avatar"
+                      src={authUser.avatar_url}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
+                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                      <UserIcon className="w-5 h-5" />
                     </div>
                   )}
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 hidden sm:block">
-                    {user?.username || user?.email?.split("@")[0]}
+                  <span className="hidden md:inline text-sm font-medium text-gray-700">
+                    {authUser?.username || authUser?.email?.split("@")[0]}
                   </span>
                   <svg
-                    className="w-4 h-4 text-gray-400 group-hover:text-blue-600 hidden sm:block"
+                    className="w-4 h-4 text-gray-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -140,17 +135,63 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
-                </Link>
-
-                {/* Logout Button */}
-                <Button
-                  variant="custom"
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm rounded-lg transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
-                >
-                  Đăng xuất
-                </Button>
-              </>
+                </button>
+                {openMenu && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 animate-fade-in"
+                    role="menu"
+                  >
+                    <button
+                      onClick={() => {
+                        setOpenMenu(false);
+                        navigate("/settings");
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <Settings className="w-4 h-4" /> Cài đặt
+                    </button>
+                    <button
+                      onClick={() => {
+                        setOpenMenu(false);
+                        navigate("/profile");
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <FileText className="w-4 h-4" /> Quản lí hồ sơ
+                    </button>
+                    <button
+                      onClick={() => {
+                        setOpenMenu(false);
+                        navigate("/jobs/applied");
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <Briefcase className="w-4 h-4" /> Việc làm đã ứng tuyển
+                    </button>
+                    <button
+                      onClick={() => {
+                        setOpenMenu(false);
+                        navigate("/jobs/saved");
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <Bookmark className="w-4 h-4" /> Việc làm đã lưu
+                    </button>
+                    <div className="my-1 h-px bg-gray-100" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      role="menuitem"
+                    >
+                      <LogOut className="w-4 h-4" /> Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link
@@ -227,57 +268,25 @@ export default function Navbar({ className = "" }: NavbarProps) {
             <div className="pt-4 pb-3 border-t border-gray-200">
               {isAuthenticated ? (
                 <div className="space-y-3">
-                  {/* User Profile Mobile */}
                   <Link
                     to="/profile"
                     className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100"
                   >
-                    {user && "avatar" in user && user.avatar ? (
+                    {authUser?.avatar_url ? (
                       <img
-                        src={user.avatar}
+                        src={authUser.avatar_url}
                         alt="Avatar"
                         className="w-8 h-8 rounded-full object-cover mr-3"
                       />
                     ) : (
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <svg
-                          className="w-5 h-5 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
+                        <UserIcon className="w-5 h-5 text-blue-600" />
                       </div>
                     )}
                     <span className="text-sm font-medium text-gray-700">
-                      {user?.username || user?.email?.split("@")[0]}
+                      {authUser?.username || authUser?.email?.split("@")[0]}
                     </span>
                   </Link>
-
-                  {/* Notifications Mobile */}
-                  <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md flex items-center">
-                    <svg
-                      className="w-5 h-5 mr-3 text-gray-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                      />
-                    </svg>
-                    Thông báo (3)
-                  </button>
-
                   <Button
                     variant="custom"
                     onClick={handleLogout}

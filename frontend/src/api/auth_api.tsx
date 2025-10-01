@@ -1,32 +1,43 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:3000/api";
+import axiosConfig from "../config/axios.config";
 
 export const login = async (email: string, password: string) => {
-  const res = await axios.post(`${BASE_URL}/login`, { email, password }, { withCredentials: true });
+  const res = await axiosConfig.post(
+    `/login`,
+    { email, password },
+    { withCredentials: true }
+  );
   return res.data;
 };
 
 export const logout = async () => {
-  const res = await axios.post(`${BASE_URL}/logout`, {}, { withCredentials: true });
+  const res = await axiosConfig.post(`/logout`, {}, { withCredentials: true });
   return res.data;
 };
 
-export const registerValidate = async (username: string, email: string, password: string) => {
-  const res = await axios.post(`${BASE_URL}/register/validate`, { username, email, password }, { withCredentials: true });
+export const registerValidate = async (
+  username: string,
+  email: string,
+  password: string
+) => {
+  const res = await axiosConfig.post(
+    `/register/validate`,
+    { username, email, password },
+    { withCredentials: true }
+  );
   return res.data;
 };
 
 export const sendRegisterEmail = async () => {
-  const res = await axios.get(`${BASE_URL}/register/email`, { withCredentials: true });
+  const res = await axiosConfig.get(`/register/email`, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
 export const verifyRegisterEmail = async (token: string) => {
-  console.log('🔐 Verifying token:', token);
-  const res = await axios.get(`${BASE_URL}/register/email/${token}`);
-  console.log('✅ Verification success:', res.data);
+  const res = await axiosConfig.get(`/register/email/${token}`);
   return res.data;
 };
 
-export const getGoogleLoginUrl = () => `${BASE_URL}/login/google`;
+export const getGoogleLoginUrl = () =>
+  `${axiosConfig.defaults.baseURL}/login/google`;

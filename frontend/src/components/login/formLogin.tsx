@@ -1,35 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import GoogleButton from "./googleButton";
+// Replaced direct redirect button with popup-based Google OAuth
+import GoogleLoginPopup from "./GoogleLoginPopup";
 import { useAuthStore } from "../../store/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function FormLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore((s) => s.login);
+  const storeError = useAuthStore((s) => s.error);
+  const isProcessing = useAuthStore((s) => s.isProcessing);
   const navigate = useNavigate();
+  const location = useLocation();
+  let redirectTo: string | undefined;
+  if (
+    location.state &&
+    typeof location.state === "object" &&
+    "redirectTo" in location.state
+  ) {
+    const val = (location.state as Record<string, unknown>).redirectTo;
+    if (typeof val === "string") redirectTo = val;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Vui lòng nhập tên đăng nhập và mật khẩu");
+      setError("Vui lòng nhập email và mật khẩu");
       return;
     }
     setError("");
-    setIsLoading(true);
     try {
-      await login(email, password);
-      navigate("/subscriptions");
+      await login?.(email, password);
+      navigate(redirectTo || "/", { replace: true });
     } catch {
-      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại.");
-    } finally {
-      setIsLoading(false);
+      setError(storeError || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
     }
   };
+
+  useEffect(() => {
+    if (storeError) setError(storeError);
+  }, [storeError]);
 
   return (
     <div className="min-h-screen flex">
@@ -40,8 +55,10 @@ export default function FormLogin() {
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Chào mừng.<br />
-              <span className="text-blue-200">Bắt đầu hành trình</span><br />
+              Chào mừng.
+              <br />
+              <span className="text-blue-200">Bắt đầu hành trình</span>
+              <br />
               <span className="text-blue-200">cùng website của chúng tôi!</span>
             </h2>
           </div>
@@ -59,15 +76,19 @@ export default function FormLogin() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4 animate-bounce-subtle">
                 👋
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Đăng nhập vào tài khoản</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Đăng nhập vào tài khoản
+              </h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Tên tài khoản</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Email
+                </label>
                 <Input
-                  type="text"
-                  placeholder="Nhập tên tài khoản"
+                  type="email"
+                  placeholder="Nhập Email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
@@ -77,29 +98,52 @@ export default function FormLogin() {
 
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-gray-700">Mật khẩu</label>
-                  <a href="/forgot-password" className="text-sm text-blue-600 hover:underline transition-colors">Quên mật khẩu?</a>
+                  <label className="text-sm font-medium text-gray-700">
+                    Mật khẩu
+                  </label>
+                  <a
+                    href="/forgot-password"
+                    className="text-sm text-blue-600 hover:underline transition-colors"
+                  >
+                    Quên mật khẩu?
+                  </a>
                 </div>
-                <Input
-                  type="password"
-                  placeholder="Nhập mật khẩu của bạn"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Nhập mật khẩu của bạn"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm text-center animate-shake">{error}</div>
+                <div className="text-red-500 text-sm text-center animate-shake">
+                  {error}
+                </div>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading}
+                disabled={isProcessing}
               >
-                {isLoading ? (
+                {isProcessing ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Đang đăng nhập...</span>
@@ -114,15 +158,20 @@ export default function FormLogin() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Hoặc tiếp tục với</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Hoặc tiếp tục với
+                  </span>
                 </div>
               </div>
 
-              <GoogleButton />
+              <GoogleLoginPopup />
 
               <div className="text-center text-sm text-gray-600">
-                Chưa có tài khoản?{' '}
-                <a href="/register" className="text-blue-600 hover:underline font-medium transition-colors">
+                Chưa có tài khoản?{" "}
+                <a
+                  href="/register"
+                  className="text-blue-600 hover:underline font-medium transition-colors"
+                >
                   Đăng ký ngay
                 </a>
               </div>

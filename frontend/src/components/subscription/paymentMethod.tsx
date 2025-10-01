@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 
-export type PaymentMethod = 'zalopay' | 'momo' | 'cpay';
+export type PaymentMethod = "zalopay" | "vnpay";
 
 interface PaymentOption {
   id: PaymentMethod;
@@ -15,34 +15,24 @@ interface PaymentOption {
 
 const paymentOptions: PaymentOption[] = [
   {
-    id: 'zalopay',
-    name: 'ZaloPay',
-    icon: '💙',
-    description: 'Thanh toán nhanh chóng và bảo mật',
-    backgroundColor: 'bg-blue-50',
-    borderColor: 'border-blue-200 hover:border-blue-400',
-    textColor: 'text-blue-700',
-    hoverColor: 'hover:bg-blue-100',
+    id: "zalopay",
+    name: "ZaloPay",
+    icon: "💙",
+    description: "Thanh toán nhanh chóng và bảo mật",
+    backgroundColor: "bg-blue-50",
+    borderColor: "border-blue-200 hover:border-blue-400",
+    textColor: "text-blue-700",
+    hoverColor: "hover:bg-blue-100",
   },
   {
-    id: 'momo',
-    name: 'MoMo',
-    icon: '💗',
-    description: 'Ví điện tử phổ biến nhất Việt Nam',
-    backgroundColor: 'bg-pink-50',
-    borderColor: 'border-pink-200 hover:border-pink-400',
-    textColor: 'text-pink-700',
-    hoverColor: 'hover:bg-pink-100',
-  },
-  {
-    id: 'cpay',
-    name: 'CPay',
-    icon: '💚',
-    description: 'Thanh toán tiện lợi với ưu đãi hấp dẫn',
-    backgroundColor: 'bg-green-50',
-    borderColor: 'border-green-200 hover:border-green-400',
-    textColor: 'text-green-700',
-    hoverColor: 'hover:bg-green-100',
+    id: "vnpay",
+    name: "VNPay",
+    icon: "💚",
+    description: "Thanh toán tiện lợi với ưu đãi hấp dẫn",
+    backgroundColor: "bg-green-50",
+    borderColor: "border-green-200 hover:border-green-400",
+    textColor: "text-green-700",
+    hoverColor: "hover:bg-green-100",
   },
 ];
 
@@ -53,11 +43,11 @@ interface PaymentMethodSelectorProps {
   isLoading?: boolean;
 }
 
-export function PaymentMethodSelector({ 
-  selectedMethod, 
-  onSelectMethod, 
-  onProceedPayment, 
-  isLoading = false 
+export function PaymentMethodSelector({
+  selectedMethod,
+  onSelectMethod,
+  onProceedPayment,
+  isLoading = false,
 }: PaymentMethodSelectorProps) {
   return (
     <div className="space-y-6">
@@ -78,16 +68,26 @@ export function PaymentMethodSelector({
             className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
               option.backgroundColor
             } ${
-              selectedMethod === option.id 
-                ? `${option.borderColor.split(' ')[0]} ring-4 ring-opacity-20 ${option.borderColor.includes('blue') ? 'ring-blue-400' : option.borderColor.includes('pink') ? 'ring-pink-400' : 'ring-green-400'} shadow-lg` 
+              selectedMethod === option.id
+                ? `${option.borderColor.split(" ")[0]} ring-4 ring-opacity-20 ${
+                    option.borderColor.includes("blue")
+                      ? "ring-blue-400"
+                      : option.borderColor.includes("pink")
+                      ? "ring-pink-400"
+                      : "ring-green-400"
+                  } shadow-lg`
                 : option.borderColor
             } ${option.hoverColor}`}
           >
             <div className="flex items-center space-x-4">
               {/* Payment Icon */}
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${
-                selectedMethod === option.id ? 'bg-white shadow-md' : 'bg-white/50'
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${
+                  selectedMethod === option.id
+                    ? "bg-white shadow-md"
+                    : "bg-white/50"
+                }`}
+              >
                 {option.icon}
               </div>
 
@@ -96,22 +96,34 @@ export function PaymentMethodSelector({
                 <h4 className={`font-bold text-lg ${option.textColor}`}>
                   {option.name}
                 </h4>
-                <p className={`text-sm ${option.textColor.replace('700', '600')}`}>
+                <p
+                  className={`text-sm ${option.textColor.replace(
+                    "700",
+                    "600"
+                  )}`}
+                >
                   {option.description}
                 </p>
               </div>
 
               {/* Selection Indicator */}
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                selectedMethod === option.id
-                  ? `${option.borderColor.split(' ')[0]} bg-white`
-                  : 'border-gray-300'
-              }`}>
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  selectedMethod === option.id
+                    ? `${option.borderColor.split(" ")[0]} bg-white`
+                    : "border-gray-300"
+                }`}
+              >
                 {selectedMethod === option.id && (
-                  <div className={`w-3 h-3 rounded-full ${
-                    option.borderColor.includes('blue') ? 'bg-blue-500' : 
-                    option.borderColor.includes('pink') ? 'bg-pink-500' : 'bg-green-500'
-                  } animate-scale-in`} />
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      option.borderColor.includes("blue")
+                        ? "bg-blue-500"
+                        : option.borderColor.includes("pink")
+                        ? "bg-pink-500"
+                        : "bg-green-500"
+                    } animate-scale-in`}
+                  />
                 )}
               </div>
             </div>
@@ -120,15 +132,30 @@ export function PaymentMethodSelector({
             {selectedMethod === option.id && (
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between text-sm">
-                  <span className={`flex items-center space-x-2 ${option.textColor.replace('700', '600')}`}>
+                  <span
+                    className={`flex items-center space-x-2 ${option.textColor.replace(
+                      "700",
+                      "600"
+                    )}`}
+                  >
                     <span>✅</span>
                     <span>Bảo mật cao</span>
                   </span>
-                  <span className={`flex items-center space-x-2 ${option.textColor.replace('700', '600')}`}>
+                  <span
+                    className={`flex items-center space-x-2 ${option.textColor.replace(
+                      "700",
+                      "600"
+                    )}`}
+                  >
                     <span>⚡</span>
                     <span>Xử lý nhanh</span>
                   </span>
-                  <span className={`flex items-center space-x-2 ${option.textColor.replace('700', '600')}`}>
+                  <span
+                    className={`flex items-center space-x-2 ${option.textColor.replace(
+                      "700",
+                      "600"
+                    )}`}
+                  >
                     <span>🎁</span>
                     <span>Ưu đãi thêm</span>
                   </span>
@@ -146,12 +173,10 @@ export function PaymentMethodSelector({
           disabled={!selectedMethod || isLoading}
           className={`w-full py-4 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg ${
             selectedMethod
-              ? selectedMethod === 'zalopay' 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-500/25'
-                : selectedMethod === 'momo'
-                ? 'bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white shadow-pink-500/25'
-                : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-green-500/25'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed hover:scale-100'
+              ? selectedMethod === "zalopay"
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-500/25"
+                : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-green-500/25"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed hover:scale-100"
           }`}
         >
           {isLoading ? (
@@ -161,11 +186,12 @@ export function PaymentMethodSelector({
             </div>
           ) : selectedMethod ? (
             <>
-              Thanh toán bằng {paymentOptions.find(p => p.id === selectedMethod)?.name}
+              Thanh toán bằng{" "}
+              {paymentOptions.find((p) => p.id === selectedMethod)?.name}
               <span className="ml-2">→</span>
             </>
           ) : (
-            'Vui lòng chọn phương thức thanh toán'
+            "Vui lòng chọn phương thức thanh toán"
           )}
         </Button>
 
@@ -187,9 +213,13 @@ interface PaymentSuccessProps {
   onContinue: () => void;
 }
 
-export function PaymentSuccess({ paymentMethod, amount, onContinue }: PaymentSuccessProps) {
-  const option = paymentOptions.find(p => p.id === paymentMethod);
-  
+export function PaymentSuccess({
+  paymentMethod,
+  amount,
+  onContinue,
+}: PaymentSuccessProps) {
+  const option = paymentOptions.find((p) => p.id === paymentMethod);
+
   return (
     <div className="text-center py-12">
       <div className="mb-8">
