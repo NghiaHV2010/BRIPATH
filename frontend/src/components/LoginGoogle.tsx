@@ -1,8 +1,8 @@
 const LoginGoogle = () => {
 
     return (
-        <a href='http://localhost:3000/login/google'>LoginGoogle</a>
+        <a href='http://localhost:3000/api/login/google'>LoginGoogle</a>
     )
 }
 
-export default <LoginGoogle></LoginGoogle>
+export default LoginGoogle

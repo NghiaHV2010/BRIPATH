@@ -11,7 +11,7 @@ passport.use(
         {
             clientID: GOOGLE_CLIENT_ID,
             clientSecret: GOOGLE_CLIENT_SECRET,
-            callbackURL: "/login/google/callback"
+            callbackURL: "/api/login/google/callback"
         },
         async (accessToken: string, refreshToken: string, profile: Profile, done) => {
             let user;
@@ -36,6 +36,7 @@ passport.use(
                             email: profile.emails?.[0].value,
                             password: buf.toString('hex'),
                             avatar_url: profile.photos?.[0].value,
+                            last_loggedIn: new Date(),
                             role_id: 1
                         },
                         omit: {

@@ -82,7 +82,9 @@ interface CV {
     ];
 }
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: ["error", "query", "info", "warn"]
+});
 
 export const uploadCV = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -248,5 +250,38 @@ export const deleteCV = async (req: Request, res: Response, next: NextFunction) 
         res.status(HTTP_SUCCESS.NO_CONTENT);
     } catch (error) {
         next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV not found!"));
+    }
+}
+
+export const getSuitableJobs = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const cv_id = parseInt(req.params.id);
+
+    if (cv_id < 1 || isNaN(cv_id)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid CV ID"));
+    }
+
+    try {
+        const jobs = await prisma.$queryRaw`
+            SELECT  j.id, 
+                    j.job_title,
+                    1 - (j.embedding <=> cv.embedding) as score
+            FROM jobs j,
+            (
+                SELECT embedding 
+                FROM cvs
+                WHERE id=${cv_id} AND users_id=${user_id}
+            ) AS cv
+            WHERE 1 - (j.embedding <=> cv.embedding) > 0.7
+            ORDER BY score DESC
+            LIMIT 5
+        `;
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            data: jobs
+        });
+    } catch (error) {
+        next(error);
     }
 }

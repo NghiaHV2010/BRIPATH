@@ -20,6 +20,8 @@ import {
 } from "./pages";
 import { useAuthStore } from './store/auth';
 import { Loader } from 'lucide-react';
+import VerifySMS from "./components/VerifySMS";
+import LoginGoogle from "./components/LoginGoogle";
 
 
 function App() {
@@ -71,6 +73,8 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/sms" element={<VerifySMS />} />
+      <Route path="/test" element={<LoginGoogle />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/register/email/:token"

@@ -54,10 +54,15 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
 
         const user = await prisma.users.findFirst({
             where: {
-                id: userId
+                AND: {
+                    id: userId,
+                    is_deleted: false
+                }
             },
             omit: {
-                password: true
+                password: true,
+                is_deleted: true,
+                firebase_uid: true
             }
         });
 

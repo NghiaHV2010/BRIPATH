@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, checkAuth, logout, googleLogin, sendOTP, validateRegisterInput, verifyEmail } from "../controllers/auth.controller";
+import { login, checkAuth, logout, googleLogin, sendOTP, validateRegisterInput, verifyEmail, verifySMS } from "../controllers/auth.controller";
 import { authenticationMiddleware, emailOTPMiddleware, emailVerifyMiddleware } from "../middlewares/auth.middleware";
 import passport from "passport";
 
@@ -14,6 +14,8 @@ authRoute.get('/register/email/:otp', emailVerifyMiddleware, emailOTPMiddleware,
 authRoute.post('/login', login);
 authRoute.post('/logout', authenticationMiddleware, logout);
 authRoute.get('/check', authenticationMiddleware, checkAuth);
+
+authRoute.post('/verify-sms', authenticationMiddleware, verifySMS)
 
 authRoute.get('/login/google',
     passport.authenticate("google", {
