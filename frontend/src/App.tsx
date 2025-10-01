@@ -14,15 +14,22 @@ import {
   QuizTestPageWrapper,
   QuizResultsPageWrapper,
   CompaniesPageWrapper,
+  CompanyDetailsPageWrapper,
   JobsPageWrapper,
+  JobDetailsPageWrapper,
   UploadCVPageWrapper,
   ProfilePageWrapper,
+  HomePage,
 } from "./pages";
 import { useAuthStore } from "./store/auth";
+import GuestOnly from "./components/auth/GuestOnly";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import SettingsPage from "./pages/settings/settingsPage";
+import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
+import SavedJobsPage from "./pages/jobs/savedJobsPage";
 import { Loader } from "lucide-react";
 
 function App() {
-  // @ts-expect-error
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
 
   // Force scroll to top on app load/reload with multiple methods
@@ -69,8 +76,23 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/login"
+        element={
+          <GuestOnly>
+            <LoginPage />
+          </GuestOnly>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <GuestOnly>
+            <RegisterPage />
+          </GuestOnly>
+        }
+      />
       <Route
         path="/register/email/:token"
         element={<EmailVerificationPage />}
@@ -80,9 +102,38 @@ function App() {
       <Route path="/quiz/test" element={<QuizTestPageWrapper />} />
       <Route path="/quiz/results" element={<QuizResultsPageWrapper />} />
       <Route path="/companies" element={<CompaniesPageWrapper />} />
+      <Route
+        path="/companies/:companyId"
+        element={<CompanyDetailsPageWrapper />}
+      />
       <Route path="/jobs" element={<JobsPageWrapper />} />
+      <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
       <Route path="/upload-cv" element={<UploadCVPageWrapper />} />
       <Route path="/profile" element={<ProfilePageWrapper />} />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/jobs/applied"
+        element={
+          <ProtectedRoute>
+            <AppliedJobsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/jobs/saved"
+        element={
+          <ProtectedRoute>
+            <SavedJobsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
       <Route
         path="/subscriptions/:planId"
