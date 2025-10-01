@@ -9,6 +9,8 @@ import { ACCESS_SECRET } from "../config/env.config";
 import crypto from "crypto";
 import emailTemplate from "../constants/emailTemplate";
 import { sendEmail, validateEmail } from "../utils";
+import admin, { ServiceAccount } from "firebase-admin";
+import serviceAccount from "../../serviceAccountKey.json";
 
 const prisma = new PrismaClient();
 
@@ -220,4 +222,43 @@ export const googleLogin = (req: Request, res: Response) => {
             avatar: user.avatar_url
         }
     });
+}
+
+export const verifySMS = async (req: Request, res: Response, next: NextFunction) => {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount as ServiceAccount),
+    });
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { token } = req.body;
+
+    try {
+        const decoded = await admin.auth().verifyIdToken(token);
+
+        if (decoded) {
+            const user = await prisma.users.update({
+                where: {
+                    id: user_id
+                },
+                data: {
+                    phone: decoded.phone_number,
+                    phone_verified: true
+                },
+                omit: {
+                    password: true,
+                    is_deleted: true,
+                }
+            })
+
+            return res.status(HTTP_SUCCESS.OK).json({
+                data: {
+                    success: true,
+                    uid: decoded.uid,
+                    ...user
+                }
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
 }

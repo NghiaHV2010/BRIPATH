@@ -35,4 +35,10 @@ src/constants/prompt.ts
 
 src/generated/*
 
+src/constants/emdeddings.ts
+src/constants/prompt.ts
+src/constants/emailTemplate.ts
+
 training.jsonl
+
+serviceAccountKey.json

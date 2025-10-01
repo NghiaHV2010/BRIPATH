@@ -21,13 +21,16 @@ import {
   ProfilePageWrapper,
   HomePage,
 } from "./pages";
-import { useAuthStore } from "./store/auth";
 import GuestOnly from "./components/auth/GuestOnly";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPage from "./pages/jobs/savedJobsPage";
-import { Loader } from "lucide-react";
+import { useAuthStore } from './store/auth';
+import { Loader } from 'lucide-react';
+import VerifySMS from "./components/VerifySMS";
+import LoginGoogle from "./components/LoginGoogle";
+
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -93,6 +96,10 @@ function App() {
           </GuestOnly>
         }
       />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/sms" element={<VerifySMS />} />
+      <Route path="/test" element={<LoginGoogle />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/register/email/:token"
         element={<EmailVerificationPage />}

@@ -1,9 +1,11 @@
-export { default as zalopayRoutes } from './zalopay.routes';
-export { default as vnpayRoutes } from './vnpay.routes';
+export { default as zalopayRoutes } from "./zalopay.routes";
+export { default as vnpayRoutes } from "./vnpay.routes";
 export { default as authRoute } from "./auth.routes";
-export { default as paymentRoutes } from './payment.routes';
-export { default as dashboardRoutes } from './dashboard.routes';
+export { default as paymentRoutes } from "./payment.routes";
+export { default as dashboardRoutes } from "./dashboard.routes";
 export { default as cvRouter } from "./cv.routes";
 export { default as userRouter } from "./user.routes";
 export { default as companyRouter } from "./company.routes";
 export { default as jobRouter } from "./job.routes";
+export { default as questionRouter } from "./question.routes";
+export { default as eventRouter } from "./event.routes";

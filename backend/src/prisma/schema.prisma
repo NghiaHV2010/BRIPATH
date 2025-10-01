@@ -13,7 +13,7 @@ model answers {
   answer                 String                   @db.VarChar(150)
   embedding              Unsupported("vector")?
   question_id            Int
-  questions              questions                @relation(fields: [question_id], references: [id])
+  questions              questions                @relation(fields: [question_id], references: [id], onDelete: Cascade)
   personalityTestResults personalityTestResults[]
 }
 
@@ -113,7 +113,7 @@ model certificates {
 
 model companies {
   id                   String              @id @default(uuid())
-  company_name         String              @unique @db.VarChar(150)
+  company_name         String              @db.VarChar(150)
   company_website      String?
   address_street       String              @db.VarChar(50)
   address_ward         String              @db.VarChar(50)
@@ -130,7 +130,7 @@ model companies {
   is_verified          Boolean             @default(false)
   email_verified       Boolean             @default(false)
   phone_verified       Boolean             @default(false)
-  fax_code             String?             @unique @db.VarChar(10)
+  fax_code             String?             @db.VarChar(10)
   is_deleted           Boolean             @default(false)
   created_at           DateTime            @default(now())
   updated_at           DateTime            @updatedAt
@@ -265,9 +265,9 @@ model jobSpecialized {
 
 model jobs {
   id           String                 @id @default(uuid())
-  job_title    String                 @db.VarChar(150)
+  job_title    String                 @db.Text
   description  String
-  location     String?                @db.VarChar(150)
+  location     String?                @db.VarChar(200)
   benefit      String?                @db.VarChar(255)
   working_time String?                @db.VarChar(50)
   salary       String[]               @default(["Thỏa thuận"])
@@ -278,7 +278,7 @@ model jobs {
   quantity     Int?
   skill_tags   String[]
   education    Education?
-  experience   String?
+  experience   String?                @db.Text
   embedding    Unsupported("vector")?
   start_date   DateTime               @default(now()) @db.Date
   end_date     DateTime?              @db.Date
@@ -424,6 +424,34 @@ model userNotifications {
   @@id([id, user_id])
 }
 
+model events {
+  id           String       @id @default(uuid())
+  title        String       @db.VarChar(200)
+  description  String       @db.Text
+  start_date   DateTime     @db.Date
+  end_date     DateTime?    @db.Date
+  working_time String?      @db.VarChar(100)
+  banner_url   String?      @db.Text
+  quantity     Int?         @db.Integer
+  user_id      String
+  users        users        @relation(fields: [user_id], references: [id])
+  volunteers   volunteers[]
+}
+
+model volunteers {
+  event_id      String
+  user_id       String
+  description   String           @db.Text
+  apply_date    DateTime         @default(now())
+  verified_date DateTime?
+  feedback      String?          @db.VarChar(255)
+  status        ApplicantsStatus @default(pending)
+  users         users            @relation(fields: [user_id], references: [id])
+  events        events           @relation(fields: [event_id], references: [id])
+
+  @@id([event_id, user_id])
+}
+
 model users {
   id                     String                   @id @default(uuid())
   username               String                   @db.VarChar(100)
@@ -436,6 +464,7 @@ model users {
   address_city           String?                  @db.VarChar(50)
   address_country        String?                  @db.VarChar(50)
   gender                 Gender?
+  firebase_uid           String?                  @unique @db.VarChar(50)
   is_deleted             Boolean                  @default(false)
   last_loggedIn          DateTime?
   created_at             DateTime                 @default(now())
@@ -443,6 +472,8 @@ model users {
   role_id                Int
   phone_verified         Boolean                  @default(false)
   company_id             String?                  @unique
+  events                 events[]
+  volunteers             volunteers[]
   cvs                    cvs[]
   blogs                  blogs[]
   careerPaths            careerPaths[]

@@ -24,6 +24,7 @@ interface Config {
     GMAIL_APP_PASSWORD: string;
     GEMINI_API_KEY: string;
     OPENAI_API_KEY: string;
+    OPENAI_MODEL: string;
 }
 
 dotenv.config();
@@ -51,7 +52,8 @@ const config: Config = {
     GMAIL_USER: process.env.GMAIL_USER!,
     GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD!,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY!
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+    OPENAI_MODEL: process.env.OPENAI_MODEL!,
 };
 
 export const {
@@ -77,6 +79,7 @@ export const {
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
     GEMINI_API_KEY,
-    OPENAI_API_KEY
+    OPENAI_API_KEY,
+    OPENAI_MODEL
 } = config;
 

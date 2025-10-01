@@ -36,6 +36,7 @@ passport.use(
                             email: profile.emails?.[0].value,
                             password: buf.toString('hex'),
                             avatar_url: profile.photos?.[0].value,
+                            last_loggedIn: new Date(),
                             role_id: 1
                         },
                         omit: {
