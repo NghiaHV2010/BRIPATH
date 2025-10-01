@@ -21,13 +21,11 @@ import {
   ProfilePageWrapper,
   HomePage,
 } from "./pages";
-import { useAuthStore } from "./store/auth";
 import GuestOnly from "./components/auth/GuestOnly";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPage from "./pages/jobs/savedJobsPage";
-import { Loader } from "lucide-react";
 import { useAuthStore } from './store/auth';
 import { Loader } from 'lucide-react';
 import VerifySMS from "./components/VerifySMS";
