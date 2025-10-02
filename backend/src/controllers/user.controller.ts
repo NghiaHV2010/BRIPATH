@@ -18,7 +18,6 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
     }
 
     try {
-
         const isCompanyExisted = await prisma.companies.findFirst({
             where: {
                 id: company_id
@@ -28,10 +27,6 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
                     where: {
                         user_id
                     },
-                    select: {
-                        user_id: true,
-                        company_id: true
-                    }
                 }
             }
         });
@@ -40,7 +35,7 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Company not found!"));
         }
 
-        if (isCompanyExisted.followedCompanies[0]?.user_id) {
+        if (isCompanyExisted.followedCompanies.length > 0) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Already followed!"));
         }
 
@@ -61,7 +56,7 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
 
 export const saveJob = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
-    const { id, company_id } = req.user.id;
+    const { id, company_id } = req.user;
     const job_id = req.params.jobId;
 
     try {
@@ -74,10 +69,6 @@ export const saveJob = async (req: Request, res: Response, next: NextFunction) =
                     where: {
                         user_id: id
                     },
-                    select: {
-                        job_id: true,
-                        user_id: true
-                    }
                 },
             }
         });
@@ -88,6 +79,10 @@ export const saveJob = async (req: Request, res: Response, next: NextFunction) =
 
         if (isJobExisted.company_id === company_id) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You cannot save yours job!"));
+        }
+
+        if (isJobExisted.savedJobs.length > 0) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already saved this job!"));
         }
 
         await prisma.savedJobs.create({
@@ -148,7 +143,7 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
             return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "You cannot apply yours job!"));
         }
 
-        if (isJobExisted.applicants[0]?.cv_id) {
+        if (isJobExisted.applicants.length > 0) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already apply for this jobs!"));
         }
 
@@ -205,10 +200,6 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
                     where: {
                         user_id
                     },
-                    select: {
-                        company_id: true,
-                        user_id: true
-                    }
                 }
             }
         });
@@ -217,7 +208,7 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Not found company!"));
         }
 
-        if (isCompanyExisted.feedbacks[0]?.user_id) {
+        if (isCompanyExisted.feedbacks.length > 0) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already feedback!"));
         }
 
@@ -332,7 +323,7 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You can not apply your event!"));
         }
 
-        if (isEventExisted.volunteers[0]?.user_id) {
+        if (isEventExisted.volunteers.length > 0) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already volunteered"));
         }
 

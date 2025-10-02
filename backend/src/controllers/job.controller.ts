@@ -4,14 +4,13 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 
 const prisma = new PrismaClient();
+const numberOfJobs = 12;
 
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string);
     const user_id: string = req.query?.userId as string;
 
-    const numberOfJobs = 12;
-
-    if (page - 1 < 0 || isNaN(page)) {
+    if (page < 1 || isNaN(page)) {
         return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "Invalid Page!"));
     }
 
@@ -37,18 +36,15 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
                         label_name: true
                     }
                 },
-                savedJobs: {
+                savedJobs: user_id ? {
                     where: {
-                        user_id: user_id ? user_id : ''
+                        user_id: user_id
                     }
-                }
+                } : false
             },
             take: numberOfJobs,
             skip: page * numberOfJobs,
-
         });
-        console.log(jobs);
-
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: jobs,
@@ -83,18 +79,18 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
                         label_name: true
                     }
                 },
-                savedJobs: {
+                savedJobs: userId ? {
                     where: {
-                        user_id: userId ? userId : ''
+                        user_id: userId
                     },
                     select: {
                         saved_at: true,
                     }
-                },
-                applicants: {
+                } : false,
+                applicants: userId ? {
                     where: {
                         cvs: {
-                            users_id: userId ? userId : ''
+                            users_id: userId
                         }
                     },
                     select: {
@@ -103,7 +99,7 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
                         status: true,
                         description: true,
                     }
-                },
+                } : false,
                 companies: {
                     select: {
                         company_name: true,
@@ -117,11 +113,11 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
                                 field_name: true
                             }
                         },
-                        followedCompanies: {
+                        followedCompanies: userId ? {
                             where: {
-                                user_id: userId ? userId : ''
+                                user_id: userId
                             }
-                        }
+                        } : false
                     }
                 }
             },
@@ -130,6 +126,94 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
         return res.status(HTTP_SUCCESS.OK).json({
             data: job
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getJobsByFilter = async (req: Request, res: Response, next: NextFunction) => {
+    type RequestQuery = {
+        userId?: string,
+        name?: string,
+        field?: string,
+        location?: string,
+        salary?: string[],
+    }
+
+    const { userId, name, field, location, salary }: RequestQuery = req.query;
+    let page: number = parseInt(req.query?.page as string || '1');
+    const filters: any[] = [];
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+
+    page -= 1;
+
+    if (name) {
+        filters.push({
+            job_title: { contains: name, mode: 'insensitive' }
+        });
+    }
+
+    if (location) {
+        filters.push({
+            location: { contains: location, mode: 'insensitive' }
+        });
+    }
+
+    if (salary && salary.length > 0) {
+        filters.push({
+            salary: { hasSome: salary }
+        });
+    }
+
+    if (field) {
+        filters.push({
+            categories: {
+                is: {
+                    category_name: { equals: field }
+                }
+            }
+        });
+    }
+
+    try {
+        const jobs = await prisma.jobs.findMany({
+            where: {
+                AND: filters
+            },
+            select: {
+                id: true,
+                job_title: true,
+                salary: true,
+                currency: true,
+                location: true,
+                status: true,
+                categories: {
+                    select: {
+                        category_name: true
+                    }
+                },
+                jobLabels: {
+                    select: {
+                        label_name: true
+                    }
+                },
+                savedJobs: userId ? {
+                    where: {
+                        user_id: userId
+                    }
+                } : false
+            },
+            take: numberOfJobs,
+            skip: page * numberOfJobs
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: jobs
+        })
     } catch (error) {
         next(error);
     }

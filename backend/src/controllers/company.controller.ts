@@ -4,15 +4,13 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 
 const prisma = new PrismaClient();
+const numberOfCompanies = 10;
 
 export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // @ts-ignore
         const { user_id, company_id } = req.user;
         const { company_name, email, phone, address_street, address_ward, address_city, address_country } = req.body;
-
-        console.log(company_id);
-
 
         let company;
 
@@ -62,13 +60,11 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
     }
 }
 
-const getAllCompanies = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllCompanies = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string);
     const user_id: string = req.query?.userId as string;
 
-    const numberOfCompanies = 10;
-
-    if (page - 1 < 0 || isNaN(page)) {
+    if (page < 1 || isNaN(page)) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid page!"));
     }
 
@@ -97,17 +93,19 @@ const getAllCompanies = async (req: Request, res: Response, next: NextFunction) 
                         field_name: true
                     }
                 },
-                jobs: {
+                _count: {
                     select: {
-                        _count: true,
+                        jobs: true
                     }
                 },
-                followedCompanies: {
+                followedCompanies: user_id ? {
                     where: {
-                        user_id: user_id ? user_id : ''
+                        user_id: user_id
                     }
-                }
-            }
+                } : false
+            },
+            take: numberOfCompanies,
+            skip: page * numberOfCompanies
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -119,7 +117,7 @@ const getAllCompanies = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-const getCompanyByID = async (req: Request, res: Response, next: NextFunction) => {
+export const getCompanyByID = async (req: Request, res: Response, next: NextFunction) => {
     type RequestQuery = {
         companyId: string,
         userId?: string,
@@ -186,20 +184,108 @@ const getCompanyByID = async (req: Request, res: Response, next: NextFunction) =
                         }
                     }
                 },
-                followedCompanies: {
+                followedCompanies: userId ? {
                     select: {
                         is_notified: true,
                         followed_at: true,
                     },
                     where: {
-                        user_id: userId ? userId : ''
+                        user_id: userId
                     }
-                }
+                } : false
             }
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: company
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getCompaniesByFilter = async (req: Request, res: Response, next: NextFunction) => {
+    type RequestQuery = {
+        name?: string,
+        location?: string,
+        field?: string,
+        userId?: string
+    }
+
+    const { name, location, field, userId }: RequestQuery = req.query;
+    let page = parseInt(req.query?.page as string || '1');
+    const filter: any[] = [];
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+
+    page -= 1;
+
+    if (name) {
+        filter.push({
+            company_name: { contains: name, mode: "insensitive" }
+        });
+    }
+
+    if (location) {
+        filter.push({
+            address_city: { contains: location, mode: "insensitive" }
+        });
+    }
+
+    if (field) {
+        filter.push({
+            fields: {
+                is: {
+                    field_name: { equals: field }
+                }
+            }
+        });
+    }
+
+    try {
+        const companies = await prisma.companies.findMany({
+            where: {
+                AND: filter
+            },
+            select: {
+                id: true,
+                company_name: true,
+                logo_url: true,
+                company_type: true,
+                address_street: true,
+                address_ward: true,
+                address_city: true,
+                address_country: true,
+                companyLabels: {
+                    select: {
+                        label_name: true
+                    }
+                },
+                fields: {
+                    select: {
+                        field_name: true
+                    }
+                },
+                jobs: {
+                    select: {
+                        _count: true,
+                    }
+                },
+                followedCompanies: userId ? {
+                    where: {
+                        user_id: userId
+                    }
+                } : false
+            },
+            take: numberOfCompanies,
+            skip: page * numberOfCompanies
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: companies
         })
     } catch (error) {
         next(error);

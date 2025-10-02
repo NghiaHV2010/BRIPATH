@@ -54,10 +54,8 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
 
         const user = await prisma.users.findFirst({
             where: {
-                AND: {
-                    id: userId,
-                    is_deleted: false
-                }
+                id: userId,
+                is_deleted: false
             },
             omit: {
                 password: true,
@@ -139,5 +137,44 @@ export const authorizationMiddleware = (role: string) => {
         } catch (error) {
             next(error);
         }
+    }
+}
+
+export const eventAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    type UserDTO = {
+        id: string,
+        phone: string,
+        phone_verified: boolean
+    }
+
+    try {
+        const { id, phone, phone_verified }: UserDTO = req.user as UserDTO;
+
+        if (!phone || !phone_verified) {
+            return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Vui lòng xác thực số điện thoại"));
+        }
+
+        const subscription = await prisma.subscriptions.findFirst({
+            where: {
+                user_id: id,
+                status: 'on_going',
+                end_date: {
+                    gt: new Date()
+                },
+                membershipPlans: {
+                    is: {
+                        plan_name: "Gói đăng tuyển cộng tác viên"
+                    }
+                }
+            }
+        });
+
+        if (!subscription) {
+            next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa mua gói đăng tuyển cộng tác viên"));
+        }
+
+        next();
+    } catch (error) {
+        next(error);
     }
 }
