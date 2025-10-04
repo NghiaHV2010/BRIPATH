@@ -7,7 +7,6 @@ interface GuestOnlyProps {
   children: ReactNode;
 }
 
-// Blocks access to auth pages for logged-in users
 export default function GuestOnly({ children }: GuestOnlyProps) {
   const authUser = useAuthStore((s) => s.authUser);
   const isChecking = useAuthStore((s) => s.isCheckingAuth);
