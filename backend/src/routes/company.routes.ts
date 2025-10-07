@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticationMiddleware, authorizationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
+import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
 import { createCompany, feedbackCV, getAllCompanies, getApplicantsByStatus, getCompaniesByFilter, getCompanyByID, updateApplicantStatus, createCompanyLabel } from "../controllers/company.controller";
 
 const companyRouter = Router();
