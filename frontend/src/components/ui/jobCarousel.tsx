@@ -42,7 +42,7 @@ const JobCarousel: React.FC<JobCarouselProps> = ({
   const autoplay = React.useRef(
     Autoplay({
       delay: 1500,
-      stopOnInteraction: false,
+      stopOnInteraction: true,
       playOnInit: true,
     })
   );
@@ -65,8 +65,6 @@ const JobCarousel: React.FC<JobCarouselProps> = ({
         <Carousel
           opts={{ align: "start", loop: true, slidesToScroll: 1 }}
           plugins={[autoplay.current]}
-          onMouseEnter={autoplay.current.stop}
-          onMouseLeave={autoplay.current.reset}
           className="relative"
         >
           <CarouselContent>

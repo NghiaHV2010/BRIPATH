@@ -5,7 +5,7 @@ import axiosConfig from "../config/axios.config";
 import { registerValidate as apiRegisterValidate, sendRegisterEmail as apiSendRegisterEmail, login as apiLogin, logout as apiLogout } from "../api/auth_api";
 
 // Reflect backend /check response shape (subset). Feel free to expand as needed.
-interface AuthUser {
+export interface AuthUser {
 	id: string;
 	username: string;
 	email: string;
@@ -34,9 +34,13 @@ interface AuthState {
 	clearError: () => void;
 	login?: (email: string, password: string) => Promise<void>;
 	logout?: () => Promise<void>;
+	// Helper methods for role checking
+	isCompany: () => boolean;
+	isCandidate: () => boolean;
+	hasCompany: () => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
 	isCheckingAuth: true,
 	isProcessing: false,
 	authUser: null,
@@ -121,5 +125,21 @@ export const useAuthStore = create<AuthState>((set) => ({
 		} finally {
 			set({ isProcessing: false });
 		}
+	},
+
+	// Helper methods for role checking
+	isCompany: () => {
+		const { authUser } = get();
+		return authUser?.role_id === 3;
+	},
+
+	isCandidate: () => {
+		const { authUser } = get();
+		return authUser?.role_id === 1; // Assuming 1 is candidate role
+	},
+
+	hasCompany: () => {
+		const { authUser } = get();
+		return !!authUser?.company_id;
 	}
 }));

@@ -10,6 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-blue-600 text-white hover:bg-blue-700",
+        outline:
+          "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-400",
         gold: "bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-white shadow-yellow-500/25 hover:from-yellow-600 hover:via-amber-600 hover:to-yellow-700 hover:shadow-yellow-500/40",
         silver:
           "bg-gradient-to-r from-slate-500 via-gray-500 to-slate-600 text-white shadow-slate-500/25 hover:from-slate-600 hover:via-gray-600 hover:to-slate-700 hover:shadow-slate-500/40",
@@ -19,11 +21,14 @@ const buttonVariants = cva(
           "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-500",
         google:
           "border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 focus-visible:ring-blue-500 gap-3",
+        custom:
+          "bg-transparent text-inherit shadow-none hover:shadow-none focus-visible:ring-transparent",
       },
       size: {
         default: "py-3 px-4 text-base",
         lg: "py-4 px-6 text-lg",
         sm: "h-8 px-3 text-xs",
+        icon: "h-10 w-10 p-0",
       },
     },
     defaultVariants: {
@@ -54,4 +59,5 @@ function Button({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };

@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { CompanyCarousel } from "../ui";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
+import { cn } from "@/lib/utils";
 
 interface Company {
   id: number;
@@ -17,6 +27,22 @@ interface Company {
   experienceRequired: string;
   salaryRange: string;
 }
+
+type CompanyFilterState = {
+  searchTerm: string;
+  industryInput: string;
+  locationInput: string;
+  selectedSize: string;
+  sortBy: string;
+};
+
+const createDefaultCompanyFilters = (): CompanyFilterState => ({
+  searchTerm: "",
+  industryInput: "",
+  locationInput: "",
+  selectedSize: "",
+  sortBy: "default",
+});
 
 // Mock data - sắp xếp ngược theo ID (công ty mới thêm hiện lên trước)
 const mockCompanies: Company[] = [
@@ -261,6 +287,29 @@ export default function CompaniesPage() {
   const [locationInput, setLocationInput] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  const [appliedFilters, setAppliedFilters] = useState<CompanyFilterState>(() =>
+    createDefaultCompanyFilters()
+  );
+
+  const handleApplyFilters = () => {
+    setAppliedFilters({
+      searchTerm,
+      industryInput,
+      locationInput,
+      selectedSize,
+      sortBy,
+    });
+  };
+
+  const handleClearFilters = () => {
+    const defaults = createDefaultCompanyFilters();
+    setSearchTerm("");
+    setIndustryInput("");
+    setLocationInput("");
+    setSelectedSize("");
+    setSortBy(defaults.sortBy);
+    setAppliedFilters(defaults);
+  };
 
   // Get unique values for filter options
   const industries = Array.from(new Set(companies.map((c) => c.industry)));
@@ -269,62 +318,58 @@ export default function CompaniesPage() {
 
   // Filter and sort companies
   useEffect(() => {
-    let filtered = companies;
+    const {
+      searchTerm: appliedSearchTerm,
+      industryInput: appliedIndustry,
+      locationInput: appliedLocation,
+      selectedSize: appliedSize,
+      sortBy: appliedSort,
+    } = appliedFilters;
 
-    // Search filter
-    if (searchTerm) {
+    let filtered = [...companies];
+
+    if (appliedSearchTerm) {
+      const loweredSearch = appliedSearchTerm.toLowerCase();
       filtered = filtered.filter(
         (company) =>
-          company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          company.description.toLowerCase().includes(searchTerm.toLowerCase())
+          company.name.toLowerCase().includes(loweredSearch) ||
+          company.description.toLowerCase().includes(loweredSearch)
       );
     }
 
-    // Industry filter - hỗ trợ tự gõ
-    if (industryInput) {
+    if (appliedIndustry) {
+      const loweredIndustry = appliedIndustry.toLowerCase();
       filtered = filtered.filter((company) =>
-        company.industry.toLowerCase().includes(industryInput.toLowerCase())
+        company.industry.toLowerCase().includes(loweredIndustry)
       );
     }
 
-    // Location filter - hỗ trợ tự gõ
-    if (locationInput) {
+    if (appliedLocation) {
+      const loweredLocation = appliedLocation.toLowerCase();
       filtered = filtered.filter((company) =>
-        company.location.toLowerCase().includes(locationInput.toLowerCase())
+        company.location.toLowerCase().includes(loweredLocation)
       );
     }
 
-    // Company size filter
-    if (selectedSize) {
-      filtered = filtered.filter((company) => company.size === selectedSize);
+    if (appliedSize) {
+      filtered = filtered.filter((company) => company.size === appliedSize);
     }
 
-    // Sorting - cải thiện logic
-    if (sortBy === "name-asc") {
+    if (appliedSort === "name-asc") {
       filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "name-desc") {
+    } else if (appliedSort === "name-desc") {
       filtered = filtered.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sortBy === "rating-high") {
+    } else if (appliedSort === "rating-high") {
       filtered = filtered.sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "rating-low") {
+    } else if (appliedSort === "rating-low") {
       filtered = filtered.sort((a, b) => a.rating - b.rating);
-    } else if (sortBy === "newest") {
-      filtered = filtered.sort((a, b) => b.id - a.id); // Mới nhất trước
-    } else {
-      // Default: theo thứ tự trong DB (đã sắp xếp ngược)
-      filtered = [...filtered]; // Giữ nguyên thứ tự
+    } else if (appliedSort === "newest") {
+      filtered = filtered.sort((a, b) => b.id - a.id);
     }
 
     setFilteredCompanies(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [
-    companies,
-    searchTerm,
-    industryInput,
-    locationInput,
-    selectedSize,
-    sortBy,
-  ]);
+    setCurrentPage(1);
+  }, [companies, appliedFilters]);
 
   // Pagination
   const totalPages = Math.ceil(filteredCompanies.length / COMPANIES_PER_PAGE);
@@ -488,16 +533,16 @@ export default function CompaniesPage() {
               </div>
             </div>
 
-            {/* Clear Filters Button */}
-            <div className="mt-4 flex justify-end">
+            {/* Search & Clear Buttons */}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button
-                onClick={() => {
-                  setSearchTerm("");
-                  setIndustryInput("");
-                  setLocationInput("");
-                  setSelectedSize("");
-                  setSortBy("default");
-                }}
+                onClick={handleApplyFilters}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
+              >
+                🔍 Tìm kiếm
+              </Button>
+              <Button
+                onClick={handleClearFilters}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
               >
                 🗑️ Xóa bộ lọc
@@ -618,44 +663,85 @@ export default function CompaniesPage() {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - dùng shadcn/ui pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-4">
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                ← Trước
-              </Button>
-
-              <div className="flex space-x-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-md text-xs font-medium transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl ${
-                        currentPage === page
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
-                      }`}
+            <div className="flex justify-center">
+              <Pagination>
+                <PaginationContent className="gap-2">
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        if (currentPage > 1) {
+                          setCurrentPage((prev) => Math.max(1, prev - 1));
+                        }
+                      }}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-2 text-sm font-semibold",
+                        currentPage === 1
+                          ? "pointer-events-none border-gray-200 bg-gray-100 text-gray-400"
+                          : "border-blue-500 bg-white text-blue-600 hover:bg-blue-500 hover:text-white hover:shadow-lg hover:scale-105"
+                      )}
+                      aria-disabled={currentPage === 1}
+                      tabIndex={currentPage === 1 ? -1 : undefined}
                     >
-                      {page}
-                    </button>
-                  )
-                )}
-              </div>
+                      <ChevronLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Trước</span>
+                    </PaginationPrevious>
+                  </PaginationItem>
 
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                Tiếp →
-              </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                          isActive={currentPage === page}
+                          className={`
+                    cursor-pointer px-4 py-2 rounded-lg font-medium transition-all duration-200
+                    ${
+                      currentPage === page
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-110 border-2 border-blue-600"
+                        : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 hover:shadow-md hover:scale-105"
+                    }
+                    `}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        if (currentPage < totalPages) {
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages, prev + 1)
+                          );
+                        }
+                      }}
+                      className={cn(
+                        "rounded-lg border-2 px-3 py-2 text-sm font-semibold",
+                        currentPage === totalPages
+                          ? "pointer-events-none border-gray-200 bg-gray-100 text-gray-400"
+                          : "border-blue-500 bg-white text-blue-600 hover:bg-blue-500 hover:text-white hover:shadow-lg hover:scale-105"
+                      )}
+                      aria-disabled={currentPage === totalPages}
+                      tabIndex={currentPage === totalPages ? -1 : undefined}
+                    >
+                      <span className="hidden sm:inline">Sau</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </PaginationNext>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
 

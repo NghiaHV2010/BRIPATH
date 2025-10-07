@@ -52,21 +52,7 @@ export default function QuizLandingPage() {
           </h1>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
             Khám phá con đường sự nghiệp phù hợp với bạn thông qua trắc nghiệm
-            thông minh được hỗ trợ bởi AI.{" "}
-            {loading && (
-              <span className="text-sm text-blue-500">
-                (Đang tải câu hỏi...)
-              </span>
-            )}
-            {!loading && error && (
-              <span className="text-sm text-red-500"> ({error})</span>
-            )}
-            {!loading && !error && questions && (
-              <span className="text-sm text-green-600">
-                {" "}
-                (Có {questions.length} câu hỏi)
-              </span>
-            )}
+            thông minh được hỗ trợ bởi AI.
           </p>
         </div>
 
