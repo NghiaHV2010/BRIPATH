@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-// Replaced direct redirect button with popup-based Google OAuth
-import GoogleLoginPopup from "./GoogleLoginPopup";
 import { useAuthStore } from "../../store/auth";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import GoogleButton from "../ui/googleButton";
 export default function FormLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,7 +89,7 @@ export default function FormLogin() {
                   placeholder="Nhập Email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
+                  className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
               </div>
@@ -114,7 +112,7 @@ export default function FormLogin() {
                     placeholder="Nhập mật khẩu của bạn"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md pr-10"
+                    className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md pr-10"
                     required
                   />
                   <button
@@ -124,9 +122,9 @@ export default function FormLogin() {
                     className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="size-4" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="size-4" />
                     )}
                   </button>
                 </div>
@@ -140,7 +138,8 @@ export default function FormLogin() {
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
+                size="default"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
@@ -164,7 +163,7 @@ export default function FormLogin() {
                 </div>
               </div>
 
-              <GoogleLoginPopup />
+              <GoogleButton />
 
               <div className="text-center text-sm text-gray-600">
                 Chưa có tài khoản?{" "}

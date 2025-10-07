@@ -17,7 +17,6 @@ import {
   CompanyDetailsPageWrapper,
   JobsPageWrapper,
   JobDetailsPageWrapper,
-  UploadCVPageWrapper,
   ProfilePageWrapper,
   HomePage,
 } from "./pages";
@@ -26,11 +25,10 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPage from "./pages/jobs/savedJobsPage";
-import { useAuthStore } from './store/auth';
-import { Loader } from 'lucide-react';
-import VerifySMS from "./components/VerifySMS";
-import LoginGoogle from "./components/LoginGoogle";
-
+import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
+import CompanyRegistrationPage from "./pages/company/companyRegistrationPage";
+import { useAuthStore } from "./store/auth";
+import { Loader } from "lucide-react";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -97,8 +95,7 @@ function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/sms" element={<VerifySMS />} />
-      <Route path="/test" element={<LoginGoogle />} />
+      {/* <Route path="/sms" element={<VerifySMS />} /> */}
       <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/register/email/:token"
@@ -115,8 +112,16 @@ function App() {
       />
       <Route path="/jobs" element={<JobsPageWrapper />} />
       <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
-      <Route path="/upload-cv" element={<UploadCVPageWrapper />} />
-      <Route path="/profile" element={<ProfilePageWrapper />} />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePageWrapper />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/settings"
         element={
@@ -138,6 +143,22 @@ function App() {
         element={
           <ProtectedRoute>
             <SavedJobsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cv/suitable"
+        element={
+          <ProtectedRoute>
+            <CVSuitableJobsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/companies-create"
+        element={
+          <ProtectedRoute>
+            <CompanyRegistrationPage />
           </ProtectedRoute>
         }
       />

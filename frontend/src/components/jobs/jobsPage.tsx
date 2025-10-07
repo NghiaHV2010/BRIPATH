@@ -23,6 +23,24 @@ interface Job {
   isRemote: boolean;
 }
 
+type JobFilterState = {
+  searchTerm: string;
+  locationInput: string;
+  industryInput: string;
+  selectedType: string;
+  selectedLevel: string;
+  sortBy: string;
+};
+
+const createDefaultJobFilters = (): JobFilterState => ({
+  searchTerm: "",
+  locationInput: "",
+  industryInput: "",
+  selectedType: "",
+  selectedLevel: "",
+  sortBy: "default",
+});
+
 // Mock data - sắp xếp ngược theo ID (job mới đăng hiện lên trước)
 const mockJobs: Job[] = [
   {
@@ -408,6 +426,31 @@ export default function JobsPage() {
   const [selectedType, setSelectedType] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  const [appliedFilters, setAppliedFilters] = useState<JobFilterState>(() =>
+    createDefaultJobFilters()
+  );
+
+  const handleApplyFilters = () => {
+    setAppliedFilters({
+      searchTerm,
+      locationInput,
+      industryInput,
+      selectedType,
+      selectedLevel,
+      sortBy,
+    });
+  };
+
+  const handleClearFilters = () => {
+    const defaults = createDefaultJobFilters();
+    setSearchTerm("");
+    setLocationInput("");
+    setIndustryInput("");
+    setSelectedType("");
+    setSelectedLevel("");
+    setSortBy(defaults.sortBy);
+    setAppliedFilters(defaults);
+  };
 
   // Get unique values for filter options
   const locations = Array.from(new Set(jobs.map((j) => j.location)));
@@ -416,84 +459,79 @@ export default function JobsPage() {
 
   // Filter and sort jobs
   useEffect(() => {
-    let filtered = jobs;
+    const {
+      searchTerm: appliedSearchTerm,
+      locationInput: appliedLocation,
+      industryInput: appliedIndustry,
+      selectedType: appliedType,
+      selectedLevel: appliedLevel,
+      sortBy: appliedSort,
+    } = appliedFilters;
 
-    // Search filter
-    if (searchTerm) {
+    let filtered = [...jobs];
+
+    if (appliedSearchTerm) {
+      const loweredSearch = appliedSearchTerm.toLowerCase();
       filtered = filtered.filter(
         (job) =>
-          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.title.toLowerCase().includes(loweredSearch) ||
+          job.company.name.toLowerCase().includes(loweredSearch) ||
+          job.description.toLowerCase().includes(loweredSearch) ||
           job.skills.some((skill) =>
-            skill.toLowerCase().includes(searchTerm.toLowerCase())
+            skill.toLowerCase().includes(loweredSearch)
           )
       );
     }
 
-    // Location filter
-    if (locationInput) {
+    if (appliedLocation) {
+      const loweredLocation = appliedLocation.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.location.toLowerCase().includes(locationInput.toLowerCase())
+        job.location.toLowerCase().includes(loweredLocation)
       );
     }
 
-    // Industry filter
-    if (industryInput) {
+    if (appliedIndustry) {
+      const loweredIndustry = appliedIndustry.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.industry.toLowerCase().includes(industryInput.toLowerCase())
+        job.industry.toLowerCase().includes(loweredIndustry)
       );
     }
 
-    // Job type filter
-    if (selectedType) {
-      filtered = filtered.filter((job) => job.type === selectedType);
+    if (appliedType) {
+      filtered = filtered.filter((job) => job.type === appliedType);
     }
 
-    // Level filter
-    if (selectedLevel) {
-      filtered = filtered.filter((job) => job.level === selectedLevel);
+    if (appliedLevel) {
+      filtered = filtered.filter((job) => job.level === appliedLevel);
     }
 
-    // Sorting
-    if (sortBy === "title-asc") {
+    if (appliedSort === "title-asc") {
       filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "title-desc") {
+    } else if (appliedSort === "title-desc") {
       filtered = filtered.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortBy === "company-asc") {
+    } else if (appliedSort === "company-asc") {
       filtered = filtered.sort((a, b) =>
         a.company.name.localeCompare(b.company.name)
       );
-    } else if (sortBy === "salary-high") {
+    } else if (appliedSort === "salary-high") {
       filtered = filtered.sort((a, b) => {
         const aMax = parseInt(a.salary.split("-")[1]) || 0;
         const bMax = parseInt(b.salary.split("-")[1]) || 0;
         return bMax - aMax;
       });
-    } else if (sortBy === "salary-low") {
+    } else if (appliedSort === "salary-low") {
       filtered = filtered.sort((a, b) => {
         const aMax = parseInt(a.salary.split("-")[1]) || 0;
         const bMax = parseInt(b.salary.split("-")[1]) || 0;
         return aMax - bMax;
       });
-    } else if (sortBy === "newest") {
+    } else if (appliedSort === "newest") {
       filtered = filtered.sort((a, b) => b.id - a.id);
-    } else {
-      // Default: theo thứ tự trong DB (đã sắp xếp ngược)
-      filtered = [...filtered];
     }
 
     setFilteredJobs(filtered);
     setCurrentPage(1);
-  }, [
-    jobs,
-    searchTerm,
-    locationInput,
-    industryInput,
-    selectedType,
-    selectedLevel,
-    sortBy,
-  ]);
+  }, [jobs, appliedFilters]);
 
   // Pagination
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
@@ -623,17 +661,16 @@ export default function JobsPage() {
               </div>
             </div>
 
-            {/* Clear Filters Button */}
-            <div className="mt-4 flex justify-end">
+            {/* Search & Clear Buttons */}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button
-                onClick={() => {
-                  setSearchTerm("");
-                  setLocationInput("");
-                  setIndustryInput("");
-                  setSelectedType("");
-                  setSelectedLevel("");
-                  setSortBy("default");
-                }}
+                onClick={handleApplyFilters}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
+              >
+                🔍 Tìm kiếm
+              </Button>
+              <Button
+                onClick={handleClearFilters}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 text-xs transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
               >
                 🗑️ Xóa bộ lọc

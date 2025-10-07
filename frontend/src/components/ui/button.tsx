@@ -1,29 +1,63 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "custom";
-}
+import { cn } from "@/lib/utils";
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", ...props }, ref) => {
-    const baseClasses =
-      "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transform transition-transform duration-300 ease-out hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100";
-
-    const defaultClasses =
-      variant === "default" && !className
-        ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
-        : "";
-
-    return (
-      <button
-        className={`${baseClasses} ${defaultClasses} ${className || ""}`}
-        ref={ref}
-        {...props}
-      />
-    );
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg",
+  {
+    variants: {
+      variant: {
+        default: "bg-blue-600 text-white hover:bg-blue-700",
+        outline:
+          "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-400",
+        gold: "bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-white shadow-yellow-500/25 hover:from-yellow-600 hover:via-amber-600 hover:to-yellow-700 hover:shadow-yellow-500/40",
+        silver:
+          "bg-gradient-to-r from-slate-500 via-gray-500 to-slate-600 text-white shadow-slate-500/25 hover:from-slate-600 hover:via-gray-600 hover:to-slate-700 hover:shadow-slate-500/40",
+        bronze:
+          "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-amber-500/25 hover:from-amber-600 hover:via-orange-600 hover:to-amber-700 hover:shadow-amber-500/40",
+        emerald:
+          "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-500",
+        google:
+          "border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 focus-visible:ring-blue-500 gap-3",
+        custom:
+          "bg-transparent text-inherit shadow-none hover:shadow-none focus-visible:ring-transparent",
+      },
+      size: {
+        default: "py-3 px-4 text-base",
+        lg: "py-4 px-6 text-lg",
+        sm: "h-8 px-3 text-xs",
+        icon: "h-10 w-10 p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
   }
 );
-Button.displayName = "Button";
 
-export { Button };
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot : "button";
+
+  return (
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export { Button, buttonVariants };

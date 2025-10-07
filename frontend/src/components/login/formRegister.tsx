@@ -1,10 +1,13 @@
-
 import { useState, useEffect } from "react";
+// no direct navigation hooks required for blocking; we'll rely on beforeunload + popstate listeners
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import GoogleButton from "./googleButton";
+import GoogleButton from "../ui/googleButton";
 // Verify via email link; no OTP input screen
 import { useAuthStore } from "../../store/auth";
+import { Eye, EyeOff, Mail } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Link } from "react-router";
 
 export default function FormRegister() {
   const [username, setUsername] = useState("");
@@ -12,12 +15,24 @@ export default function FormRegister() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [step, setStep] = useState<'register' | 'sent'>('register');
+  const [step, setStep] = useState<"register" | "sent">("register");
   const [isLoading, setIsLoading] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [canResend, setCanResend] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
-  const { registerValidate: doRegisterValidate, sendRegisterEmail: doSendRegisterEmail, error: storeError } = useAuthStore();
+  // Cooldown config (3 minutes)
+  const VERIFY_COOLDOWN_MS = 3 * 60 * 1000; // 180000 ms
+  const VERIFY_COOLDOWN_SECONDS = 180; // 3 * 60
+  const ACTIVE_VERIFY_KEY = "verifyEmailActive";
+
+  const {
+    registerValidate: doRegisterValidate,
+    sendRegisterEmail: doSendRegisterEmail,
+    error: storeError,
+  } = useAuthStore();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,35 +49,37 @@ export default function FormRegister() {
     }
     setError("");
     setIsLoading(true);
-    
+
     try {
       // Step 1: Check if account exists with username/email/password
-      console.log('Step 1: Validating registration...', { username, email });
       await doRegisterValidate(username, email, password);
-      console.log('Step 1: Validation successful');
-      
+
       // Step 2: If validation passes, immediately send verification email
-      console.log('Step 2: Sending verification email...');
       await doSendRegisterEmail();
-      console.log('Step 2: Email sent successfully');
-      
+
       // Set initial cooldown when email is sent
-      const cooldownEnd = Date.now() + 5 * 60 * 1000; // 5 minutes
-      localStorage.setItem(`verifyEmailCooldown_${email}`, cooldownEnd.toString());
-      setStep('sent');
+      const cooldownEnd = Date.now() + VERIFY_COOLDOWN_MS; // 3 minutes
+      localStorage.setItem(
+        `verifyEmailCooldown_${email}`,
+        cooldownEnd.toString()
+      );
+      localStorage.setItem(
+        ACTIVE_VERIFY_KEY,
+        JSON.stringify({ email, cooldownEnd })
+      );
+      setStep("sent");
     } catch (error) {
-      console.error('Registration failed:', error);
-      
+      console.error("Registration failed:", error);
+
       // Wait a bit for store to update, then get the error
       setTimeout(() => {
         const currentStoreError = storeError;
-        console.log('Store error:', currentStoreError);
-        
+
         if (currentStoreError) {
           setError(currentStoreError);
         } else {
           // Fallback error message
-          setError('Đăng ký thất bại. Vui lòng kiểm tra thông tin và thử lại.');
+          setError("Đăng ký thất bại. Vui lòng kiểm tra thông tin và thử lại.");
         }
       }, 200);
     } finally {
@@ -72,10 +89,10 @@ export default function FormRegister() {
 
   // Initialize cooldown on sent step
   useEffect(() => {
-    if (step === 'sent' && email) {
+    if (step === "sent" && email) {
       const cooldownKey = `verifyEmailCooldown_${email}`;
       const cooldownEnd = localStorage.getItem(cooldownKey);
-      
+
       if (cooldownEnd) {
         const remaining = Math.max(0, parseInt(cooldownEnd) - Date.now());
         if (remaining > 0) {
@@ -93,6 +110,35 @@ export default function FormRegister() {
     }
   }, [step, email]);
 
+  // Restore existing verification process on mount (user reload)
+  useEffect(() => {
+    if (step === "register") {
+      try {
+        const raw = localStorage.getItem(ACTIVE_VERIFY_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as {
+            email: string;
+            cooldownEnd: number;
+          };
+          const remaining = parsed.cooldownEnd - Date.now();
+          if (remaining > 0) {
+            if (!email) setEmail(parsed.email);
+            setStep("sent");
+            setRemainingSeconds(Math.ceil(remaining / 1000));
+            setCanResend(false);
+          } else {
+            // expired -> cleanup
+            localStorage.removeItem(ACTIVE_VERIFY_KEY);
+            localStorage.removeItem(`verifyEmailCooldown_${parsed.email}`);
+          }
+        }
+      } catch {
+        // ignore JSON parse errors
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Countdown timer
   useEffect(() => {
     if (remainingSeconds > 0) {
@@ -102,31 +148,68 @@ export default function FormRegister() {
             setCanResend(true);
             if (email) {
               localStorage.removeItem(`verifyEmailCooldown_${email}`);
+              // keep ACTIVE_VERIFY_KEY so we still know we are in 'sent' state until success link clicked or user resets
             }
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-      
+
       return () => clearInterval(timer);
     }
   }, [remainingSeconds, email]);
 
+  // Block navigation when waiting for email verification
+  useEffect(() => {
+    if (step !== "sent") return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
+
+    const confirmNav = () => {
+      const answer = window.confirm(
+        "Tiến trình xác minh email sẽ bị mất nếu rời trang. Bạn có chắc muốn rời?"
+      );
+      if (!answer) {
+        // push user back to current page
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", confirmNav);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", confirmNav);
+    };
+  }, [step]);
+
   const handleResend = async () => {
     if (!canResend || !email) return;
-    
+
     setError("");
     setIsLoading(true);
     try {
       await doSendRegisterEmail();
       // Set new cooldown
-      const cooldownEnd = Date.now() + 5 * 60 * 1000;
-      localStorage.setItem(`verifyEmailCooldown_${email}`, cooldownEnd.toString());
-      setRemainingSeconds(300); // 5 minutes in seconds
+      const cooldownEnd = Date.now() + VERIFY_COOLDOWN_MS;
+      localStorage.setItem(
+        `verifyEmailCooldown_${email}`,
+        cooldownEnd.toString()
+      );
+      localStorage.setItem(
+        ACTIVE_VERIFY_KEY,
+        JSON.stringify({ email, cooldownEnd })
+      );
+      setRemainingSeconds(VERIFY_COOLDOWN_SECONDS); // 3 minutes in seconds
       setCanResend(false);
     } catch {
-      setError(storeError || 'Gửi lại email thất bại');
+      setError(storeError || "Gửi lại email thất bại");
     } finally {
       setIsLoading(false);
     }
@@ -135,20 +218,26 @@ export default function FormRegister() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
-  if (step === 'sent') {
+  if (step === "sent") {
     return (
       <div className="min-h-screen flex">
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-600 p-12 flex-col justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10 text-white animate-fade-in">
-            <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
+            <h1 className="text-4xl font-bold mb-2 animate-slide-up">
+              BRIPATH
+            </h1>
             <div className="space-y-4 mt-16 animate-slide-up-delay">
               <h2 className="text-5xl font-light leading-tight">
-                Kiểm tra hộp thư<br />
-                <span className="text-purple-200">Nhấp vào liên kết</span><br />
+                Kiểm tra hộp thư
+                <br />
+                <span className="text-purple-200">Nhấp vào liên kết</span>
+                <br />
                 <span className="text-purple-200">để xác minh</span>
               </h2>
             </div>
@@ -159,35 +248,55 @@ export default function FormRegister() {
           <div className="w-full max-w-md animate-fade-in-right">
             <div className="bg-white rounded-2xl shadow-xl border border-purple-200 p-8 transform transition-all duration-300 hover:shadow-2xl">
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">📧</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Email xác minh đã được gửi</h2>
-                <p className="text-gray-600 text-sm">Hãy mở email của bạn và nhấp vào liên kết xác thực. Sau khi xác thực, hệ thống sẽ tự chuyển bạn về trang chủ.</p>
+                <div className="flex justify-center mb-4">
+                  <DotLottieReact
+                    src="../../../public/animations/GkVe3BEgZD.json"
+                    autoplay
+                    loop={true} // Loop the animation
+                    style={{ width: 130, height: 130 }}
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Email xác minh đã được gửi
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Hãy mở email của bạn và nhấp vào liên kết xác thực. Sau khi
+                  xác thực, hệ thống sẽ tự chuyển bạn về trang chủ.
+                </p>
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm text-center animate-shake mb-4">{error}</div>
+                <div className="text-red-500 text-sm text-center animate-shake mb-4">
+                  {error}
+                </div>
               )}
 
               <div className="space-y-4">
-                <a 
-                  href="https://mail.google.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg text-center font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg"
+                <Button
+                  variant={"default"}
+                  className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg text-center font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg"
                 >
-                  <div className="flex items-center justify-center space-x-2">
-                    <span>📧</span>
-                    <span>Mở Gmail</span>
-                  </div>
-                </a>
+                  <a
+                    href="https://mail.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <Mail className="size-4 text-white" />
+                      <span className="text-white">Mở Gmail</span>
+                    </div>
+                  </a>
+                </Button>
 
                 <Button
                   onClick={handleResend}
                   disabled={!canResend || isLoading}
+                  variant={"default"}
                   className={`w-full py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg ${
                     canResend && !isLoading
-                      ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? "bg-gray-600 hover:bg-gray-700 text-white hover:scale-[1.02] hover:shadow-lg"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300"
                   }`}
                 >
                   {isLoading ? (
@@ -196,16 +305,19 @@ export default function FormRegister() {
                       <span>Đang gửi...</span>
                     </div>
                   ) : canResend ? (
-                    'Gửi lại email'
+                    "Gửi lại email"
                   ) : (
                     `Gửi lại sau ${formatTime(remainingSeconds)}`
                   )}
                 </Button>
               </div>
 
-              <a href="/login" className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg text-center font-medium transition mt-4">
+              <Link
+                to="/login"
+                className="mt-4 block text-center text-purple-600 font-medium transition-transform duration-200 hover:scale-105"
+              >
                 Quay lại đăng nhập
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -222,8 +334,10 @@ export default function FormRegister() {
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Tham gia cùng chúng tôi!<br />
-              <span className="text-emerald-200">Tạo tài khoản của bạn</span><br />
+              Tham gia cùng chúng tôi!
+              <br />
+              <span className="text-emerald-200">Tạo tài khoản của bạn</span>
+              <br />
               <span className="text-emerald-200">và bắt đầu khám phá</span>
             </h2>
           </div>
@@ -240,89 +354,140 @@ export default function FormRegister() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-full mb-4 animate-bounce-subtle">
                 ✨
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Tạo tài khoản của bạn</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Tạo tài khoản của bạn
+              </h2>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Tên tài khoản</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Tên tài khoản
+                </label>
                 <Input
                   type="text"
                   placeholder="Nhập tên tài khoản"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
+                  className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Địa chỉ Email</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Địa chỉ Email
+                </label>
                 <Input
                   type="email"
                   placeholder="ví dụ: example@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
+                  className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Mật khẩu (chứa chữ và số)</label>
-                <Input
-                  type="password"
-                  placeholder="Nhập mật khẩu (chữ và số)"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  title="Mật khẩu phải có cả chữ và số"
-                  autoComplete="new-password"
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
-                  required
-                />
+                <label className="text-sm font-medium text-gray-700">
+                  Mật khẩu (chứa chữ và số)
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Nhập mật khẩu của bạn"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
-                <Input
-                  type="password"
-                  placeholder="Nhập lại mật khẩu"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  title="Mật khẩu phải có cả chữ và số"
-                  autoComplete="new-password"
-                  className={`transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${
-                    confirmPassword && password && confirmPassword !== password 
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                      : ''
-                  }`}
-                  required
-                />
-                {confirmPassword && password && confirmPassword !== password && (
-                  <div className="text-red-500 text-sm animate-shake">
-                    Mật khẩu không khớp
-                  </div>
-                )}
+                <label className="text-sm font-medium text-gray-700">
+                  Xác nhận mật khẩu
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Nhập lại mật khẩu"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    title="Mật khẩu phải có cả chữ và số"
+                    autoComplete="new-password"
+                    className={`h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${
+                      confirmPassword &&
+                      password &&
+                      confirmPassword !== password
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : ""
+                    }`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                    }
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
                 <p className="font-medium mb-1">Yêu cầu mật khẩu:</p>
                 <ul className="space-y-1">
-                  <li className={`${/^(?=.*[A-Za-z])(?=.*\d).+$/.test(password) ? 'text-green-600' : 'text-gray-400'}`}>
+                  <li
+                    className={`${
+                      /^(?=.*[A-Za-z])(?=.*\d).+$/.test(password)
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
                     • Chứa ít nhất 1 chữ và 1 số
                   </li>
-                  <li className={`${password && confirmPassword && password === confirmPassword ? 'text-green-600' : 'text-gray-400'}`}>
+                  <li
+                    className={`${
+                      password &&
+                      confirmPassword &&
+                      password === confirmPassword
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
                     • Mật khẩu phải khớp nhau
                   </li>
                 </ul>
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm text-center animate-shake">{error}</div>
+                <div className="text-red-500 text-sm text-center animate-shake">
+                  {error}
+                </div>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
@@ -341,15 +506,20 @@ export default function FormRegister() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Hoặc tiếp tục với</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Hoặc tiếp tục với
+                  </span>
                 </div>
               </div>
 
               <GoogleButton />
 
               <div className="text-center text-sm text-gray-600">
-                Đã có tài khoản?{' '}
-                <a href="/login" className="text-emerald-600 hover:underline font-medium transition-colors">
+                Đã có tài khoản?{" "}
+                <a
+                  href="/login"
+                  className="text-emerald-600 hover:underline font-medium transition-colors"
+                >
                   Đăng nhập
                 </a>
               </div>

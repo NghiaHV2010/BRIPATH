@@ -1,11 +1,42 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { fetchQuestions } from "../../api";
+import type { QuizQuestion } from "../../api";
 
 export default function QuizLandingPage() {
   const navigate = useNavigate();
+  const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchQuestions();
+        if (mounted) setQuestions(data);
+      } catch (e: unknown) {
+        let message = "Không tải được câu hỏi";
+        if (typeof e === "object" && e && "response" in e) {
+          type ErrResp = { data?: { message?: string } };
+          const resp = (e as { response?: ErrResp }).response;
+          if (resp?.data?.message) message = resp.data.message;
+        }
+        if (mounted) setError(message);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const startQuiz = () => {
-    navigate("/quiz/test");
+    navigate("/quiz/test", { state: { questions } });
   };
 
   return (
@@ -21,8 +52,7 @@ export default function QuizLandingPage() {
           </h1>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
             Khám phá con đường sự nghiệp phù hợp với bạn thông qua trắc nghiệm
-            thông minh được hỗ trợ bởi AI. Chỉ mất 5-10 phút để có được gợi ý
-            nghề nghiệp cá nhân hóa.
+            thông minh được hỗ trợ bởi AI.
           </p>
         </div>
 
@@ -78,17 +108,20 @@ export default function QuizLandingPage() {
         {/* CTA Button */}
         <Button
           onClick={startQuiz}
+          disabled={
+            loading || !!error || (questions !== null && questions.length === 0)
+          }
           className="px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 
              hover:from-blue-700 hover:to-indigo-700 
              text-white text-lg font-semibold rounded-xl 
              transform transition-transform duration-300 ease-out
-             hover:scale-105 shadow-lg hover:shadow-2xl"
+             hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          🚀 Bắt đầu làm bài trắc nghiệm
+          {loading ? "Đang tải..." : "🚀 Bắt đầu làm bài trắc nghiệm"}
         </Button>
 
         <p className="text-gray-500 text-sm mt-4">
-          Hoàn toàn miễn phí • Không cần đăng ký
+          Hoàn toàn miễn phí • Cần đăng nhập để lưu kết quả
         </p>
 
         {/* Additional Info */}

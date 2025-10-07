@@ -3,7 +3,7 @@ import { QuizTestPage } from "../../components/test";
 
 export default function QuizTestPageWrapper() {
   return (
-    <Layout showNavbar={false}>
+    <Layout>
       <QuizTestPage />
     </Layout>
   );

@@ -212,16 +212,23 @@ export const googleLogin = (req: Request, res: Response) => {
 
     const user: userDTO = req.user as userDTO;
 
-    generateToken(user.id, res);
+        generateToken(user.id, res);
+        const html = `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8" />
+            <title>Đăng nhập...</title>
+            <style>html,body{background:#0d1117;color:#fff;font-family:system-ui;margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-size:14px;} .fade{opacity:.6}</style>
+            </head><body>
+            <div>Đăng nhập Google thành công. Cửa sổ sẽ đóng...</div>
+            <script>
+                try {
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage({ source:'bripath-google-auth', status:'success' }, '*');
+                    }
+                    setTimeout(() => window.close(), 400);
+                } catch (e) { setTimeout(() => window.close(), 600); }
+            </script>
+            </body></html>`;
 
-    return res.status(HTTP_SUCCESS.OK).json({
-        data: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            avatar: user.avatar_url
-        }
-    });
+        res.status(200).send(html);
 }
 
 export const verifySMS = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   User as UserIcon,
   LogOut,
@@ -9,7 +9,28 @@ import {
   FileText,
   Bookmark,
   Briefcase,
+  ChevronDown,
+  Menu,
+  X,
+  Search,
+  Building,
+  Plus,
 } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "./navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
 
 interface NavbarProps {
   className?: string;
@@ -17,47 +38,27 @@ interface NavbarProps {
 
 export default function Navbar({ className = "" }: NavbarProps) {
   const navigate = useNavigate();
-  // Align with updated store keys: authUser instead of user/isAuthenticated
   const authUser = useAuthStore((s) => s.authUser);
   const logout = useAuthStore((s) => s.logout);
-  const [openMenu, setOpenMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const isCompany = useAuthStore((s) => s.isCompany);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!authUser;
 
   const handleLogout = async () => {
     try {
       await logout?.();
-      setOpenMenu(false);
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
 
-  // Close on outside click or ESC
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpenMenu(false);
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenMenu(false);
-    };
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleKey);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKey);
-    };
-  }, []);
-
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 ${className}`}
     >
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
@@ -69,50 +70,97 @@ export default function Navbar({ className = "" }: NavbarProps) {
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:block">
-            <div className="ml-20 flex items-baseline space-x-50">
-              <Link
-                to="/jobs"
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-lg font-medium"
-              >
-                Việc Làm
-              </Link>
-              <Link
-                to="/companies"
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-lg font-medium"
-              >
-                Công Ty
-              </Link>
-              <Link
-                to="/quiz"
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-lg font-medium"
-              >
-                Career Map
-              </Link>
-              <Link
-                to="/quiz"
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-lg font-medium"
-              >
-                Blogs
-              </Link>
-            </div>
+          {/* Navigation Menu */}
+          <div className="hidden md:flex">
+            <NavigationMenu>
+              <NavigationMenuList className="space-x-2">
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/jobs"
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Việc Làm
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/companies"
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Công Ty
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="h-10">
+                    Tính Năng
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <div className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/quiz"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          >
+                            <Briefcase className="h-6 w-6" />
+                            <div className="mb-2 mt-4 text-lg font-medium">
+                              Career Map
+                            </div>
+                            <p className="text-sm leading-tight text-muted-foreground">
+                              Khám phá và lập kế hoạch sự nghiệp của bạn với AI
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </div>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/blog"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">
+                            Blogs
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Chia sẻ kinh nghiệm và bí quyết tuyển dụng
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/cv-builder"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">
+                            CV Builder
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Tạo CV chuyên nghiệp với AI
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setOpenMenu((o) => !o)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  aria-haspopup="menu"
-                  aria-expanded={openMenu}
-                >
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors outline-none">
                   {authUser?.avatar_url ? (
                     <img
                       src={authUser.avatar_url}
                       className="w-8 h-8 rounded-full object-cover"
+                      alt="Avatar"
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
@@ -122,148 +170,130 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
                     {authUser?.username || authUser?.email?.split("@")[0]}
                   </span>
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Cài đặt</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Quản lí hồ sơ</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/jobs/applied")}>
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    <span>Việc làm đã ứng tuyển</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/jobs/saved")}>
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    <span>Việc làm đã lưu</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/cv/suitable")}>
+                    <Search className="mr-2 h-4 w-4" />
+                    <span>Việc làm phù hợp</span>
+                  </DropdownMenuItem>
+                  {isCompany() ? (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/company/dashboard")}
+                      >
+                        <Building className="mr-2 h-4 w-4" />
+                        <span>Quản lý công ty</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/companies-create")}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        <span>Đăng ký tuyển dụng</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {openMenu && (
-                  <div
-                    className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 animate-fade-in"
-                    role="menu"
-                  >
-                    <button
-                      onClick={() => {
-                        setOpenMenu(false);
-                        navigate("/settings");
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                    >
-                      <Settings className="w-4 h-4" /> Cài đặt
-                    </button>
-                    <button
-                      onClick={() => {
-                        setOpenMenu(false);
-                        navigate("/profile");
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                    >
-                      <FileText className="w-4 h-4" /> Quản lí hồ sơ
-                    </button>
-                    <button
-                      onClick={() => {
-                        setOpenMenu(false);
-                        navigate("/jobs/applied");
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                    >
-                      <Briefcase className="w-4 h-4" /> Việc làm đã ứng tuyển
-                    </button>
-                    <button
-                      onClick={() => {
-                        setOpenMenu(false);
-                        navigate("/jobs/saved");
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                    >
-                      <Bookmark className="w-4 h-4" /> Việc làm đã lưu
-                    </button>
-                    <div className="my-1 h-px bg-gray-100" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      role="menuitem"
-                    >
-                      <LogOut className="w-4 h-4" /> Đăng xuất
-                    </button>
-                  </div>
-                )}
-              </div>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Đăng xuất</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
-                <Link
-                  to="/subscriptions"
-                  className="bg-gray-600 hover:bg-gray-700 text-white hover:text-white px-6 py-2 rounded-md text-sm font-medium transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl inline-flex items-center"
+                <Button
+                  asChild
+                  variant="outline"
+                  className="hidden sm:inline-flex"
                 >
-                  Nhà Tuyển Dụng
-                </Link>
-                <Link
-                  to="/login"
-                  className="bg-blue-600 hover:bg-blue-700 text-white hover:text-white px-6 py-2 rounded-md text-sm font-medium transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl inline-flex items-center"
+                  <Link to="/subscriptions">Nhà Tuyển Dụng</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant={"default"}
+                  className="hidden sm:inline-flex"
                 >
-                  Đăng nhập / Đăng ký
-                </Link>
+                  <Link to="/login">Đăng nhập</Link>
+                </Button>
               </>
             )}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button
-              type="button"
-              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
-              aria-expanded="false"
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className="block h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+              {mobileMenuOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
 
         {/* Mobile menu */}
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              to="/jobs"
-              className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Việc Làm
-            </Link>
-            <Link
-              to="/companies"
-              className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Công Ty
-            </Link>
-            <Link
-              to="/quiz"
-              className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Career Map
-            </Link>
-            <Link
-              to="/quiz"
-              className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Blogs
-            </Link>
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 pt-4 pb-3">
+            <div className="px-2 space-y-1">
+              <Link
+                to="/jobs"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Việc Làm
+              </Link>
+              <Link
+                to="/companies"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Công Ty
+              </Link>
+              <Link
+                to="/quiz"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Career Map
+              </Link>
+              <Link
+                to="/blog"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Blogs
+              </Link>
+            </div>
 
             <div className="pt-4 pb-3 border-t border-gray-200">
               {isAuthenticated ? (
@@ -271,6 +301,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <Link
                     to="/profile"
                     className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100"
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     {authUser?.avatar_url ? (
                       <img
@@ -288,32 +319,37 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     </span>
                   </Link>
                   <Button
-                    variant="custom"
-                    onClick={handleLogout}
-                    className="w-full text-left bg-red-500 hover:bg-red-600 text-white px-3 py-2 text-sm rounded-md transform transition-transform duration-300 ease-out hover:scale-105 shadow-lg hover:shadow-2xl"
+                    variant="outline"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full mx-3 text-red-600 border-red-600 hover:bg-red-50"
                   >
+                    <LogOut className="w-4 h-4 mr-2" />
                     Đăng xuất
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Link
-                    to="/subscriptions"
-                    className="block bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Nhà Tuyển Dụng
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Đăng nhập / Đăng ký
-                  </Link>
+                <div className="space-y-2 px-3">
+                  <Button asChild className="w-full" variant="outline">
+                    <Link
+                      to="/subscriptions"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Nhà Tuyển Dụng
+                    </Link>
+                  </Button>
+                  <Button asChild className="w-full">
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      Đăng nhập
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   );

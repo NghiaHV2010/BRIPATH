@@ -39,5 +39,8 @@ export const verifyRegisterEmail = async (token: string) => {
   return res.data;
 };
 
-export const getGoogleLoginUrl = () =>
-  `${axiosConfig.defaults.baseURL}/login/google`;
+// Append redirect param so backend (if implemented) can optionally use it
+export const getGoogleLoginUrl = () => {
+  const redirect = encodeURIComponent(window.location.origin + "/");
+  return `${axiosConfig.defaults.baseURL}/login/google?redirect_uri=${redirect}`;
+};

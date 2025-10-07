@@ -21,10 +21,10 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
       setError("Vui lòng nhập địa chỉ email hợp lệ");
       return;
     }
-    
+
     setError("");
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsLoading(false);
     onEmailSubmit(email);
   };
@@ -38,9 +38,13 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>
           <div className="space-y-4 mt-16 animate-slide-up-delay">
             <h2 className="text-5xl font-light leading-tight">
-              Quên mật khẩu?<br />
-              <span className="text-orange-200">Đừng lo lắng!</span><br />
-              <span className="text-orange-200">Chúng tôi sẽ giúp bạn khôi phục</span>
+              Quên mật khẩu?
+              <br />
+              <span className="text-orange-200">Đừng lo lắng!</span>
+              <br />
+              <span className="text-orange-200">
+                Chúng tôi sẽ giúp bạn khôi phục
+              </span>
             </h2>
           </div>
         </div>
@@ -56,31 +60,38 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-4 animate-bounce-subtle">
                 🔐
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Quên mật khẩu?</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Quên mật khẩu?
+              </h2>
               <p className="text-gray-600 text-sm">
-                Nhập địa chỉ email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.
+                Nhập địa chỉ email của bạn và chúng tôi sẽ gửi mã xác minh để
+                đặt lại mật khẩu.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Địa chỉ Email</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Địa chỉ Email
+                </label>
                 <Input
                   type="email"
                   placeholder="Nhập email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
+                  className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm text-center animate-shake">{error}</div>
+                <div className="text-red-500 text-sm text-center animate-shake">
+                  {error}
+                </div>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
@@ -95,8 +106,11 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                Nhớ lại mật khẩu?{' '}
-                <a href="/login" className="text-orange-600 hover:underline font-medium transition-colors">
+                Nhớ lại mật khẩu?{" "}
+                <a
+                  href="/login"
+                  className="text-orange-600 hover:underline font-medium transition-colors"
+                >
                   Quay lại đăng nhập
                 </a>
               </div>

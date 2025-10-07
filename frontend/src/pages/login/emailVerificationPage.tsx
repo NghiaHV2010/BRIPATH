@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { verifyRegisterEmail } from "../../api/auth_api";
 import { useAuthStore } from "../../store/auth";
-
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 export default function EmailVerificationPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -92,11 +92,17 @@ export default function EmailVerificationPage() {
 
   if (status === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 via-emerald-200 to-teal-100">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-            ✅
+          <div className="flex justify-center mb-4">
+            <DotLottieReact
+              src="../../../public/animations/Success Check.json"
+              autoplay
+              loop={false}
+              style={{ width: 120, height: 120 }}
+            />
           </div>
+
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
             Xác minh thành công
           </h2>
@@ -110,21 +116,29 @@ export default function EmailVerificationPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-400 via-red-500 to-pink-600">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-fade-in">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-6">
-          ❌
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 via-rose-200 to-pink-100">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+        <div className="flex justify-center mb-4">
+          <DotLottieReact
+            src="../../../public/animations/Bouncy Fail.json"
+            autoplay
+            loop={false}
+            style={{ width: 120, height: 120 }}
+          />
         </div>
+
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           Xác minh thất bại
         </h2>
         <p className="text-gray-600 mb-6">{error}</p>
+
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-700 text-sm">
             Vui lòng thử đăng ký lại hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp
             diễn.
           </p>
         </div>
+
         <button
           onClick={() => navigate("/register")}
           className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg"

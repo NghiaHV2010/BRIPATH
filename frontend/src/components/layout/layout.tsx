@@ -7,6 +7,7 @@ interface LayoutProps {
   showNavbar?: boolean;
   showFooter?: boolean;
   className?: string;
+  disableAutoScroll?: boolean;
 }
 
 export default function Layout({
@@ -14,10 +15,13 @@ export default function Layout({
   showNavbar = true,
   showFooter = true,
   className = "",
+  disableAutoScroll = false,
 }: LayoutProps) {
-  // Always scroll to top when this component mounts or updates
+  // Only scroll to top if not disabled
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (!disableAutoScroll) {
+      window.scrollTo(0, 0);
+    }
   });
 
   return (
