@@ -16,7 +16,7 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
 
         let company;
 
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             if (company_id) {
                 company = await tx.companies.update({
                     where: {
@@ -57,6 +57,44 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
                 message: "Step 1 Successfully!"
             });
         }
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createCompanyLabel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { label_name } = req.body as { label_name?: string };
+
+        if (!label_name || typeof label_name !== 'string') {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name is required"));
+        }
+
+        const name = label_name.trim();
+
+        if (name.length === 0) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name cannot be empty"));
+        }
+
+        if (name.length > 100) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 100 characters"));
+        }
+
+        const existed = await prisma.companyLabels.findFirst({
+            where: { label_name: name }
+        });
+
+        if (existed) {
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
+        }
+
+        const created = await prisma.companyLabels.create({
+            data: { label_name: name }
+        });
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            data: created
+        });
     } catch (error) {
         next(error);
     }
