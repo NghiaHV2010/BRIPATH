@@ -6,6 +6,36 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 const prisma = new PrismaClient();
 const numberOfJobs = 12;
 
+export const createJobLabel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { label_name } = req.body as { label_name?: string };
+
+        if (!label_name || typeof label_name !== 'string') {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name is required"));
+        }
+
+        const name = label_name.trim();
+
+        if (name.length === 0) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name cannot be empty"));
+        }
+
+        if (name.length > 50) { // schema uses VarChar(50)
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 50 characters"));
+        }
+
+        const existed = await prisma.jobLabels.findFirst({ where: { label_name: name } });
+        if (existed) {
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
+        }
+
+        const created = await prisma.jobLabels.create({ data: { label_name: name } });
+        return res.status(HTTP_SUCCESS.CREATED).json({ data: created });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string);
     const user_id: string = req.query?.userId as string;
