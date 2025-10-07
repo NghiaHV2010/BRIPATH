@@ -29,7 +29,6 @@ import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import CompanyRegistrationPage from "./pages/company/companyRegistrationPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
-import VerifySMS from "./components/VerifySMS";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -96,7 +95,7 @@ function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/sms" element={<VerifySMS />} />
+      {/* <Route path="/sms" element={<VerifySMS />} /> */}
       <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/register/email/:token"

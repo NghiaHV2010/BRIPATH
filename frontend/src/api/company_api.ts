@@ -54,3 +54,23 @@ export const getAllCompanies = async <T = Company[]>(params?: {
 
   return response.data.data;
 };
+
+// Upload file for company (business certificate, logo, background)
+export const uploadCompanyFile = async (file: File, fileType: 'business_certificate' | 'logo' | 'background') => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('type', fileType);
+
+  const response = await axiosConfig.post<ApiResponse<{ url: string }>>(
+    "/company/upload",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    }
+  );
+
+  return response.data.data;
+};

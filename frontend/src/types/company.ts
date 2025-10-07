@@ -113,4 +113,6 @@ export interface CompanyFormErrors {
   fax_code?: string;
   business_certificate?: string;
   description?: string;
+  logo_url?: string;
+  background_url?: string;
 }

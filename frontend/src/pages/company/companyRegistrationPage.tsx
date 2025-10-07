@@ -37,7 +37,7 @@ import {
   type CompanyRegistrationForm,
   type CompanyFormErrors,
 } from "../../types/company";
-import { createCompany } from "../../api/company_api";
+import { createCompany, uploadCompanyFile } from "../../api/company_api";
 import { useAuthStore } from "../../store/auth";
 import toast from "react-hot-toast";
 
@@ -67,6 +67,13 @@ export default function CompanyRegistrationPage() {
   const [isValidating, setIsValidating] = useState(false);
   const [errors, setErrors] = useState<CompanyFormErrors>({});
 
+  // File upload states
+  const [uploadingFiles, setUploadingFiles] = useState({
+    business_certificate: false,
+    logo: false,
+    background: false,
+  });
+
   const [formData, setFormData] = useState<CompanyRegistrationForm>({
     company_name: "",
     email: authUser?.email || "",
@@ -93,6 +100,64 @@ export default function CompanyRegistrationPage() {
     // Clear error when user starts typing
     if (errors[field as keyof CompanyFormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (
+    file: File,
+    fileType: "business_certificate" | "logo" | "background",
+    fieldName: keyof CompanyRegistrationForm
+  ) => {
+    try {
+      setUploadingFiles((prev) => ({ ...prev, [fileType]: true }));
+
+      // Validate file size (5MB for documents, 2MB for images)
+      const maxSize =
+        fileType === "business_certificate" ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        const sizeMB = fileType === "business_certificate" ? "5MB" : "2MB";
+        toast.error(`Kích thước file không được vượt quá ${sizeMB}!`);
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes =
+        fileType === "business_certificate"
+          ? [
+              "application/pdf",
+              "image/jpeg",
+              "image/png",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ]
+          : ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+      if (!allowedTypes.includes(file.type)) {
+        const typeText =
+          fileType === "business_certificate"
+            ? "PDF, JPG, PNG hoặc DOCX"
+            : "JPG, PNG, GIF hoặc WEBP";
+        toast.error(`Vui lòng chọn file ${typeText}!`);
+        return;
+      }
+
+      // Upload file
+      const result = await uploadCompanyFile(file, fileType);
+
+      // Update form data with the returned URL
+      setFormData((prev) => ({ ...prev, [fieldName]: result.url }));
+
+      // Clear any existing error
+      if (errors[fieldName as keyof CompanyFormErrors]) {
+        setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
+      }
+
+      toast.success("Tải file lên thành công!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Có lỗi xảy ra khi tải file lên. Vui lòng thử lại.");
+    } finally {
+      setUploadingFiles((prev) => ({ ...prev, [fileType]: false }));
     }
   };
 
@@ -146,7 +211,10 @@ export default function CompanyRegistrationPage() {
     }
 
     if (step === 2) {
-      if (formData.company_website && formData.company_website.trim()) {
+      // Website là bắt buộc
+      if (!formData.company_website?.trim()) {
+        newErrors.company_website = "Website công ty là bắt buộc";
+      } else {
         const websiteRegex =
           /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
         if (!websiteRegex.test(formData.company_website)) {
@@ -155,7 +223,16 @@ export default function CompanyRegistrationPage() {
         }
       }
 
-      if (formData.fax_code && formData.fax_code.trim()) {
+      // Số lượng nhân viên là bắt buộc
+      if (!formData.employees || formData.employees <= 50) {
+        newErrors.employees =
+          "Số lượng nhân viên là bắt buộc và phải lớn hơn 50";
+      }
+
+      // Mã số thuế là bắt buộc
+      if (!formData.fax_code?.trim()) {
+        newErrors.fax_code = "Mã số thuế là bắt buộc";
+      } else {
         const cleanFax = formData.fax_code.replace(/\D/g, "");
         if (cleanFax.length < 6 || cleanFax.length > 10) {
           newErrors.fax_code = "Mã số thuế phải có 6-10 chữ số";
@@ -164,12 +241,45 @@ export default function CompanyRegistrationPage() {
         }
       }
 
-      if (
-        formData.business_certificate &&
-        formData.business_certificate.length > 255
-      ) {
+      // Giấy phép kinh doanh là bắt buộc
+      if (!formData.business_certificate?.trim()) {
+        newErrors.business_certificate = "Giấy phép kinh doanh là bắt buộc";
+      } else if (formData.business_certificate.length > 255) {
         newErrors.business_certificate =
           "Thông tin giấy phép không được vượt quá 255 ký tự";
+      }
+    }
+
+    if (step === 3) {
+      // Mô tả công ty là bắt buộc
+      if (!formData.description?.trim()) {
+        newErrors.description = "Mô tả công ty là bắt buộc";
+      } else if (formData.description.length < 10) {
+        newErrors.description = "Mô tả công ty phải có ít nhất 10 ký tự";
+      } else if (formData.description.length > 1000) {
+        newErrors.description = "Mô tả công ty không được vượt quá 1000 ký tự";
+      }
+
+      // Logo URL là bắt buộc
+      if (!formData.logo_url?.trim()) {
+        newErrors.logo_url = "Logo công ty là bắt buộc";
+      } else {
+        const urlRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif|svg|webp)$/i;
+        if (!urlRegex.test(formData.logo_url)) {
+          newErrors.logo_url =
+            "Logo phải là URL hợp lệ (.jpg, .png, .gif, .svg, .webp)";
+        }
+      }
+
+      // Background URL là bắt buộc
+      if (!formData.background_url?.trim()) {
+        newErrors.background_url = "Ảnh bìa là bắt buộc";
+      } else {
+        const urlRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif|svg|webp)$/i;
+        if (!urlRegex.test(formData.background_url)) {
+          newErrors.background_url =
+            "Ảnh bìa phải là URL hợp lệ (.jpg, .png, .gif, .svg, .webp)";
+        }
       }
     }
 
@@ -400,7 +510,7 @@ export default function CompanyRegistrationPage() {
                   className="flex items-center gap-2"
                 >
                   <Globe className="h-4 w-4" />
-                  Website công ty
+                  Website công ty *
                 </Label>
                 <Input
                   id="company_website"
@@ -419,7 +529,7 @@ export default function CompanyRegistrationPage() {
               </div>
 
               <div>
-                <Label>Loại hình doanh nghiệp</Label>
+                <Label>Loại hình doanh nghiệp *</Label>
                 <Select
                   value={formData.company_type}
                   onValueChange={(value) =>
@@ -443,7 +553,7 @@ export default function CompanyRegistrationPage() {
               <div>
                 <Label htmlFor="employees" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Số lượng nhân viên
+                  Số lượng nhân viên *
                 </Label>
                 <Input
                   type="text"
@@ -473,7 +583,7 @@ export default function CompanyRegistrationPage() {
               <div>
                 <Label htmlFor="fax_code" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Mã số thuế
+                  Mã số thuế *
                 </Label>
                 <Input
                   id="fax_code"
@@ -491,16 +601,47 @@ export default function CompanyRegistrationPage() {
 
               <div className="md:col-span-2">
                 <Label htmlFor="business_certificate">
-                  Giấy phép kinh doanh
+                  Giấy phép kinh doanh *
                 </Label>
-                <Input
-                  id="business_certificate"
-                  value={formData.business_certificate}
-                  onChange={(e) =>
-                    handleInputChange("business_certificate", e.target.value)
-                  }
-                  placeholder="Số giấy phép hoặc đường dẫn file"
-                />
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    id="business_certificate"
+                    accept=".pdf,.jpg,.jpeg,.png,.docx"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(
+                          file,
+                          "business_certificate",
+                          "business_certificate"
+                        );
+                      }
+                    }}
+                    className={
+                      errors.business_certificate ? "border-red-500" : ""
+                    }
+                    disabled={uploadingFiles.business_certificate}
+                  />
+                  {uploadingFiles.business_certificate && (
+                    <p className="text-sm text-blue-600">
+                      Đang tải file lên...
+                    </p>
+                  )}
+                  {formData.business_certificate && (
+                    <p className="text-sm text-green-600">
+                      ✓ File đã được tải lên thành công
+                    </p>
+                  )}
+                  {errors.business_certificate && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.business_certificate}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Chấp nhận: PDF, JPG, PNG, DOCX
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -526,28 +667,72 @@ export default function CompanyRegistrationPage() {
               <div>
                 <Label htmlFor="logo_url" className="flex items-center gap-2">
                   <Upload className="h-4 w-4" />
-                  Logo công ty (URL)
+                  Logo công ty *
                 </Label>
-                <Input
-                  id="logo_url"
-                  value={formData.logo_url}
-                  onChange={(e) =>
-                    handleInputChange("logo_url", e.target.value)
-                  }
-                  placeholder="https://example.com/logo.png"
-                />
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    id="logo_url"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(file, "logo", "logo_url");
+                      }
+                    }}
+                    className={errors.logo_url ? "border-red-500" : ""}
+                    disabled={uploadingFiles.logo}
+                  />
+                  {uploadingFiles.logo && (
+                    <p className="text-sm text-blue-600">Đang tải ảnh lên...</p>
+                  )}
+                  {formData.logo_url && (
+                    <p className="text-sm text-green-600">
+                      ✓ Logo đã được tải lên thành công
+                    </p>
+                  )}
+                  {errors.logo_url && (
+                    <p className="text-sm text-red-500">{errors.logo_url}</p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Chấp nhận: JPG, PNG, GIF, WEBP (tối đa 2MB)
+                  </p>
+                </div>
               </div>
 
               <div>
-                <Label htmlFor="background_url">Ảnh bìa (URL)</Label>
-                <Input
-                  id="background_url"
-                  value={formData.background_url}
-                  onChange={(e) =>
-                    handleInputChange("background_url", e.target.value)
-                  }
-                  placeholder="https://example.com/background.png"
-                />
+                <Label htmlFor="background_url">Ảnh bìa *</Label>
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    id="background_url"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(file, "background", "background_url");
+                      }
+                    }}
+                    className={errors.background_url ? "border-red-500" : ""}
+                    disabled={uploadingFiles.background}
+                  />
+                  {uploadingFiles.background && (
+                    <p className="text-sm text-blue-600">Đang tải ảnh lên...</p>
+                  )}
+                  {formData.background_url && (
+                    <p className="text-sm text-green-600">
+                      ✓ Ảnh bìa đã được tải lên thành công
+                    </p>
+                  )}
+                  {errors.background_url && (
+                    <p className="text-sm text-red-500">
+                      {errors.background_url}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Chấp nhận: JPG, PNG, GIF, WEBP (tối đa 2MB)
+                  </p>
+                </div>
               </div>
             </div>
 
