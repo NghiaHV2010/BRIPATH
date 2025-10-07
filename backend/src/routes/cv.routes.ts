@@ -3,13 +3,11 @@ import { deleteCV, getSuitableJobs, getUserCV, uploadCV } from "../controllers/c
 import { authenticationMiddleware } from "../middlewares/auth.middleware";
 
 const cvRouter = Router();
+cvRouter.use(authenticationMiddleware);
 
-cvRouter.post('/cv/upload', authenticationMiddleware, uploadCV);
-
-cvRouter.get('/cv', authenticationMiddleware, getUserCV);
-
-cvRouter.delete('/cv/:id', authenticationMiddleware, deleteCV);
-
-cvRouter.get('/cv/suitable/:id', authenticationMiddleware, getSuitableJobs)
+cvRouter.post('/cv/upload', uploadCV);
+cvRouter.get('/cv', getUserCV);
+cvRouter.delete('/cv/:id', deleteCV);
+cvRouter.get('/cv/suitable/:id', getSuitableJobs);
 
 export default cvRouter;

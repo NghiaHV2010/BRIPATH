@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import e, { NextFunction, Request, Response } from 'express';
 import { PrismaClient } from '../generated/prisma';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 
@@ -9,7 +9,7 @@ export const getRevenueStats = async (req: Request, res: Response) => {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth() + 1;
         const currentYear = currentDate.getFullYear();
-        
+
         // Lấy tháng trước
         const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
         const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
@@ -55,7 +55,7 @@ export const getRevenueStats = async (req: Request, res: Response) => {
         // Tính tăng trưởng
         const currentAmount = Number(currentMonthRevenue._sum.amount || 0);
         const lastAmount = Number(lastMonthRevenue._sum.amount || 0);
-        
+
         let growthRate = 0;
         if (lastAmount > 0) {
             growthRate = ((currentAmount - lastAmount) / lastAmount) * 100;
@@ -68,7 +68,7 @@ export const getRevenueStats = async (req: Request, res: Response) => {
         for (let i = 11; i >= 0; i--) {
             const date = new Date(currentYear, currentMonth - 1 - i, 1);
             const nextDate = new Date(currentYear, currentMonth - i, 1);
-            
+
             const monthRevenue = await prisma.payments.aggregate({
                 where: {
                     status: 'success',
@@ -145,8 +145,8 @@ export const getRevenueStats = async (req: Request, res: Response) => {
                         style: 'currency',
                         currency: 'VND'
                     }).format(currentAmount),
-                    growthText: growthRate >= 0 ? 
-                        `Tăng ${Math.abs(growthRate).toFixed(1)}%` : 
+                    growthText: growthRate >= 0 ?
+                        `Tăng ${Math.abs(growthRate).toFixed(1)}%` :
                         `Giảm ${Math.abs(growthRate).toFixed(1)}%`
                 }
             }
@@ -348,10 +348,10 @@ export const getUserAccessStats = async (req: Request, res: Response) => {
             });
 
             dailyUserStats.push({
-                date: date.toLocaleDateString('vi-VN', { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
+                date: date.toLocaleDateString('vi-VN', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
                 }),
                 users: usersLoggedInOnDay,
                 fullDate: date.toISOString().split('T')[0]
@@ -433,5 +433,135 @@ export const getUserAccessStats = async (req: Request, res: Response) => {
             success: false,
             message: 'Internal server error'
         });
+    }
+};
+
+export const getCompaniesByStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const { status } = req.query;
+
+    if (!status || (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
+        return res.status(HTTP_ERROR.BAD_REQUEST).json({
+            success: false,
+            message: 'Trạng thái không hợp lệ. Vui lòng sử dụng "pending", "approved" hoặc "rejected".'
+        });
+    }
+
+    try {
+        const companies = await prisma.companies.findMany({
+            where: {
+                status: status
+            }
+        });
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: companies
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getEventsByStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const { status } = req.query;
+
+    if (!status || (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
+        return res.status(HTTP_ERROR.BAD_REQUEST).json({
+            success: false,
+            message: 'Trạng thái không hợp lệ. Vui lòng sử dụng "pending", "approved" hoặc "rejected".'
+        });
+    }
+
+    try {
+        const events = await prisma.events.findMany({
+            where: {
+                status: status
+            }
+        });
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: events
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateEventStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const { eventId } = req.params;
+    const { status } = req.body;
+
+    if (!status || (status !== 'approved' && status !== 'rejected')) {
+        return res.status(HTTP_ERROR.BAD_REQUEST).json({
+            success: false,
+            message: 'Trạng thái không hợp lệ. Vui lòng sử dụng "approved" hoặc "rejected".'
+        });
+    }
+
+    try {
+        const event = await prisma.events.update({
+            where: {
+                id: eventId,
+                status: 'pending'
+            },
+            data: {
+                status: status,
+                approved_at: new Date()
+            }
+        });
+
+        if (!event) {
+            return res.status(HTTP_ERROR.NOT_FOUND).json({
+                success: false,
+                message: 'Sự kiện không tồn tại hoặc đã được duyệt.'
+            });
+        }
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: event
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateCompanyStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const { companyId } = req.params;
+    const { status } = req.body;
+
+    if (!status || (status !== 'approved' && status !== 'rejected')) {
+        return res.status(HTTP_ERROR.BAD_REQUEST).json({
+            success: false,
+            message: 'Trạng thái không hợp lệ. Vui lòng sử dụng "approved" hoặc "rejected".'
+        });
+    }
+
+    try {
+        const company = await prisma.companies.update({
+            where: {
+                id: companyId,
+                status: 'pending'
+            },
+            data: {
+                status: status,
+                approved_at: new Date()
+            }
+        });
+
+        if (!company) {
+            return res.status(HTTP_ERROR.NOT_FOUND).json({
+                success: false,
+                message: 'Công ty không tồn tại hoặc đã được duyệt.'
+            });
+        }
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: company
+        });
+    } catch (error) {
+        next(error);
     }
 };

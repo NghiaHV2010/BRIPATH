@@ -65,8 +65,6 @@ export const createMyAnswer = async (req: Request, res: Response, next: NextFunc
 export const getSuitableJobCategories = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const user_id = req.user.id;
-    console.log("Hello");
-
 
     try {
         const data = await prisma.$queryRaw`

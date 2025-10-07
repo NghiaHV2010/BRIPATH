@@ -216,38 +216,47 @@ async function main() {
 
     const jobCategory = [
         {
-            job_category: "Kinh doanh & Quản trị",
-            description: "Bao gồm các vai trò như nhân sự, kế toán và quản lý."
+            job_category: "Công nghệ & Kỹ thuật",
+            description: "Bao gồm IT, phần mềm, điện, cơ khí và tự động hóa."
         },
         {
-            job_category: "Chăm sóc sức khỏe",
-            description: "Bao gồm các công việc như bác sĩ, y tá và dược sĩ."
+            job_category: "Kinh doanh & Quản lý",
+            description: "Bao gồm bán hàng, quản lý, khởi nghiệp và chuỗi cung ứng."
         },
         {
-            job_category: "Công nghệ",
-            description: "Bao gồm phát triển phần mềm, khoa học dữ liệu và hỗ trợ CNTT."
+            job_category: "Tài chính & Kế toán",
+            description: "Bao gồm ngân hàng, bảo hiểm, đầu tư và kiểm toán."
         },
         {
-            job_category: "Giáo dục",
-            description: "Có các vai như giáo viên và giảng viên đại học."
+            job_category: "Marketing & Truyền thông",
+            description: "Bao gồm quảng cáo, nội dung, thương mại điện tử và PR."
         },
         {
-            job_category: "Nghệ thuật & Thiết kế Sáng tạo",
-            description: "Bao gồm các nhà thiết kế đồ họa, nhà báo và nhà sản xuất."
+            job_category: "Giáo dục & Đào tạo",
+            description: "Bao gồm giảng dạy, huấn luyện và nghiên cứu học thuật."
         },
         {
-            job_category: "Xây dựng & Bất động sản",
-            description: "Bao gồm các vai trò trong xây dựng, thiết kế và bảo trì các công trình."
+            job_category: "Y tế & Chăm sóc sức khỏe",
+            description: "Bao gồm bác sĩ, y tá, dược sĩ và chăm sóc cá nhân."
         },
         {
-            job_category: "Bán hàng & Tiếp thị",
-            description: "Liên quan đến các vai trò tập trung vào việc quảng bá và bán sản phẩm hoặc dịch vụ."
+            job_category: "Nghệ thuật & Thiết kế",
+            description: "Bao gồm đồ họa, thời trang, âm nhạc và nhiếp ảnh."
         },
         {
-            job_category: "Khách sạn & Sự kiện",
-            description: "Bao gồm các công việc trong lĩnh vực thực phẩm và đồ uống, du lịch và quản lý sự kiện."
+            job_category: "Xây dựng & Kiến trúc",
+            description: "Bao gồm thiết kế, thi công, giám sát và bất động sản."
         },
-    ];
+        {
+            job_category: "Dịch vụ & Du lịch",
+            description: "Bao gồm khách sạn, nhà hàng, hướng dẫn viên và vận tải."
+        },
+        {
+            job_category: "Pháp lý & Hành chính",
+            description: "Bao gồm luật, nhân sự, hành chính và công việc chính phủ."
+        }
+    ]
+
 
     // Xóa dữ liệu cũ trước khi seed (nếu muốn)
     await prisma.jobCategories.deleteMany();
@@ -269,6 +278,137 @@ async function main() {
     }
 
     console.log("✅ Seed jobcategories thành công!");
+
+    await prisma.jobSpecialized.deleteMany();
+    const jobCates = await prisma.jobCategories.findMany();
+
+    const jobSpecializedData = [
+        {
+            job_category: "Công nghệ & Kỹ thuật",
+            job_types: [
+                { job_type: "Phát triển phần mềm", description: "Lập trình viên, kỹ sư phần mềm, tester, devops." },
+                { job_type: "Khoa học dữ liệu & AI", description: "Chuyên viên phân tích dữ liệu, kỹ sư machine learning." },
+                { job_type: "Kỹ thuật điện & điện tử", description: "Kỹ sư điện, điện tử, viễn thông." },
+                { job_type: "Cơ khí & Tự động hóa", description: "Thiết kế máy, sản xuất, robot và điều khiển tự động." },
+                { job_type: "An ninh mạng & Hạ tầng", description: "Chuyên viên bảo mật, quản trị hệ thống, mạng máy tính." }
+            ]
+        },
+        {
+            job_category: "Kinh doanh & Quản lý",
+            job_types: [
+                { job_type: "Quản lý dự án", description: "Điều phối, lập kế hoạch và giám sát tiến độ dự án." },
+                { job_type: "Phát triển kinh doanh", description: "Tìm kiếm cơ hội hợp tác và mở rộng thị trường." },
+                { job_type: "Quản lý chuỗi cung ứng", description: "Điều phối logistics, kho bãi, và vận chuyển." },
+                { job_type: "Khởi nghiệp", description: "Xây dựng, vận hành và phát triển doanh nghiệp mới." },
+                { job_type: "Quản lý nhân sự", description: "Tuyển dụng, đào tạo và phát triển nhân viên." }
+            ]
+        },
+        {
+            job_category: "Tài chính & Kế toán",
+            job_types: [
+                { job_type: "Kế toán", description: "Ghi chép, kiểm tra và tổng hợp số liệu tài chính." },
+                { job_type: "Kiểm toán", description: "Đảm bảo tính chính xác và tuân thủ trong báo cáo tài chính." },
+                { job_type: "Ngân hàng", description: "Tín dụng, giao dịch khách hàng và quản lý rủi ro." },
+                { job_type: "Đầu tư & Chứng khoán", description: "Phân tích thị trường, môi giới, quản lý danh mục đầu tư." },
+                { job_type: "Bảo hiểm", description: "Tư vấn, thẩm định và xử lý yêu cầu bồi thường." }
+            ]
+        },
+        {
+            job_category: "Marketing & Truyền thông",
+            job_types: [
+                { job_type: "Marketing kỹ thuật số", description: "SEO, Google Ads, Facebook Ads, TikTok Ads." },
+                { job_type: "Content Marketing", description: "Sáng tạo nội dung, viết bài, biên tập video." },
+                { job_type: "Quan hệ công chúng (PR)", description: "Tổ chức sự kiện, truyền thông doanh nghiệp." },
+                { job_type: "Thương mại điện tử", description: "Quản lý sàn TMĐT, tối ưu sản phẩm và chiến dịch." },
+                { job_type: "Nghiên cứu thị trường", description: "Thu thập, phân tích dữ liệu hành vi người tiêu dùng." }
+            ]
+        },
+        {
+            job_category: "Giáo dục & Đào tạo",
+            job_types: [
+                { job_type: "Giảng viên", description: "Giảng dạy tại các trường đại học, cao đẳng." },
+                { job_type: "Giáo viên phổ thông", description: "Giảng dạy tại trường tiểu học, trung học." },
+                { job_type: "Huấn luyện viên kỹ năng", description: "Đào tạo kỹ năng mềm, kỹ năng nghề." },
+                { job_type: "Chuyên viên đào tạo nội bộ", description: "Xây dựng chương trình và đào tạo nhân sự doanh nghiệp." },
+                { job_type: "Nghiên cứu & học thuật", description: "Thực hiện nghiên cứu khoa học, xuất bản bài báo." }
+            ]
+        },
+        {
+            job_category: "Y tế & Chăm sóc sức khỏe",
+            job_types: [
+                { job_type: "Bác sĩ & Y tá", description: "Khám chữa bệnh, chăm sóc bệnh nhân." },
+                { job_type: "Dược sĩ", description: "Cấp phát thuốc, tư vấn và kiểm tra dược phẩm." },
+                { job_type: "Kỹ thuật viên y học", description: "Xét nghiệm, chẩn đoán hình ảnh, vật lý trị liệu." },
+                { job_type: "Chăm sóc sức khỏe cộng đồng", description: "Truyền thông, phòng chống dịch bệnh." },
+                { job_type: "Quản lý y tế", description: "Điều hành bệnh viện, phòng khám và hệ thống y tế." }
+            ]
+        },
+        {
+            job_category: "Nghệ thuật & Thiết kế",
+            job_types: [
+                { job_type: "Thiết kế đồ họa", description: "Sáng tạo hình ảnh, logo, ấn phẩm truyền thông." },
+                { job_type: "Thiết kế thời trang", description: "Phát triển sản phẩm may mặc và phụ kiện." },
+                { job_type: "Âm nhạc & Biểu diễn", description: "Ca sĩ, nhạc sĩ, đạo diễn sân khấu." },
+                { job_type: "Nhiếp ảnh & Dựng phim", description: "Quay phim, chụp ảnh, hậu kỳ video." },
+                { job_type: "Mỹ thuật & Truyền thông đa phương tiện", description: "Hội họa, điêu khắc, thiết kế tương tác." }
+            ]
+        },
+        {
+            job_category: "Xây dựng & Kiến trúc",
+            job_types: [
+                { job_type: "Kỹ sư xây dựng", description: "Thi công, kết cấu, giám sát công trình." },
+                { job_type: "Kiến trúc sư", description: "Thiết kế nhà ở, đô thị, nội thất." },
+                { job_type: "Quản lý dự án xây dựng", description: "Lập kế hoạch, giám sát và kiểm soát chi phí." },
+                { job_type: "Kỹ sư cơ sở hạ tầng", description: "Giao thông, cầu đường, thoát nước." },
+                { job_type: "Bất động sản", description: "Môi giới, đầu tư và phát triển dự án nhà đất." }
+            ]
+        },
+        {
+            job_category: "Dịch vụ & Du lịch",
+            job_types: [
+                { job_type: "Lễ tân & Quản lý khách sạn", description: "Tiếp đón, phục vụ và quản lý lưu trú." },
+                { job_type: "Nhà hàng & Ẩm thực", description: "Đầu bếp, phục vụ, quản lý nhà hàng." },
+                { job_type: "Hướng dẫn viên du lịch", description: "Dẫn đoàn, tổ chức tour du lịch." },
+                { job_type: "Tổ chức sự kiện", description: "Lên kế hoạch và triển khai các chương trình." },
+                { job_type: "Vận tải & Logistics", description: "Điều phối, giao hàng, và dịch vụ khách hàng." }
+            ]
+        },
+        {
+            job_category: "Pháp lý & Hành chính",
+            job_types: [
+                { job_type: "Luật sư & Tư vấn pháp lý", description: "Giải quyết tranh chấp, tư vấn pháp luật." },
+                { job_type: "Nhân sự & Tuyển dụng", description: "Tuyển dụng, đào tạo và phúc lợi nhân viên." },
+                { job_type: "Hành chính văn phòng", description: "Soạn thảo, lưu trữ hồ sơ, hỗ trợ điều hành." },
+                { job_type: "Công chức nhà nước", description: "Thực hiện công việc hành chính tại cơ quan nhà nước." },
+                { job_type: "Phiên dịch & Biên dịch", description: "Dịch tài liệu, hội thoại và đàm phán quốc tế." }
+            ]
+        }
+    ];
+
+    for (const jobSpec of jobSpecializedData) {
+        const jobCate = jobCates.find((js) => js.job_category === jobSpec.job_category);
+        if (!jobCate) continue;
+
+        jobSpec.job_types.map(async (spec) => {
+            const jobSpecialized = await prisma.jobSpecialized.create({
+                data: {
+                    job_type: spec.job_type,
+                    description: spec.description,
+                    jobcategory_id: jobCate.id
+                }
+            });
+
+            const vector = await openai.embeddings.create({
+                model: "text-embedding-3-large", // dimension = 3072
+                input: spec.job_type,
+            });
+
+            const embedding = vector.data[0].embedding;
+
+            await prisma.$queryRaw`UPDATE "jobSpecialized" SET embedding=${embedding} WHERE id=${jobSpecialized.id}`
+        });
+    }
+    console.log("✅ Seed jobSpecialized completed!");
 
 
 }

@@ -50,6 +50,17 @@ model languages {
   cvs         cvs     @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
 
+model aiFeedbacks {
+  id       Int      @id @default(autoincrement())
+  role     String   @db.VarChar(50)
+  job_id   String
+  cv_id    Int
+  is_good  Boolean  @default(false)
+  saved_at DateTime @default(now())
+  cvs      cvs      @relation(fields: [cv_id], references: [id], onDelete: Cascade)
+  jobs     jobs     @relation(fields: [job_id], references: [id], onDelete: Cascade)
+}
+
 model blogs {
   id              Int      @id @default(autoincrement())
   title           String   @db.VarChar(255)
@@ -94,12 +105,6 @@ model reviews {
   users      users    @relation(fields: [user_id], references: [id])
 }
 
-model categories {
-  id            Int    @id @default(autoincrement())
-  category_name String @unique @db.VarChar(50)
-  jobs          jobs[]
-}
-
 model certificates {
   id          Int       @id @default(autoincrement())
   title       String?   @db.VarChar(255)
@@ -113,27 +118,16 @@ model certificates {
 
 model companies {
   id                   String              @id @default(uuid())
-  company_name         String              @db.VarChar(150)
-  company_website      String?
-  address_street       String              @db.VarChar(50)
-  address_ward         String              @db.VarChar(50)
-  address_city         String              @db.VarChar(50)
-  address_country      String              @db.VarChar(50)
-  email                String?             @unique @db.VarChar(50)
-  phone                String?             @unique @db.VarChar(12)
+  company_website      String?             @db.Text
   business_certificate String?
   company_type         Company_Type        @default(business_househole)
-  description          String?
-  logo_url             String?
-  background_url       String?
+  description          String?             @db.Text
+  background_url       String?             @db.Text
   employees            Int?
   is_verified          Boolean             @default(false)
-  email_verified       Boolean             @default(false)
-  phone_verified       Boolean             @default(false)
   fax_code             String?             @db.VarChar(10)
-  is_deleted           Boolean             @default(false)
-  created_at           DateTime            @default(now())
-  updated_at           DateTime            @updatedAt
+  status               ApplicantsStatus    @default(pending)
+  approved_at          DateTime?
   field_id             Int?
   label_id             Int?
   fields               fields?             @relation(fields: [field_id], references: [id])
@@ -165,6 +159,7 @@ model cvs {
   others         String?                @db.Text
   apply_job      String?                @db.VarChar(50)
   career_goal    String?                @db.Text
+  created_at     DateTime               @default(now())
   users_id       String
   embedding      Unsupported("vector")?
   applicants     applicants[]
@@ -175,6 +170,7 @@ model cvs {
   projects       projects[]
   references     references[]
   languages      languages[]
+  aiFeedbacks    aiFeedbacks[]
   users          users                  @relation(fields: [users_id], references: [id])
 }
 
@@ -245,6 +241,7 @@ model jobCategories {
   description    String?                @db.VarChar(255)
   embedding      Unsupported("vector")?
   jobSpecialized jobSpecialized[]
+  jobs           jobs[]
 }
 
 model jobLabels {
@@ -260,38 +257,39 @@ model jobSpecialized {
   embedding      Unsupported("vector")?
   jobcategory_id Int
   careerPaths    careerPaths?
-  jobCategories  jobCategories          @relation(fields: [jobcategory_id], references: [id])
+  jobCategories  jobCategories          @relation(fields: [jobcategory_id], references: [id], onDelete: Cascade)
 }
 
 model jobs {
-  id           String                 @id @default(uuid())
-  job_title    String                 @db.Text
-  description  String
-  location     String?                @db.VarChar(200)
-  benefit      String?                @db.VarChar(255)
-  working_time String?                @db.VarChar(50)
-  salary       String[]               @default(["Thỏa thuận"])
-  currency     String?                @default("VND") @db.VarChar(3)
-  job_type     Job_Type?
-  status       Job_Status?
-  job_level    String                 @db.VarChar(50)
-  quantity     Int?
-  skill_tags   String[]
-  education    Education?
-  experience   String?                @db.Text
-  embedding    Unsupported("vector")?
-  start_date   DateTime               @default(now()) @db.Date
-  end_date     DateTime?              @db.Date
-  created_at   DateTime               @default(now())
-  updated_at   DateTime               @updatedAt
-  category_id  Int?
-  label_id     Int?
-  company_id   String
-  companies    companies              @relation(fields: [company_id], references: [id])
-  applicants   applicants[]
-  categories   categories?            @relation(fields: [category_id], references: [id])
-  jobLabels    jobLabels?             @relation(fields: [label_id], references: [id])
-  savedJobs    savedJobs[]
+  id             String                 @id @default(uuid())
+  job_title      String                 @db.Text
+  description    String
+  location       String?                @db.VarChar(200)
+  benefit        String?                @db.VarChar(255)
+  working_time   String?                @db.VarChar(50)
+  salary         String[]               @default(["Thỏa thuận"])
+  currency       String?                @default("VND") @db.VarChar(3)
+  job_type       Job_Type?
+  status         Job_Status?
+  job_level      String                 @db.VarChar(50)
+  quantity       Int?
+  skill_tags     String[]
+  education      Education?
+  experience     String?                @db.Text
+  embedding      Unsupported("vector")?
+  start_date     DateTime               @default(now()) @db.Date
+  end_date       DateTime?              @db.Date
+  created_at     DateTime               @default(now())
+  updated_at     DateTime               @updatedAt
+  jobCategory_id Int?
+  label_id       Int?
+  company_id     String
+  companies      companies              @relation(fields: [company_id], references: [id])
+  applicants     applicants[]
+  jobCategories  jobCategories?         @relation(fields: [jobCategory_id], references: [id])
+  jobLabels      jobLabels?             @relation(fields: [label_id], references: [id])
+  savedJobs      savedJobs[]
+  aiFeedbacks    aiFeedbacks[]
 }
 
 model membershipPlans {
@@ -425,16 +423,18 @@ model userNotifications {
 }
 
 model events {
-  id           String       @id @default(uuid())
-  title        String       @db.VarChar(200)
-  description  String       @db.Text
-  start_date   DateTime     @db.Date
-  end_date     DateTime?    @db.Date
-  working_time String?      @db.VarChar(100)
-  banner_url   String?      @db.Text
-  quantity     Int?         @db.Integer
+  id           String           @id @default(uuid())
+  title        String           @db.VarChar(200)
+  description  String           @db.Text
+  start_date   DateTime         @db.Date
+  end_date     DateTime?        @db.Date
+  working_time String?          @db.VarChar(100)
+  banner_url   String?          @db.Text
+  quantity     Int?             @db.Integer
+  status       ApplicantsStatus @default(pending)
+  approved_at  DateTime?
   user_id      String
-  users        users        @relation(fields: [user_id], references: [id])
+  users        users            @relation(fields: [user_id], references: [id])
   volunteers   volunteers[]
 }
 
@@ -456,7 +456,7 @@ model users {
   id                     String                   @id @default(uuid())
   username               String                   @db.VarChar(100)
   password               String                   @db.VarChar(255)
-  avatar_url             String?
+  avatar_url             String?                  @db.Text
   email                  String                   @unique @db.VarChar(50)
   phone                  String?                  @unique @db.VarChar(12)
   address_street         String?                  @db.VarChar(50)

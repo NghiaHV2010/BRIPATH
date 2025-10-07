@@ -20,7 +20,8 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
     try {
         const isCompanyExisted = await prisma.companies.findFirst({
             where: {
-                id: company_id
+                id: company_id,
+                status: "approved"
             },
             include: {
                 followedCompanies: {
@@ -193,7 +194,8 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
     try {
         const isCompanyExisted = await prisma.companies.findFirst({
             where: {
-                id: company_id
+                id: company_id,
+                status: "approved"
             },
             include: {
                 feedbacks: {
@@ -266,8 +268,6 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
             ],
         });
 
-        console.log(response);
-
         if (response.choices[0].message) {
             const message = await prisma.messages.create({
                 data: {
@@ -305,6 +305,7 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
         const isEventExisted = await prisma.events.findFirst({
             where: {
                 id: event_id,
+                status: "approved"
             },
             include: {
                 volunteers: {
@@ -337,6 +338,64 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const feedbackJob = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const job_id = req.params.jobId;
+    const { cv_id, is_good }: { cv_id: number, is_good: boolean } = req.body;
+
+    try {
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: job_id
+            }
+        });
+
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy công việc!"));
+        }
+
+        const isCvExisted = await prisma.cvs.findFirst({
+            where: {
+                id: cv_id,
+                users_id: user_id
+            },
+            include: {
+                aiFeedbacks: {
+                    where: {
+                        job_id,
+                        role: "User"
+                    }
+                }
+            }
+        });
+
+        if (!isCvExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy CV!"));
+        }
+
+        if (isCvExisted.aiFeedbacks.length > 0) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn đã phản hồi công việc này cho CV này!"));
+        }
+
+        const feedback = await prisma.aiFeedbacks.create({
+            data: {
+                cv_id,
+                job_id,
+                role: "User",
+                is_good,
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            success: true,
+            data: feedback
         });
     } catch (error) {
         next(error);

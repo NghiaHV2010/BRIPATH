@@ -3,10 +3,11 @@ import { createMyAnswer, getAllQuestions, getAnswersByQuestion, getSuitableJobCa
 import { authenticationMiddleware } from "../middlewares/auth.middleware";
 
 const questionRouter = Router();
+questionRouter.use(authenticationMiddleware);
 
-questionRouter.get('/questions', authenticationMiddleware, getAllQuestions);
-questionRouter.get('/answers/:questionId', authenticationMiddleware, getAnswersByQuestion);
-questionRouter.post('/answers', authenticationMiddleware, createMyAnswer);
-questionRouter.get('/finished', authenticationMiddleware, getSuitableJobCategories);
+questionRouter.get('/questions', getAllQuestions);
+questionRouter.get('/answers/:questionId', getAnswersByQuestion);
+questionRouter.post('/answers', createMyAnswer);
+questionRouter.get('/finished', getSuitableJobCategories);
 
 export default questionRouter;

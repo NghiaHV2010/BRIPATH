@@ -28,6 +28,9 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
                         user_id
                     }
                 } : false
+            },
+            where: {
+                status: 'approved'
             }
         });
 
@@ -97,6 +100,175 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true
         })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getVolunteersByStatus = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { eventId, status } = req.query as { eventId: string, status: string };
+
+    if (!status || (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'pending', 'approved', 'rejected'"));
+    }
+
+    try {
+        const isEventExist = await prisma.events.findFirst({
+            where: {
+                id: eventId,
+                user_id,
+                status: 'approved'
+            }
+        });
+
+        if (!isEventExist) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Sự kiện không tồn tại hoặc đang chờ duyệt!"));
+        }
+
+        const volunteers = await prisma.volunteers.findMany({
+            where: {
+                status,
+                event_id: eventId
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true,
+                        gender: true,
+                        avatar_url: true
+                    }
+                }
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: volunteers
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateVolunteerStatus = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { volunteerId } = req.params;
+    const { event_id, feedback, status } = req.body as { event_id: string, feedback: string, status: string };
+
+    if (!status || (status !== 'approved' && status !== 'rejected')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'approved', 'rejected'"));
+    }
+
+    try {
+        const isVolunteerExist = await prisma.volunteers.findUnique({
+            where: {
+                event_id_user_id: {
+                    user_id: volunteerId,
+                    event_id,
+                },
+            },
+            include: {
+                events: true
+            }
+        });
+
+        if (!isVolunteerExist) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Tình nguyện viên không tồn tại!"));
+        }
+        if (isVolunteerExist.events.user_id !== user_id) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền cập nhật trạng thái cho tình nguyện viên này!"));
+        }
+        if (isVolunteerExist.status !== 'pending') {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Chỉ có thể cập nhật trạng thái cho các tình nguyện viên đang chờ duyệt!"));
+        }
+
+        const volunteer = await prisma.volunteers.update({
+            where: {
+                event_id_user_id: {
+                    user_id: volunteerId,
+                    event_id
+                }
+            },
+            data: {
+                status,
+                feedback,
+                verified_date: new Date()
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: volunteer
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getEventsByUserId = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const userId = req.params.userId;
+    let page: number = parseInt(req.query?.page as string || '1');
+    const status = req.query?.status as string;
+
+    if (!status || (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'pending', 'approved', 'rejected'"));
+    }
+
+    const numberOfEvents = 10;
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+
+    page -= 1;
+
+    if (!userId || userId !== user_id) {
+        return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền truy cập sự kiện của người dùng này!"));
+    }
+
+    try {
+        const total_events = await prisma.events.count({
+            where: {
+                user_id: userId,
+            }
+        });
+        const events = await prisma.events.findMany({
+            where: {
+                user_id: userId,
+                status,
+            },
+            include: {
+                volunteers: status === 'approved' ? {
+                    select: {
+                        apply_date: true,
+                        description: true,
+                        status: true,
+                        verified_date: true,
+                        users: {
+                            select: {
+                                username: true,
+                                avatar_url: true,
+                                gender: true,
+
+                            }
+                        }
+                    }
+                } : false
+            },
+            take: numberOfEvents,
+            skip: page * numberOfEvents,
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: events,
+            totalPages: Math.ceil(total_events / numberOfEvents)
+        });
     } catch (error) {
         next(error);
     }

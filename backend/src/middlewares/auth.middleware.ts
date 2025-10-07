@@ -126,9 +126,6 @@ export const authorizationMiddleware = (role: string) => {
                 }
             });
 
-            console.log(user);
-
-
             if (user?.roles.role_name !== role) {
                 return next(errorHandler(HTTP_ERROR.FORBIDDEN, "You don't have permission to do this request"));
             }
