@@ -450,6 +450,13 @@ export const getCompaniesByStatus = async (req: Request, res: Response, next: Ne
         const companies = await prisma.companies.findMany({
             where: {
                 status: status
+            },
+            include: {
+                users: {
+                    omit: {
+                        password: true,
+                    }
+                }
             }
         });
 
@@ -476,6 +483,13 @@ export const getEventsByStatus = async (req: Request, res: Response, next: NextF
         const events = await prisma.events.findMany({
             where: {
                 status: status
+            },
+            include: {
+                users: {
+                    omit: {
+                        password: true
+                    }
+                }
             }
         });
 

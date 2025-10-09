@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
-import { createCompany, feedbackCV, getAllCompanies, getApplicantsByStatus, getCompaniesByFilter, getCompanyByID, updateApplicantStatus, createCompanyLabel } from "../controllers/company.controller";
+import { createCompany, feedbackCV, getAllCompanies, getApplicantsByStatus, getCompaniesByFilter, getCompanyByID, updateApplicantStatus, createCompanyLabel, getAllCompanyFields, getAllCompanyLabel } from "../controllers/company.controller";
 
 const companyRouter = Router();
 
@@ -13,5 +13,8 @@ companyRouter.post('/feedback/cv/:cvId', authenticationMiddleware, authorization
 
 companyRouter.get('/applicants', authenticationMiddleware, authorizationMiddleware("Company"), getApplicantsByStatus);
 companyRouter.put('/applicant/:applicantId', authenticationMiddleware, authorizationMiddleware("Company"), updateApplicantStatus);
+
+companyRouter.get('/company/fields', getAllCompanyFields);
+companyRouter.get('/company/label', getAllCompanyLabel);
 
 export default companyRouter;

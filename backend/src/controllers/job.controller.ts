@@ -354,7 +354,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         salary?: string[],
         currency?: string,
         job_type?: 'remote' | 'part_time' | 'full_time' | 'others',
-        status?: 'over_due' | 'on_going',
+        status?: 'on_going',
         job_level: string,
         quantity?: number,
         skill_tags?: string[],
@@ -456,8 +456,6 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
             }
         });
 
-
-
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
             data: job
@@ -468,8 +466,202 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
 }
 
 export const updateJob = async (req: Request, res: Response, next: NextFunction) => {
+    type RequestBody = {
+        job_title: string,
+        description: string,
+        location?: string,
+        benefit?: string,
+        working_time?: string,
+        salary?: string[],
+        currency?: string,
+        job_type?: 'remote' | 'part_time' | 'full_time' | 'others',
+        status?: 'over_due' | 'on_going',
+        job_level: string,
+        quantity?: number,
+        skill_tags?: string[],
+        education?: 'highschool_graduate' | 'phd' | 'mastter' | 'bachelor' | 'others',
+        experience?: string,
+        start_date: string,
+        end_date?: string,
+        category?: string,
+    }
+
+    //@ts-ignore
+    const { company_id } = req.user;
+    const { jobId } = req.params;
+
+    const {
+        job_title,
+        description,
+        location,
+        benefit,
+        working_time,
+        salary,
+        currency,
+        job_type,
+        status,
+        job_level,
+        quantity,
+        skill_tags,
+        education,
+        experience,
+        start_date,
+        end_date,
+        category,
+    } = req.body as RequestBody;
+
+    try {
+        const existedJob = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id: company_id
+            }
+        });
+
+        if (!existedJob) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        if (!job_title) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập tiêu đề"));
+        }
+
+        if (!description) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập mô tả"));
+        }
+
+        if (!job_level) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập cấp bậc công việc"));
+        }
+
+        if (!start_date) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập ngày bắt đầu"))
+        }
+
+        const convert_startDate = new Date(start_date);
+
+        // @ts-ignore
+        if (isNaN(convert_startDate)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày bắt đầu(YYYY-MM-DD)"))
+        }
+
+        let convert_endDate: Date;
+
+        if (end_date) {
+            convert_endDate = new Date(end_date);
+        }
+
+        // @ts-ignore
+        if (isNaN(convert_endDate)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày kết thúc(YYYY-MM-DD)"))
+        }
+
+        const jobCategory = await prisma.jobCategories.findUnique({
+            where: {
+                job_category: category
+            }
+        });
+
+        if (!jobCategory) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Danh mục công việc không tồn tại!"));
+        }
+
+        const job = await prisma.jobs.update({
+            where: {
+                company_id,
+                id: jobId
+            },
+            data: {
+                job_title,
+                description,
+                location,
+                benefit,
+                working_time,
+                salary,
+                currency,
+                job_type,
+                status,
+                job_level,
+                quantity,
+                skill_tags,
+                education,
+                experience,
+                start_date,
+                end_date,
+                company_id,
+                jobCategory_id: jobCategory.id
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: job
+        })
+    } catch (error) {
+        next(error);
+    }
 }
 
+export const deleteJob = async (req: Request, res: Response, next: NextFunction) => {
+    //@ts-ignore
+    const { company_id } = req.user;
+    const { jobId } = req.params;
+
+    try {
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            }
+        });
+
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Công việc không tồn tại!"));
+        }
+
+        await prisma.jobs.delete({
+            where: {
+                id: jobId
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.NO_CONTENT);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const getAllJobCategories = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const jobCategories = await prisma.jobCategories.findMany();
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: jobCategories
+        })
+    } catch (error) {
+        console.log(error);
+        next(error)
+    }
+}
+
+export const getAllJobLabels = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const jobLabels = await prisma.jobLabels.findMany();
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: jobLabels
+        })
+    } catch (error) {
+        console.log(error);
+        next(error)
+    }
+}
+
+
+//Delete this
 export const createMockJob = async (req: Request, res: Response, next: NextFunction) => {
     const {
         job_title,

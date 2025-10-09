@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createMyAnswer, getAllQuestions, getAnswersByQuestion, getSuitableJobCategories } from "../controllers/question.controller";
+import { createUserAnswer, getAllQuestions, getAnswersByQuestion, getSuitableJobCategories, restartUserAnswer } from "../controllers/question.controller";
 import { authenticationMiddleware } from "../middlewares/auth.middleware";
 
 const questionRouter = Router();
@@ -7,7 +7,8 @@ questionRouter.use(authenticationMiddleware);
 
 questionRouter.get('/questions', getAllQuestions);
 questionRouter.get('/answers/:questionId', getAnswersByQuestion);
-questionRouter.post('/answers', createMyAnswer);
-questionRouter.get('/finished', getSuitableJobCategories);
+questionRouter.post('/answers', createUserAnswer);
+questionRouter.get('/question/finished', getSuitableJobCategories);
+questionRouter.delete('/question/restart', restartUserAnswer);
 
 export default questionRouter;

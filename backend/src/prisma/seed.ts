@@ -410,6 +410,43 @@ async function main() {
     }
     console.log("✅ Seed jobSpecialized completed!");
 
+    const fields = [
+        "Công nghệ thông tin",
+        "Thương mại điện tử",
+        "Tài chính – Ngân hàng",
+        "Bảo hiểm",
+        "Bất động sản",
+        "Xây dựng – Kiến trúc",
+        "Sản xuất – Chế tạo",
+        "Nông nghiệp – Lâm nghiệp – Thủy sản",
+        "Năng lượng – Điện lực",
+        "Vận tải – Logistics",
+        "Giáo dục – Đào tạo",
+        "Y tế – Chăm sóc sức khỏe",
+        "Dược phẩm – Sinh học",
+        "Du lịch – Nhà hàng – Khách sạn",
+        "Truyền thông – Quảng cáo – Marketing",
+        "Thiết kế – Mỹ thuật – Sáng tạo",
+        "Luật – Tư vấn pháp lý",
+        "Nhân sự – Tuyển dụng",
+        "Hàng tiêu dùng – FMCG",
+        "Thời trang – Làm đẹp – Mỹ phẩm",
+        "Xuất nhập khẩu",
+        "Môi trường – Tài nguyên",
+        "Khoa học – Nghiên cứu & Phát triển",
+        "Viễn thông",
+        "Phi lợi nhuận – Tổ chức xã hội"
+    ];
+
+    for (const name of fields) {
+        await prisma.fields.upsert({
+            where: { field_name: name },
+            update: {},
+            create: { field_name: name },
+        });
+    }
+
+    console.log("✅ Seeded company fields successfully!");
 
 }
 

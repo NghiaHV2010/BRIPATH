@@ -37,7 +37,7 @@ export const getAllQuestions = async (req: Request, res: Response, next: NextFun
     }
 }
 
-export const createMyAnswer = async (req: Request, res: Response, next: NextFunction) => {
+export const createUserAnswer = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const user_id = req.user.id;
     const { question_id, answer_id }: { question_id: number, answer_id: number[] } = req.body;
@@ -114,6 +114,23 @@ export const getSuitableJobCategories = async (req: Request, res: Response, next
             data
         })
 
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const restartUserAnswer = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user;
+
+    try {
+        await prisma.personalityTestResults.deleteMany({
+            where: {
+                user_id
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.NO_CONTENT);
     } catch (error) {
         next(error);
     }

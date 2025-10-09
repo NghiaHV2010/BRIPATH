@@ -7,25 +7,51 @@ const prisma = new PrismaClient();
 const numberOfCompanies = 10;
 
 export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // @ts-ignore
-        const { id, company_id } = req.user;
-        const { fax_code, business_certificate, company_type } = req.body;
+    type RequestBody = {
+        fax_code: string,
+        business_certificate: string,
+        company_type: "business_househole" | "business",
+        field: string
+    }
 
-        const isPhoneVerified = await prisma.users.findFirst({
+    // @ts-ignore
+    const { id, company_id } = req.user;
+    const { fax_code, business_certificate, company_type, field } = req.body as RequestBody;
+
+    try {
+        const isFieldExisted = await prisma.fields.findUnique({
+            where: {
+                field_name: field
+            }
+        });
+
+        if (!isFieldExisted) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Lĩnh vực không hợp lệ!"));
+        }
+
+        const isPhoneVerified = await prisma.users.findUnique({
             where: {
                 id: id
             },
             select: {
                 phone_verified: true,
+                companies: company_id ? {
+                    where: {
+                        id: company_id
+                    },
+                    select: {
+                        status: true,
+                    }
+                } : false
             }
         });
 
-        console.log(isPhoneVerified);
-
-
         if (!isPhoneVerified?.phone_verified) {
             return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa xác thực số điện thoại!"));
+        }
+
+        if (isPhoneVerified.companies && (isPhoneVerified.companies.status === "pending" || isPhoneVerified.companies.status === "approved")) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Hồ sơ của bạn đang/đã được phê duyệt"));
         }
 
         const isFaxCodeExisted = await fetch(
@@ -49,8 +75,17 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng tải lên giấy phép kinh doanh!"));
         }
 
-        const company = await prisma.companies.create({
-            data: {
+        const company = await prisma.companies.upsert({
+            where: {
+                id: company_id ? company_id : ''
+            },
+            update: {
+                fax_code,
+                business_certificate,
+                company_type,
+                status: "pending"
+            },
+            create: {
                 fax_code,
                 business_certificate,
                 company_type,
@@ -530,3 +565,28 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
     }
 }
 
+export const getAllCompanyFields = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const fields = await prisma.fields.findMany();
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: fields
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllCompanyLabel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const fields = await prisma.companyLabels.findMany();
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: fields
+        })
+    } catch (error) {
+        next(error);
+    }
+}
