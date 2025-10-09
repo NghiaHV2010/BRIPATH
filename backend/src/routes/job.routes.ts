@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { createJob, getAllJobs, getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob } from "../controllers/job.controller";
-import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
-import { getAllJobs, getJobByID, createJobLabel } from "../controllers/job.controller";
+import { createJob, getAllJobs,createJobLabel,  getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob } from "../controllers/job.controller";
 import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
 
 const jobRouter = Router();

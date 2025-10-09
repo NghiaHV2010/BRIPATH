@@ -1,0 +1,58 @@
+import axiosConfig from "@/config/axios.config";
+import type { CompanyDetail, CompanySummary } from "@/types/company";
+// ========================
+// Get all companies
+// ========================
+export const getAllCompanies = async (
+  page: number,
+  userId?: string
+): Promise<CompanySummary[]> => {
+  const response = await axiosConfig.get<{ data: CompanySummary[] }>(
+    "/companies",
+    {
+      params: { 
+        page, 
+        userId,
+        _t: Date.now() // Cache-busting parameter
+      },
+    }
+  );
+  return response.data.data;
+};
+
+// ========================
+// Get company details by ID
+// ========================
+export const getCompanyDetails = async (
+  companyId: string,
+  userId?: string
+): Promise<CompanyDetail> => {
+  const response = await axiosConfig.get<{ data: CompanyDetail }>("/company", {
+    params: { companyId, userId },
+  });
+  return response.data.data;
+};
+
+// ========================
+// Filter companies
+// ========================
+export const apiFilterCompanies = async (
+  page: number | 1,
+  name?: string,
+  location?: string,
+  field?: string,
+  userId?: string
+): Promise<CompanySummary[]> => {
+  // Try POST method with filter data in body
+  const response = await axiosConfig.post<{ data: CompanySummary[] }>(
+    "/companies/filter",
+    {
+      page, 
+      name, 
+      location, 
+      field, 
+      userId
+    }
+  );
+  return response.data.data;
+};
