@@ -13,12 +13,11 @@ import {
   QuizLandingPageWrapper,
   QuizTestPageWrapper,
   QuizResultsPageWrapper,
-  CompaniesPageWrapper,
-  CompanyDetailsPageWrapper,
   JobsPageWrapper,
   JobDetailsPageWrapper,
   ProfilePageWrapper,
   HomePage,
+  CompaniesPage,
 } from "./pages";
 import GuestOnly from "./components/auth/GuestOnly";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -26,7 +25,6 @@ import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPage from "./pages/jobs/savedJobsPage";
 import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
-import CompanyRegistrationPage from "./pages/company/companyRegistrationPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
 
@@ -105,11 +103,11 @@ function App() {
       <Route path="/quiz" element={<QuizLandingPageWrapper />} />
       <Route path="/quiz/test" element={<QuizTestPageWrapper />} />
       <Route path="/quiz/results" element={<QuizResultsPageWrapper />} />
-      <Route path="/companies" element={<CompaniesPageWrapper />} />
-      <Route
+      <Route path="/companies" element={<CompaniesPage />} />
+      {/* <Route
         path="/companies/:companyId"
         element={<CompanyDetailsPageWrapper />}
-      />
+      /> */}
       <Route path="/jobs" element={<JobsPageWrapper />} />
       <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
 
@@ -154,14 +152,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/companies-create"
         element={
           <ProtectedRoute>
             <CompanyRegistrationPage />
           </ProtectedRoute>
         }
-      />
+      /> */}
       <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
       <Route
         path="/subscriptions/:planId"

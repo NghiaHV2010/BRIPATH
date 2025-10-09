@@ -17,10 +17,6 @@ export { default as QuizLandingPageWrapper } from "./test/quizLandingPageWrapper
 export { default as QuizTestPageWrapper } from "./test/quizTestPageWrapper";
 export { default as QuizResultsPageWrapper } from "./test/quizResultsPageWrapper";
 
-// Company pages
-export { default as CompaniesPageWrapper } from "./companies/companiesPageWrapper";
-export { default as CompanyDetailsPageWrapper } from "./companies/companyDetailsPageWrapper";
-
 // Job pages
 export { default as JobsPageWrapper } from "./jobs/jobsPageWrapper";
 export { default as JobDetailsPageWrapper } from "./jobs/jobDetailsPageWrapper";
@@ -30,3 +26,6 @@ export { default as ProfilePageWrapper } from "./profile/profilePageWrapper";
 
 // Home page
 export { default as HomePage } from "./home/homePage";
+
+// Company pages
+export { default as CompaniesPage } from "./company/CompaniesPage";
