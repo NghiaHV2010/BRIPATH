@@ -178,7 +178,19 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                avatar: user.avatar_url
+                avatar_url: user.avatar_url,
+                phone: user.phone,
+                address_street: user.address_street,
+                address_ward: user.address_ward,
+                address_city: user.address_city,
+                address_country: user.address_country,
+                gender: user.gender,
+                last_loggedIn: user.last_loggedIn,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+                role_id: user.role_id,
+                phone_verified: user.phone_verified,
+                company_id: user.company_id
             }
         });
     } catch (error) {
