@@ -7,6 +7,7 @@ import passport from './config/passport.config';
 import { FRONTEND_URL, PORT } from './config/env.config';
 import fileUpload from "express-fileupload";
 import "./jobs/subscriptionReminder";
+import testRouter from './routes/test.routes';
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: "*",
     credentials: true
 }));
 
@@ -36,6 +37,8 @@ app.use('/api', companyRouter);
 app.use('/api', jobRouter);
 app.use('/api', questionRouter);
 app.use('/api', eventRouter);
+
+app.use(testRouter);
 
 // App error middleware
 app.use(errorMiddleware);

@@ -68,24 +68,47 @@ export const getSuitableJobCategories = async (req: Request, res: Response, next
 
     try {
         const data = await prisma.$queryRaw`
-            SELECT  jc.id,
+            WITH scored_specialized AS (
+                SELECT 
+                    jc.id AS category_id,
                     jc.job_category,
-                    jc.description,
-                    1 - (jc.embedding <=> user_score.avg_embedding) AS score
-            FROM "jobCategories" jc,
-            (
-                SELECT AVG(ans.embedding) AS avg_embedding
-                FROM "personalityTestResults" AS result
-                LEFT JOIN answers AS ans
-                ON result.answer_id = ans.id
-                WHERE result.user_id = ${user_id}
-            ) AS user_score
-            WHERE 1 - (jc.embedding <=> user_score.avg_embedding) > 0.6
+                    jc.description AS category_description,
+                    js.id AS job_id,
+                    js.job_type,
+                    js.description AS job_description,
+                    1 - (js.embedding <=> user_score.avg_embedding) AS job_score,
+                    1 - (jc.embedding <=> user_score.avg_embedding) AS category_score,
+                    ROW_NUMBER() OVER (PARTITION BY jc.id ORDER BY 1 - (js.embedding <=> user_score.avg_embedding) DESC) AS rn
+                FROM "jobCategories" jc
+                INNER JOIN "jobSpecialized" js
+                    ON js.jobcategory_id = jc.id
+                CROSS JOIN (
+                    SELECT AVG(ans.embedding) AS avg_embedding
+                    FROM "personalityTestResults" AS result
+                    LEFT JOIN answers AS ans
+                        ON result.answer_id = ans.id
+                    WHERE result.user_id = ${user_id}
+                ) AS user_score
+                WHERE 1 - (jc.embedding <=> user_score.avg_embedding) > 0.5
+            )
+            SELECT 
+                category_id AS id,
+                job_category,
+                category_description AS description,
+                json_agg(
+                    json_build_object(
+                        'job_type', job_type,
+                        'description', job_description,
+                        'score', job_score
+                    )
+                ) AS job_types,
+                MAX(category_score) AS score
+            FROM scored_specialized
+            WHERE rn <= 3
+            GROUP BY category_id, job_category, category_description
             ORDER BY score DESC
-            LIMIT 3
+            LIMIT 3;
         `;
-
-        console.log(data);
 
         return res.status(HTTP_SUCCESS.OK).json({
             data

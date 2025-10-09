@@ -1,7 +1,8 @@
-import e, { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "../generated/prisma";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 const numberOfJobs = 12;
@@ -212,9 +213,9 @@ export const getJobsByFilter = async (req: Request, res: Response, next: NextFun
 
     if (field) {
         filters.push({
-            categories: {
+            jobCategories: {
                 is: {
-                    category_name: { equals: field }
+                    job_category: { equals: field }
                 }
             }
         });
@@ -455,6 +456,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
             }
         });
 
+
+
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
             data: job
@@ -465,4 +468,147 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
 }
 
 export const updateJob = async (req: Request, res: Response, next: NextFunction) => {
+}
+
+export const createMockJob = async (req: Request, res: Response, next: NextFunction) => {
+    const {
+        job_title,
+        description,
+        location,
+        salary,
+        currency,
+        job_type,
+        status,
+        job_level,
+        quantity,
+        skill_tags,
+        education,
+        experience,
+        start_date,
+        company_id,
+        embedding
+    } = req.body;
+
+    if (!job_title) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập tiêu đề"));
+    }
+
+    if (!job_level) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập cấp bậc công việc"));
+    }
+
+    if (!start_date) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập ngày bắt đầu"))
+    }
+
+    const convert_startDate = new Date(start_date);
+
+    // @ts-ignore
+    if (isNaN(convert_startDate)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày bắt đầu(YYYY-MM-DD)"))
+    }
+
+    try {
+        const isExisted = await prisma.jobs.findFirst({
+            where: {
+                job_title,
+                company_id
+            }
+        });
+
+        if (isExisted) {
+            return res.status(HTTP_SUCCESS.OK).json({
+                success: true,
+                message: "This job is exited"
+            })
+        }
+
+        const job = await prisma.jobs.create({
+            data: {
+                job_title,
+                description: description ? description : "Không có",
+                location,
+                salary,
+                currency,
+                job_type,
+                status,
+                job_level,
+                quantity,
+                skill_tags,
+                education,
+                experience,
+                start_date: convert_startDate,
+                company_id,
+                jobCategory_id: 19
+            }
+        });
+
+        await prisma.$queryRaw`UPDATE jobs SET embedding=${embedding} WHERE id=${job.id}`;
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            success: true,
+            data: job.id
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createMockCompany = async (req: Request, res: Response, next: NextFunction) => {
+    const { logo, address, company_name, description, website }: { logo?: string, address?: string, company_name: string, description?: string, website?: string } = req.body;
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            const isCompanyExited = await tx.users.findFirst({
+                where: {
+                    username: company_name
+                },
+            });
+
+            if (isCompanyExited) {
+                return res.status(HTTP_SUCCESS.OK).json({
+                    success: false,
+                    data: isCompanyExited.company_id
+                })
+            }
+
+            const mockemail = company_name.trim().split(' ').slice(-4);
+
+            const salt = await bcrypt.genSalt(10);
+            const hashPassword = await bcrypt.hash("123456", salt);
+
+            const user = await tx.users.create({
+                data: {
+                    username: company_name,
+                    email: `${mockemail}@gmail.com`,
+                    password: hashPassword,
+                    avatar_url: logo,
+                    role_id: 2
+                }
+            });
+
+            const company = await tx.companies.create({
+                data: {
+                    description,
+                    status: "approved",
+                    fax_code: "0123456789",
+                    is_verified: true,
+                    company_website: website,
+                    users: {
+                        connect: {
+                            id: user.id
+                        }
+                    }
+                }
+            })
+
+            return res.status(HTTP_SUCCESS.OK).json({
+                success: true,
+                data: company.id
+            })
+        })
+
+    } catch (error) {
+        next(error);
+    }
 }

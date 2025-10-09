@@ -82,9 +82,7 @@ interface CV {
     ];
 }
 
-const prisma = new PrismaClient({
-    log: ["error", "query", "info", "warn"]
-});
+const prisma = new PrismaClient();
 
 export const uploadCV = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -263,20 +261,87 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
     }
 
     try {
-        const jobs = await prisma.$queryRaw`
-            SELECT  j.id, 
-                    j.job_title,
-                    1 - (j.embedding <=> cv.embedding) as score
-            FROM jobs j,
-            (
-                SELECT embedding 
-                FROM cvs
-                WHERE id=${cv_id} AND users_id=${user_id}
-            ) AS cv
-            WHERE 1 - (j.embedding <=> cv.embedding) > 0.7
-            ORDER BY score DESC
-            LIMIT 5
-        `;
+        const isCvExisted = await prisma.cvs.findUnique({
+            where: {
+                id: cv_id,
+                users_id: user_id
+            }
+        });
+
+        if (!isCvExisted) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Hồ sơ không tồn tại!"));
+        }
+
+        // const jobs = await prisma.$queryRaw`
+        //     SELECT  j.id, 
+        //             j.job_title,
+        //             1 - (j.embedding <=> cv.embedding) as score
+        //     FROM jobs j,
+        //     (
+        //         SELECT embedding 
+        //         FROM cvs
+        //         WHERE id=${cv_id} AND users_id=${user_id}
+        //     ) AS cv
+        //     WHERE 1 - (j.embedding <=> cv.embedding) > 0.7
+        //     ORDER BY score DESC
+        //     LIMIT 5
+        // `;
+
+        // tính trọng số động
+        const savedCount = await prisma.savedJobs.count({ where: { user_id } });
+        const feedbackCount = await prisma.aiFeedbacks.count({ where: { cv_id, is_good: true } });
+
+        const alpha = 0.6;
+        const beta = Math.min(0.1 + savedCount * 0.05, 0.3);
+        const gamma = Math.min(0.1 + feedbackCount * 0.05, 0.4);
+
+        const jobs = await prisma.$queryRawUnsafe(`
+        WITH user_profile AS (
+            SELECT embedding FROM (
+            SELECT (
+                ((
+                    SELECT embedding
+                    FROM cvs 
+                    WHERE users_id='${user_id}' AND id=${cv_id})
+                    * (
+                        SELECT ('[' || string_agg('${alpha}', ',') || ']')::vector(3072)
+                        FROM generate_series(1, 3072)
+                    )
+                ) +
+                (COALESCE(
+                    (SELECT AVG(j.embedding) AS embedding
+                    FROM "savedJobs" s
+                    JOIN jobs j ON j.id = s.job_id
+                    WHERE s.user_id = '${user_id}')
+                    * (
+                        SELECT ('[' || string_agg('${beta}', ',') || ']')::vector(3072)
+                        FROM generate_series(1, 3072)
+                    ),
+                    (SELECT ('[' || string_agg('0', ',') || ']')::vector(3072)
+                    FROM generate_series(1, 3072))
+                )) +
+                (COALESCE(
+                    (SELECT AVG(j.embedding) AS embedding
+                    FROM "aiFeedbacks" f
+                    JOIN jobs j ON j.id = f.job_id
+                    WHERE f.is_good = true AND f.cv_id = ${cv_id})
+                    * (
+                        SELECT ('[' || string_agg('${gamma}', ',') || ']')::vector(3072)
+                        FROM generate_series(1, 3072)
+                    ),
+                    (SELECT ('[' || string_agg('0', ',') || ']')::vector(3072)
+                    FROM generate_series(1, 3072))
+                ))
+            ) AS embedding) AS t
+        )
+        SELECT 
+            j.id, 
+            j.job_title,
+            1 - (j.embedding <=> up.embedding) AS score
+        FROM jobs j, user_profile up
+        ORDER BY score DESC
+        LIMIT 10;
+        `);
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: jobs

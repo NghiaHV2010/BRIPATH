@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createJob, getAllJobs, getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob, createJobLabel } from "../controllers/job.controller";
+import { createJob, getAllJobs, getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob, createJobLabel, createMockCompany, createMockJob } from "../controllers/job.controller";
 import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
 const jobRouter = Router();
 
