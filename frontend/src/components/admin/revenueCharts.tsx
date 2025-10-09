@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { TrendingUp, Star, Crown } from "lucide-react";
 import { getRevenueStats } from "../../api/admin_api";
@@ -22,24 +22,17 @@ const mockRevenueData = {
 };
 
 export default function RevenueCharts() {
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchRevenueData = async () => {
       try {
-        setLoading(true);
         await getRevenueStats();
       } catch (error) {
         console.error("Error fetching revenue data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchRevenueData();
   }, []);
-
-  const maxMonthlyRevenue = Math.max(...mockRevenueData.monthlyRevenue.map(d => d.revenue));
 
   return (
     <div className="space-y-6">
