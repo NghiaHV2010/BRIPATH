@@ -14,7 +14,7 @@ export default function CompanyList({
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-          CÁC CÔNG TY HIỆN ĐANG CÓ TRÊN HỆ THỐNG
+          CÁC CÔNG TY HIỆN ĐANG CÓ TRÊN HỆ THÔ
           <svg
             className="w-12 h-12 text-slate-400"
             fill="none"

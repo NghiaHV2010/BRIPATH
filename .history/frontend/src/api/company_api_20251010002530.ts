@@ -45,12 +45,12 @@ export const apiFilterCompanies = async (
   const response = await axiosConfig.get<{ data: CompanySummary[] }>(
     "/filter-companies",
     {
-      params: { 
-        page: page || '',
-        name: name || '',
-        location: location || '',
-        field: field || '',
-        userId: userId || ''
+      params: { a
+        page, 
+        name, 
+        location, 
+        field, 
+        userId,
       },
     }
   );

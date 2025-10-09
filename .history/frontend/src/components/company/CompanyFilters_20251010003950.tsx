@@ -126,7 +126,7 @@ export default function CompanyFilters({
 
       {/* Filtered Companies Results - Separate Section */}
       {isSearching && filteredCompanies.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-9 mt-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb mt-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-slate-900">
               Kết quả tìm kiếm

@@ -411,15 +411,15 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày bắt đầu(YYYY-MM-DD)"))
     }
 
-    let convert_endDate: Date | undefined = undefined;
+    let convert_endDate: Date;
 
     if (end_date) {
         convert_endDate = new Date(end_date);
+    }
 
-        // @ts-ignore
-        if (isNaN(convert_endDate)) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày kết thúc(YYYY-MM-DD)"))
-        }
+    // @ts-ignore
+    if (isNaN(convert_endDate)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày kết thúc(YYYY-MM-DD)"))
     }
 
     try {
@@ -449,8 +449,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 skill_tags,
                 education,
                 experience,
-                start_date: convert_startDate,
-end_date: convert_endDate ? convert_endDate : undefined,
+                start_date,
+                end_date,
                 company_id,
                 jobCategory_id: jobCategory.id
             }
@@ -464,6 +464,7 @@ end_date: convert_endDate ? convert_endDate : undefined,
         next(error);
     }
 }
+
 export const updateJob = async (req: Request, res: Response, next: NextFunction) => {
     type RequestBody = {
         job_title: string,

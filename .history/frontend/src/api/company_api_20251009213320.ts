@@ -46,11 +46,11 @@ export const apiFilterCompanies = async (
     "/filter-companies",
     {
       params: { 
-        page: page || '',
-        name: name || '',
-        location: location || '',
-        field: field || '',
-        userId: userId || ''
+        page, 
+        name, 
+        location, 
+        field, 
+        userId,
       },
     }
   );
