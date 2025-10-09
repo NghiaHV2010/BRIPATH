@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
-import { applyEvent, applyJob, createMessage, feedbackCompany, feedbackJob, followCompany, getLastestUserChat, saveJob } from "../controllers/user.controller";
+import { authenticationMiddleware } from "../middlewares/auth.middleware";
+import { applyEvent, applyJob, createMessage, feedbackCompany, feedbackJob, followCompany, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
 import OpenAI from "openai";
 import { OPENAI_API_KEY } from "../config/env.config";
 import fs from "fs";
@@ -18,6 +18,14 @@ userRouter.get('/agent-chat', getLastestUserChat);
 userRouter.post('/agent-chat', createMessage);
 
 userRouter.post('/feedback/job/:jobId', feedbackJob);
+
+userRouter.get('/user/profile', getUserProfile);
+userRouter.put('/user/profile', updateUserProfile);
+
+userRouter.get('/user/notification', getUserNotification);
+userRouter.put('/user/notification', updateUserNotification);
+
+userRouter.put('/user/history', getUserActivityHistory);
 
 userRouter.get('/test', async (req, res) => {
     const openai = new OpenAI({

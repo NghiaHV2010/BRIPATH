@@ -401,3 +401,302 @@ export const feedbackJob = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 }
+
+export const getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { id, company_id } = req.user;
+
+    try {
+        const user = await prisma.users.findFirst({
+            where: {
+                id
+            },
+            include: {
+                companies: company_id ? {
+                    select: {
+                        jobs: {
+                            select: {
+                                _count: {
+                                    select: {
+                                        applicants: {
+                                            where: {
+                                                status: 'pending'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } : false,
+                roles: {
+                    select: {
+                        role_name: true
+                    }
+                },
+                events: {
+                    where: {
+                        status: 'approved',
+                    },
+                    select: {
+                        _count: {
+                            select: {
+                                volunteers: {
+                                    where: {
+                                        status: 'pending'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        userNotifications: {
+                            where: {
+                                is_read: false
+                            }
+                        }
+                    }
+                }
+            },
+            omit: {
+                password: true,
+                firebase_uid: true,
+                is_deleted: true,
+                role_id: true
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateUserProfile = async (req: Request, res: Response, next: NextFunction) => {
+    type RequestBody = {
+        username?: string,
+        avatar_url?: string,
+        address_street?: string,
+        address_ward?: string,
+        address_city?: string,
+        address_country?: string,
+        gender?: 'male' | 'female' | 'others',
+    }
+    // @ts-ignore
+    const { id, company_id } = req.user;
+    const { username, avatar_url, address_street, address_ward, address_city, address_country, gender } = req.body as RequestBody
+
+    if (username && username?.length < 10) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tên người dùng quá ngắn, tối thiểu 10 ký tự!"));
+    }
+
+    if (avatar_url && !avatar_url?.includes("http")) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ảnh đại diện không hợp lệ!"));
+    }
+
+    if (gender && (gender !== 'male' && gender !== 'female' && gender !== 'others')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Giới tính không hợp lệ!"));
+    }
+
+    try {
+        const user = await prisma.users.update({
+            where: {
+                id
+            },
+            data: {
+                username,
+                avatar_url,
+                address_street,
+                address_ward,
+                address_city,
+                address_country,
+                gender
+            },
+            include: {
+                companies: company_id ? {
+                    select: {
+                        jobs: {
+                            select: {
+                                _count: {
+                                    select: {
+                                        applicants: {
+                                            where: {
+                                                status: 'pending'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } : false,
+                roles: {
+                    select: {
+                        role_name: true
+                    }
+                },
+                events: {
+                    where: {
+                        status: 'approved',
+                    },
+                    select: {
+                        _count: {
+                            select: {
+                                volunteers: {
+                                    where: {
+                                        status: 'pending'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        userNotifications: {
+                            where: {
+                                is_read: false
+                            }
+                        }
+                    }
+                }
+            },
+            omit: {
+                password: true,
+                firebase_uid: true,
+                is_deleted: true,
+                role_id: true
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getUserNotification = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    let page = parseInt(req.query.page as string || '1');
+    const numberOfNotifications = 20;
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+
+    page -= 1;
+
+    try {
+        const totalNotifications = await prisma.userNotifications.count({
+            where: {
+                user_id
+            }
+        });
+
+        const notifications = await prisma.userNotifications.findMany({
+            where: {
+                user_id
+            },
+            take: numberOfNotifications,
+            skip: page * numberOfNotifications
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: notifications,
+            totalPages: Math.ceil(totalNotifications / numberOfNotifications)
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateUserNotification = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { notification_id } = req.body as { notification_id: number };
+
+    if (notification_id < 1 || isNaN(notification_id)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã thông báo không hợp lệ"));
+    }
+
+    try {
+        const isNotificationExisted = await prisma.userNotifications.findUnique({
+            where: {
+                id_user_id: {
+                    user_id,
+                    id: notification_id
+                }
+            }
+        });
+
+        if (!isNotificationExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy thông báo!"));
+        }
+
+        const notification = await prisma.userNotifications.update({
+            where: {
+                id_user_id: {
+                    id: notification_id,
+                    user_id
+                }
+            },
+            data: {
+                is_read: true
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: notification
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getUserActivityHistory = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    let page = parseInt(req.query.page as string || '1');
+    const numberOfActivities = 20;
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+
+    page -= 1;
+
+    try {
+        const totalActivities = await prisma.userActivitiesHistory.count({
+            where: {
+                user_id
+            }
+        });
+
+        const activities = await prisma.userActivitiesHistory.findMany({
+            where: {
+                user_id
+            },
+            take: numberOfActivities,
+            skip: page * numberOfActivities
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: activities,
+            totalPages: Math.ceil(totalActivities / numberOfActivities)
+        });
+    } catch (error) {
+        next(error);
+    }
+}

@@ -5,7 +5,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
-const numberOfJobs = 12;
+const numberOfJobs = 16;
 
 export const createJobLabel = async (req: Request, res: Response, next: NextFunction) => {
     try {

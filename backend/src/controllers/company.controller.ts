@@ -4,7 +4,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 
 const prisma = new PrismaClient();
-const numberOfCompanies = 10;
+const numberOfCompanies = 12;
 
 export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
     type RequestBody = {
@@ -586,6 +586,65 @@ export const getAllCompanyLabel = async (req: Request, res: Response, next: Next
             success: true,
             data: fields
         })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateCompanyProfile = async (req: Request, res: Response, next: NextFunction) => {
+    type RequestBody = {
+        company_website?: string,
+        description?: string,
+        background_url?: string,
+        employees?: number
+    };
+
+    // @ts-ignore
+    const { id, company_id } = req.user;
+    const { company_website, description, background_url, employees } = req.body as RequestBody;
+
+    if (company_website && !company_website?.includes("http")) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trang web không hợp lệ!"));
+    }
+
+    if (description && !description?.includes("http")) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mô tả không hợp lệ!"));
+    }
+
+    if (background_url && !background_url?.includes("http")) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Hình nền không hợp lệ!"));
+    }
+
+    if (employees && (employees < 1 || isNaN(employees))) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số lượng nhân viên không hợp lệ!"));
+    }
+
+    try {
+        const company = await prisma.companies.update({
+            where: {
+                id: company_id
+            },
+            data: {
+                company_website,
+                description,
+                background_url,
+                employees
+            },
+            include: {
+                users: {
+                    omit: {
+                        password: true,
+                        is_deleted: true,
+                        firebase_uid: true
+                    }
+                }
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: company
+        });
     } catch (error) {
         next(error);
     }
