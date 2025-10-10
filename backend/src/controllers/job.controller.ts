@@ -7,42 +7,12 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 const numberOfJobs = 16;
 
-export const createJobLabel = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { label_name } = req.body as { label_name?: string };
-
-        if (!label_name || typeof label_name !== 'string') {
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name is required"));
-        }
-
-        const name = label_name.trim();
-
-        if (name.length === 0) {
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name cannot be empty"));
-        }
-
-        if (name.length > 50) { // schema uses VarChar(50)
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 50 characters"));
-        }
-
-        const existed = await prisma.jobLabels.findFirst({ where: { label_name: name } });
-        if (existed) {
-            return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
-        }
-
-        const created = await prisma.jobLabels.create({ data: { label_name: name } });
-        return res.status(HTTP_SUCCESS.CREATED).json({ data: created });
-    } catch (error) {
-        next(error);
-    }
-}
-
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string);
     const user_id: string = req.query?.userId as string;
 
     if (page < 1 || isNaN(page)) {
-        return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "Invalid Page!"));
+        return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "Trang không hợp lệ!"));
     }
 
     page -= 1;
@@ -85,6 +55,7 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: jobs,
             totalPages: Math.ceil(total_jobs / numberOfJobs)
         });
@@ -353,12 +324,12 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         working_time?: string,
         salary?: string[],
         currency?: string,
-        job_type?: 'remote' | 'part_time' | 'full_time' | 'others',
+        job_type?: 'remote' | 'part_time' | 'full_time' | 'others' | 'hybrid',
         status?: 'on_going',
         job_level: string,
         quantity?: number,
         skill_tags?: string[],
-        education?: 'highschool_graduate' | 'phd' | 'mastter' | 'bachelor' | 'others',
+        education?: 'highschool_graduate' | 'phd' | 'master' | 'bachelor' | 'others',
         experience?: string,
         start_date: string,
         end_date?: string,
@@ -411,15 +382,15 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày bắt đầu(YYYY-MM-DD)"))
     }
 
-    let convert_endDate: Date;
+    let convert_endDate: Date | undefined = undefined;
 
     if (end_date) {
         convert_endDate = new Date(end_date);
-    }
 
-    // @ts-ignore
-    if (isNaN(convert_endDate)) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày kết thúc(YYYY-MM-DD)"))
+        // @ts-ignore
+        if (isNaN(convert_endDate)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Sai định dạng ngày kết thúc(YYYY-MM-DD)"))
+        }
     }
 
     try {
@@ -449,8 +420,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 skill_tags,
                 education,
                 experience,
-                start_date,
-                end_date,
+                start_date: convert_startDate,
+                end_date: convert_endDate ? convert_endDate : undefined,
                 company_id,
                 jobCategory_id: jobCategory.id
             }
@@ -474,12 +445,12 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
         working_time?: string,
         salary?: string[],
         currency?: string,
-        job_type?: 'remote' | 'part_time' | 'full_time' | 'others',
+        job_type?: 'remote' | 'part_time' | 'full_time' | 'others' | 'hybrid',
         status?: 'over_due' | 'on_going',
         job_level: string,
         quantity?: number,
         skill_tags?: string[],
-        education?: 'highschool_graduate' | 'phd' | 'mastter' | 'bachelor' | 'others',
+        education?: 'highschool_graduate' | 'phd' | 'master' | 'bachelor' | 'others',
         experience?: string,
         start_date: string,
         end_date?: string,
@@ -487,7 +458,7 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
     }
 
     //@ts-ignore
-    const { company_id } = req.user;
+    const { id, company_id } = req.user;
     const { jobId } = req.params;
 
     const {
@@ -566,36 +537,47 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Danh mục công việc không tồn tại!"));
         }
 
-        const job = await prisma.jobs.update({
-            where: {
-                company_id,
-                id: jobId
-            },
-            data: {
-                job_title,
-                description,
-                location,
-                benefit,
-                working_time,
-                salary,
-                currency,
-                job_type,
-                status,
-                job_level,
-                quantity,
-                skill_tags,
-                education,
-                experience,
-                start_date,
-                end_date,
-                company_id,
-                jobCategory_id: jobCategory.id
-            }
+        const result = await prisma.$transaction(async (tx) => {
+            const job = await tx.jobs.update({
+                where: {
+                    company_id,
+                    id: jobId
+                },
+                data: {
+                    job_title,
+                    description,
+                    location,
+                    benefit,
+                    working_time,
+                    salary,
+                    currency,
+                    job_type,
+                    status,
+                    job_level,
+                    quantity,
+                    skill_tags,
+                    education,
+                    experience,
+                    start_date,
+                    end_date,
+                    company_id,
+                    jobCategory_id: jobCategory.id
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã cập nhật công việc ${job.job_title} #${job.id}`,
+                    user_id: id
+                }
+            });
+
+            return job;
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: job
+            data: result
         })
     } catch (error) {
         next(error);
@@ -604,7 +586,7 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
 
 export const deleteJob = async (req: Request, res: Response, next: NextFunction) => {
     //@ts-ignore
-    const { company_id } = req.user;
+    const { id, company_id } = req.user;
     const { jobId } = req.params;
 
     try {
@@ -619,10 +601,20 @@ export const deleteJob = async (req: Request, res: Response, next: NextFunction)
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Công việc không tồn tại!"));
         }
 
-        await prisma.jobs.delete({
-            where: {
-                id: jobId
-            }
+        await prisma.$transaction(async (tx) => {
+            const job = await tx.jobs.delete({
+                where: {
+                    id: jobId
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã xóa công việc ${job.job_title} #${job.id}`,
+                    user_id: id
+                }
+            });
+
         });
 
         return res.status(HTTP_SUCCESS.NO_CONTENT);

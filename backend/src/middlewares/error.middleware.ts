@@ -9,6 +9,7 @@ interface Error {
 export const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
     try {
         res.status(err.status || HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
+            success: false,
             message: err.message || 'Internal server error.'
         });
     } catch (error) {

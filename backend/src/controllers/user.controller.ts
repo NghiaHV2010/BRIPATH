@@ -4,6 +4,7 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import OpenAI from "openai";
 import { OPENAI_API_KEY, OPENAI_MODEL } from "../config/env.config";
+import { createNotificationData } from "../utils";
 
 const prisma = new PrismaClient();
 
@@ -14,7 +15,7 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
 
     // @ts-ignore
     if (req.user.company_id === company_id) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You cannot follow your self!"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn không thể theo dõi chính mình!"));
     }
 
     try {
@@ -24,6 +25,12 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
                 status: "approved"
             },
             include: {
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                    }
+                },
                 followedCompanies: {
                     where: {
                         user_id
@@ -33,23 +40,47 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
         });
 
         if (!isCompanyExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Company not found!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy công ty!"));
         }
 
         if (isCompanyExisted.followedCompanies.length > 0) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Already followed!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Đã theo dõi công ty này!"));
         }
 
-        await prisma.followedCompanies.create({
-            data: {
-                company_id,
-                user_id,
+        await prisma.$transaction(async (tx) => {
+            await tx.followedCompanies.create({
+                data: {
+                    company_id,
+                    user_id,
+                }
+            });
+
+
+            if (isCompanyExisted.users) {
+                await tx.userActivitiesHistory.create({
+                    data: {
+                        activity_name: `Bạn đã theo dõi công ty ${isCompanyExisted.users.username}`,
+                        user_id
+                    }
+                });
+
+                const notificationData = createNotificationData(undefined, undefined, "followed", "company");
+
+                await tx.userNotifications.create({
+                    data: {
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                        user_id: isCompanyExisted.users.id
+                    }
+                });
             }
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
-            message: "Successfully!"
-        })
+            success: true,
+            message: "Thành công!"
+        });
     } catch (error) {
         next(error);
     }
@@ -75,26 +106,39 @@ export const saveJob = async (req: Request, res: Response, next: NextFunction) =
         });
 
         if (!isJobExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Job not found!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy công việc!"));
         }
 
         if (isJobExisted.company_id === company_id) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You cannot save yours job!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn không thể lưu công việc của mình!"));
         }
 
         if (isJobExisted.savedJobs.length > 0) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already saved this job!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn đã lưu công việc này!"));
         }
 
-        await prisma.savedJobs.create({
-            data: {
-                job_id,
-                user_id: id
-            }
+        const result = await prisma.$transaction(async (tx) => {
+            const savedJob = await tx.savedJobs.create({
+                data: {
+                    job_id,
+                    user_id: id
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã lưu công việc ${isJobExisted.job_title}`,
+                    user_id: id
+                }
+            });
+
+            return savedJob;
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
-            message: "Successfully!"
+            success: true,
+            message: "Thành công!",
+            data: result
         });
     } catch (error) {
         next(error);
@@ -108,7 +152,7 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
     const { cv_id, description } = req.body;
 
     if (description && description.length < 10) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Description must be at least 10"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mô tả hồ sơ ứng tuyển phải có ít nhất 10 ký tự!"));
     }
 
     try {
@@ -120,7 +164,7 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
         });
 
         if (!isCvExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "This cv is not found!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy hồ sơ này!"));
         }
 
         const isJobExisted = await prisma.jobs.findFirst({
@@ -128,6 +172,16 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
                 id: job_id
             },
             include: {
+                companies: {
+                    select: {
+                        users: {
+                            select: {
+                                id: true,
+                                username: true,
+                            }
+                        }
+                    }
+                },
                 applicants: {
                     where: {
                         cv_id
@@ -137,27 +191,52 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
         });
 
         if (!isJobExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Not found jobs"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy công việc!"));
         }
 
         if (isJobExisted.company_id === company_id) {
-            return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "You cannot apply yours job!"));
+            return next(errorHandler(HTTP_ERROR.BAD_GATEWAY, "Bạn không thể ứng tuyển vào công việc của mình!"));
         }
 
         if (isJobExisted.applicants.length > 0) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already apply for this jobs!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn đã ứng tuyển vào công việc này!"));
         }
 
-        await prisma.applicants.create({
-            data: {
-                cv_id,
-                job_id,
-                description
+        const result = await prisma.$transaction(async (tx) => {
+            const applicant = await tx.applicants.create({
+                data: {
+                    cv_id,
+                    job_id,
+                    description
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã ứng tuyển vào công việc ${isJobExisted.job_title}`,
+                    user_id: id
+                }
+            });
+
+            const notificationData = createNotificationData(undefined, 'pending', "applicant", 'user');
+
+            if (isJobExisted.companies.users) {
+                await tx.userNotifications.create({
+                    data: {
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                        user_id: isJobExisted.companies.users.id
+                    }
+                });
             }
-        }).catch((e) => (next(errorHandler(HTTP_ERROR.CONFLICT, "Failed to apply to this job, try again!"))));
+
+            return applicant;
+        }).catch((e) => (next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi, vui lòng thử lại!"))));
 
         return res.status(HTTP_SUCCESS.CREATED).json({
-            success: true
+            success: true,
+            data: result
         })
     } catch (error) {
         next(error);
@@ -172,23 +251,23 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
 
     // @ts-ignore
     if (req.user.company_id === company_id) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You cannot feedback your self!"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn không thể phản hồi chính mình!"));
     }
 
     if (description.length < 10) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Description must be at least 10"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mô tả phải có ít nhất 10 ký tự!"));
     }
 
     if (stars < 1 || stars > 5) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Rating stars must be between 1 to 5!"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số sao đánh giá phải từ 1 đến 5!"));
     }
 
     if (benefit && benefit.length < 10) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Benefit must be at least 10"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Lợi ích phải có ít nhất 10 ký tự!"));
     }
 
     if (work_environment && work_environment.length < 10) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Work environemnt must be at least 10"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Môi trường làm việc phải có ít nhất 10 ký tự!"));
     }
 
     try {
@@ -198,6 +277,12 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
                 status: "approved"
             },
             include: {
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                    }
+                },
                 feedbacks: {
                     where: {
                         user_id
@@ -207,26 +292,51 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
         });
 
         if (!isCompanyExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Not found company!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy công ty!"));
         }
 
         if (isCompanyExisted.feedbacks.length > 0) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already feedback!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn đã phản hồi công ty này!"));
         }
 
-        const feedback = await prisma.feedbacks.create({
-            data: {
-                description,
-                stars,
-                benefit,
-                work_environment,
-                company_id,
-                user_id
+        const result = await prisma.$transaction(async (tx) => {
+            const feedback = await tx.feedbacks.create({
+                data: {
+                    description,
+                    stars,
+                    benefit,
+                    work_environment,
+                    company_id,
+                    user_id
+                }
+            });
+
+            if (isCompanyExisted.users) {
+                await tx.userActivitiesHistory.create({
+                    data: {
+                        activity_name: `Bạn đã theo dõi công ty ${isCompanyExisted.users.username}`,
+                        user_id
+                    }
+                });
+
+                const notificationData = createNotificationData(undefined, undefined, "followed", "company");
+
+                await tx.userNotifications.create({
+                    data: {
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                        user_id: isCompanyExisted.users.id
+                    }
+                });
             }
+
+            return feedback;
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
-            data: feedback
+            success: true,
+            data: result
         })
     } catch (error) {
         next(error);
@@ -278,12 +388,13 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
             });
 
             return res.status(HTTP_SUCCESS.OK).json({
+                success: true,
                 data: message
             });
         }
 
         return res.status(HTTP_ERROR.CONFLICT).json({
-            message: "Something went wrong! Please try again"
+            message: "Đã xảy ra lỗi, vui lòng thử lại!"
         });
     } catch (error) {
         next(error);
@@ -298,7 +409,7 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
     const { description } = req.body;
 
     if (!description || description.length < 20) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Description must be at least 20 character"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mô tả phải có ít nhất 20 ký tự!"));
     }
 
     try {
@@ -317,27 +428,50 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
         });
 
         if (!isEventExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Not found event!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy sự kiện!"));
         }
 
         if (isEventExisted.user_id === user_id) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You can not apply your event!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn không thể đăng ký sự kiện của chính mình!"));
         }
 
         if (isEventExisted.volunteers.length > 0) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "You already volunteered"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn đã đăng ký tình nguyện cho sự kiện này!"));
         }
 
-        await prisma.volunteers.create({
-            data: {
-                event_id,
-                user_id,
-                description
-            }
-        }).catch((e) => (errorHandler(HTTP_ERROR.CONFLICT, "Failed to apply this event, try again!")));
+        const result = await prisma.$transaction(async (tx) => {
+            const volunteer = await tx.volunteers.create({
+                data: {
+                    event_id,
+                    user_id,
+                    description
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã đăng ký tình nguyện cho sự kiện ${isEventExisted.title}`,
+                    user_id
+                }
+            });
+
+            const notificationData = createNotificationData(undefined, 'pending', "applicant", 'user');
+
+            await tx.userNotifications.create({
+                data: {
+                    title: notificationData.title,
+                    content: notificationData.content,
+                    type: notificationData.type,
+                    user_id: isEventExisted.user_id
+                }
+            });
+
+            return volunteer;
+        }).catch((e) => (errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi, vui lòng thử lại!")));
 
         return res.status(HTTP_SUCCESS.CREATED).json({
-            success: true
+            success: true,
+            data: result
         });
     } catch (error) {
         next(error);
@@ -504,79 +638,90 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
     }
 
     try {
-        const user = await prisma.users.update({
-            where: {
-                id
-            },
-            data: {
-                username,
-                avatar_url,
-                address_street,
-                address_ward,
-                address_city,
-                address_country,
-                gender
-            },
-            include: {
-                companies: company_id ? {
-                    select: {
-                        jobs: {
-                            select: {
-                                _count: {
-                                    select: {
-                                        applicants: {
-                                            where: {
-                                                status: 'pending'
+        const result = await prisma.$transaction(async (tx) => {
+            const user = await tx.users.update({
+                where: {
+                    id
+                },
+                data: {
+                    username,
+                    avatar_url,
+                    address_street,
+                    address_ward,
+                    address_city,
+                    address_country,
+                    gender
+                },
+                include: {
+                    companies: company_id ? {
+                        select: {
+                            jobs: {
+                                select: {
+                                    _count: {
+                                        select: {
+                                            applicants: {
+                                                where: {
+                                                    status: 'pending'
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                } : false,
-                roles: {
-                    select: {
-                        role_name: true
-                    }
-                },
-                events: {
-                    where: {
-                        status: 'approved',
+                    } : false,
+                    roles: {
+                        select: {
+                            role_name: true
+                        }
                     },
-                    select: {
-                        _count: {
-                            select: {
-                                volunteers: {
-                                    where: {
-                                        status: 'pending'
+                    events: {
+                        where: {
+                            status: 'approved',
+                        },
+                        select: {
+                            _count: {
+                                select: {
+                                    volunteers: {
+                                        where: {
+                                            status: 'pending'
+                                        }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    _count: {
+                        select: {
+                            userNotifications: {
+                                where: {
+                                    is_read: false
                                 }
                             }
                         }
                     }
                 },
-                _count: {
-                    select: {
-                        userNotifications: {
-                            where: {
-                                is_read: false
-                            }
-                        }
-                    }
+                omit: {
+                    password: true,
+                    firebase_uid: true,
+                    is_deleted: true,
+                    role_id: true
                 }
-            },
-            omit: {
-                password: true,
-                firebase_uid: true,
-                is_deleted: true,
-                role_id: true
-            }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã cập nhật hồ sơ cá nhân`,
+                    user_id: id
+                }
+            });
+
+            return user;
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: user
+            data: result
         });
     } catch (error) {
         next(error);
@@ -651,7 +796,8 @@ export const updateUserNotification = async (req: Request, res: Response, next: 
                 }
             },
             data: {
-                is_read: true
+                is_read: true,
+                read_at: new Date()
             }
         });
 

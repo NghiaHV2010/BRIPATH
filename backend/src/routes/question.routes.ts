@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUserAnswer, getAllQuestions, getAnswersByQuestion, getSuitableJobCategories, restartUserAnswer } from "../controllers/question.controller";
+import { createCareerPath, createUserAnswer, getAllQuestions, getAnswersByQuestion, getSuitableJobCategories, restartUserAnswer } from "../controllers/question.controller";
 import { authenticationMiddleware } from "../middlewares/auth.middleware";
 
 const questionRouter = Router();
@@ -10,5 +10,7 @@ questionRouter.get('/answers/:questionId', getAnswersByQuestion);
 questionRouter.post('/answers', createUserAnswer);
 questionRouter.get('/question/finished', getSuitableJobCategories);
 questionRouter.delete('/question/restart', restartUserAnswer);
+
+questionRouter.post('/careerpath', createCareerPath);
 
 export default questionRouter;

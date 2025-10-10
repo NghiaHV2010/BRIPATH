@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "../generated/prisma";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
+import { createNotificationData } from "../utils";
 
 const prisma = new PrismaClient();
 const numberOfCompanies = 12;
@@ -74,70 +75,53 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
         if (!business_certificate) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng tải lên giấy phép kinh doanh!"));
         }
-
-        const company = await prisma.companies.upsert({
-            where: {
-                id: company_id ? company_id : ''
-            },
-            update: {
-                fax_code,
-                business_certificate,
-                company_type,
-                status: "pending"
-            },
-            create: {
-                fax_code,
-                business_certificate,
-                company_type,
-                users: {
-                    connect: { id: id }
+        const result = await prisma.$transaction(async (tx) => {
+            const company = await tx.companies.upsert({
+                where: {
+                    id: company_id ? company_id : ''
                 },
-            }
+                update: {
+                    fax_code,
+                    business_certificate,
+                    company_type,
+                    status: "pending"
+                },
+                create: {
+                    fax_code,
+                    business_certificate,
+                    company_type,
+                    users: {
+                        connect: { id: id }
+                    },
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: "Bạn đã tạo tài khoản doanh nghiệp.",
+                    user_id: id
+                }
+            });
+
+            const notificationData = createNotificationData(undefined, undefined, "system", "company");
+
+
+            await tx.userNotifications.create({
+                data: {
+                    user_id: id,
+                    type: notificationData.type,
+                    title: notificationData.title,
+                    content: notificationData.content
+                }
+            });
+            return company;
         });
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             message: "Tạo công ty thành công! Vui lòng chờ duyệt.",
-            data: company
+            data: result
         });
 
-    } catch (error) {
-        next(error);
-    }
-}
-
-export const createCompanyLabel = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { label_name } = req.body as { label_name?: string };
-
-        if (!label_name || typeof label_name !== 'string') {
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name is required"));
-        }
-
-        const name = label_name.trim();
-
-        if (name.length === 0) {
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name cannot be empty"));
-        }
-
-        if (name.length > 100) {
-            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 100 characters"));
-        }
-
-        const existed = await prisma.companyLabels.findFirst({
-            where: { label_name: name }
-        });
-
-        if (existed) {
-            return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
-        }
-
-        const created = await prisma.companyLabels.create({
-            data: { label_name: name }
-        });
-
-        return res.status(HTTP_SUCCESS.CREATED).json({
-            data: created
-        });
     } catch (error) {
         next(error);
     }
@@ -508,6 +492,7 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
     const { company_id } = req.user;
     const applicantId: number = parseInt(req.params.applicantId);
     const { job_id, feedback, status } = req.body as { job_id: string, feedback: string, status: string };
+
     if (!status || (status !== 'approved' && status !== 'rejected')) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'approved', 'rejected'"));
     }
@@ -525,6 +510,11 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
                 }
             },
             include: {
+                cvs: {
+                    select: {
+                        users_id: true
+                    }
+                },
                 jobs: true
             }
         });
@@ -538,27 +528,41 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
         if (isApplicantExisted.status !== 'pending') {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Chỉ có thể cập nhật trạng thái cho các ứng viên đang chờ duyệt!"));
         }
-
-        const applicant = await prisma.applicants.update({
-            where: {
-                cv_id_job_id: {
-                    job_id,
-                    cv_id: applicantId
+        const result = await prisma.$transaction(async (tx) => {
+            const applicant = await tx.applicants.update({
+                where: {
+                    cv_id_job_id: {
+                        job_id,
+                        cv_id: applicantId
+                    }
+                },
+                data: {
+                    status,
+                    feedback,
+                    verified_date: new Date()
+                },
+                include: {
+                    cvs: true
                 }
-            },
-            data: {
-                status,
-                feedback,
-                verified_date: new Date()
-            },
-            include: {
-                cvs: true
-            }
-        });
+            });
+
+            const notificationData = createNotificationData(isApplicantExisted.jobs.job_title, status, "applicant", 'company', feedback);
+
+            await tx.userNotifications.create({
+                data: {
+                    user_id: isApplicantExisted.cvs.users_id,
+                    title: notificationData.title,
+                    content: notificationData.content,
+                    type: notificationData.type,
+                }
+            });
+
+            return applicant;
+        })
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: applicant
+            data: result
         });
     } catch (error) {
         next(error);
@@ -620,30 +624,41 @@ export const updateCompanyProfile = async (req: Request, res: Response, next: Ne
     }
 
     try {
-        const company = await prisma.companies.update({
-            where: {
-                id: company_id
-            },
-            data: {
-                company_website,
-                description,
-                background_url,
-                employees
-            },
-            include: {
-                users: {
-                    omit: {
-                        password: true,
-                        is_deleted: true,
-                        firebase_uid: true
+        const result = await prisma.$transaction(async (tx) => {
+            const company = await tx.companies.update({
+                where: {
+                    id: company_id
+                },
+                data: {
+                    company_website,
+                    description,
+                    background_url,
+                    employees,
+                },
+                include: {
+                    users: {
+                        omit: {
+                            password: true,
+                            is_deleted: true,
+                            firebase_uid: true
+                        }
                     }
                 }
-            }
-        });
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id: id,
+                    activity_name: "Bạn vừa cập nhât hồ sơ"
+                }
+            });
+
+            return company;
+        })
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: company
+            data: result
         });
     } catch (error) {
         next(error);

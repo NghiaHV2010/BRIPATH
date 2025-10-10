@@ -51,4 +51,3 @@ export const embeddingData = async (data: string) => {
         return error;
     }
 }
-
