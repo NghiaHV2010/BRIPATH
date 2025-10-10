@@ -27,3 +27,6 @@ export { default as HomePage } from "./home/homePage";
 
 // Company pages
 export { default as CompaniesPage } from "./company/CompaniesPage";
+
+// Admin pages
+export { default as AdminPage } from "./admin/adminPage";

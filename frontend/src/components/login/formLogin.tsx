@@ -34,7 +34,17 @@ export default function FormLogin() {
     setError("");
     try {
       await login?.(email, password);
-      navigate(redirectTo || "/", { replace: true });
+      setTimeout(() => {
+        const currentUser = useAuthStore.getState().authUser;
+        console.log("Current user after login:", currentUser); // Debug log
+        if (currentUser?.role_id === 3) {
+          console.log("Redirecting to admin dashboard"); // Debug log
+          navigate(redirectTo || "/admin", { replace: true });
+        } else {
+          console.log("Redirecting to homepage"); // Debug log
+          navigate(redirectTo || "/", { replace: true });
+        }
+      }, 500);
     } catch {
       setError(storeError || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
     }
