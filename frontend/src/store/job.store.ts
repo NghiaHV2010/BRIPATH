@@ -8,6 +8,7 @@ import {
 } from "@/api/job_api";
 import type {
   Job,
+  JobDetail,
   FetchJobDetailParams,
   FilterJobParams,
   FetchJobByComId,
@@ -16,7 +17,7 @@ import type {
 
 interface JobState {
   jobs: Job[];
-  selectedJob: Job | null;
+  selectedJob: JobDetail | null;
   totalPages?: number;
   isLoading: boolean;
   error: string | null;
@@ -36,13 +37,18 @@ export const useJobStore = create<JobState>((set) => ({
   selectedJob: null,
   isLoading: false,
   error: null,
+  totalPages: undefined,
 
   // ✅ Lấy tất cả job
   getAllJobs: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await fetchAllJobs<{ data: Job[]; totalPages: number }>(params);
-      set({ jobs: data?.data || [] });
+      const res = await fetchAllJobs(params);
+      if (res?.success) {
+        set({ jobs: res.data, totalPages: res.totalPages || 1 });
+      } else {
+        set({ error: "Không thể tải danh sách công việc" });
+      }
     } catch (err) {
       const axiosErr = err as AxiosError;
       const message =
@@ -53,27 +59,32 @@ export const useJobStore = create<JobState>((set) => ({
     }
   },
 
+  // ✅ Lấy job theo ID (trang chi tiết)
   getJobById: async (params) => {
-  set({ isLoading: true, error: null });
-  try {
-    const data = await fetchJobById(params);
-    set({ selectedJob: data?.data || null });
-  } catch (err) {
-    const axiosErr = err as AxiosError;
-    const message =
-      (axiosErr.response?.data as any)?.message || "Không thể tải chi tiết công việc";
-    set({ error: message });
-  } finally {
-    set({ isLoading: false });
-  }
-},
+    set({ isLoading: true, error: null });
+    try {
+      const data = await fetchJobById(params);
+      set({ selectedJob: data || null });
+    } catch (err) {
+      const axiosErr = err as AxiosError;
+      const message =
+        (axiosErr.response?.data as any)?.message || "Không thể tải chi tiết công việc";
+      set({ error: message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   // ✅ Lọc job
   filterJobs: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await filterJobs<{ data: Job[] }>(params);
-      set({ jobs: data?.data || [] });
+      const res = await filterJobs(params);
+      if (res?.success) {
+        set({ jobs: res.data, totalPages: res.totalPages || 1 });
+      } else {
+        set({ error: "Không thể lọc công việc" });
+      }
     } catch (err) {
       const axiosErr = err as AxiosError;
       const message =
@@ -88,8 +99,12 @@ export const useJobStore = create<JobState>((set) => ({
   getJobsByCompanyId: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await fetchJobsByComId<{ data: Job[]; totalPages: number }>(params);
-      set({ jobs: data?.data || [] });
+      const res = await fetchJobsByComId(params);
+      if (res?.success) {
+        set({ jobs: res.data, totalPages: res.totalPages || 1 });
+      } else {
+        set({ error: "Không thể tải job theo công ty" });
+      }
     } catch (err) {
       const axiosErr = err as AxiosError;
       const message =
@@ -100,7 +115,6 @@ export const useJobStore = create<JobState>((set) => ({
     }
   },
 
-  // ✅ Helper
   clearError: () => set({ error: null }),
   clearSelectedJob: () => set({ selectedJob: null }),
 }));

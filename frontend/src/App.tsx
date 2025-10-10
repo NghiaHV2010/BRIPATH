@@ -27,6 +27,7 @@ import SavedJobsPage from "./pages/jobs/savedJobsPage";
 import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
+import { CompanyDetailsPageMinimal } from "./pages/company";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -88,10 +89,10 @@ function App() {
       <Route path="/quiz/test" element={<QuizTestPageWrapper />} />
       <Route path="/quiz/results" element={<QuizResultsPageWrapper />} />
       <Route path="/companies" element={<CompaniesPage />} />
-      {/* <Route
+      <Route
         path="/companies/:companyId"
-        element={<CompanyDetailsPageWrapper />}
-      /> */}
+        element={<CompanyDetailsPageMinimal />}
+      />
       <Route path="/jobs" element={<JobsPageWrapper />} />
       <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
 

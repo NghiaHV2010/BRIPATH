@@ -67,3 +67,34 @@ export const fetchFields = async (): Promise<CompanyField[]> => {
     throw error;
   }
 }
+
+// ========================
+// Feedback CV
+// ========================
+export const feedbackCV = async (
+  cvId: string,          
+  is_good: boolean,      
+  job_id: string         
+): Promise<{
+  success: boolean;
+  data: {
+    id: number;
+    role: string;
+    job_id: string;
+    cv_id: number;
+    is_good: boolean;
+    saved_at: string;
+  };
+}> => {
+  try {
+    const response = await axiosConfig.post(`/feedback/cv/${cvId}`, {
+      is_good,
+      job_id,
+    });
+
+    return response.data;
+  } catch (error: any) {
+     throw error.response.data; // Ném lỗi để xử lý ở nơi gọi hàm
+  }
+};
+

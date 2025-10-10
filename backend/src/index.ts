@@ -27,16 +27,16 @@ const middlePath = '/api';
 
 // App routes
 app.use('/api', authRoute);
+app.use('/api', companyRouter);
+app.use('/api', jobRouter);
+app.use('/api', eventRouter);
 app.use('/api/vnpay', vnpayRoutes);
 app.use('/api/zalopay', zalopayRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', cvRouter);
 app.use('/api', userRouter);
-app.use('/api', companyRouter);
-app.use('/api', jobRouter);
 app.use('/api', questionRouter);
-app.use('/api', eventRouter);
 
 app.use(testRouter);
 

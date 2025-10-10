@@ -1,3 +1,4 @@
+import { educations } from './../../../backend/src/generated/prisma/index.d';
 
 export type JobCategory = {
   job_category: string;
@@ -10,7 +11,7 @@ export interface Job {
   salary?: string[]; // Array of salary ranges
   currency?: string; // "VND", "USD", etc.
   location?: string;
-  status?: "on_going" | "closed" | "draft"; // Job status enum
+  status?: string; 
   jobCategories?: JobCategory | null;
   jobLabels?: any | null; 
 }
@@ -68,6 +69,26 @@ export interface FilterJobParams {
   salary?: string;            // optional — mức lương
 }
 
+export interface CRUDJobParams {
+  job_title: string;           // bắt buộc
+  description: string;         // bắt buộc
+  location : string;            // bắt buộc
+  benefit?: string;            // tuỳ chọn
+  working_time?: string;      // tuỳ chọn
+  salary ?: string[];            // tuỳ chọn
+  currency ?: string;           // tuỳ chọn
+  job_type: "remote" | "part_time" | "full_time" | "others"; 
+  status: "on_going" ;
+  job_level: string;          // tuỳ chọn
+  quantity: number;           // bắt buộc
+  skill_tags?: string[];      // tuỳ chọn
+  educations?: "bachelor" | "master" | "phd" | "highschool_graduate" | "others"; // tuỳ chọn
+  experience?: string;        // tuỳ chọn
+  start_date: string;         // bắt buộc   YYYY-MM-DD
+  end_date?: string;          // tuỳ chọn
+  category: string;          // bắt buộc   job category name
+}
+
 
 export interface FetchJobByComId {
     companyId: string; // bắt buộc
@@ -77,9 +98,14 @@ export interface FetchJobByComId {
 
 
 export interface JobResponse {
-    success : boolean;
+  success : boolean;
   data: Job[];
   totalPages?: number | null;
+}
+
+export interface CreateJobResponse {
+  success: boolean;
+  data: JobDetail;
 }
 
 export interface SingleJobResponse {
