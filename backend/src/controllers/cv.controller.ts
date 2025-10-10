@@ -193,10 +193,18 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
 
             await tx.$queryRaw`UPDATE cvs SET embedding=${vector} WHERE id=${cv.id}`;
 
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn vừa đăng tải CV #${cv.id} lên hệ thống.`
+                }
+            });
+
             console.log(cv);
-        });
+        }).catch((e) => next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi! Vui lòng thử lại")));
 
         res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: cv
         });
     } catch (error) {
@@ -225,6 +233,7 @@ export const getUserCV = async (req: Request, res: Response, next: NextFunction)
         })
 
         res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: cv
         });
     } catch (error) {
@@ -238,16 +247,25 @@ export const deleteCV = async (req: Request, res: Response, next: NextFunction) 
     const cv_id = req.params.id;
 
     try {
-        const cv = await prisma.cvs.delete({
-            where: {
-                users_id: user_id,
-                id: parseInt(cv_id)
-            }
-        });
+        await prisma.$transaction(async (tx) => {
+            const cv = await tx.cvs.delete({
+                where: {
+                    users_id: user_id,
+                    id: parseInt(cv_id)
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn vừa xóa CV #${cv.id} khỏi hệ thống.`
+                }
+            });
+        })
 
         res.status(HTTP_SUCCESS.NO_CONTENT);
     } catch (error) {
-        next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV not found!"));
+        next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));
     }
 }
 
@@ -257,7 +275,7 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
     const cv_id = parseInt(req.params.id);
 
     if (cv_id < 1 || isNaN(cv_id)) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid CV ID"));
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "CV không hợp lệ!"));
     }
 
     try {
@@ -344,6 +362,7 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
         `);
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: jobs
         });
     } catch (error) {

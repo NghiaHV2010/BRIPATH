@@ -26,17 +26,17 @@ app.use(passport.initialize());
 const middlePath = '/api';
 
 // App routes
-app.use('/api', authRoute);
-app.use('/api', companyRouter);
-app.use('/api', jobRouter);
-app.use('/api', eventRouter);
-app.use('/api/vnpay', vnpayRoutes);
-app.use('/api/zalopay', zalopayRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api', cvRouter);
-app.use('/api', userRouter);
-app.use('/api', questionRouter);
+app.use(`${middlePath}`, authRoute);
+app.use(`${middlePath}`, companyRouter);
+app.use(`${middlePath}`, jobRouter);
+app.use(`${middlePath}`, eventRouter);
+app.use(`${middlePath}`, cvRouter);
+app.use(`${middlePath}`, userRouter);
+app.use(`${middlePath}`, questionRouter);
+app.use(`${middlePath}/vnpay`, vnpayRoutes);
+app.use(`${middlePath}/zalopay`, zalopayRoutes);
+app.use(`${middlePath}/payments`, paymentRoutes);
+app.use(`${middlePath}/dashboard`, dashboardRoutes);
 
 app.use(testRouter);
 

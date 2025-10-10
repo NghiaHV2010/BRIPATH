@@ -19,19 +19,19 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
         const { username, email, password } = req.body;
 
         if (!username || !email || !password) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Please fill all data!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng điền đầy đủ thông tin!"));
         }
 
         if (username.length < 6) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Username is too short!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tên người dùng quá ngắn! (Tối thiểu 6 ký tự)"));
         }
 
         if (password.length < 8) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Password is not secure! (Minium lenght is 8)"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mật khẩu không đủ mạnh! (Tối thiểu 8 ký tự)"));
         }
 
         if (!validateEmail(email)) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Email is invalid pattern!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Email không hợp lệ!"));
         }
 
         const isExisted = await prisma.users.findFirst({
@@ -44,7 +44,7 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
         });
 
         if (isExisted) {
-            return next(errorHandler(HTTP_ERROR.CONFLICT, "Email is already existed!"));
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Email đã tồn tại!"));
         }
 
         const data = jwt.sign({ username, email, password }, ACCESS_SECRET, { expiresIn: "30m" });
@@ -57,7 +57,8 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
-            message: "Successfully!"
+            success: true,
+            message: "Thành công!"
         });
     } catch (error) {
         next(error);
@@ -84,7 +85,8 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
         });
 
         res.status(HTTP_SUCCESS.OK).json({
-            message: "Email has sent to your mailbox"
+            success: true,
+            message: "Email đã được gửi đến hộp thư của bạn"
         })
     } catch (error) {
         next(error);
@@ -105,14 +107,14 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         const { otp }: { otp: string } = req.params as { otp: string };
 
         if (!otp) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP invalid!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP không hợp lệ!"));
         }
 
         const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
 
         // @ts-ignore
         if (req.otp.otp !== otpDecoded.otp) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP invalid!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP không hợp lệ!"));
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -134,7 +136,8 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         res.cookie("otp", '', { maxAge: 0 });
 
         return res.status(HTTP_SUCCESS.CREATED).json({
-            message: "Register Successfully!"
+            success: true,
+            message: "Đăng ký thành công!"
         });
 
     } catch (error) {
@@ -146,39 +149,66 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const { email, password } = req.body;
 
-        let user = await prisma.users.findFirst({
+        const isUserExisted = await prisma.users.findFirst({
             where: {
                 email
             }
         });
 
-        if (!user) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid Credentials!"));
+        if (!isUserExisted) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Thông tin đăng nhập không hợp lệ!"));
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, isUserExisted.password);
 
         if (!isPasswordValid) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Invalid Credentials!"));
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Thông tin đăng nhập không hợp lệ!"));
         }
 
-        user = await prisma.users.update({
-            where: {
-                email
-            },
-            data: {
-                last_loggedIn: new Date()
+        const result = await prisma.$transaction(async (tx) => {
+            const user = await tx.users.update({
+                where: {
+                    email
+                },
+                data: {
+                    last_loggedIn: new Date()
+                },
+                include: {
+                    roles: {
+                        select: {
+                            role_name: true
+                        }
+                    }
+                },
+                omit: {
+                    firebase_uid: true,
+                    password: true,
+                    is_deleted: true,
+                }
+            });
+
+            if (user) {
+                await tx.userActivitiesHistory.create({
+                    data: {
+                        user_id: user.id,
+                        activity_name: "Bạn đã đăng nhập vào hệ thống."
+                    }
+                });
             }
+
+            return user;
         });
 
-        generateToken(user.id, res);
+        generateToken(result.id, res);
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                avatar: user.avatar_url
+                id: result.id,
+                username: result.username,
+                email: result.email,
+                avatar: result.avatar_url,
+                role: result.roles.role_name
             }
         });
     } catch (error) {
@@ -186,12 +216,22 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 }
 
-export const logout = (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const user_id = req.user as string;
     res.cookie("accessToken", '', { maxAge: 0 });
     res.cookie("refreshToken", '', { maxAge: 0 });
 
+    await prisma.userActivitiesHistory.create({
+        data: {
+            user_id,
+            activity_name: "Bạn đã đăng xuất khỏi hệ thống."
+        }
+    })
+
     return res.status(HTTP_SUCCESS.OK).json({
-        message: "Logout successfully!"
+        success: true,
+        message: "Đăng xuất thành công!"
     });
 }
 
@@ -212,8 +252,8 @@ export const googleLogin = (req: Request, res: Response) => {
 
     const user: userDTO = req.user as userDTO;
 
-        generateToken(user.id, res);
-        const html = `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8" />
+    generateToken(user.id, res);
+    const html = `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8" />
             <title>Đăng nhập...</title>
             <style>html,body{background:#0d1117;color:#fff;font-family:system-ui;margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-size:14px;} .fade{opacity:.6}</style>
             </head><body>
@@ -228,7 +268,7 @@ export const googleLogin = (req: Request, res: Response) => {
             </script>
             </body></html>`;
 
-        res.status(200).send(html);
+    res.status(200).send(html);
 }
 
 export const verifySMS = async (req: Request, res: Response, next: NextFunction) => {
@@ -243,25 +283,38 @@ export const verifySMS = async (req: Request, res: Response, next: NextFunction)
         const decoded = await admin.auth().verifyIdToken(token);
 
         if (decoded) {
-            const user = await prisma.users.update({
-                where: {
-                    id: user_id
-                },
-                data: {
-                    phone: decoded.phone_number,
-                    phone_verified: true
-                },
-                omit: {
-                    password: true,
-                    is_deleted: true,
-                }
-            })
+            const result = await prisma.$transaction(async (tx) => {
+                const user = await tx.users.update({
+                    where: {
+                        id: user_id
+                    },
+                    data: {
+                        phone: decoded.phone_number,
+                        phone_verified: true
+                    },
+                    omit: {
+                        password: true,
+                        is_deleted: true,
+                    }
+                });
+
+                await tx.userActivitiesHistory.create({
+                    data: {
+                        user_id,
+                        activity_name: "Bạn đã xác thực số điện thoại."
+                    }
+                })
+
+
+                return user;
+            });
 
             return res.status(HTTP_SUCCESS.OK).json({
+                success: true,
                 data: {
                     success: true,
                     uid: decoded.uid,
-                    ...user
+                    ...result
                 }
             });
         }

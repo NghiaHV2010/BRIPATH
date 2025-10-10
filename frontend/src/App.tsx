@@ -16,11 +16,13 @@ import {
   ProfilePageWrapper,
   HomePage,
   CompaniesPage,
+  AdminPage,
 } from "./pages";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
 import GuestOnly from "./components/auth/GuestOnly";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import AdminRoute from "./components/auth/AdminRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPage from "./pages/jobs/savedJobsPage";
@@ -152,6 +154,17 @@ function App() {
       />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      
+      {/* Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
+      
       <Route path="*" element={<LoginPage />} />
     </Routes>
   );

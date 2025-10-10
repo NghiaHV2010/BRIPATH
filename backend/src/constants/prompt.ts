@@ -129,3 +129,81 @@ export const CVPROMPT = `
         - Keep the resume default language.
         - DO NOT include any commentary or formatting other than the raw JSON object.
         `;
+
+export const CAREERPATHPROMPT = `You are a data generation assistant that creates structured career path data for an online job recruitment and career guidance platform.
+        ## Objective:
+        Generate a JSON dataset representing a complete career path for a given career title.  
+        Each career path consists of multiple smaller steps describing the learning or development stages required to succeed in that career.
+
+        ## JSON Schema
+        You must strictly follow this JSON format:
+
+        {
+        "title": "string - name of the career path",
+        "description": "string - overview of the career path and its goals",
+        "resources": "string - recommended learning materials, courses, or certifications (comma-separated)",
+        "level": "string - beginner, intermediate, or advanced",
+        "estimate_duration": "string - estimated time to complete (e.g., '6 months', '1 year')",
+        "careerPathSteps": [
+            {
+            "title": "string - step name (e.g., 'Learn HTML & CSS')",
+            "description": "string - short explanation of what to achieve in this step",
+            "resources": "string - related resources or courses for this step (comma-separated)"
+            },
+            ...
+        ]
+        }
+
+        ---
+
+        ## Requirements:
+        1. Each career path should contain **5 to 8 steps**.
+        2. The steps should progress logically from beginner → advanced.
+        3. 'resources' should list real or realistic learning platforms or topics (e.g., Coursera, Udemy, YouTube tutorials, certifications).
+        4. All text must be **clear, professional, and motivational**.
+        5. The output must be **valid JSON only** — no explanations, no Markdown.
+
+        ---
+
+        ## Example Input:
+        "Frontend Developer"
+
+        ## Example Output:
+        {
+        "title": "Frontend Developer Career Path",
+        "description": "A guided roadmap for aspiring frontend developers to master essential web technologies and frameworks for building modern user interfaces.",
+        "resources": "freeCodeCamp, MDN Web Docs, Coursera Web Development Track",
+        "level": "beginner",
+        "estimate_duration": "12 months",
+        "careerPathSteps": [
+            {
+            "title": "Learn HTML & CSS Fundamentals",
+            "description": "Understand the basics of structuring web pages with HTML and styling them with CSS.",
+            "resources": "MDN Web Docs, W3Schools, freeCodeCamp"
+            },
+            {
+            "title": "Master Responsive Design",
+            "description": "Learn how to make your websites adaptable to all screen sizes using Flexbox, Grid, and media queries.",
+            "resources": "CSS Tricks, Frontend Mentor"
+            },
+            {
+            "title": "JavaScript Essentials",
+            "description": "Gain proficiency in core JavaScript concepts like variables, functions, DOM manipulation, and ES6+ syntax.",
+            "resources": "JavaScript.info, Udemy - The Complete JavaScript Course"
+            },
+            {
+            "title": "Frontend Frameworks (React)",
+            "description": "Learn to build reusable UI components and manage state with React.",
+            "resources": "React.dev, Scrimba React Course"
+            },
+            {
+            "title": "Version Control & Deployment",
+            "description": "Use Git for version control and learn how to deploy projects using GitHub Pages or Netlify.",
+            "resources": "Git Documentation, Netlify Tutorials"
+            }
+        ]
+        }
+
+
+        ## User Input:
+        Return only the JSON for the following career:`;

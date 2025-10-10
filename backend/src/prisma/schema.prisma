@@ -33,7 +33,7 @@ model applicants {
 
 model awards {
   id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(255)
+  title       String    @db.Text
   description String?   @db.Text
   start_date  DateTime? @db.Date
   end_date    DateTime? @db.Date
@@ -43,9 +43,9 @@ model awards {
 
 model languages {
   id          Int     @id @default(autoincrement())
-  name        String  @db.VarChar(100)
+  name        String  @db.Text
   certificate String? @db.Text
-  level       String? @db.VarChar(50)
+  level       String? @db.Text
   cv_id       Int
   cvs         cvs     @relation(fields: [cv_id], references: [id], onDelete: Cascade)
 }
@@ -74,22 +74,22 @@ model blogs {
 
 model careerPathSteps {
   id          Int         @id @default(autoincrement())
-  title       String      @db.VarChar(100)
-  description String?
-  resources   String?
+  title       String      @db.Text
+  description String?     @db.Text
+  resources   String?     @db.Text
   career_id   Int
   careerPaths careerPaths @relation(fields: [career_id], references: [id])
 }
 
 model careerPaths {
   id                Int               @id @default(autoincrement())
-  title             String            @db.VarChar(150)
-  description       String?
-  resources         String?
-  level             String?           @db.VarChar(100)
-  estimate_duration String?           @db.VarChar(50)
+  title             String            @db.Text
+  description       String?           @db.Text
+  resources         String?           @db.Text
+  level             String?           @db.Text
+  estimate_duration String?           @db.Text
   user_id           String
-  jobspecialized_id Int               @unique
+  jobspecialized_id Int
   careerPathSteps   careerPathSteps[]
   jobSpecialized    jobSpecialized    @relation(fields: [jobspecialized_id], references: [id])
   users             users             @relation(fields: [user_id], references: [id])
@@ -107,7 +107,7 @@ model reviews {
 
 model certificates {
   id          Int       @id @default(autoincrement())
-  title       String?   @db.VarChar(255)
+  title       String?   @db.Text
   link        String?   @db.Text
   description String?   @db.Text
   start_date  DateTime? @db.Date
@@ -146,18 +146,18 @@ model companyLabels {
 
 model cvs {
   id             Int                    @id @default(autoincrement())
-  fullname       String                 @db.VarChar(50)
+  fullname       String                 @db.Text
   age            Int?
-  gender         String?                @db.VarChar(10)
-  address        String?                @db.VarChar(200)
-  email          String?                @db.VarChar(50)
+  gender         String?                @db.Text
+  address        String?                @db.Text
+  email          String?                @db.Text
   introduction   String?                @db.Text
   soft_skills    String[]
   primary_skills String[]
-  phone          String?                @db.VarChar(12)
+  phone          String?                @db.Text
   hobbies        String?                @db.Text
   others         String?                @db.Text
-  apply_job      String?                @db.VarChar(50)
+  apply_job      String?                @db.Text
   career_goal    String?                @db.Text
   created_at     DateTime               @default(now())
   users_id       String
@@ -176,8 +176,8 @@ model cvs {
 
 model educations {
   id             Int       @id @default(autoincrement())
-  school         String?   @db.VarChar(150)
-  graduated_type String?   @db.VarChar(250)
+  school         String?   @db.Text
+  graduated_type String?   @db.Text
   gpa            Float?    @db.Real
   start_date     DateTime? @db.Date
   end_date       DateTime? @db.Date
@@ -187,8 +187,8 @@ model educations {
 
 model experiences {
   id           Int       @id @default(autoincrement())
-  company_name String?   @db.VarChar(255)
-  title        String?   @db.VarChar(255)
+  company_name String?   @db.Text
+  title        String?   @db.Text
   description  String?   @db.Text
   start_date   DateTime? @db.Date
   end_date     DateTime? @db.Date
@@ -256,7 +256,7 @@ model jobSpecialized {
   description    String?                @db.VarChar(150)
   embedding      Unsupported("vector")?
   jobcategory_id Int
-  careerPaths    careerPaths?
+  careerPaths    careerPaths[]
   jobCategories  jobCategories          @relation(fields: [jobcategory_id], references: [id], onDelete: Cascade)
 }
 
@@ -504,7 +504,7 @@ enum Company_Type {
 
 enum Education {
   bachelor            @map("Cử nhân")
-  mastter             @map("Thạc sĩ")
+  master              @map("Thạc sĩ")
   phd                 @map("Tiến sĩ")
   others              @map("Khác")
   highschool_graduate @map("Tốt nghiệp trung học phổ thông")
@@ -525,6 +525,7 @@ enum Job_Type {
   remote
   part_time @map("Part time")
   full_time @map("Full time")
+  hybrid
   others    @map("Khác")
 }
 

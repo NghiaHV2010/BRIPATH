@@ -1,6 +1,8 @@
 import e, { NextFunction, Request, Response } from 'express';
 import { PrismaClient } from '../generated/prisma';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
+import { createNotificationData } from '../utils';
+import { errorHandler } from '../utils/error';
 
 const prisma = new PrismaClient();
 
@@ -504,7 +506,7 @@ export const getEventsByStatus = async (req: Request, res: Response, next: NextF
 
 export const updateEventStatus = async (req: Request, res: Response, next: NextFunction) => {
     const { eventId } = req.params;
-    const { status } = req.body;
+    const { status, feedback } = req.body;
 
     if (!status || (status !== 'approved' && status !== 'rejected')) {
         return res.status(HTTP_ERROR.BAD_REQUEST).json({
@@ -514,27 +516,49 @@ export const updateEventStatus = async (req: Request, res: Response, next: NextF
     }
 
     try {
-        const event = await prisma.events.update({
+        const isEventExisted = await prisma.events.findFirst({
             where: {
-                id: eventId,
-                status: 'pending'
-            },
-            data: {
-                status: status,
-                approved_at: new Date()
+                id: eventId
             }
         });
 
-        if (!event) {
+        if (!isEventExisted) {
             return res.status(HTTP_ERROR.NOT_FOUND).json({
                 success: false,
                 message: 'Sự kiện không tồn tại hoặc đã được duyệt.'
             });
         }
 
+        const result = await prisma.$transaction(async (tx) => {
+            const event = await tx.events.update({
+                where: {
+                    id: eventId,
+                    status: 'pending'
+                },
+                data: {
+                    status: status,
+                    approved_at: new Date()
+                }
+            });
+
+            const notificationData = createNotificationData(isEventExisted.title, status, "system", "user", feedback);
+
+            await tx.userNotifications.create({
+                data: {
+                    user_id: isEventExisted.user_id,
+                    title: notificationData.title,
+                    content: notificationData.content,
+                    type: notificationData.type,
+                }
+            });
+
+            return event;
+        });
+
+
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: event
+            data: result
         });
     } catch (error) {
         next(error);
@@ -543,7 +567,7 @@ export const updateEventStatus = async (req: Request, res: Response, next: NextF
 
 export const updateCompanyStatus = async (req: Request, res: Response, next: NextFunction) => {
     const { companyId } = req.params;
-    const { status } = req.body;
+    const { status, feedback } = req.body;
 
     if (!status || (status !== 'approved' && status !== 'rejected')) {
         return res.status(HTTP_ERROR.BAD_REQUEST).json({
@@ -553,29 +577,131 @@ export const updateCompanyStatus = async (req: Request, res: Response, next: Nex
     }
 
     try {
-        const company = await prisma.companies.update({
+        const isCompanyExisted = await prisma.companies.findFirst({
             where: {
                 id: companyId,
                 status: 'pending'
-            },
-            data: {
-                status: status,
-                approved_at: new Date()
             }
         });
 
-        if (!company) {
+        if (!isCompanyExisted) {
             return res.status(HTTP_ERROR.NOT_FOUND).json({
                 success: false,
                 message: 'Công ty không tồn tại hoặc đã được duyệt.'
             });
         }
 
+        const result = await prisma.$transaction(async (tx) => {
+            const company = await tx.companies.update({
+                where: {
+                    id: companyId,
+                    status: 'pending'
+                },
+                data: {
+                    status: status,
+                    approved_at: new Date()
+                },
+                include: {
+                    users: {
+                        omit: {
+                            password: true,
+                        }
+                    }
+                }
+            });
+
+            const notificationData = createNotificationData(undefined, status, "system", "company", feedback);
+
+            if (company.users) {
+                await tx.userNotifications.create({
+                    data: {
+                        user_id: company.users?.id,
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                    }
+                });
+            }
+
+            return company;
+        });
+
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: company
+            data: result
         });
     } catch (error) {
         next(error);
     }
 };
+
+export const createJobLabel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { label_name } = req.body as { label_name?: string };
+
+        if (!label_name || typeof label_name !== 'string') {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Nhãn không hợp lệ"));
+        }
+
+        const name = label_name.trim();
+
+        if (name.length === 0) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Nhãn không được để trống"));
+        }
+
+        if (name.length > 50) { // schema uses VarChar(50)
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Nhãn phải có tối đa 50 ký tự"));
+        }
+
+        const existed = await prisma.jobLabels.findFirst({ where: { label_name: name } });
+        if (existed) {
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Nhãn đã tồn tại"));
+        }
+
+        const created = await prisma.jobLabels.create({ data: { label_name: name } });
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            success: true,
+            data: created
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createCompanyLabel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { label_name } = req.body as { label_name?: string };
+
+        if (!label_name || typeof label_name !== 'string') {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name is required"));
+        }
+
+        const name = label_name.trim();
+
+        if (name.length === 0) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name cannot be empty"));
+        }
+
+        if (name.length > 100) {
+            return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 100 characters"));
+        }
+
+        const existed = await prisma.companyLabels.findFirst({
+            where: { label_name: name }
+        });
+
+        if (existed) {
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
+        }
+
+        const created = await prisma.companyLabels.create({
+            data: { label_name: name }
+        });
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            data: created
+        });
+    } catch (error) {
+        next(error);
+    }
+}

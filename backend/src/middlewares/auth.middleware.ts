@@ -19,13 +19,13 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             const refreshToken: string = req.cookies?.refreshToken;
 
             if (!refreshToken) {
-                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Unauthorized - Please login!"));
+                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Chưa xác thực - Vui lòng đăng nhập!"));
             }
 
             const refreshTokenDecoded = jwt.verify(refreshToken, REFRESH_SECRET);
 
             if (!refreshTokenDecoded) {
-                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Unauthorized - Invalid token!"));
+                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Chưa xác thực - Token không hợp lệ!"));
             }
 
             //@ts-ignore
@@ -45,7 +45,7 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             const accessTokenDecoded = jwt.verify(accessToken, ACCESS_SECRET);
 
             if (!accessTokenDecoded) {
-                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Unauthorized - Invalid token!"));
+                return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Chưa xác thực - Token không hợp lệ!"));
             }
 
             //@ts-ignore
@@ -65,7 +65,7 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
         });
 
         if (!user) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "User not found!"));
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!"));
         }
 
         //@ts-ignore
@@ -80,13 +80,13 @@ export const emailVerifyMiddleware = async (req: Request, res: Response, next: N
     const user = req.cookies?.data;
 
     if (!user) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Please register again!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng đăng ký lại!"));
     }
 
     const userDecoded = jwt.verify(user, ACCESS_SECRET);
 
     if (!userDecoded) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Please register again!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng đăng ký lại!"));
     }
 
     req.user = userDecoded;
@@ -97,13 +97,13 @@ export const emailOTPMiddleware = async (req: Request, res: Response, next: Next
     const otp = req.cookies?.otp;
 
     if (!otp) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "OTP Timeout!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Mã OTP hết hạn!"));
     }
 
     const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
 
     if (!otpDecoded) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "OTP Timeout!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Mã OTP hết hạn!"));
     }
 
     // @ts-ignore
@@ -127,7 +127,7 @@ export const authorizationMiddleware = (role: string) => {
             });
 
             if (user?.roles.role_name !== role) {
-                return next(errorHandler(HTTP_ERROR.FORBIDDEN, "You don't have permission to do this request"));
+                return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền thực hiện yêu cầu này"));
             }
 
             next();
