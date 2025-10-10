@@ -103,6 +103,7 @@ export interface FetchJobByComId {
 
 
 export interface JobResponse {
+  success : boolean;
   data: Job[];
   totalPages?: number | null;
 }

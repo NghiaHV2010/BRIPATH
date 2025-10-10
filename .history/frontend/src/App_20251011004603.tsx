@@ -93,8 +93,8 @@ function App() {
         path="/companies/:companyId"
         element={<CompanyDetailsPageMinimal />}
       />
-      <Route path="/jobs" element={<JobsPage />} />
-      <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+      <Route path="/jobs" element={<JobsPageWrapper />} />
+      <Route path="/jobs/:jobId" element={<JobDetailsPageWrapper />} />
 
       <Route
         path="/profile"

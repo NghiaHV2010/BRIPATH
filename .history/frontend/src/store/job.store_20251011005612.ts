@@ -49,7 +49,7 @@ export const useJobStore = create<JobState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await fetchAllJobs(params);
-      if (res && res.data) {
+      if (res?.success) {
         set({ jobs: res.data, totalPages: res.totalPages || 1 });
       } else {
         set({ error: "Không thể tải danh sách công việc" });
@@ -85,7 +85,7 @@ export const useJobStore = create<JobState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await filterJobs(params);
-      if (res && res.data) {
+      if (res?.success) {
         set({ jobs: res.data, totalPages: res.totalPages || 1 });
       } else {
         set({ error: "Không thể lọc công việc" });
@@ -105,7 +105,7 @@ export const useJobStore = create<JobState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await fetchJobsByComId(params);
-      if (res && res.data) {
+      if (res?.success) {
         set({ jobs: res.data, totalPages: res.totalPages || 1 });
       } else {
         set({ error: "Không thể tải job theo công ty" });

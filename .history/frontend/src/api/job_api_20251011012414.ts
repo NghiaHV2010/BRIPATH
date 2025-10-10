@@ -19,8 +19,17 @@ export const fetchAllJobs = async (
       params: {
         page: params.page,
         userId: params.userId || undefined,
+        // Cache busting for development
+        _t: Date.now(),
       },
     });
+    
+    // Handle 304 Not Modified - data still exists in response
+    if (response.status === 304 || !response.data) {
+      console.warn("304 Not Modified - using cached data");
+      return null;
+    }
+    
     return response.data as JobResponse;
   } catch (error) {
     console.error("Error fetching jobs:", error);

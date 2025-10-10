@@ -120,17 +120,3 @@ export const deleteJob = async (
     throw error;
   }
 };
-
-// ========================
-// Get job labels for filter dropdown
-// ========================
-export const fetchJobLabels = async (): Promise<JobLabel[]> => {
-  try {
-    const response = await axiosConfig.get<{ data: JobLabel[] }>("/job/labels");
-    console.log("✅ Fetched job labels successfully:", response.data.data);
-    return response.data.data;
-  } catch (error) {
-    console.error("❌ Error fetching job labels:", error);
-    throw error;
-  }
-};
