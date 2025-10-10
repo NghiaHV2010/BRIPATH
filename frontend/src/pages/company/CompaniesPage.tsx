@@ -7,10 +7,11 @@ import {
   CompanyCarousel,
 } from "../../components/company";
 import { useCompanyStore } from "../../store/company.store";
+import { Layout } from "../../components/layout";
 
 export default function CompaniesPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(10);
+  const [totalPages] = useState(10); // Có thể get từ API response
 
   const { companies, isLoading, fetchCompanies } = useCompanyStore();
 
@@ -30,7 +31,7 @@ export default function CompaniesPage() {
   const featuredCompanies = companies.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-4 mb-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-4">
@@ -48,6 +49,7 @@ export default function CompaniesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-12">
+        <CompanyFilters onCompanyClick={handleCompanyClick} />
         {featuredCompanies.length > 0 && (
           <CompanyCarousel
             companies={featuredCompanies}
@@ -56,10 +58,8 @@ export default function CompaniesPage() {
           />
         )}
 
-        <CompanyFilters onCompanyClick={handleCompanyClick} />
-
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-16 ">
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
               <p className="text-slate-600 font-medium">Loading companies...</p>
@@ -67,11 +67,14 @@ export default function CompaniesPage() {
           </div>
         ) : (
           <>
+            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-6">
+              Các công ty đang liên kết với{" "}
+              <span className="text-blue-600">BriPath</span>
+            </h2>
             <CompanyList
               companies={companies}
               onCompanyClick={handleCompanyClick}
             />
-
             <CompanyPagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -80,6 +83,6 @@ export default function CompaniesPage() {
           </>
         )}
       </div>
-    </div>
+    </Layout>
   );
 }

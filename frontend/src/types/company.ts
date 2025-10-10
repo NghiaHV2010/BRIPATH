@@ -67,3 +67,12 @@ export interface CompanyDetail {
   fields?: any | null;
   jobs?: JobSummary[];
 }
+
+
+
+
+
+export interface CompanyField {
+  id: number;
+  field_name: string;
+}

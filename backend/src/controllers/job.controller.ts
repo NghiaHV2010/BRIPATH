@@ -420,8 +420,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 skill_tags,
                 education,
                 experience,
-                start_date: convert_startDate,
-                end_date: convert_endDate ? convert_endDate : undefined,
+                start_date,
+                end_date,
                 company_id,
                 jobCategory_id: jobCategory.id
             }
@@ -435,7 +435,6 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         next(error);
     }
 }
-
 export const updateJob = async (req: Request, res: Response, next: NextFunction) => {
     type RequestBody = {
         job_title: string,

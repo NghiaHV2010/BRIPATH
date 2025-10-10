@@ -6,13 +6,13 @@ import { BrowserRouter } from "react-router";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
-// Force scroll to top immediately when script loads
-window.scrollTo(0, 0);
+// // Force scroll to top immediately when script loads
+// window.scrollTo(0, 0);
 
-// Disable scroll restoration
-if ("scrollRestoration" in history) {
-  history.scrollRestoration = "manual";
-}
+// // Disable scroll restoration
+// if ("scrollRestoration" in history) {
+//   history.scrollRestoration = "manual";
+// }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

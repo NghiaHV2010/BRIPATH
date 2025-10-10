@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { useEffect } from "react";
 import { Navbar, Footer } from "../ui";
 
 interface LayoutProps {
@@ -7,7 +6,6 @@ interface LayoutProps {
   showNavbar?: boolean;
   showFooter?: boolean;
   className?: string;
-  disableAutoScroll?: boolean;
 }
 
 export default function Layout({
@@ -15,14 +13,9 @@ export default function Layout({
   showNavbar = true,
   showFooter = true,
   className = "",
-  disableAutoScroll = false,
 }: LayoutProps) {
-  // Only scroll to top if not disabled
-  useEffect(() => {
-    if (!disableAutoScroll) {
-      window.scrollTo(0, 0);
-    }
-  });
+  // Scroll logic moved to App.tsx - only runs on app initial load
+  // No need for auto scroll in Layout component
 
   return (
     <div className={`min-h-screen bg-white ${className}`}>

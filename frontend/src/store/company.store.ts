@@ -3,7 +3,7 @@ import type { CompanyDetail, CompanySummary } from "@/types/company";
 import { create } from "zustand";
 
 interface CompanyStore {
-  companies: CompanySummary[];              // Danh sách tất cả công ty
+  companies: CompanySummary[];              
   filteredCompanies: CompanySummary[];      // Danh sách kết quả tìm kiếm
   companyDetail: CompanyDetail | null;
   isLoading: boolean;
@@ -62,3 +62,5 @@ export const useCompanyStore = create<CompanyStore>((set) => ({
   // Clear search results
   clearFilteredCompanies: () => set({ filteredCompanies: [] }),
 }));
+
+
