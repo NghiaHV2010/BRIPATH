@@ -40,11 +40,23 @@ export const updateEventStatus = async (eventId: string, status: 'approved' | 'r
 
 // Label management
 export const createCompanyLabel = async (labelName: string) => {
-  const response = await axiosConfig.post('/company/labels', { label_name: labelName });
+  const response = await axiosConfig.post('/dashboard/company/labels', { label_name: labelName });
   return response.data;
 };
 
 export const createJobLabel = async (labelName: string) => {
-  const response = await axiosConfig.post('/job-labels', { label_name: labelName });
+  const response = await axiosConfig.post('/dashboard/job-labels', { label_name: labelName });
+  return response.data;
+};
+
+// Get all job labels
+export const getAllJobLabels = async () => {
+  const response = await axiosConfig.get('/job/labels');
+  return response.data;
+};
+
+// Get all company labels
+export const getAllCompanyLabels = async () => {
+  const response = await axiosConfig.get('/company/label');
   return response.data;
 };

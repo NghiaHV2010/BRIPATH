@@ -9,6 +9,7 @@ export interface AuthUser {
 	id: string;
 	username: string;
 	email: string;
+	avatar?: string | null;
 	avatar_url?: string | null;
 	phone?: string | null;
 	address_street?: string | null;
@@ -19,9 +20,16 @@ export interface AuthUser {
 	last_loggedIn?: string;
 	created_at?: string;
 	updated_at?: string;
+	role?: string;
 	role_id?: number;
 	phone_verified?: boolean;
 	company_id?: string | null;
+	roles: {
+		role_name: string;
+	};
+	_count?: {
+		userNotifications: number;
+	};
 }
 interface AuthState {
 	isCheckingAuth: boolean;
@@ -119,23 +127,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 		set({ isProcessing: true });
 		try {
 			await apiLogout();
-			set({ authUser: null });
 		} catch (err) {
+			// Even if logout API fails, we should clear local state
 			console.error('Logout error', err);
 		} finally {
-			set({ isProcessing: false });
+			// Always clear local auth state regardless of API response
+			set({ authUser: null, isProcessing: false });
 		}
 	},
 
 	// Helper methods for role checking
 	isCompany: () => {
 		const { authUser } = get();
-		return authUser?.role_id === 3;
+		return authUser?.roles.role_name === "Company";
 	},
 
 	isCandidate: () => {
 		const { authUser } = get();
-		return authUser?.role_id === 1; // Assuming 1 is candidate role
+		return authUser?.roles.role_name === "Candidate";
+	},
+
+	isAdmin: () => {
+		const { authUser } = get();
+		return authUser?.roles.role_name === "Admin";
 	},
 
 	hasCompany: () => {

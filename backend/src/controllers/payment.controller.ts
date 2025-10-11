@@ -2,60 +2,72 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '../generated/prisma';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { CreatePaymentRequest, UpdatePaymentRequest, PaymentQueryParams } from '../types/payment.types';
+import { createNotificationData } from '../utils';
 
 const prisma = new PrismaClient();
 
 export const createPayment = async (req: Request, res: Response) => {
-    try {
-        const { amount, currency, payment_gateway, payment_method, transaction_id, status, user_id }: CreatePaymentRequest = req.body;
+    //@ts-ignore
+    const { id: user_id } = req.user;
+    const { amount, currency, payment_gateway, payment_method, transaction_id, status }: CreatePaymentRequest = req.body;
 
-        if (!amount || !payment_gateway || !payment_method || !status || !user_id) {
+    try {
+        if (!amount || !payment_gateway || !payment_method || !status) {
             return res.status(HTTP_ERROR.BAD_REQUEST).json({
                 success: false,
-                message: 'Missing required fields'
+                message: 'Thông tin thanh toán không hợp lệ'
             });
         }
 
-        const user = await prisma.users.findUnique({
-            where: { id: user_id }
-        });
-
-        if (!user) {
-            return res.status(HTTP_ERROR.NOT_FOUND).json({
-                success: false,
-                message: 'User not found'
+        const result = await prisma.$transaction(async (tx) => {
+            const payment = await tx.payments.create({
+                data: {
+                    amount: BigInt(amount),
+                    currency: currency || 'VND',
+                    payment_gateway,
+                    payment_method,
+                    transaction_id,
+                    status,
+                    user_id
+                }
             });
-        }
 
-        const payment = await prisma.payments.create({
-            data: {
-                amount: BigInt(amount),
-                currency: currency || 'VND',
-                payment_gateway,
-                payment_method,
-                transaction_id,
-                status,
-                user_id
-            }
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn đã thanh toán ${amount} ${currency || 'VND'} thành công qua ${payment_gateway}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                }
+            });
+
+            // await tx.userNotifications.create({
+            //     data: {
+            //         title: 'Thanh toán thành công!',
+            //         content: ``,
+            //         type: 'pricing_plan',
+            //         user_id: user_id
+            //     }
+            // });
+
+            return payment;
         });
 
         res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
-            message: 'Payment created successfully',
+            message: 'Thanh toán thành công',
             data: {
-                id: payment.id,
-                amount: Number(payment.amount),
-                currency: payment.currency,
-                payment_gateway: payment.payment_gateway,
-                payment_method: payment.payment_method,
-                transaction_id: payment.transaction_id,
-                status: payment.status,
-                created_at: payment.created_at,
-                user_id: payment.user_id
+                id: result.id,
+                amount: Number(result.amount),
+                currency: result.currency,
+                payment_gateway: result.payment_gateway,
+                payment_method: result.payment_method,
+                transaction_id: result.transaction_id,
+                status: result.status,
+                created_at: result.created_at,
+                user_id: result.user_id
             }
         });
     } catch (error) {
-        console.error('Create payment error:', error);
+        console.error('Tạo thanh toán thất bại:', error);
         res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Internal server error'
@@ -118,7 +130,7 @@ export const getPayments = async (req: Request, res: Response) => {
             }
         });
     } catch (error) {
-        console.error('Get payments error:', error);
+        console.error('Lấy danh sách thanh toán thất bại:', error);
         res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Internal server error'
@@ -146,7 +158,7 @@ export const getPaymentById = async (req: Request, res: Response) => {
         if (!payment) {
             return res.status(HTTP_ERROR.NOT_FOUND).json({
                 success: false,
-                message: 'Payment not found'
+                message: 'Không tìm thấy thanh toán'
             });
         }
 

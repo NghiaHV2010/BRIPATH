@@ -145,6 +145,112 @@ export const saveJob = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
+export const unsaveJob = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const job_id = req.params.jobId;
+
+    try {
+        const isSavedJobExisted = await prisma.savedJobs.findFirst({
+            where: {
+                job_id,
+                user_id
+            },
+            include: {
+                jobs: { select: { job_title: true } }
+            }
+        });
+
+        if (!isSavedJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc chưa được lưu!"));
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã hủy lưu công việc ${isSavedJobExisted.jobs.job_title}`,
+                    user_id
+                }
+            });
+
+            await tx.savedJobs.delete({
+                where: {
+                    user_id_job_id: {
+                        user_id,
+                        job_id
+                    }
+                }
+            });
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Thành công!"
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const unfollowCompany = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const company_id = req.params.companyId;
+
+    try {
+        const isFollowedCompanyExisted = await prisma.followedCompanies.findFirst({
+            where: {
+                company_id,
+                user_id
+            },
+            select: {
+                companies: {
+                    select: {
+                        users: {
+                            select: {
+                                username: true
+                            },
+                            where: {
+                                company_id
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!isFollowedCompanyExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công ty chưa được theo dõi!"));
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã hủy theo dõi công ty ${isFollowedCompanyExisted.companies.users?.username}`,
+                    user_id
+                }
+            });
+
+            await tx.followedCompanies.delete({
+                where: {
+                    user_id_company_id: {
+                        user_id,
+                        company_id
+                    }
+                }
+            });
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Thành công!"
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
 export const applyJob = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const { id, company_id } = req.user;
@@ -356,6 +462,7 @@ export const getLastestUserChat = async (req: Request, res: Response, next: Next
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: messages
         });
     } catch (error) {

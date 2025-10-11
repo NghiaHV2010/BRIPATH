@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Navbar, Footer } from "../ui";
+import { ChatPopup } from "../chatbot/ChatPopup";
+import { useAuthStore } from "@/store";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,13 +16,17 @@ export default function Layout({
   showFooter = true,
   className = "",
 }: LayoutProps) {
+  const authUser = useAuthStore((s) => s.authUser);
   // Scroll logic moved to App.tsx - only runs on app initial load
   // No need for auto scroll in Layout component
 
   return (
-    <div className={`min-h-screen bg-white ${className}`}>
+    <div className={`min-h-screen relative bg-white ${className}`}>
       {showNavbar && <Navbar />}
-      <main className={showNavbar ? "pt-16" : ""}>{children}</main>
+      <main className={`${showNavbar ? "pt-16" : ""} relative`}>
+        {children}
+        {authUser?.roles.role_name !== "Admin" && <ChatPopup />}
+      </main>
       {showFooter && <Footer />}
     </div>
   );

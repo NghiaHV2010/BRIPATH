@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { PrismaClient } from "../generated/prisma";
-import { sendEmail } from "../utils";
+import { createNotificationData, sendEmail } from "../utils";
 
 const mockSubscriptions = [
     // ✅ Sắp hết hạn 3 ngày (2025-09-28)
@@ -64,9 +64,8 @@ const mockSubscriptions = [
     }
 ];
 
-
-
 const checkSubscriptionRemainDate = async () => {
+    const prisma = new PrismaClient();
     const today = new Date();
     // const today = new Date("2025-09-26");
 
@@ -90,6 +89,17 @@ const checkSubscriptionRemainDate = async () => {
     for (const sub of expireIn3Days) {
         // console.log("3 days: ", sub);
 
+        const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
+
+        await prisma.userNotifications.create({
+            data: {
+                user_id: sub.user_id,
+                title: notificationData.title,
+                content: notificationData.content,
+                type: notificationData.type,
+            }
+        }).catch((error) => { console.error("Đã xảy ra lỗi, vui lòng thử lại!", error); });
+
         sendEmail(
             sub.users.email,
             `Nhắc nhở: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
@@ -99,6 +109,17 @@ const checkSubscriptionRemainDate = async () => {
 
     for (const sub of expireIn1Day) {
         // console.log("1 day: ", sub);
+
+        const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
+
+        await prisma.userNotifications.create({
+            data: {
+                user_id: sub.user_id,
+                title: notificationData.title,
+                content: notificationData.content,
+                type: notificationData.type,
+            }
+        }).catch((error) => { console.error("Đã xảy ra lỗi, vui lòng thử lại!", error); });
 
         sendEmail(
             sub.users.email,
@@ -130,7 +151,9 @@ const getExpireIn = async (daysLater: Date) => {
             include: {
                 users: {
                     omit: {
-                        password: true
+                        password: true,
+                        firebase_uid: true,
+                        is_deleted: true,
                     }
                 },
                 membershipPlans: true

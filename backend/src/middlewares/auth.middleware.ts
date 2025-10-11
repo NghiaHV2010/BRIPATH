@@ -57,6 +57,22 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
                 id: userId,
                 is_deleted: false
             },
+            include: {
+                roles: {
+                    select: {
+                        role_name: true
+                    }
+                },
+                _count: {
+                    select: {
+                        userNotifications: {
+                            where: {
+                                is_read: false
+                            }
+                        }
+                    }
+                },
+            },
             omit: {
                 password: true,
                 is_deleted: true,

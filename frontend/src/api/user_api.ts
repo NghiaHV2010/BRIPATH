@@ -1,5 +1,7 @@
 import type { AuthUser } from "@/store/auth";
 import axiosConfig from "@/config/axios.config";
+import type { NotificationResponse } from "@/types/notification";
+import type { ChatResponse } from "@/types/chatbot";
 
 export const fetchCurrentUserProfile = async (): Promise<AuthUser | null> => {
   const response = await axiosConfig.get("/check", {
@@ -12,3 +14,60 @@ export const fetchCurrentUserProfile = async (): Promise<AuthUser | null> => {
 
   return null;
 };
+
+
+export const getAllNotifications = async (page: number): Promise<NotificationResponse | null> => {
+  const response = await axiosConfig.get(
+    `/user/notification?page=${page}`
+  );
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  console.log(response.data);
+
+
+  return response.data;
+}
+
+export const markNotificationAsRead = async (notificationId: number): Promise<NotificationResponse | null> => {
+  try {
+    const response = await axiosConfig.put('/user/notification', {
+      notification_id: notificationId,
+    });
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+
+    return response.data;
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    return null;
+  }
+};
+
+export const getAllChatMessages = async (): Promise<ChatResponse | null> => {
+  const response = await axiosConfig.get('/agent-chat');
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  return response.data;
+}
+
+
+export const sendMessageToChatbot = async (message: string): Promise<Boolean> => {
+  const response = await axiosConfig.post('/agent-chat', {
+    content: message,
+  });
+
+  if (response.status !== 200) {
+    return false;
+  }
+
+  return true;
+}

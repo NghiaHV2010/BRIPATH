@@ -324,7 +324,7 @@ export default function ProfilePageWrapper() {
                 <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                   {formData.avatar_url || user.avatar_url ? (
                     <img
-                      src={formData.avatar_url || user.avatar_url || ""}
+                      src={formData.avatar_url || user.avatar_url || undefined}
                       alt="Avatar"
                       className="w-full h-full object-cover"
                     />

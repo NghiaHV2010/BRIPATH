@@ -3,9 +3,9 @@ import { HTTP_ERROR } from '../constants/httpCode';
 import { PaymentGateway, PaymentMethod, PaymentStatus } from '../generated/prisma';
 
 export const validateCreatePaymentRequest = (req: Request, res: Response, next: NextFunction) => {
-    const { amount, payment_gateway, payment_method, status, user_id } = req.body;
+    const { amount, payment_gateway, payment_method, status } = req.body;
 
-    if (!amount || !payment_gateway || !payment_method || !status || !user_id) {
+    if (!amount || !payment_gateway || !payment_method || !status) {
         return res.status(HTTP_ERROR.BAD_REQUEST).json({
             success: false,
             message: 'Missing required fields: amount, payment_gateway, payment_method, status, user_id'
@@ -37,14 +37,6 @@ export const validateCreatePaymentRequest = (req: Request, res: Response, next: 
         return res.status(HTTP_ERROR.BAD_REQUEST).json({
             success: false,
             message: `Invalid status. Must be one of: ${Object.values(PaymentStatus).join(', ')}`
-        });
-    }
-
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(user_id)) {
-        return res.status(HTTP_ERROR.BAD_REQUEST).json({
-            success: false,
-            message: 'Invalid user_id format'
         });
     }
 
