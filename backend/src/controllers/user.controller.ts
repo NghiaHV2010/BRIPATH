@@ -462,6 +462,7 @@ export const getLastestUserChat = async (req: Request, res: Response, next: Next
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: messages
         });
     } catch (error) {

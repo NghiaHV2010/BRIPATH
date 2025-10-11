@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navbar, Footer } from "../ui";
+import { ChatPopup } from "../chatbot/ChatPopup";
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,9 +19,12 @@ export default function Layout({
   // No need for auto scroll in Layout component
 
   return (
-    <div className={`min-h-screen bg-white ${className}`}>
+    <div className={`min-h-screen relative bg-white ${className}`}>
       {showNavbar && <Navbar />}
-      <main className={showNavbar ? "pt-16" : ""}>{children}</main>
+      <main className={`${showNavbar ? "pt-16" : ""} relative`}>
+        {children}
+        <ChatPopup />
+      </main>
       {showFooter && <Footer />}
     </div>
   );

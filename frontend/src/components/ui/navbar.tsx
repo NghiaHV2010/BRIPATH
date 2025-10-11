@@ -15,6 +15,7 @@ import {
   Search,
   Building,
   Plus,
+  Bell,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -153,6 +154,14 @@ export default function Navbar({ className = "" }: NavbarProps) {
 
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
+            <div className="rounded-full relative hover:bg-gray-100 p-2 cursor-pointer" onClick={() => navigate("/notifications")}>
+              {authUser?._count && authUser?._count?.userNotifications > 0 && (
+                <div className="absolute top-0 right-0 size-4 bg-red-500 rounded-full flex items-center justify-center">
+                  <p className="text-xs text-white">{authUser._count.userNotifications}</p>
+                </div>
+              )}
+              <Bell className="size-full text-gray-500 " />
+            </div>
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors outline-none">

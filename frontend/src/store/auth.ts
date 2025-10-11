@@ -22,6 +22,12 @@ export interface AuthUser {
 	role_id?: number;
 	phone_verified?: boolean;
 	company_id?: string | null;
+	roles: {
+		role_name: string;
+	};
+	_count?: {
+		userNotifications: number;
+	};
 }
 interface AuthState {
 	isCheckingAuth: boolean;

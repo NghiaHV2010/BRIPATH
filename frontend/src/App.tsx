@@ -30,6 +30,7 @@ import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
 import { CompanyDetailsPageMinimal } from "./pages/company";
+import { NotificationList } from "./components/notification/NotificationList";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -82,8 +83,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       {/* <Route path="/sms" element={<VerifySMS />} /> */}
       <Route path="/register" element={<RegisterPage />} />
-      <Route
-        path="/register/email/:token"
+      <Route path="/register/email/:token"
         element={<EmailVerificationPage />}
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -154,7 +154,7 @@ function App() {
       />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      
+
       {/* Admin Routes */}
       <Route
         path="/admin"
@@ -164,7 +164,14 @@ function App() {
           </AdminRoute>
         }
       />
-      
+
+      <Route
+        path="/notifications"
+        element={
+          <NotificationList />
+        }
+      />
+
       <Route path="*" element={<LoginPage />} />
     </Routes>
   );
