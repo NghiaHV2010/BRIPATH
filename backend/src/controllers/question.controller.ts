@@ -126,7 +126,7 @@ export const getSuitableJobCategories = async (req: Request, res: Response, next
 
 export const restartUserAnswer = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
-    const user_id = req.user;
+    const user_id = req.user?.id;
 
     try {
         await prisma.personalityTestResults.deleteMany({

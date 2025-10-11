@@ -31,6 +31,30 @@ export default function CompanyFilters({
   const { filterCompanies, fetchCompanies, isLoading, clearFilteredCompanies } =
     useCompanyStore();
 
+  // Wrapper function để save filter states khi click company
+  const handleCompanyClick = (companyId: string) => {
+    // Save current filter states
+    sessionStorage.setItem(
+      "companyFilterState",
+      JSON.stringify({
+        searchTerm,
+        selectedField,
+        selectedLocation,
+        isSearching,
+        page,
+        visibleCount,
+        displayedCompaniesLength: displayedCompanies.length,
+        lastFetchCount,
+      })
+    );
+
+    // Save scroll position
+    sessionStorage.setItem("companyScrollPosition", window.scrollY.toString());
+
+    // Call parent handler
+    onCompanyClick?.(companyId);
+  };
+
   // fetch danh sách lĩnh vực + địa điểm khi load trang
   useEffect(() => {
     const loadOptions = async () => {
@@ -59,6 +83,40 @@ export default function CompanyFilters({
     };
     loadOptions();
   }, [fetchCompanies]);
+
+  // Restore filter states when returning from company detail
+  useEffect(() => {
+    const savedFilterState = sessionStorage.getItem("companyFilterState");
+    if (savedFilterState) {
+      try {
+        const state = JSON.parse(savedFilterState);
+        setSearchTerm(state.searchTerm || "");
+        setSelectedField(state.selectedField || "");
+        setSelectedLocation(state.selectedLocation || "");
+        setIsSearching(state.isSearching || false);
+        setPage(state.page || 1);
+        setVisibleCount(state.visibleCount || 6);
+        setLastFetchCount(state.lastFetchCount || 0);
+
+        // Restore search results if was searching
+        if (state.isSearching) {
+          const filteredCompanies =
+            useCompanyStore.getState().filteredCompanies ?? [];
+          setDisplayedCompanies(
+            filteredCompanies.slice(
+              0,
+              state.displayedCompaniesLength || filteredCompanies.length
+            )
+          );
+        }
+
+        // Clear saved state after restoring
+        sessionStorage.removeItem("companyFilterState");
+      } catch (err) {
+        console.error("Error restoring filter state:", err);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,7 +280,7 @@ export default function CompanyFilters({
               <CompanyCard
                 key={company.id}
                 company={company}
-                onClick={() => onCompanyClick?.(company.id)}
+                onClick={() => handleCompanyClick(company.id)}
               />
             ))}
           </div>

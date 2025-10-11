@@ -1,3 +1,4 @@
+
 // Login pages
 export { default as ForgotPasswordPage } from "./login/forgotPasswordPage";
 export { default as LoginPage } from "./login/loginPage";
@@ -12,12 +13,10 @@ export { default as SubscriptionDetailPage } from "./subscription/subscriptionDe
 export { default as AboutPage } from "./about/aboutPage";
 export { default as ContactPage } from "./contact/contactPage";
 
-// Test/Quiz pages
-export { default as QuizLandingPageWrapper } from "./test/quizLandingPageWrapper";
-export { default as QuizTestPageWrapper } from "./test/quizTestPageWrapper";
-export { default as QuizResultsPageWrapper } from "./test/quizResultsPageWrapper";
-
 // Job pages - using direct imports in App.tsx
+export { default as QuizLandingPage } from "./quiz/QuizLandingPage";
+export { default as QuizPage } from "./quiz/QuizPage";
+export { default as QuizResultsPage } from "./quiz/QuizResultsPage";
 
 // Profile pages
 export { default as ProfilePageWrapper } from "./profile/profilePageWrapper";

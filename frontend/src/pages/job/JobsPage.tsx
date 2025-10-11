@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Briefcase } from "lucide-react";
 import {
   JobList,
@@ -10,6 +11,8 @@ import { useJobStore } from "../../store/job.store";
 import { Layout } from "../../components/layout";
 
 export default function JobsPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages] = useState(10); // Có thể get từ API response
 
@@ -19,15 +22,60 @@ export default function JobsPage() {
     getAllJobs({ page: currentPage });
   }, [currentPage, getAllJobs]);
 
+  // Handle external navigation detection
+  useEffect(() => {
+    // Check if this is external navigation (from navbar, direct URL, etc.)
+    const isExternalNavigation =
+      !sessionStorage.getItem("jobScrollPosition") &&
+      !sessionStorage.getItem("jobPage") &&
+      !sessionStorage.getItem("jobFilterState");
+
+    if (isExternalNavigation) {
+      // Clear any leftover states and start fresh
+      sessionStorage.removeItem("jobScrollPosition");
+      sessionStorage.removeItem("jobPage");
+      sessionStorage.removeItem("jobFilterState");
+
+      // Reset to page 1
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      }
+    }
+  }, [location.pathname, currentPage]);
+
+  // Restore states when returning from job detail (run once on mount)
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem("jobScrollPosition");
+    const savedPage = sessionStorage.getItem("jobPage");
+
+    if (savedScrollPosition) {
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        sessionStorage.removeItem("jobScrollPosition");
+      }, 100);
+    }
+
+    if (savedPage) {
+      const page = parseInt(savedPage);
+      if (page !== currentPage) {
+        setCurrentPage(page);
+        // Don't call getAllJobs here as it will be handled by the first useEffect
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   const loadJobs = async (page: number) => {
     setCurrentPage(page);
+    sessionStorage.setItem("jobPage", page.toString()); // 🔹 lưu page hiện tại
     await getAllJobs({ page });
   };
 
   const handleJobClick = (jobId: string) => {
-    console.log("Job clicked:", jobId);
-    // Có thể navigate to job details page
-    // window.location.href = `/jobs/${jobId}`;
+    // 🔹 lưu vị trí cuộn trước khi rời trang
+    sessionStorage.setItem("jobScrollPosition", window.scrollY.toString());
+    sessionStorage.setItem("jobPage", currentPage.toString());
+    navigate(`/jobs/${jobId}`);
   };
 
   return (
@@ -50,8 +98,7 @@ export default function JobsPage() {
 
       <div className="max-w-7xl mx-auto px-4 pb-12">
         <JobFilters onJobClick={handleJobClick} />
-        
-        {/* Featured Jobs Carousel - Show first 16 jobs in 4x4 grid */}
+
         {jobs.length > 0 && (
           <JobCarousel
             jobs={jobs}

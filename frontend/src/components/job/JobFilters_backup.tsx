@@ -6,15 +6,29 @@ import {
   Briefcase,
   DollarSign,
   Loader2,
-  SearchIcon,
 } from "lucide-react";
 import { useJobStore } from "../../store/job.store";
 import JobCard from "./JobCard";
 import type { Job } from "../../types/job";
-import { Button } from "../ui/button";
 
-interface JobFiltersProps {
-  onJobClick?: (jobId: string) => void;
+interface JobF          {/* Show More Button */}
+          {canShowLoadMore && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoading}
+                className="px-6 py-3 rounded-lg bg-green-100 hover:bg-green-200 text-green-700 font-semibold disabled:opacity-50 flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> Đang tải...
+                  </>
+                ) : (
+                  "Hiển thị thêm"
+                )}
+              </button>
+            </div>
+          )}nJobClick?: (jobId: string) => void;
 }
 
 export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
@@ -25,97 +39,18 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
   const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1);
   const [visibleCount, setVisibleCount] = useState(8); // Show 8 jobs initially (2 rows x 4)
-
+  
   // dữ liệu hiển thị
   const [displayedJobs, setDisplayedJobs] = useState<Job[]>([]);
   const [lastFetchCount, setLastFetchCount] = useState(0);
 
-  const {
-    jobs,
-    filteredJobs,
-    jobLabels,
-    isLoading,
-    filterJobs,
-    getAllJobs,
-    fetchJobLabels,
-    saveJob,
-    unsaveJob,
-    checkIfSaved,
-    clearFilteredJobs,
-  } = useJobStore();
-
-  const handleSaveJob = async (jobId: string) => {
-    const isSaved = checkIfSaved(jobId);
-    if (isSaved) {
-      await unsaveJob(jobId);
-    } else {
-      await saveJob(jobId);
-    }
-  };
-
-  // Wrapper function để save filter states khi click job
-  const handleJobClick = (jobId: string) => {
-    // Save current filter states
-    sessionStorage.setItem(
-      "jobFilterState",
-      JSON.stringify({
-        searchTerm,
-        selectedLocation,
-        selectedField,
-        selectedSalary,
-        isSearching,
-        page,
-        visibleCount,
-        displayedJobsLength: displayedJobs.length,
-        lastFetchCount,
-      })
-    );
-
-    // Save scroll position
-    sessionStorage.setItem("jobScrollPosition", window.scrollY.toString());
-
-    // Call parent handler
-    onJobClick?.(jobId);
-  };
+  const { jobs, jobLabels, isLoading, filterJobs, getAllJobs, fetchJobLabels } =
+    useJobStore();
 
   // Load job labels on mount
   useEffect(() => {
     fetchJobLabels();
   }, [fetchJobLabels]);
-
-  // Restore filter states when returning from job detail
-  useEffect(() => {
-    const savedFilterState = sessionStorage.getItem("jobFilterState");
-    if (savedFilterState) {
-      try {
-        const state = JSON.parse(savedFilterState);
-        setSearchTerm(state.searchTerm || "");
-        setSelectedLocation(state.selectedLocation || "");
-        setSelectedField(state.selectedField || "");
-        setSalaryRange(state.selectedSalary || "");
-        setIsSearching(state.isSearching || false);
-        setPage(state.page || 1);
-        setVisibleCount(state.visibleCount || 8);
-        setLastFetchCount(state.lastFetchCount || 0);
-
-        // Restore search results if was searching
-        if (state.isSearching) {
-          const filteredJobs = useJobStore.getState().filteredJobs ?? [];
-          setDisplayedJobs(
-            filteredJobs.slice(
-              0,
-              state.displayedJobsLength || filteredJobs.length
-            )
-          );
-        }
-
-        // Clear saved state after restoring
-        sessionStorage.removeItem("jobFilterState");
-      } catch (err) {
-        console.error("Error restoring job filter state:", err);
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +78,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       salary: selectedSalary || undefined,
     });
 
-    const latest = useJobStore.getState().filteredJobs ?? [];
+    const latest = useJobStore.getState().jobs ?? [];
     setDisplayedJobs(latest);
     setLastFetchCount(latest.length);
   };
@@ -158,7 +93,6 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
     setVisibleCount(8);
     setDisplayedJobs([]);
     setLastFetchCount(0);
-    clearFilteredJobs();
     await getAllJobs({ page: 1 });
   };
 
@@ -176,7 +110,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
         field: selectedField || undefined,
         salary: selectedSalary || undefined,
       });
-      const latestPage = useJobStore.getState().filteredJobs ?? [];
+      const latestPage = useJobStore.getState().jobs ?? [];
       setDisplayedJobs((prev) => [...prev, ...latestPage]);
       setLastFetchCount(latestPage.length);
     }
@@ -219,18 +153,23 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
               className="w-full pl-12 pr-4 py-4 text-lg border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
             />
           </div>
-          <Button
+          <button
             type="submit"
             disabled={isLoading}
-            variant="emerald"
-            className="flex items-center justify-center min-w-[60px]"
+            className="px-8 py-4 bg-green-600 hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors flex items-center gap-2"
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Đang tìm...
+              </>
             ) : (
-              <SearchIcon />
+              <>
+                <Search className="w-5 h-5" />
+                Tìm kiếm
+              </>
             )}
-          </Button>
+          </button>
         </div>
 
         {/* Advanced Filters */}
@@ -305,7 +244,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       {hasResults && (
         <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-green-800 text-center">
-            Tìm thấy {displayedJobs.length} công việc phù hợp
+            Tìm thấy {jobs.length} công việc phù hợp
           </p>
         </div>
       )}
@@ -325,8 +264,8 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
             <div className="h-8 bg-slate-200 rounded w-48 animate-pulse"></div>
             <div className="h-8 bg-slate-200 rounded-full w-20 animate-pulse"></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
                 className="bg-white rounded-lg border border-slate-200 p-6 animate-pulse"
@@ -348,7 +287,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       )}
 
       {/* Filtered Jobs Results */}
-      {isSearching && !isLoading && displayedJobs.length > 0 && (
+      {isSearching && !isLoading && jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-slate-900">
@@ -356,7 +295,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
             </h3>
             <div className="text-slate-600 bg-green-50 px-4 py-2 rounded-lg">
               <span className="font-semibold text-green-600">
-                {displayedJobs.length}
+                {jobs.length}
               </span>{" "}
               công việc
             </div>
@@ -367,19 +306,17 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
               <JobCard
                 key={job.id}
                 job={job}
-                onClick={() => handleJobClick(job.id)}
-                onSave={() => handleSaveJob?.(job.id)}
-                isSaved={job.isSaved || false}
+                onClick={() => onJobClick?.(job.id)}
                 compact={true}
               />
             ))}
           </div>
 
           {/* Show More Button */}
-          {canShowLoadMore && (
+          {jobs.length > visibleCount && (
             <div className="flex justify-center mt-8">
               <button
-                onClick={handleLoadMore}
+                onClick={() => setVisibleCount((prev) => prev + 8)}
                 disabled={isLoading}
                 className="px-6 py-3 rounded-lg bg-green-100 hover:bg-green-200 text-green-700 font-semibold disabled:opacity-50 flex items-center gap-2"
               >

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Building2 } from "lucide-react";
 import {
   CompanyList,
@@ -11,21 +12,71 @@ import { Layout } from "../../components/layout";
 
 export default function CompaniesPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(10); // Có thể get từ API response
 
-  const { companies, isLoading, fetchCompanies } = useCompanyStore();
+  const { companies, isLoading, totalPages, fetchCompanies } =
+    useCompanyStore();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchCompanies(currentPage);
   }, [currentPage, fetchCompanies]);
 
+  // Handle external navigation detection
+  useEffect(() => {
+    // Check if this is external navigation (from navbar, direct URL, etc.)
+    const isExternalNavigation =
+      !sessionStorage.getItem("companyScrollPosition") &&
+      !sessionStorage.getItem("companyPage") &&
+      !sessionStorage.getItem("companyFilterState");
+
+    if (isExternalNavigation) {
+      // Clear any leftover states and start fresh
+      sessionStorage.removeItem("companyScrollPosition");
+      sessionStorage.removeItem("companyPage");
+      sessionStorage.removeItem("companyFilterState");
+
+      // Reset to page 1
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      }
+    }
+  }, [location.pathname, currentPage]);
+
+  // Restore states when returning from company detail (run once on mount)
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem("companyScrollPosition");
+    const savedPage = sessionStorage.getItem("companyPage");
+
+    if (savedScrollPosition) {
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        sessionStorage.removeItem("companyScrollPosition");
+      }, 100);
+    }
+
+    if (savedPage) {
+      const page = parseInt(savedPage);
+      if (page !== currentPage) {
+        setCurrentPage(page);
+        // Don't call fetchCompanies here as it will be handled by the first useEffect
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   const loadCompanies = async (page: number) => {
     setCurrentPage(page);
+    // Save current page for navigation state
+    sessionStorage.setItem("companyPage", page.toString());
     await fetchCompanies(page);
   };
 
   const handleCompanyClick = (companyId: string) => {
-    console.log("Company clicked:", companyId);
+    // Save current scroll position and page before navigating
+    sessionStorage.setItem("companyScrollPosition", window.scrollY.toString());
+    sessionStorage.setItem("companyPage", currentPage.toString());
+    navigate(`/companies/${companyId}`);
   };
 
   const featuredCompanies = companies.slice(0, 6);
@@ -79,6 +130,7 @@ export default function CompaniesPage() {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={loadCompanies}
+              isLoading={isLoading}
             />
           </>
         )}

@@ -24,7 +24,8 @@ export default function JobCarousel({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use fixed jobs or current jobs - show 16 jobs (4x4)
-  const displayJobs = isFixed && fixedJobs.length > 0 ? fixedJobs : jobs.slice(0, 16);
+  const displayJobs =
+    isFixed && fixedJobs.length > 0 ? fixedJobs : jobs.slice(0, 16);
 
   // Store first 16 jobs when isFixed is true
   useEffect(() => {
@@ -57,7 +58,10 @@ export default function JobCarousel({
     const startAutoSlide = () => {
       intervalRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => {
-          const maxIndex = Math.max(0, Math.ceil(displayJobs.length / itemsPerView) - 1);
+          const maxIndex = Math.max(
+            0,
+            Math.ceil(displayJobs.length / itemsPerView) - 1
+          );
           return prevIndex >= maxIndex ? 0 : prevIndex + 1;
         });
       }, 4000);
@@ -85,19 +89,28 @@ export default function JobCarousel({
     }
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prevIndex) => {
-        const maxIndex = Math.max(0, Math.ceil(displayJobs.length / itemsPerView) - 1);
+        const maxIndex = Math.max(
+          0,
+          Math.ceil(displayJobs.length / itemsPerView) - 1
+        );
         return prevIndex >= maxIndex ? 0 : prevIndex + 1;
       });
     }, 4000);
   };
 
   const nextSlide = () => {
-    const maxIndex = Math.max(0, Math.ceil(displayJobs.length / itemsPerView) - 1);
+    const maxIndex = Math.max(
+      0,
+      Math.ceil(displayJobs.length / itemsPerView) - 1
+    );
     setCurrentIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
   };
 
   const prevSlide = () => {
-    const maxIndex = Math.max(0, Math.ceil(displayJobs.length / itemsPerView) - 1);
+    const maxIndex = Math.max(
+      0,
+      Math.ceil(displayJobs.length / itemsPerView) - 1
+    );
     setCurrentIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
   };
 
@@ -106,12 +119,12 @@ export default function JobCarousel({
   }
 
   const totalSlides = Math.ceil(displayJobs.length / itemsPerView);
-  
+
   return (
     <div className="mb-12">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-        
+
         {totalSlides > 1 && (
           <div className="flex items-center gap-2">
             <Button
@@ -151,13 +164,13 @@ export default function JobCarousel({
               }}
             >
               {Array.from({ length: totalSlides }).map((_, slideIndex) => (
-                <div
-                  key={slideIndex}
-                  className="w-full flex-shrink-0"
-                >
+                <div key={slideIndex} className="w-full flex-shrink-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {displayJobs
-                      .slice(slideIndex * itemsPerView, (slideIndex + 1) * itemsPerView)
+                      .slice(
+                        slideIndex * itemsPerView,
+                        (slideIndex + 1) * itemsPerView
+                      )
                       .map((job) => (
                         <div key={job.id} className="h-full">
                           <JobCard
