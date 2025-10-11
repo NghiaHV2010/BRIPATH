@@ -12,7 +12,7 @@ authRoute.get('/register/email/', emailVerifyMiddleware, sendOTP);
 authRoute.get('/register/email/:otp', emailVerifyMiddleware, emailOTPMiddleware, verifyEmail);
 
 authRoute.post('/login', login);
-authRoute.post('/logout', authenticationMiddleware, logout);
+authRoute.post('/logout', logout);
 authRoute.get('/check', authenticationMiddleware, checkAuth);
 
 authRoute.post('/verify-sms', authenticationMiddleware, verifySMS)

@@ -34,7 +34,7 @@ export default function AdminHeader() {
           {/* User Avatar */}
           <div className="flex items-center space-x-3">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={authUser?.avatar_url || ""} alt={authUser?.username || ""} />
+              <AvatarImage src={authUser?.avatar_url || undefined} alt={authUser?.username || ""} />
               <AvatarFallback>
                 {authUser?.username?.charAt(0).toUpperCase()}
               </AvatarFallback>

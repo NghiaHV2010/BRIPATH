@@ -31,6 +31,7 @@ import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
 import { CompanyDetailsPage } from "./pages/company";
 import { NotificationList } from "./components/notification/NotificationList";
+import Layout from "./components/layout/layout";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -63,7 +64,11 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={
+        <Layout showFooter={false}>
+          <HomePage />
+        </Layout>
+      } />
       <Route
         path="/login"
         element={

@@ -8,6 +8,7 @@ import PaymentsManagement from "./paymentsManagement";
 import Analytics from "./analytics";
 import UserManagement from "./userManagement";
 import RevenueCharts from "./revenueCharts";
+import LabelManagement from "./labelManagement";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { 
   Settings,
@@ -116,6 +117,9 @@ export default function AdminDashboard() {
       
       case "payments":
         return <PaymentsManagement />;
+      
+      case "labels":
+        return <LabelManagement />;
       
       case "analytics":
         return <Analytics />;
