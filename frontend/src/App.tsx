@@ -10,9 +10,9 @@ import {
   SubscriptionDetailPage,
   AboutPage,
   ContactPage,
-  QuizLandingPageWrapper,
-  QuizTestPageWrapper,
-  QuizResultsPageWrapper,
+  QuizLandingPage,
+  QuizPage,
+  QuizResultsPage,
   ProfilePageWrapper,
   HomePage,
   CompaniesPage,
@@ -25,11 +25,11 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AdminRoute from "./components/auth/AdminRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
-import SavedJobsPage from "./pages/jobs/savedJobsPage";
+import SavedJobsPageProfile from "./pages/profile/savedJobsPage";
 import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
-import { CompanyDetailsPageMinimal } from "./pages/company";
+import { CompanyDetailsPage } from "./pages/company";
 import { NotificationList } from "./components/notification/NotificationList";
 
 function App() {
@@ -87,14 +87,11 @@ function App() {
         element={<EmailVerificationPage />}
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/quiz" element={<QuizLandingPageWrapper />} />
-      <Route path="/quiz/test" element={<QuizTestPageWrapper />} />
-      <Route path="/quiz/results" element={<QuizResultsPageWrapper />} />
+      <Route path="/quiz" element={<QuizLandingPage />} />
+      <Route path="/quiz/test" element={<QuizPage />} />
+      <Route path="/quiz/results" element={<QuizResultsPage />} />
       <Route path="/companies" element={<CompaniesPage />} />
-      <Route
-        path="/companies/:companyId"
-        element={<CompanyDetailsPageMinimal />}
-      />
+      <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
       <Route path="/jobs" element={<JobsPage />} />
       <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
 
@@ -124,10 +121,10 @@ function App() {
         }
       />
       <Route
-        path="/jobs/saved"
+        path="/profile/saved-jobs"
         element={
           <ProtectedRoute>
-            <SavedJobsPage />
+            <SavedJobsPageProfile />
           </ProtectedRoute>
         }
       />

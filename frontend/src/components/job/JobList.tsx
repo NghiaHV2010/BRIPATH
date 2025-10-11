@@ -8,12 +8,21 @@ interface JobListProps {
 }
 
 export default function JobList({ onJobClick }: JobListProps = {}) {
-  const { jobs, isLoading } = useJobStore();
+  const { jobs, isLoading, saveJob, unsaveJob, checkIfSaved } = useJobStore();
+
+  const handleSaveJob = async (jobId: string) => {
+    const isSaved = checkIfSaved(jobId);
+    if (isSaved) {
+      await unsaveJob(jobId);
+    } else {
+      await saveJob(jobId);
+    }
+  };
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        {Array.from({ length: 6 }).map((_, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 16 }).map((_, index) => (
           <JobDetailSkeleton key={index} />
         ))}
       </div>
@@ -38,9 +47,16 @@ export default function JobList({ onJobClick }: JobListProps = {}) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {jobs.map((job) => (
-        <JobCard key={job.id} job={job} onClick={() => onJobClick?.(job.id)} />
+        <JobCard
+          key={job.id}
+          job={job}
+          onClick={() => onJobClick?.(job.id)}
+          onSave={() => handleSaveJob(job.id)}
+          compact={true}
+          isSaved={job.isSaved || false}
+        />
       ))}
     </div>
   );

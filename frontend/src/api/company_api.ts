@@ -6,8 +6,11 @@ import type { CompanyDetail, CompanySummary, CompanyField } from "@/types/compan
 export const getAllCompanies = async (
   page: number,
   userId?: string
-): Promise<CompanySummary[]> => {
-  const response = await axiosConfig.get<{ data: CompanySummary[] }>(
+): Promise<{ data: CompanySummary[]; totalPages: number }> => {
+  const response = await axiosConfig.get<{ 
+    data: CompanySummary[]; 
+    totalPages: number; 
+  }>(
     "/companies",
     {
       params: { 
@@ -16,7 +19,7 @@ export const getAllCompanies = async (
       },
     }
   );
-  return response.data.data;
+  return response.data;
 };
 
 // ========================
@@ -93,8 +96,8 @@ export const feedbackCV = async (
     });
 
     return response.data;
-  } catch (error: any) {
-     throw error.response.data; // Ném lỗi để xử lý ở nơi gọi hàm
+  } catch (error: unknown) {
+     throw error; // Ném lỗi để xử lý ở nơi gọi hàm
   }
 };
 

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
+import { navigateToJobs, navigateToCompanies } from "../../utils/navigation";
 import { useState } from "react";
 import {
   User as UserIcon,
@@ -77,23 +78,23 @@ export default function Navbar({ className = "" }: NavbarProps) {
               <NavigationMenuList className="space-x-2">
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link
-                      to="/jobs"
+                    <button
+                      onClick={() => navigateToJobs(navigate)}
                       className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                     >
                       Việc Làm
-                    </Link>
+                    </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link
-                      to="/companies"
+                    <button
+                      onClick={() => navigateToCompanies(navigate)}
                       className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                     >
                       Công Ty
-                    </Link>
+                    </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
@@ -274,20 +275,24 @@ export default function Navbar({ className = "" }: NavbarProps) {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 pt-4 pb-3">
             <div className="px-2 space-y-1">
-              <Link
-                to="/jobs"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateToJobs(navigate);
+                }}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
               >
                 Việc Làm
-              </Link>
-              <Link
-                to="/companies"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateToCompanies(navigate);
+                }}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
               >
                 Công Ty
-              </Link>
+              </button>
               <Link
                 to="/quiz"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"

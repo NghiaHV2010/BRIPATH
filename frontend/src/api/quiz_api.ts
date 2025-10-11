@@ -1,25 +1,34 @@
 import axiosConfig from "../config/axios.config";
 
 export const fetchQuestions = () =>
-  axiosConfig.get("/questions", { withCredentials: true })
+  axiosConfig.get("/questions")
     .then(res => res.data?.data ?? []);
 
 export const fetchAnswersByQuestion = (questionId: number) =>
-  axiosConfig.get(`/answers/${questionId}`, { withCredentials: true })
+  axiosConfig.get(`/answers/${questionId}`)
     .then(res => res.data?.data ?? []);
 
-export const submitQuiz = (questionId: number, answerId: number[]) =>
+export const answerQuiz = (questionId: number, answerId: number[]) =>
   axiosConfig.post("/answers",
     { question_id: questionId, answer_id: answerId },
-    { withCredentials: true }
   ).then(res => res.data?.data ?? {});
 
-  
-export const fetchSuitableJobCategories = async (): Promise<SuitableJobCategory[]> => {
-  const res = await axiosConfig.get('/finished', { withCredentials: true });
-  return res.data?.data ?? [];
-};
+  export const submitQuiz = () =>
+  axiosConfig.get("/question/finished")
+    .then(res => res.data?.data ?? {}); 
 
+export const createCPAPI = (
+  id: number,
+  jobSpecialized: string) =>
+axiosConfig.post("/careerpath", { id, jobSpecialized })
+  .then(res => res.data?.data ?? {});
+
+
+export const resetAnswer = async () => {
+  const res = await axiosConfig.delete("/question/restart");
+  console.log("dit me mayf");
+  return res.status; 
+};
 
 export interface QuizQuestion {
   id: number;

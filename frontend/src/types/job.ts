@@ -19,6 +19,12 @@ export interface Job {
   status?: string; 
   jobCategories?: JobCategory | null;
   jobLabels?: any | null; 
+  isSaved?: boolean; // Được frontend set từ savedJobs array
+  savedJobs?: Array<{
+    user_id: string;
+    job_id: string;
+    saved_at: string;
+  }>; // Array từ backend khi truyền userId
 }
 
 
@@ -51,7 +57,7 @@ export interface JobDetail extends Job {
       address_city?: string | null;
       address_country?: string | null;
     };
-    fields?: any;
+    fields?: { field_name: string } | null;
   };
 }
 

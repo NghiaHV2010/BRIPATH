@@ -6,6 +6,7 @@ interface CompanyStore {
   companies: CompanySummary[];              
   filteredCompanies: CompanySummary[];      // Danh sách kết quả tìm kiếm
   companyDetail: CompanyDetail | null;
+  totalPages: number;
   isLoading: boolean;
 
   fetchCompanies: (page: number, userId?: string) => Promise<void>;
@@ -24,14 +25,15 @@ export const useCompanyStore = create<CompanyStore>((set) => ({
   companies: [],
   filteredCompanies: [], // thêm state này
   companyDetail: null,
+  totalPages: 1,
   isLoading: false,
 
   // Fetch all companies
   fetchCompanies: async (page, userId) => {
     set({ isLoading: true });
     try {
-      const data = await getAllCompanies(page, userId);
-      set({ companies: data });
+      const response = await getAllCompanies(page, userId);
+      set({ companies: response.data, totalPages: response.totalPages });
     } finally {
       set({ isLoading: false });
     }

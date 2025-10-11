@@ -134,3 +134,31 @@ export const fetchJobLabels = async (): Promise<JobLabel[]> => {
     throw error;
   }
 };
+
+
+export const saveJobApi = async (
+  jobId: string
+): Promise<{ success: boolean; message: string, data?: any | null }> => {
+  try {
+    const response = await axiosConfig.get(`/save-job/${jobId}`);
+    console.log("Saved job:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error saving job:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// API để lấy danh sách job IDs đã save
+export const getSavedJobIds = async (): Promise<{ success: boolean; data: string[] }> => {
+  try {
+    const response = await axiosConfig.get('/saved-jobs');
+    console.log("Fetched saved job IDs:", response.data);
+    // Giả sử backend trả về array jobs, extract IDs
+    const jobIds = response.data?.data?.map((job: any) => job.id) || [];
+    return { success: true, data: jobIds };
+  } catch (error: any) {
+    console.error("Error fetching saved job IDs:", error.response?.data || error.message);
+    return { success: false, data: [] };
+  }
+};
