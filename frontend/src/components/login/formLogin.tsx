@@ -37,7 +37,7 @@ export default function FormLogin() {
       setTimeout(() => {
         const currentUser = useAuthStore.getState().authUser;
         console.log("Current user after login:", currentUser); // Debug log
-        if (currentUser?.role === "Admin") {
+        if (currentUser?.roles.role_name === "Admin") {
           console.log("Redirecting to admin dashboard"); // Debug log
           navigate(redirectTo || "/admin", { replace: true });
         } else {

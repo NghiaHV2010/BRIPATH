@@ -7,10 +7,8 @@ import { MessageCircle, X, Send, MoreVertical, BotMessageSquare } from 'lucide-r
 import type { ChatMessage } from '../../types/chatbot';
 import { ChatBubble } from './ChatBubble';
 import { getAllChatMessages, sendMessageToChatbot } from '@/api';
-import { useAuthStore } from '@/store';
 
 export function ChatPopup() {
-    const authUser = useAuthStore((s) => s.authUser);
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputMessage, setInputMessage] = useState('');
@@ -93,7 +91,7 @@ export function ChatPopup() {
 
     return (
         <>
-            {authUser?.roles.role_name !== "Admin" && isOpen && (
+            {isOpen && (
                 <Card className="fixed bottom-24 right-6 w-96 h-[600px] shadow-2xl border-gray-200 flex flex-col z-50">
                     <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
                         <div className="flex items-center gap-3">

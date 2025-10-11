@@ -17,7 +17,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
         replace: true,
         state: { redirectTo: "/admin" },
       });
-    } else if (!isChecking && authUser && authUser.role !== "Admin") {
+    } else if (!isChecking && authUser && authUser.roles.role_name !== "Admin") {
       // Check if user is Admin
       navigate("/", { replace: true });
     }

@@ -134,6 +134,7 @@ export const CAREERPATHPROMPT = `You are a data generation assistant that create
         ## Objective:
         Generate a JSON dataset representing a complete career path for a given career title.  
         Each career path consists of multiple smaller steps describing the learning or development stages required to succeed in that career.
+        Return value in Vietnamese language.
 
         ## JSON Schema
         You must strictly follow this JSON format:

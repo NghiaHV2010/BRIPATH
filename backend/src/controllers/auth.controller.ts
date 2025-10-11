@@ -208,7 +208,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
                 username: result.username,
                 email: result.email,
                 avatar_url: result.avatar_url,
-                role: result.roles.role_name
+                roles: {
+                    role_name: result.roles.role_name
+                }
             }
         });
     } catch (error) {
@@ -229,7 +231,7 @@ export const logout = async (req: Request, res: Response) => {
                 const jwt = require('jsonwebtoken');
                 const { ACCESS_SECRET } = require('../config/env.config');
                 const decoded = jwt.verify(accessToken, ACCESS_SECRET);
-                
+
                 if (decoded && decoded.userId) {
                     await prisma.userActivitiesHistory.create({
                         data: {
@@ -252,7 +254,7 @@ export const logout = async (req: Request, res: Response) => {
         // Even if there's an error, we should still clear cookies
         res.cookie("accessToken", '', { maxAge: 0 });
         res.cookie("refreshToken", '', { maxAge: 0 });
-        
+
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             message: "Đăng xuất thành công!"

@@ -9,7 +9,7 @@ export interface AuthUser {
 	id: string;
 	username: string;
 	email: string;
-	avatar?: string | null; 
+	avatar?: string | null;
 	avatar_url?: string | null;
 	phone?: string | null;
 	address_street?: string | null;
@@ -139,17 +139,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 	// Helper methods for role checking
 	isCompany: () => {
 		const { authUser } = get();
-		return authUser?.role === "Company";
+		return authUser?.roles.role_name === "Company";
 	},
 
 	isCandidate: () => {
 		const { authUser } = get();
-		return authUser?.role === "Candidate";
+		return authUser?.roles.role_name === "Candidate";
 	},
 
 	isAdmin: () => {
 		const { authUser } = get();
-		return authUser?.role === "Admin";
+		return authUser?.roles.role_name === "Admin";
 	},
 
 	hasCompany: () => {

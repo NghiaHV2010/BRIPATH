@@ -8,7 +8,7 @@ interface AccountLayoutProps {
 
 export default function AccountLayout({ title, children }: AccountLayoutProps) {
   return (
-    <Layout className="!min-h-0" disableAutoScroll={true}>
+    <Layout className="!min-h-0">
       <div className="py-6 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {title && (
