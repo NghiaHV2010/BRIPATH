@@ -207,7 +207,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
                 id: result.id,
                 username: result.username,
                 email: result.email,
-                avatar: result.avatar_url,
+                avatar_url: result.avatar_url,
                 role: result.roles.role_name
             }
         });
@@ -217,22 +217,47 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 export const logout = async (req: Request, res: Response) => {
-    // @ts-ignore
-    const user_id = req.user as string;
-    res.cookie("accessToken", '', { maxAge: 0 });
-    res.cookie("refreshToken", '', { maxAge: 0 });
+    try {
+        // Clear cookies regardless of authentication status
+        res.cookie("accessToken", '', { maxAge: 0 });
+        res.cookie("refreshToken", '', { maxAge: 0 });
 
-    await prisma.userActivitiesHistory.create({
-        data: {
-            user_id,
-            activity_name: "Bạn đã đăng xuất khỏi hệ thống."
+        // Try to get user from token if available
+        const accessToken = req.cookies?.accessToken;
+        if (accessToken) {
+            try {
+                const jwt = require('jsonwebtoken');
+                const { ACCESS_SECRET } = require('../config/env.config');
+                const decoded = jwt.verify(accessToken, ACCESS_SECRET);
+                
+                if (decoded && decoded.userId) {
+                    await prisma.userActivitiesHistory.create({
+                        data: {
+                            user_id: decoded.userId,
+                            activity_name: "Bạn đã đăng xuất khỏi hệ thống."
+                        }
+                    });
+                }
+            } catch (tokenError) {
+                // Token is invalid, just continue with logout
+                console.log('Token invalid during logout, continuing...');
+            }
         }
-    })
 
-    return res.status(HTTP_SUCCESS.OK).json({
-        success: true,
-        message: "Đăng xuất thành công!"
-    });
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Đăng xuất thành công!"
+        });
+    } catch (error) {
+        // Even if there's an error, we should still clear cookies
+        res.cookie("accessToken", '', { maxAge: 0 });
+        res.cookie("refreshToken", '', { maxAge: 0 });
+        
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Đăng xuất thành công!"
+        });
+    }
 }
 
 export const checkAuth = (req: Request, res: Response) => {

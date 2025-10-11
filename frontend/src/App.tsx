@@ -30,6 +30,7 @@ import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
 import { CompanyDetailsPageMinimal } from "./pages/company";
+import Layout from "./components/layout/layout";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -62,7 +63,11 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={
+        <Layout showFooter={false}>
+          <HomePage />
+        </Layout>
+      } />
       <Route
         path="/login"
         element={
