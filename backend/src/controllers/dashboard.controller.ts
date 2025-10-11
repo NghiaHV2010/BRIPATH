@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { PrismaClient } from '../generated/prisma';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { createNotificationData } from '../utils';
@@ -701,6 +701,163 @@ export const createCompanyLabel = async (req: Request, res: Response, next: Next
         return res.status(HTTP_SUCCESS.CREATED).json({
             data: created
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createBlogPost = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user?.id;
+    const { title, cover_image_url, description_url }: { title: string; cover_image_url: string; description_url: string } = req.body;
+
+    if (!title || !cover_image_url || !description_url) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng điền đầy đủ thông tin"));
+    }
+
+    if (title.length < 10 || title.length > 255) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Tiêu đề phải từ 10 đến 255 ký tự"));
+    }
+
+    if (!description_url.includes('http')) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Nội dung không hợp lệ"));
+    }
+
+    if (!cover_image_url.includes('http')) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Ảnh bìa không hợp lệ"));
+    }
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const blogPost = await tx.blogs.create({
+                data: {
+                    title,
+                    cover_image_url,
+                    description_url,
+                    user_id
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn đã tạo bài viết mới trên hệ thống \n ${title} #${blogPost.id}`,
+                }
+            });
+
+            return blogPost;
+        });
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateBlogPost = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user?.id;
+    const blogId = parseInt(req.params.blogId as string);
+    const { title, cover_image_url, description_url }: { title: string; cover_image_url: string; description_url: string } = req.body;
+
+    if (isNaN(blogId)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "blogId không hợp lệ"));
+    }
+
+    if (!title || !cover_image_url || !description_url) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng điền đầy đủ thông tin"));
+    }
+
+    if (title.length < 10 || title.length > 255) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Tiêu đề phải từ 10 đến 255 ký tự"));
+    }
+
+    if (!description_url.includes('http')) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Nội dung không hợp lệ"));
+    }
+
+    if (!cover_image_url.includes('http')) {
+        return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "Ảnh bìa không hợp lệ"));
+    }
+
+    try {
+        const isBlogsExisted = await prisma.blogs.findFirst({
+            where: {
+                id: blogId
+            }
+        });
+
+        if (!isBlogsExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Bài viết không tồn tại"));
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+            const blogPost = await tx.blogs.update({
+                where: { id: blogId },
+                data: {
+                    title,
+                    cover_image_url,
+                    description_url,
+                    user_id
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn đã cập nhật bài viết \n ${title} #${blogPost.id}`,
+                }
+            });
+
+            return blogPost;
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const deleteBlogPost = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user?.id;
+    const blogId = parseInt(req.params.blogId as string);
+
+    if (isNaN(blogId)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "blogId không hợp lệ"));
+    }
+
+    try {
+        const isBlogsExisted = await prisma.blogs.findFirst({
+            where: {
+                id: blogId
+            }
+        });
+
+        if (!isBlogsExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Bài viết không tồn tại"));
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.blogs.delete({
+                where: { id: blogId }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id,
+                    activity_name: `Bạn đã xóa bài viết \n ${isBlogsExisted.title} #${blogId}`,
+                }
+            });
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({ success: true, message: 'Xóa bài viết thành công' });
     } catch (error) {
         next(error);
     }

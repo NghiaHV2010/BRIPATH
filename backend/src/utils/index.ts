@@ -149,6 +149,10 @@ export const createNotificationData = (
                     notification.title = 'Gói đăng tuyển đã bị hủy';
                     notification.content = `Gói ${title} của bạn đã bị hủy, liên hệ quản trị viên để biết thêm chi tiết.`;
                     break;
+                default:
+                    notification.title = `Gói ${title} sắp hết hạn.`;
+                    notification.content = `Gói ${title} sẽ ngừng hoạt động vào ngày ${feedback}. Vui lòng gia hạn để tiếp tục sử dụng.`;
+                    break;
             }
             break;
 

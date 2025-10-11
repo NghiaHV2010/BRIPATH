@@ -3,6 +3,7 @@ import { PrismaClient } from "../generated/prisma";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
+import { createNotificationData } from "../utils";
 
 const prisma = new PrismaClient();
 const numberOfJobs = 16;
@@ -337,7 +338,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
     }
 
     //@ts-ignore
-    const { company_id } = req.user;
+    const { id, username, company_id } = req.user;
 
     const {
         job_title,
@@ -394,47 +395,91 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
     }
 
     try {
-        const jobCategory = await prisma.jobCategories.findUnique({
+        const isJobCategoryExisted = await prisma.jobCategories.findUnique({
             where: {
                 job_category: category
             }
         });
 
-        if (!jobCategory) {
+        if (!isJobCategoryExisted) {
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Danh mục công việc không tồn tại!"));
         }
 
-        const job = await prisma.jobs.create({
-            data: {
-                job_title,
-                description,
-                location,
-                benefit,
-                working_time,
-                salary,
-                currency,
-                job_type,
-                status,
-                job_level,
-                quantity,
-                skill_tags,
-                education,
-                experience,
-                start_date,
-                end_date,
-                company_id,
-                jobCategory_id: jobCategory.id
+        const result = await prisma.$transaction(async (tx) => {
+            const job = await tx.jobs.create({
+                data: {
+                    job_title,
+                    description,
+                    location,
+                    benefit,
+                    working_time,
+                    salary,
+                    currency,
+                    job_type,
+                    status,
+                    job_level,
+                    quantity,
+                    skill_tags,
+                    education,
+                    experience,
+                    start_date,
+                    end_date,
+                    company_id,
+                    jobCategory_id: isJobCategoryExisted.id
+                },
+                include: {
+                    jobCategories: {
+                        select: {
+                            job_category: true
+                        }
+                    }
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    activity_name: `Bạn đã tạo công việc ${job.job_title} #${job.id}`,
+                    user_id: id
+                }
+            });
+
+            const usersFollowed = await prisma.followedCompanies.findMany({
+                where: {
+                    company_id: company_id,
+                    is_notified: true,
+                },
+                select: {
+                    user_id: true,
+                }
+            });
+
+            if (usersFollowed.length > 0) {
+                const notificationData = createNotificationData(username, undefined, "followed", 'user');
+
+                const notifications = usersFollowed.map((user) => ({
+                    title: notificationData.title,
+                    content: notificationData.content,
+                    type: notificationData.type,
+                    user_id: user.user_id,
+                }));
+
+                await tx.userNotifications.createMany({
+                    data: notifications,
+                });
             }
+
+            return job;
         });
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
-            data: job
+            data: result
         })
     } catch (error) {
         next(error);
     }
 }
+
 export const updateJob = async (req: Request, res: Response, next: NextFunction) => {
     type RequestBody = {
         job_title: string,
