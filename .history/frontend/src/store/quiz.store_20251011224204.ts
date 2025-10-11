@@ -28,16 +28,12 @@ interface QuizState {
   isCompleted: boolean;
 
 
-//   interface CareerPath {
-//     id : number;
-//     title: string;
-//     description: string;
-//     resources : string;
-//     level : string;
-//     estimate_duration: string;
-//     user_id: number;
-
-// }
+  interface CareerPath {
+    id : number;
+    title: string;
+    description: string;
+    resources
+}
   
   // Actions
   loadQuestions: () => Promise<void>;
