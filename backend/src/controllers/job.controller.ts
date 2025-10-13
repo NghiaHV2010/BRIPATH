@@ -5,7 +5,9 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { createNotificationData } from "../utils";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+});
 const numberOfJobs = 16;
 
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
@@ -436,6 +438,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 }
             });
 
+            // Add embedding
+
             await tx.userActivitiesHistory.create({
                 data: {
                     activity_name: `Bạn đã tạo công việc ${job.job_title} #${job.id}`,
@@ -840,3 +844,94 @@ export const createMockCompany = async (req: Request, res: Response, next: NextF
         next(error);
     }
 }
+
+export const filterSuitableCVforJob = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { company_id } = req.user;
+    const jobId = req.params.jobId;
+
+    try {
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            }
+        });
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        // Lấy ra tất cả các cv đã ứng tuyển mà phù hợp với job nhất
+        const suitableCVs = await prisma.$queryRaw`
+            SELECT 
+                c.id,
+                c.fullname,
+                a.status,
+                1 - (c.embedding <=> j.embedding) AS score
+            FROM applicants a
+            INNER JOIN cvs c ON a.cv_id = c.id
+            CROSS JOIN (
+                SELECT embedding
+                FROM jobs
+                WHERE id = ${jobId}
+            ) AS j
+            WHERE a.job_id = ${jobId} AND a.status = 'Đang chờ'
+            ORDER BY score DESC
+            LIMIT 10;
+        `;
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: suitableCVs
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllSuitableCVs = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { company_id } = req.user;
+    const jobId = req.params.jobId;
+
+    try {
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            }
+        });
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        // Lấy ra tất cả các cv bên ngoài phạm vi đã ứng tuyển mà phù hợp với job nhất
+        const suitableCVs = await prisma.$queryRaw`
+            SELECT 
+                c.id,
+                c.fullname,
+                1 - (c.embedding <=> j.embedding) AS score
+            FROM cvs c
+            CROSS JOIN (
+                SELECT embedding 
+                FROM jobs 
+                WHERE id = ${jobId}
+            ) AS j
+            WHERE c.id NOT IN (
+                SELECT a.cv_id 
+                FROM applicants a 
+                WHERE a.job_id = ${jobId}
+            )
+            ORDER BY score DESC
+            LIMIT 5;
+        `;
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: suitableCVs
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+

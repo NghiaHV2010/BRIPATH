@@ -2,6 +2,7 @@ import type { AuthUser } from "@/store/auth";
 import axiosConfig from "@/config/axios.config";
 import type { NotificationResponse } from "@/types/notification";
 import type { ChatResponse } from "@/types/chatbot";
+import type { ActivityResponse } from "@/types/activity";
 
 export const fetchCurrentUserProfile = async (): Promise<AuthUser | null> => {
   const response = await axiosConfig.get("/check", {
@@ -70,4 +71,12 @@ export const sendMessageToChatbot = async (message: string): Promise<Boolean> =>
   }
 
   return true;
+}
+
+export const getAllActivities = async (page: number): Promise<ActivityResponse | null> => {
+  const response = await axiosConfig.get(`/user/history?page=${page}`);
+  if (response.status !== 200) {
+    return null;
+  }
+  return response.data;
 }

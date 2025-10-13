@@ -29,7 +29,7 @@ userRouter.put('/user/profile', updateUserProfile);
 userRouter.get('/user/notification', getUserNotification);
 userRouter.put('/user/notification', updateUserNotification);
 
-userRouter.put('/user/history', getUserActivityHistory);
+userRouter.get('/user/history', getUserActivityHistory);
 
 userRouter.get('/test', async (req, res) => {
     const openai = new OpenAI({

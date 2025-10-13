@@ -1,4 +1,5 @@
-import { formatDistanceToNow } from '@/utils';
+
+import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Check } from 'lucide-react';
 

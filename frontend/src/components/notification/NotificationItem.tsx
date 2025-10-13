@@ -1,7 +1,7 @@
 import { Badge } from '../ui/badge';
 import { Card } from '../ui/card';
 import type { Notification, NotificationType } from '../../types/notification';
-import { formatDistanceToNow } from '@/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 interface NotificationItemProps {
     notification: Notification;

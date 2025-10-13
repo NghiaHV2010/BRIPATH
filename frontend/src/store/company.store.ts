@@ -3,14 +3,14 @@ import type { CompanyDetail, CompanySummary } from "@/types/company";
 import { create } from "zustand";
 
 interface CompanyStore {
-  companies: CompanySummary[];              
+  companies: CompanySummary[];
   filteredCompanies: CompanySummary[];      // Danh sách kết quả tìm kiếm
   companyDetail: CompanyDetail | null;
   totalPages: number;
   isLoading: boolean;
 
   fetchCompanies: (page: number, userId?: string) => Promise<void>;
-  fetchCompanyDetail: (companyId: string, userId?: string) => Promise<void>;
+  fetchCompanyDetail: (companyId: string, userId?: string, page?: number) => Promise<void>;
   filterCompanies: (
     page: number,
     name?: string,
@@ -18,7 +18,7 @@ interface CompanyStore {
     field?: string,
     userId?: string
   ) => Promise<void>;
-  clearFilteredCompanies: () => void; 
+  clearFilteredCompanies: () => void;
 }
 
 export const useCompanyStore = create<CompanyStore>((set) => ({
@@ -40,11 +40,11 @@ export const useCompanyStore = create<CompanyStore>((set) => ({
   },
 
   // Fetch single company detail
-  fetchCompanyDetail: async (companyId, userId) => {
+  fetchCompanyDetail: async (companyId, userId, page = 1) => {
     set({ isLoading: true });
     try {
-      const data = await getCompanyDetails(companyId, userId);
-      set({ companyDetail: data });
+      const data = await getCompanyDetails(companyId, userId, page);
+      set({ companyDetail: data, totalPages: data.totalPages });
     } finally {
       set({ isLoading: false });
     }

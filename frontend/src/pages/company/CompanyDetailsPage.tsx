@@ -1,5 +1,5 @@
 // Company Details Page - VPBank Inspired Design
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   MapPin,
@@ -8,7 +8,6 @@ import {
   Globe,
   Mail,
   Building2,
-  Award,
   Clock,
   DollarSign,
   Plus,
@@ -16,6 +15,10 @@ import {
   Calendar,
   Copy,
   ArrowLeft,
+  CircleChevronDown,
+  UserRoundCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
@@ -24,12 +27,16 @@ import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { useCompanyStore } from "../../store/company.store";
 import { CompanyDetailSkeleton } from "../../components/company";
+import CompanyMap from "@/components/utils/CompanyMap";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPages] = useState(1);
   const navigate = useNavigate();
   const location = useLocation();
-  const { companyDetail, isLoading, fetchCompanyDetail } = useCompanyStore();
+  const { companyDetail, isLoading, fetchCompanyDetail, totalPages } = useCompanyStore();
+  const companyDetailData = companyDetail?.data;
 
   // Get navigation state from previous page
   const navigationState = location.state as {
@@ -39,9 +46,10 @@ export default function CompanyDetailsPage() {
 
   useEffect(() => {
     if (companyId) {
-      fetchCompanyDetail(companyId);
+      fetchCompanyDetail(companyId, undefined, currentPage);
+      setTotalPages(totalPages)
     }
-  }, [companyId, fetchCompanyDetail]);
+  }, [companyId, currentPage, fetchCompanyDetail]);
 
   // Restore scroll position when returning from job detail
   useEffect(() => {
@@ -54,6 +62,18 @@ export default function CompanyDetailsPage() {
       }, 100);
     }
   }, [navigationState]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
 
   const handleJobClick = (jobId: string) => {
     // Save current state before navigating to job detail
@@ -80,7 +100,7 @@ export default function CompanyDetailsPage() {
     );
   }
 
-  const { users, description, employees, jobs, _count } = companyDetail;
+  const { users, description, employees, jobs, _count } = companyDetailData || {};
 
   return (
     <Layout>
@@ -88,16 +108,7 @@ export default function CompanyDetailsPage() {
         {/* Navigation Breadcrumb */}
         <div className="bg-white border-b sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Link to="/" className="hover:text-blue-600 transition-colors">
-                  Danh sách Công ty
-                </Link>
-                <span className="text-slate-400">›</span>
-                <span className="text-slate-900 font-medium">
-                  {users?.username || "Company"}
-                </span>
-              </div>
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
@@ -108,14 +119,16 @@ export default function CompanyDetailsPage() {
                   <ArrowLeft className="w-4 h-4" />
                   Quay lại
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Theo dõi công ty
-                </Button>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Link to="/" className="hover:text-blue-600 transition-colors">
+                  Danh sách Công ty
+                </Link>
+                <span className="text-slate-400">›</span>
+                <span className="text-slate-900 font-medium">
+                  {users?.username || "Company"}
+                </span>
               </div>
             </div>
           </div>
@@ -133,33 +146,45 @@ export default function CompanyDetailsPage() {
           <div className="relative max-w-7xl mx-auto px-4 py-20">
             <div className="flex flex-col lg:flex-row items-start gap-8">
               {/* Company Logo */}
-              <div className="w-36 h-36 bg-white rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl flex-shrink-0">
-                {users?.avatar_url ? (
-                  <img
-                    src={users.avatar_url}
-                    alt={users.username}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                    <Building2 className="w-16 h-16 text-slate-400" />
-                  </div>
+              <div className="relative">
+                {companyDetailData?.is_verified && (
+                  <CircleChevronDown className="size-8 absolute -top-1 -right-2 text-white bg-cyan-400 rounded-full" />
                 )}
+                <div className="w-36 h-36 bg-white rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl flex-shrink-0">
+
+                  {users?.avatar_url ? (
+                    <img
+                      src={users.avatar_url}
+                      alt={users.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                      <Building2 className="w-16 h-16 text-slate-400" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Company Info */}
               <div className="flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                <div className="flex flex-col flex-wrap sm:flex-row sm:items-center gap-4 mb-6">
                   <h1 className="text-5xl font-bold leading-tight">
                     {users?.username || "Company Name"}
                   </h1>
-                  <div className="flex gap-2">
-                    <Badge className="bg-blue-500 text-white border-0 px-4 py-2 text-sm font-medium">
-                      Pro Company
-                    </Badge>
-                    <Badge className="bg-cyan-500 text-white border-0 px-4 py-2 text-sm font-medium">
-                      ✓ Verified
-                    </Badge>
+                  <div className="flex gap-4 items-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Theo dõi công ty
+                    </Button>
+                    <span className="flex items-center gap-2 text-sm text-blue-100">
+                      <UserRoundCheck className="size-4 text-blue-100" />
+                      <p>{companyDetailData?._count?.followedCompanies || 0} Người theo dõi</p>
+                    </span>
                   </div>
                 </div>
 
@@ -168,7 +193,7 @@ export default function CompanyDetailsPage() {
                   <p className="text-blue-100 text-xl mb-8 max-w-4xl leading-relaxed">
                     {description.split("\n")[0]?.trim() ||
                       description.substring(0, 200) +
-                        (description.length > 200 ? "..." : "")}
+                      (description.length > 200 ? "..." : "")}
                   </p>
                 )}
 
@@ -196,7 +221,7 @@ export default function CompanyDetailsPage() {
                     <div>
                       <div className="text-sm text-green-200">Tuyển dụng</div>
                       <div className="font-semibold">
-                        {jobs?.length || 0} vị trí
+                        {companyDetailData?._count?.jobs || 0} vị trí
                       </div>
                     </div>
                   </div>
@@ -242,19 +267,6 @@ export default function CompanyDetailsPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-blue-600 font-medium">
-                        Được theo dõi bởi
-                      </div>
-                      <div className="text-2xl font-bold text-blue-700">
-                        {_count?.followedCompanies || 0}+ người
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -264,7 +276,7 @@ export default function CompanyDetailsPage() {
                   <h2 className="text-3xl font-bold text-slate-900">
                     Vị trí tuyển dụng
                     <span className="ml-3 text-lg font-normal text-slate-500">
-                      ({jobs?.length || 0} vị trí)
+                      ({companyDetailData?._count?.jobs || 0} vị trí)
                     </span>
                   </h2>
                   <div className="flex items-center gap-3">
@@ -319,9 +331,8 @@ export default function CompanyDetailsPage() {
                                     <DollarSign className="w-4 h-4 text-slate-400" />
                                     <span className="text-sm font-medium">
                                       {job.salary && job.salary.length > 0
-                                        ? `${job.salary[0]} ${
-                                            job.currency || "VND"
-                                          }`
+                                        ? `${job.salary[0]} ${job.currency || "VND"
+                                        }`
                                         : "Thỏa thuận"}
                                     </span>
                                   </div>
@@ -361,6 +372,34 @@ export default function CompanyDetailsPage() {
                         </CardContent>
                       </Card>
                     ))}
+
+                    {totalPage > 1 && (
+                      <div className="flex items-center justify-center gap-4 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePreviousPage}
+                          disabled={currentPage === 1 || isLoading}
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-1" />
+                          Trước
+                        </Button>
+
+                        <span className="text-sm text-gray-600">
+                          Trang {currentPage} / {totalPages}
+                        </span>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages || isLoading}
+                        >
+                          Tiếp
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <Card className="bg-white shadow-lg border-0 rounded-2xl">
@@ -391,7 +430,7 @@ export default function CompanyDetailsPage() {
                   </h3>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
-                  {users?.email && (
+                  {/* {users?.email && (
                     <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <Mail className="w-5 h-5 text-blue-600" />
@@ -408,7 +447,7 @@ export default function CompanyDetailsPage() {
                         </a>
                       </div>
                     </div>
-                  )}
+                  )} */}
                   <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                       <Globe className="w-5 h-5 text-blue-600" />
@@ -431,7 +470,7 @@ export default function CompanyDetailsPage() {
               </Card>
 
               {/* Company Stats */}
-              <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg border-0 rounded-2xl overflow-hidden">
+              {/* <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg border-0 rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-bold mb-6">Thống kê công ty</h3>
                   <div className="space-y-4">
@@ -455,6 +494,14 @@ export default function CompanyDetailsPage() {
                     </div>
                   </div>
                 </CardContent>
+              </Card> */}
+
+              <Card className="bg-white shadow-lg border-0 rounded-2xl overflow-hidden">
+                <CompanyMap
+                  companyName="Test"
+                  lat={10.77611}
+                  lng={106.69583}
+                />
               </Card>
 
               {/* Share Company */}

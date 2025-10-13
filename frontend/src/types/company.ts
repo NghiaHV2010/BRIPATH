@@ -2,22 +2,12 @@
 // USER TYPE
 // ========================
 export interface CompInfor {
-  id?: string;
   username: string;
-  email?: string | null;
   avatar_url?: string | null;
-  phone?: string | null;
   address_street?: string | null;
   address_ward?: string | null;
   address_city?: string | null;
   address_country?: string | null;
-  gender?: string | null;
-  last_loggedIn?: string;
-  created_at?: string;
-  updated_at?: string;
-  role_id?: number;
-  phone_verified?: boolean;
-  company_id?: string | null;
 }
 
 // ========================
@@ -54,23 +44,26 @@ export interface CompanySummary {
 // COMPANY DETAIL TYPE
 // ========================
 export interface CompanyDetail {
-  id: string;
-  background_url?: string | null;
-  description?: string | null;
-  employees?: number | null;
-  users?: CompInfor | null;
-  _count?: {
-    followedCompanies?: number;
+  success: boolean;
+  data: {
+    id: string;
+    background_url?: string | null;
+    description?: string | null;
+    employees?: number | null;
+    users?: CompInfor | null;
+    _count?: {
+      followedCompanies?: number;
+      jobs?: number;
+    };
+    companyLabels?: any | null;
+    feedbacks?: any[];
+    is_verified?: boolean;
+    company_type?: string;
+    fields?: any | null;
+    jobs?: JobSummary[];
   };
-  companyLabels?: any | null;
-  feedbacks?: any[];
-  fields?: any | null;
-  jobs?: JobSummary[];
+  totalPages: number;
 }
-
-
-
-
 
 export interface CompanyField {
   id: number;

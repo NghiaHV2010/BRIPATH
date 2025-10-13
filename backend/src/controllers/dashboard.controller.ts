@@ -592,6 +592,13 @@ export const updateCompanyStatus = async (req: Request, res: Response, next: Nex
         }
 
         const result = await prisma.$transaction(async (tx) => {
+            const roleId = await tx.roles.findFirst({
+                where: {
+                    role_name: 'Company'
+                },
+                select: { id: true }
+            });
+
             const company = await tx.companies.update({
                 where: {
                     id: companyId,
@@ -599,7 +606,12 @@ export const updateCompanyStatus = async (req: Request, res: Response, next: Nex
                 },
                 data: {
                     status: status,
-                    approved_at: new Date()
+                    approved_at: new Date(),
+                    users: {
+                        update: {
+                            role_id: roleId?.id || 2 // default to 'Company' role if not found
+                        }
+                    }
                 },
                 include: {
                     users: {

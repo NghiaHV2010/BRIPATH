@@ -7,14 +7,14 @@ export const getAllCompanies = async (
   page: number,
   userId?: string
 ): Promise<{ data: CompanySummary[]; totalPages: number }> => {
-  const response = await axiosConfig.get<{ 
-    data: CompanySummary[]; 
-    totalPages: number; 
+  const response = await axiosConfig.get<{
+    data: CompanySummary[];
+    totalPages: number;
   }>(
     "/companies",
     {
-      params: { 
-        page, 
+      params: {
+        page,
         userId,
       },
     }
@@ -27,12 +27,13 @@ export const getAllCompanies = async (
 // ========================
 export const getCompanyDetails = async (
   companyId: string,
-  userId?: string
+  userId?: string,
+  page: number = 1
 ): Promise<CompanyDetail> => {
-  const response = await axiosConfig.get<{ data: CompanyDetail }>("/company", {
-    params: { companyId, userId },
+  const response = await axiosConfig.get<CompanyDetail>("/company", {
+    params: { companyId, userId, page },
   });
-  return response.data.data;
+  return response.data;
 };
 
 // ========================
@@ -48,7 +49,7 @@ export const apiFilterCompanies = async (
   const response = await axiosConfig.get<{ data: CompanySummary[] }>(
     "/filter-companies",
     {
-      params: { 
+      params: {
         page: page || '',
         name: name || '',
         location: location || '',
@@ -75,9 +76,9 @@ export const fetchFields = async (): Promise<CompanyField[]> => {
 // Feedback CV
 // ========================
 export const feedbackCV = async (
-  cvId: string,          
-  is_good: boolean,      
-  job_id: string         
+  cvId: string,
+  is_good: boolean,
+  job_id: string
 ): Promise<{
   success: boolean;
   data: {
@@ -97,7 +98,7 @@ export const feedbackCV = async (
 
     return response.data;
   } catch (error: unknown) {
-     throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
   }
 };
 

@@ -147,6 +147,7 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
             select: {
                 id: true,
                 company_type: true,
+                is_verified: true,
                 users: {
                     select: {
                         username: true,
@@ -192,12 +193,15 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 };
 
 export const getCompanyByID = async (req: Request, res: Response, next: NextFunction) => {
-    type RequestQuery = {
-        companyId: string,
-        userId?: string,
-    };
+    const companyId = req.query.companyId as string;
+    const userId = req.query.userId as string | undefined;
+    let page = parseInt(req.query.page as string);
 
-    const { companyId, userId }: RequestQuery = req.query as RequestQuery;
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trang không hợp lệ!"));
+    }
+
+    page -= 1;
 
     try {
         const company = await prisma.companies.findFirst({
@@ -210,6 +214,7 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                 background_url: true,
                 description: true,
                 employees: true,
+                is_verified: true,
                 users: {
                     select: {
                         username: true,
@@ -223,6 +228,7 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                 _count: {
                     select: {
                         followedCompanies: true,
+                        jobs: true
                     }
                 },
                 companyLabels: {
@@ -265,7 +271,9 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                                 job_category: true
                             }
                         }
-                    }
+                    },
+                    take: numberOfCompanies,
+                    skip: page * numberOfCompanies,
                 },
                 followedCompanies: userId ? {
                     select: {
@@ -280,7 +288,9 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
-            data: company
+            success: true,
+            data: company,
+            totalPages: company ? Math.ceil(company?._count.jobs / numberOfCompanies) : 0
         })
     } catch (error) {
         next(error);
@@ -352,6 +362,7 @@ export const getCompaniesByFilter = async (req: Request, res: Response, next: Ne
             select: {
                 id: true,
                 company_type: true,
+                is_verified: true,
                 users: {
                     select: {
                         username: true,

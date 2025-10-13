@@ -46,6 +46,11 @@ export default function ProfilePageWrapper() {
   const [formData, setFormData] = useState({
     username: user?.username || "",
     avatar_url: user?.avatar_url || null,
+    address_street: user?.address_street || "",
+    address_ward: user?.address_ward || "",
+    address_city: user?.address_city || "",
+    address_country: user?.address_country || "",
+    gender: user?.gender || "others",  //'male' | 'female' | 'others'
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -146,17 +151,28 @@ export default function ProfilePageWrapper() {
   const handleEdit = () => {
     setIsEditing(true);
     setFormData({
-      username: user.username || "",
-      avatar_url: user.avatar_url || null,
+      username: user?.username || "",
+      avatar_url: user?.avatar_url || null,
+      address_street: user?.address_street || "",
+      address_ward: user?.address_ward || "",
+      address_city: user?.address_city || "",
+      address_country: user?.address_country || "",
+      gender: user?.gender || "others",  //'male' | 'female' | 'others'
     });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setFormData({
-      username: user.username || "",
-      avatar_url: user.avatar_url || null,
+      username: user?.username || "",
+      avatar_url: user?.avatar_url || null,
+      address_street: user?.address_street || "",
+      address_ward: user?.address_ward || "",
+      address_city: user?.address_city || "",
+      address_country: user?.address_country || "",
+      gender: user?.gender || "others",  //'male' | 'female' | 'others'
     });
+
     setShowPasswordForm(false);
     setPasswordData({
       currentPassword: "",
@@ -440,10 +456,59 @@ export default function ProfilePageWrapper() {
                     <MapPin className="w-4 h-4" />
                     Địa chỉ
                   </Label>
-                  <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                    {address || "Chưa cập nhật"}
-                  </p>
-                  <p className="text-xs text-blue-500">Cập nhật từ CV</p>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex gap-2">
+                        <Input
+                          id="address_street"
+                          type="text"
+                          placeholder="Đường..."
+                          value={formData.address_street}
+                          onChange={(e) =>
+                            handleInputChange("address_street", e.target.value)
+                          }
+                          className="focus:ring-blue-500"
+                        />
+                        <Input
+                          id="address_ward"
+                          type="text"
+                          placeholder="Phường..."
+                          value={formData.address_ward}
+                          onChange={(e) =>
+                            handleInputChange("address_ward", e.target.value)
+                          }
+                          className="focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          id="address_city"
+                          type="text"
+                          placeholder="Thành phố..."
+                          value={formData.address_city}
+                          onChange={(e) =>
+                            handleInputChange("address_city", e.target.value)
+                          }
+                          className="focus:ring-blue-500"
+                        />
+                        <Input
+                          id="address_country"
+                          type="text"
+                          placeholder="Quốc gia..."
+                          value={formData.address_country}
+                          onChange={(e) =>
+                            handleInputChange("address_country", e.target.value)
+                          }
+                          className="focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  )
+                    : (
+                      <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
+                        {address || "Chưa cập nhật"}
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
@@ -690,7 +755,7 @@ export default function ProfilePageWrapper() {
                                     };
                                     setUploadError(
                                       error.response?.data?.message ||
-                                        "Upload thất bại"
+                                      "Upload thất bại"
                                     );
                                   } finally {
                                     setUploadLoading(false);
@@ -902,7 +967,7 @@ export default function ProfilePageWrapper() {
                                           };
                                           setUploadError(
                                             error.response?.data?.message ||
-                                              "Upload thất bại"
+                                            "Upload thất bại"
                                           );
                                         } finally {
                                           setUploadLoading(false);
@@ -1093,7 +1158,7 @@ export default function ProfilePageWrapper() {
                       ) : (
                         <p className="px-3 py-2 bg-gray-50 rounded-md border text-sm">
                           {Array.isArray(cvData.primary_skills) &&
-                          cvData.primary_skills.length > 0
+                            cvData.primary_skills.length > 0
                             ? cvData.primary_skills.join(", ")
                             : "Chưa cập nhật"}
                         </p>
@@ -1122,7 +1187,7 @@ export default function ProfilePageWrapper() {
                       ) : (
                         <p className="px-3 py-2 bg-gray-50 rounded-md border text-sm">
                           {Array.isArray(cvData.soft_skills) &&
-                          cvData.soft_skills.length > 0
+                            cvData.soft_skills.length > 0
                             ? cvData.soft_skills.join(", ")
                             : "Chưa cập nhật"}
                         </p>

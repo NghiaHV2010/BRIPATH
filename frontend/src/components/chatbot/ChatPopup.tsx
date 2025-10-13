@@ -92,7 +92,7 @@ export function ChatPopup() {
     return (
         <>
             {isOpen && (
-                <Card className="fixed bottom-24 right-6 w-96 h-[600px] shadow-2xl border-gray-200 flex flex-col z-50">
+                <Card className="fixed bottom-24 right-6 w-96 h-[600px] max-h-[80vh] shadow-2xl border-gray-200 flex flex-col z-50">
                     <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">

@@ -124,11 +124,11 @@ export function NotificationList() {
                                     disabled={currentPage === 1 || loading}
                                 >
                                     <ChevronLeft className="w-4 h-4 mr-1" />
-                                    Previous
+                                    Trước
                                 </Button>
 
                                 <span className="text-sm text-gray-600">
-                                    Page {currentPage} of {totalPages}
+                                    Trang {currentPage} / {totalPages}
                                 </span>
 
                                 <Button
@@ -137,7 +137,7 @@ export function NotificationList() {
                                     onClick={handleNextPage}
                                     disabled={currentPage === totalPages || loading}
                                 >
-                                    Next
+                                    Tiếp
                                     <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
                             </div>

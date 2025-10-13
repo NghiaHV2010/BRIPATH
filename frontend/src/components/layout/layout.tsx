@@ -25,7 +25,7 @@ export default function Layout({
       {showNavbar && <Navbar />}
       <main className={`${showNavbar ? "pt-16" : ""} relative`}>
         {children}
-        {authUser?.roles.role_name !== "Admin" && <ChatPopup />}
+        {authUser && authUser?.roles.role_name !== "Admin" && <ChatPopup />}
       </main>
       {showFooter && <Footer />}
     </div>

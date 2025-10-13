@@ -1,3 +1,4 @@
+import { ActivityHistory } from "@/components/activity/ActivityHistory";
 import Layout from "../../components/layout/layout";
 
 export default function SettingsPage() {
@@ -25,6 +26,7 @@ export default function SettingsPage() {
               </ul>
             </div>
           </div>
+          <ActivityHistory />
         </div>
       </div>
     </Layout>
