@@ -1,5 +1,3 @@
-import { educations } from './../../../backend/src/generated/prisma/index.d';
-
 export type JobCategory = {
   job_category: string;
 };
