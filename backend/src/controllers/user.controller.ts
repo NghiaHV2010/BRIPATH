@@ -966,6 +966,49 @@ export const getAllUserSavedJobs = async (req: Request, res: Response, next: Nex
         const savedJobs = await prisma.savedJobs.findMany({
             where: {
                 user_id
+            },
+            select: {
+                jobs: {
+                    select: {
+                        id: true,
+                        job_title: true,
+                        salary: true,
+                        currency: true,
+                        location: true,
+                        status: true,
+                        companies: {
+                            select: {
+                                users: {
+                                    select: {
+                                        avatar_url: true,
+                                    }
+                                }
+                            }
+                        },
+                        jobCategories: {
+                            select: {
+                                job_category: true
+                            }
+                        },
+                        jobLabels: {
+                            select: {
+                                label_name: true
+                            }
+                        },
+                        savedJobs: user_id ? {
+                            where: {
+                                user_id: user_id
+                            }
+                        } : false,
+                        applicants: user_id ? {
+                            where: {
+                                cvs: {
+                                    users_id: user_id
+                                }
+                            },
+                        } : false
+                    }
+                }
             }
         });
 

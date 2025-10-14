@@ -78,17 +78,17 @@ export default function CompanyManagement() {
     try {
       setLoading(true);
       const allCompanies = await fetchAllCompaniesAndCounts();
-      
+
       // Filter companies by status type
       const filteredCompanies = allCompanies.filter(company => company.status === statusType);
-      
+
       // Calculate pagination
       const totalItems = filteredCompanies.length;
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       const startIndex = (page - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
       const paginatedCompanies = filteredCompanies.slice(startIndex, endIndex);
-      
+
       setCompanies(paginatedCompanies);
       setTotalPages(totalPages);
       setCurrentPage(page);
@@ -191,7 +191,7 @@ export default function CompanyManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
+                {companies && loading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
                       <div className="flex items-center justify-center">
@@ -215,8 +215,8 @@ export default function CompanyManagement() {
                             <Building2 className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
-                            <p className="font-medium">{company.users.username}</p>
-                            <p className="text-sm text-gray-500">{company.users.email}</p>
+                            <p className="font-medium">{company.users?.username}</p>
+                            <p className="text-sm text-gray-500">{company.users?.email}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -256,8 +256,8 @@ export default function CompanyManagement() {
                           )}
                           <Dialog open={isModalOpen && selectedCompany?.id === company.id} onOpenChange={setIsModalOpen}>
                             <DialogTrigger asChild>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
                                 onClick={() => handleViewCompany(company)}
                                 className="flex items-center gap-2"
@@ -281,8 +281,8 @@ export default function CompanyManagement() {
                                       <Building2 className="h-8 w-8 text-white" />
                                     </div>
                                     <div className="flex-1">
-                                      <h3 className="text-xl font-semibold">{selectedCompany.users.username}</h3>
-                                      <p className="text-gray-600">{selectedCompany.users.email}</p>
+                                      <h3 className="text-xl font-semibold">{selectedCompany.users?.username}</h3>
+                                      <p className="text-gray-600">{selectedCompany.users?.email}</p>
                                       <div className="flex items-center gap-2 mt-2">
                                         <Building2 className="h-4 w-4 text-gray-500" />
                                         {getStatusBadge(selectedCompany.status)}
@@ -292,7 +292,7 @@ export default function CompanyManagement() {
 
                                   {/* Detailed Information Grid */}
                                   <div className="grid gap-4 md:grid-cols-2">
-                                    
+
                                     {/* Company Information */}
                                     <Card>
                                       <CardHeader>
@@ -465,7 +465,7 @@ export default function CompanyManagement() {
                   <ChevronLeft className="h-4 w-4" />
                   Trước
                 </Button>
-                
+
                 {/* Page numbers */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
@@ -478,7 +478,7 @@ export default function CompanyManagement() {
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -490,7 +490,7 @@ export default function CompanyManagement() {
                     </Button>
                   );
                 })}
-                
+
                 <Button
                   variant="outline"
                   size="sm"

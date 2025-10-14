@@ -38,7 +38,7 @@ app.use(`${middlePath}/zalopay`, zalopayRoutes);
 app.use(`${middlePath}/payments`, paymentRoutes);
 app.use(`${middlePath}/dashboard`, dashboardRoutes);
 
-app.use(testRouter);
+// app.use(testRouter);
 
 // App error middleware
 app.use(errorMiddleware);
