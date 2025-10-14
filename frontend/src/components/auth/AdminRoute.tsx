@@ -36,7 +36,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
   }
 
   // Don't render if not admin
-  if (!authUser || authUser.role !== "Admin") {
+  if (!authUser || authUser.roles?.role_name !== "Admin") {
     return null;
   }
 
