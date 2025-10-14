@@ -174,3 +174,16 @@ export const getSavedJobs = async (): Promise<{ success: boolean; data: any[] }>
     return { success: false, data: [] };
   }
 };
+
+export const unsaveJobApi = async (
+  jobId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axiosConfig.delete(`/save-job/${jobId}`);
+    console.log("Unsaved job:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error unsaving job:", error.response?.data || error.message);
+    throw error;
+  }
+};

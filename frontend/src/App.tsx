@@ -32,6 +32,7 @@ import { Loader } from "lucide-react";
 import { CompanyDetailsPage } from "./pages/company";
 import { NotificationList } from "./components/notification/NotificationList";
 import Layout from "./components/layout/layout";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -63,12 +64,13 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={
-        <Layout showFooter={false}>
-          <HomePage />
-        </Layout>
-      } />
+    <>
+      <Routes>
+        <Route path="/" element={
+          <Layout showFooter={false}>
+            <HomePage />
+          </Layout>
+        } />
       <Route
         path="/login"
         element={
@@ -174,8 +176,10 @@ function App() {
         }
       />
 
-      <Route path="*" element={<LoginPage />} />
-    </Routes>
+        <Route path="*" element={<LoginPage />} />
+      </Routes>
+      <Toaster />
+    </>
   );
 }
 
