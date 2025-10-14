@@ -126,7 +126,7 @@ function App() {
         }
       />
       <Route
-        path="/profile/saved-jobs"
+        path="/jobs/saved"
         element={
           <ProtectedRoute>
             <SavedJobsPageProfile />
