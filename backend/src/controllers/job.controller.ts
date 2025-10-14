@@ -4,6 +4,7 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { createNotificationData } from "../utils";
+import { embeddingData } from "../utils/cvHandler";
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
@@ -438,7 +439,17 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 }
             });
 
-            // Add embedding
+            const content = `
+            Tiêu đề: ${job_title}.
+            Kỹ năng: ${skill_tags?.toString()}.
+            Kinh nghiệm: ${experience}.
+            Học vấn: ${education}.
+            Mô tả: ${description}.
+            Địa chỉ: ${location}.
+            `;
+
+            const vector = await embeddingData(content);
+            await tx.$queryRaw`UPDATE jobs SET embedding=${vector} WHERE id=${job.id}`;
 
             await tx.userActivitiesHistory.create({
                 data: {

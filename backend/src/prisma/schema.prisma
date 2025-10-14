@@ -127,6 +127,8 @@ model companies {
   is_verified          Boolean             @default(false)
   fax_code             String?             @db.VarChar(10)
   status               ApplicantsStatus    @default(pending)
+  longitude            Float?              @db.DoublePrecision
+  latitude             Float?              @db.DoublePrecision
   approved_at          DateTime?
   field_id             Int?
   label_id             Int?

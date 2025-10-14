@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticationMiddleware } from "../middlewares/auth.middleware";
-import { applyEvent, applyJob, createMessage, feedbackCompany, feedbackJob, followCompany, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
+import { applyEvent, applyJob, createMessage, feedbackCompany, feedbackJob, followCompany, getAllUserFollowedCompanies, getAllUserSavedJobs, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
 import OpenAI from "openai";
 import { OPENAI_API_KEY } from "../config/env.config";
 import fs from "fs";
@@ -9,9 +9,11 @@ const userRouter = Router();
 userRouter.use(authenticationMiddleware);
 
 userRouter.get('/save-job/:jobId', saveJob);
+userRouter.get('/save-jobs', getAllUserSavedJobs);
 userRouter.delete('/save-job/:jobId', unsaveJob);
 
 userRouter.get('/follow-company/:companyId', followCompany);
+userRouter.get('/followed-companies', getAllUserFollowedCompanies);
 userRouter.delete('/follow-company/:companyId', unfollowCompany);
 
 userRouter.post('/feedback/company/:companyId', feedbackCompany);

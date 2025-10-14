@@ -697,7 +697,9 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
                             where: {
                                 is_read: false
                             }
-                        }
+                        },
+                        followedCompanies: true,
+                        savedJobs: true,
                     }
                 }
             },
@@ -815,6 +817,8 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
                     role_id: true
                 }
             });
+
+
 
             await tx.userActivitiesHistory.create({
                 data: {
@@ -948,6 +952,46 @@ export const getUserActivityHistory = async (req: Request, res: Response, next: 
             success: true,
             data: activities,
             totalPages: Math.ceil(totalActivities / numberOfActivities)
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllUserSavedJobs = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+
+    try {
+        const savedJobs = await prisma.savedJobs.findMany({
+            where: {
+                user_id
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: savedJobs
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllUserFollowedCompanies = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+
+    try {
+        const followedCompanies = await prisma.followedCompanies.findMany({
+            where: {
+                user_id
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: followedCompanies
         });
     } catch (error) {
         next(error);
