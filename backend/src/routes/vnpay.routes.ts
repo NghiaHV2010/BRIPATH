@@ -76,15 +76,55 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                         userId = mapping?.user_id;
                     }
                     if (userId) {
-                        await prisma.payments.create({
-                            data: {
-                                amount: BigInt(amount),
-                                currency: 'VND',
-                                payment_gateway: PaymentGateway.Bank,
-                                payment_method: PaymentMethod.bank_card,
-                                transaction_id: txnRef,
-                                status: PaymentStatus.success,
-                                user_id: userId
+                        await prisma.$transaction(async (tx) => {
+                            const payment = await tx.payments.create({
+                                data: {
+                                    amount: BigInt(amount),
+                                    currency: 'VND',
+                                    payment_gateway: PaymentGateway.Bank,
+                                    payment_method: PaymentMethod.bank_card,
+                                    transaction_id: txnRef,
+                                    status: PaymentStatus.success,
+                                    user_id: userId!
+                                }
+                            });
+
+                            await tx.userNotifications.create({
+                                data: {
+                                    user_id: userId!,
+                                    title: 'Thanh toán thành công',
+                                    content: `Bạn đã thanh toán đơn hàng ${txnRef} thành công với số tiền ${(amount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                                    type: 'pricing_plan'
+                                }
+                            });
+
+                            const plan = await tx.membershipPlans.findFirst({
+                                where: { price: BigInt(amount) } // Default plan, adjust as needed
+                            });
+
+                            await tx.userActivitiesHistory.create({
+                                data: {
+                                    user_id: userId!,
+                                    activity_name: `Thanh toán gói ${plan?.plan_name} thành công`,
+                                }
+                            });
+
+
+                            if (plan) {
+                                await tx.subscriptions.create({
+                                    data: {
+                                        user_id: userId!,
+                                        amount_paid: BigInt(amount),
+                                        payment_id: payment.id,
+                                        plan_id: plan.id,
+                                        start_date: new Date(),
+                                        end_date: new Date(new Date().setMonth(new Date().getMonth() + plan.duration_months)), // 1 month duration
+                                        status: 'on_going',
+                                        remaining_urgent_jobs: plan.urgent_jobs_limit!,
+                                        remaining_quality_jobs: plan.quality_jobs_limit!,
+                                        remaining_total_jobs: plan.total_jobs_limit!
+                                    }
+                                });
                             }
                         });
                         vnpayOrderMapping.delete(txnRef);
@@ -170,15 +210,55 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
                         const dbMap = await getVnpOrderMapping(prisma, orderId);
                         if (dbMap) mapping = dbMap;
                     }
-                    await prisma.payments.create({
-                    data: {
-                        amount: BigInt(amount),
-                        currency: 'VND',
-                        payment_gateway: PaymentGateway.Bank,
-                        payment_method: PaymentMethod.bank_card,
-                            transaction_id: orderId,
-                            status: PaymentStatus.success,
-                            user_id: mapping?.user_id || 'unknown'
+                    await prisma.$transaction(async (tx) => {
+                        const payment = await tx.payments.create({
+                            data: {
+                                amount: BigInt(amount),
+                                currency: 'VND',
+                                payment_gateway: PaymentGateway.Bank,
+                                payment_method: PaymentMethod.bank_card,
+                                transaction_id: orderId,
+                                status: PaymentStatus.success,
+                                user_id: mapping?.user_id || 'unknown'
+                            }
+                        });
+
+                        await tx.userNotifications.create({
+                            data: {
+                                user_id: mapping?.user_id || 'unknown',
+                                title: 'Thanh toán thành công',
+                                content: `Bạn đã thanh toán đơn hàng ${orderId} thành công với số tiền ${(amount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                                type: 'pricing_plan'
+                            }
+                        });
+
+                        const plan = await tx.membershipPlans.findFirst({
+                            where: { price: BigInt(amount) } // Default plan, adjust as needed
+                        });
+
+                        await tx.userActivitiesHistory.create({
+                            data: {
+                                user_id: mapping?.user_id || 'unknown',
+                                activity_name: `Thanh toán gói ${plan?.plan_name} thành công`,
+                            }
+                        });
+
+
+                        if (plan) {
+                            await tx.subscriptions.create({
+                                data: {
+                                    user_id: mapping?.user_id || 'unknown',
+                                    amount_paid: BigInt(amount),
+                                    payment_id: payment.id,
+                                    plan_id: plan.id,
+                                    start_date: new Date(),
+                                    end_date: new Date(new Date().setMonth(new Date().getMonth() + plan.duration_months)), // 1 month duration
+                                    status: 'on_going',
+                                    remaining_urgent_jobs: plan.urgent_jobs_limit!,
+                                    remaining_quality_jobs: plan.quality_jobs_limit!,
+                                    remaining_total_jobs: plan.total_jobs_limit!
+                                }
+                            });
                         }
                     });
                     vnpayOrderMapping.delete(orderId);

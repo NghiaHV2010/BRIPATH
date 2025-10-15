@@ -65,15 +65,55 @@ zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async
                     let appUser: string | undefined;
                     const map = await getZaloOrderMapping(prisma, app_trans_id);
                     if (map) appUser = map.user_id;
-                    await prisma.payments.create({
-                        data: {
-                            amount: BigInt(amount),
-                            currency: 'VND',
-                            payment_gateway: PaymentGateway.ZaloPay,
-                            payment_method: PaymentMethod.e_wallet,
-                            transaction_id: transId,
-                            status: PaymentStatus.success,
-                            user_id: appUser || 'unknown'
+                    await prisma.$transaction(async (tx) => {
+                        const payment = await tx.payments.create({
+                            data: {
+                                amount: BigInt(amount),
+                                currency: 'VND',
+                                payment_gateway: PaymentGateway.ZaloPay,
+                                payment_method: PaymentMethod.e_wallet,
+                                transaction_id: transId,
+                                status: PaymentStatus.success,
+                                user_id: appUser || 'unknown'
+                            }
+                        });
+
+                        await tx.userNotifications.create({
+                            data: {
+                                user_id: appUser || 'unknown',
+                                title: 'Thanh toán thành công',
+                                content: `Bạn đã thanh toán đơn hàng ${transId} thành công với số tiền ${(amount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                                type: 'pricing_plan'
+                            }
+                        });
+
+                        const plan = await tx.membershipPlans.findFirst({
+                            where: { price: BigInt(amount) } // Default plan, adjust as needed
+                        });
+
+                        await tx.userActivitiesHistory.create({
+                            data: {
+                                user_id: appUser || 'unknown',
+                                activity_name: `Thanh toán gói ${plan?.plan_name} thành công`,
+                            }
+                        });
+
+
+                        if (plan) {
+                            await tx.subscriptions.create({
+                                data: {
+                                    user_id: appUser || 'unknown',
+                                    amount_paid: BigInt(amount),
+                                    payment_id: payment.id,
+                                    plan_id: plan.id,
+                                    start_date: new Date(),
+                                    end_date: new Date(new Date().setMonth(new Date().getMonth() + plan.duration_months)), // 1 month duration
+                                    status: 'on_going',
+                                    remaining_urgent_jobs: plan.urgent_jobs_limit!,
+                                    remaining_quality_jobs: plan.quality_jobs_limit!,
+                                    remaining_total_jobs: plan.total_jobs_limit!
+                                }
+                            });
                         }
                     });
                     await deleteZaloOrderMapping(prisma, app_trans_id);
@@ -127,16 +167,62 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                 }
                 const exists = await hasPaymentByTransactionId(prisma, transId);
                 if (!exists) {
-                    await prisma.payments.create({
-                        data: {
-                            amount: BigInt(amount),
-                            currency: 'VND',
-                            payment_gateway: PaymentGateway.ZaloPay,
-                            payment_method: PaymentMethod.e_wallet,
-                            transaction_id: transId,
-                            status: PaymentStatus.success,
-                            user_id: appUser || 'unknown'
+                    await prisma.$transaction(async (tx) => {
+                        const payment = await tx.payments.create({
+                            data: {
+                                amount: BigInt(amount),
+                                currency: 'VND',
+                                payment_gateway: PaymentGateway.ZaloPay,
+                                payment_method: PaymentMethod.e_wallet,
+                                transaction_id: transId,
+                                status: PaymentStatus.success,
+                                user_id: appUser || 'unknown'
+                            }
+                        });
+
+                        await tx.userNotifications.create({
+                            data: {
+                                user_id: appUser || 'unknown',
+                                title: 'Thanh toán thành công',
+                                content: `Bạn đã thanh toán đơn hàng ${transId} thành công với số tiền ${(amount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                                type: 'pricing_plan'
+                            }
+                        });
+
+                        const plan = await tx.membershipPlans.findFirst({
+                            where: { price: BigInt(amount) } // Check bang 
+                        });
+
+                        await tx.userActivitiesHistory.create({
+                            data: {
+                                user_id: appUser || 'unknown',
+                                activity_name: `Thanh toán gói ${plan?.plan_name} thành công`,
+                            }
+                        });
+
+
+                        if (plan) {
+                            await tx.subscriptions.create({
+                                data: {
+                                    user_id: appUser || 'unknown',
+                                    amount_paid: BigInt(amount),
+                                    payment_id: payment.id,
+                                    plan_id: plan.id,
+                                    start_date: new Date(),
+                                    end_date: new Date(new Date().setMonth(new Date().getMonth() + plan.duration_months)), // 1 month duration
+                                    status: 'on_going',
+                                    remaining_urgent_jobs: plan.urgent_jobs_limit!,
+                                    remaining_quality_jobs: plan.quality_jobs_limit!,
+                                    remaining_total_jobs: plan.total_jobs_limit!
+                                }
+                            });
                         }
+
+                        // await tx.companyTags.create({
+                        //     data: {
+
+                        //     }
+                        // })
                     });
                     if (dataJson.app_trans_id) {
                         await deleteZaloOrderMapping(prisma, dataJson.app_trans_id);
