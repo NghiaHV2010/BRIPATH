@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "../generated/prisma";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import bcrypt from "bcryptjs";
 import { createNotificationData } from "../utils";
 import { embeddingData } from "../utils/cvHandler";
 
@@ -357,10 +356,12 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         start_date: string,
         end_date?: string,
         category?: string,
+        label_type?: 'Việc gấp' | 'Việc chất' | 'Việc Hot',
     }
 
     //@ts-ignore
     const { id, username, company_id } = req.user;
+
 
     const {
         job_title,
@@ -380,6 +381,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         start_date,
         end_date,
         category,
+        label_type,
     } = req.body as RequestBody;
 
     if (!job_title) {
@@ -417,6 +419,28 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
     }
 
     try {
+        let isLabelExisted: { id: number, duration_days: number | null } | null = null;
+        let labelEndDate: Date | null = null;
+
+        if (label_type) {
+            isLabelExisted = await prisma.jobLabels.findUnique({
+                where: {
+                    label_name: label_type
+                },
+                select: {
+                    id: true,
+                    duration_days: true,
+                }
+            });
+
+            if (!isLabelExisted) {
+                return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Nhãn công việc không tồn tại!"));
+            }
+
+            labelEndDate = new Date();
+            labelEndDate.setDate(labelEndDate.getDate() + (isLabelExisted.duration_days || 1));
+        }
+
         const isJobCategoryExisted = await prisma.jobCategories.findUnique({
             where: {
                 job_category: category
@@ -447,7 +471,10 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                     start_date,
                     end_date,
                     company_id,
-                    jobCategory_id: isJobCategoryExisted.id
+                    jobCategory_id: isJobCategoryExisted.id,
+                    label_id: isLabelExisted ? isLabelExisted.id : null,
+                    label_start_at: isLabelExisted ? new Date() : null,
+                    label_end_at: isLabelExisted ? labelEndDate : null,
                 },
                 include: {
                     jobCategories: {
@@ -458,17 +485,18 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 }
             });
 
-            const content = `
-            Tiêu đề: ${job_title}.
-            Kỹ năng: ${skill_tags?.toString()}.
-            Kinh nghiệm: ${experience}.
-            Học vấn: ${education}.
-            Mô tả: ${description}.
-            Địa chỉ: ${location}.
-            `;
-
-            const vector = await embeddingData(content);
-            await tx.$queryRaw`UPDATE jobs SET embedding=${vector} WHERE id=${job.id}`;
+            await tx.subscriptions.update({
+                // @ts-ignore
+                where: { id: req.plan.id },
+                data: {
+                    ...(isLabelExisted && label_type === "Việc gấp" ?
+                        { remaining_urgent_jobs: { decrement: 1 } } :
+                        isLabelExisted && label_type === "Việc chất" &&
+                        { remaining_quality_jobs: { decrement: 1 } }
+                    ),
+                    remaining_total_jobs: { decrement: 1 }
+                },
+            });
 
             await tx.userActivitiesHistory.create({
                 data: {
@@ -477,7 +505,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 }
             });
 
-            const usersFollowed = await prisma.followedCompanies.findMany({
+            const usersFollowed = await tx.followedCompanies.findMany({
                 where: {
                     company_id: company_id,
                     is_notified: true,
@@ -501,6 +529,18 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                     data: notifications,
                 });
             }
+
+            const content = `
+                Tiêu đề: ${job_title}.
+                Kỹ năng: ${skill_tags?.toString()}.
+                Kinh nghiệm: ${experience}.
+                Học vấn: ${education}.
+                Mô tả: ${description}.
+                Địa chỉ: ${location}.
+            `;
+
+            const vector = await embeddingData(content);
+            await tx.$queryRaw`UPDATE jobs SET embedding=${vector} WHERE id=${job.id}`;
 
             return job;
         });
@@ -878,9 +918,15 @@ export const getAllJobLabels = async (req: Request, res: Response, next: NextFun
 export const filterSuitableCVforJob = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const { company_id } = req.user;
+    // @ts-ignore
+    const { ai_matchings } = req.plan;
     const jobId = req.params.jobId;
 
     try {
+        if (!ai_matchings) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
+        }
+
         const isJobExisted = await prisma.jobs.findFirst({
             where: {
                 id: jobId,
@@ -907,7 +953,7 @@ export const filterSuitableCVforJob = async (req: Request, res: Response, next: 
             ) AS j
             WHERE a.job_id = ${jobId} AND a.status = 'Đang chờ'
             ORDER BY score DESC
-            LIMIT 10;
+            LIMIT 20;
         `;
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -922,9 +968,15 @@ export const filterSuitableCVforJob = async (req: Request, res: Response, next: 
 export const getAllSuitableCVs = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const { company_id } = req.user;
+    // @ts-ignore
+    const { ai_matchings, ai_networking_limit } = req.plan;
     const jobId = req.params.jobId;
 
     try {
+        if (!ai_matchings) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
+        }
+
         const isJobExisted = await prisma.jobs.findFirst({
             where: {
                 id: jobId,
@@ -953,7 +1005,7 @@ export const getAllSuitableCVs = async (req: Request, res: Response, next: NextF
                 WHERE a.job_id = ${jobId}
             )
             ORDER BY score DESC
-            LIMIT 5;
+            LIMIT ${ai_networking_limit};
         `;
 
         return res.status(HTTP_SUCCESS.OK).json({

@@ -131,19 +131,27 @@ model companies {
   latitude             Float?              @db.DoublePrecision
   approved_at          DateTime?
   field_id             Int?
-  label_id             Int?
   fields               fields?             @relation(fields: [field_id], references: [id])
   users                users?
-  companyLabels        companyLabels?      @relation(fields: [label_id], references: [id])
   feedbacks            feedbacks[]
   followedCompanies    followedCompanies[]
   jobs                 jobs[]
+  companyTags          companyTags[]
 }
 
-model companyLabels {
-  id         Int         @id @default(autoincrement())
-  label_name String      @unique @db.VarChar(100)
-  companies  companies[]
+model companyTags {
+  company_id String
+  tag_id     Int
+  companies  companies @relation(fields: [company_id], references: [id])
+  tags       tags      @relation(fields: [tag_id], references: [id])
+
+  @@id([company_id, tag_id])
+}
+
+model tags {
+  id         Int           @id @default(autoincrement())
+  label_name String        @unique @db.VarChar(100)
+  companies  companyTags[]
 }
 
 model cvs {
@@ -247,9 +255,10 @@ model jobCategories {
 }
 
 model jobLabels {
-  id         Int    @id @default(autoincrement())
-  label_name String @unique @db.VarChar(50)
-  jobs       jobs[]
+  id            Int    @id @default(autoincrement())
+  label_name    String @unique @db.VarChar(50)
+  duration_days Int?
+  jobs          jobs[]
 }
 
 model jobSpecialized {
@@ -283,6 +292,8 @@ model jobs {
   end_date       DateTime?              @db.Date
   created_at     DateTime               @default(now())
   updated_at     DateTime               @updatedAt
+  label_start_at DateTime? // Ngày bắt đầu gắn nhãn
+  label_end_at   DateTime? // Ngày hết hạn nhãn
   jobCategory_id Int?
   label_id       Int?
   company_id     String
@@ -295,12 +306,23 @@ model jobs {
 }
 
 model membershipPlans {
-  id            Int             @id @default(autoincrement())
-  plan_name     String          @db.VarChar(50)
-  description   String?
-  price         BigInt
-  duration_days Int             @db.SmallInt
-  is_active     Boolean         @default(true)
+  id              Int     @id @default(autoincrement())
+  plan_name       String  @db.VarChar(50)
+  description     String?
+  price           BigInt
+  duration_months Int     @db.SmallInt
+  is_active       Boolean @default(true)
+
+  //Features
+  urgent_jobs_limit    Int?
+  quality_jobs_limit   Int?
+  total_jobs_limit     Int?
+  ai_matchings         Boolean? @default(false)
+  ai_networking_limit  Int?
+  verified_badge       Boolean? @default(false)
+  recommended_labels   Boolean? @default(false)
+  highlighted_hot_jobs Boolean? @default(false)
+
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
   features      features[]
@@ -386,18 +408,21 @@ model savedJobs {
 }
 
 model subscriptions {
-  id              String             @id @default(uuid())
-  start_date      DateTime           @default(now())
-  end_date        DateTime
-  amount_paid     BigInt
-  is_extended     Boolean            @default(false)
-  status          SubscriptionStatus @default(on_going)
-  user_id         String
-  plan_id         Int
-  payment_id      String             @unique
-  payments        payments           @relation(fields: [payment_id], references: [id])
-  membershipPlans membershipPlans    @relation(fields: [plan_id], references: [id])
-  users           users              @relation(fields: [user_id], references: [id])
+  id                     String             @id @default(uuid())
+  start_date             DateTime           @default(now())
+  end_date               DateTime
+  amount_paid            BigInt
+  remaining_urgent_jobs  Int                @default(0) // Việc gấp còn lại
+  remaining_quality_jobs Int                @default(0) // Việc chất còn lại
+  remaining_total_jobs   Int                @default(0) // Tổng việc còn lại
+  is_extended            Boolean            @default(false)
+  status                 SubscriptionStatus @default(on_going)
+  user_id                String
+  plan_id                Int
+  payment_id             String             @unique
+  payments               payments           @relation(fields: [payment_id], references: [id])
+  membershipPlans        membershipPlans    @relation(fields: [plan_id], references: [id])
+  users                  users              @relation(fields: [user_id], references: [id])
 }
 
 model userActivitiesHistory {

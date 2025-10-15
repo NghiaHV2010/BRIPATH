@@ -698,7 +698,7 @@ export const createCompanyLabel = async (req: Request, res: Response, next: Next
             return next(errorHandler(HTTP_ERROR.UNPROCESSABLE_ENTITY, "label_name must be at most 100 characters"));
         }
 
-        const existed = await prisma.companyLabels.findFirst({
+        const existed = await prisma.tags.findFirst({
             where: { label_name: name }
         });
 
@@ -706,7 +706,7 @@ export const createCompanyLabel = async (req: Request, res: Response, next: Next
             return next(errorHandler(HTTP_ERROR.CONFLICT, "Label already exists"));
         }
 
-        const created = await prisma.companyLabels.create({
+        const created = await prisma.tags.create({
             data: { label_name: name }
         });
 

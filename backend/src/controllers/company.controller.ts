@@ -158,9 +158,13 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
                         address_country: true,
                     }
                 },
-                companyLabels: {
+                companyTags: {
                     select: {
-                        label_name: true
+                        tags: {
+                            select: {
+                                label_name: true
+                            }
+                        }
                     }
                 },
                 fields: {
@@ -231,9 +235,13 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                         jobs: true
                     }
                 },
-                companyLabels: {
+                companyTags: {
                     select: {
-                        label_name: true
+                        tags: {
+                            select: {
+                                label_name: true
+                            }
+                        }
                     }
                 },
                 feedbacks: {
@@ -373,9 +381,13 @@ export const getCompaniesByFilter = async (req: Request, res: Response, next: Ne
                         address_country: true,
                     }
                 },
-                companyLabels: {
+                companyTags: {
                     select: {
-                        label_name: true
+                        tags: {
+                            select: {
+                                label_name: true
+                            }
+                        }
                     }
                 },
                 fields: {
@@ -595,7 +607,9 @@ export const getAllCompanyFields = async (req: Request, res: Response, next: Nex
 
 export const getAllCompanyLabel = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const fields = await prisma.companyLabels.findMany();
+        const fields = await prisma.tags.findMany({
+            select: { label_name: true }
+        });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,

@@ -110,6 +110,14 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
                 }
             });
 
+            await tx.subscriptions.update({
+                // @ts-ignore
+                where: { id: req.plan.id },
+                data: {
+                    remaining_total_jobs: { decrement: 1 },
+                }
+            });
+
             const notificationData = createNotificationData(event.title, undefined, "system", "user");
 
             await tx.userNotifications.create({

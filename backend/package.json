@@ -38,7 +38,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdf-parse": "^1.1.1",
-    "prisma": "^6.16.2"
+    "prisma": "^6.16.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -52,6 +53,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/pdf-parse": "^1.1.5",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.35.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",

@@ -1,12 +1,16 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import http from "http";
 import express from 'express';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute, cvRouter, vnpayRoutes, zalopayRoutes, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter } from './routes';
+import { authRoute, cvRouter, vnpayRoutes, zalopayRoutes, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter } from './routes';
 import passport from './config/passport.config';
 import { FRONTEND_URL, PORT } from './config/env.config';
 import fileUpload from "express-fileupload";
 import "./jobs/subscriptionReminder";
+import './jobs/subscriptionJob';
+import { setupWebSocket } from './libs/wsServer';
+
 import testRouter from './routes/test.routes';
 
 const app = express();
@@ -27,6 +31,7 @@ const middlePath = '/api';
 
 // App routes
 app.use(`${middlePath}`, authRoute);
+app.use(`${middlePath}`, pricingRouter);
 app.use(`${middlePath}`, companyRouter);
 app.use(`${middlePath}`, jobRouter);
 app.use(`${middlePath}`, eventRouter);
@@ -43,7 +48,12 @@ app.use(`${middlePath}/dashboard`, dashboardRoutes);
 // App error middleware
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on PORT: http://localhost:${PORT}`);
-})
+// 🧩 Tạo server HTTP để dùng chung với WebSocket
+const server = http.createServer(app);
 
+// 🧩 Gắn WebSocket server vào cùng cổng
+setupWebSocket(server);
+
+server.listen(PORT, () => {
+    console.log(`🚀 Server (HTTP + WS) chạy tại: http://localhost:${PORT}`);
+});
