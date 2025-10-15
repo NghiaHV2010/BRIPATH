@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 
 zaloPayRouter.post('/create-order', validateCreateOrderRequest, async (req: Request, res: Response) => {
     try {
-        const { app_user, amount, description, item, bank_code, embed_data } = req.body as { app_user: string; amount: number; description: string; item: string; bank_code?: string; embed_data?: string };
+        const { app_user, amount, description, item, bank_code, embed_data, plan_id, company_id } = req.body as { app_user: string; amount: number; description: string; item: string; bank_code?: string; embed_data?: string; plan_id?: number; company_id?: string };
 
         const result = await ZaloPayService.createOrder({
             app_user,
@@ -30,7 +30,7 @@ zaloPayRouter.post('/create-order', validateCreateOrderRequest, async (req: Requ
         try {
             //@ts-ignore
             const authUserId = (req.user?.id as string | undefined) || String(app_user);
-            await saveZaloOrderMapping(prisma, result.app_trans_id as string, authUserId, Number(amount));
+            await saveZaloOrderMapping(prisma, result.app_trans_id as string, authUserId, Number(amount), Number(plan_id || 0), company_id);
         } catch (mapErr) {
             console.error('Save ZaloPay order mapping error:', mapErr);
         }
@@ -116,6 +116,9 @@ zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async
                             });
                         }
                     });
+                    await deleteZaloOrderMapping(prisma, app_trans_id);
+                } else {
+                    // Already persisted earlier; cleanup mapping just in case
                     await deleteZaloOrderMapping(prisma, app_trans_id);
                 }
             }
@@ -224,6 +227,10 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                         //     }
                         // })
                     });
+                    if (dataJson.app_trans_id) {
+                        await deleteZaloOrderMapping(prisma, dataJson.app_trans_id);
+                    }
+                } else {
                     if (dataJson.app_trans_id) {
                         await deleteZaloOrderMapping(prisma, dataJson.app_trans_id);
                     }

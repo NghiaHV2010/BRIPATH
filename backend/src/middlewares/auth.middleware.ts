@@ -13,6 +13,12 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
     let userId: string;
 
     try {
+        // Bypass auth for payment gateways (server-to-server callbacks/returns)
+        const url = (req.originalUrl || req.url || '').toLowerCase();
+        if (url.startsWith('/api/vnpay') || url.startsWith('/api/zalopay')) {
+            return next();
+        }
+
         const accessToken: string = req.cookies?.accessToken;
 
         if (!accessToken) {

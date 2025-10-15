@@ -130,6 +130,10 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                         vnpayOrderMapping.delete(txnRef);
                         await deleteVnpOrderMapping(prisma, txnRef);
                     }
+                } else {
+                    // Payment already persisted earlier (via IPN/Return). Cleanup mapping to avoid leaks.
+                    vnpayOrderMapping.delete(txnRef);
+                    await deleteVnpOrderMapping(prisma, txnRef);
                 }
             } catch (err) {
                 console.error('Failed to save VNPay payment (return):', err);
