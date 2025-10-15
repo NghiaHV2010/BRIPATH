@@ -31,3 +31,8 @@ export const navigateToCompanies = (navigate: (path: string) => void) => {
   clearNavigationStates();
   navigate("/companies");
 };
+
+export const navigateToCareerPath = (navigate: (path: string) => void) => {
+  clearNavigationStates();
+  navigate("/quiz");
+};

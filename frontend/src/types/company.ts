@@ -1,3 +1,4 @@
+
 // ========================
 // USER TYPE
 // ========================
@@ -14,6 +15,11 @@ export interface CompInfor {
 // JOB TYPE (for CompanyDetail)
 // ========================
 export interface JobSummary {
+  _count?: {
+    applications?: number | 0;
+    savedJobs?: number | 0;
+    aiFeedbacks?: number | 0;
+  };
   id: string;
   job_title: string;
   status: string;
@@ -23,7 +29,6 @@ export interface JobSummary {
   jobCategories?: {
     job_category: string;
   };
-  jobLabels?: any | null;
 }
 
 // ========================
@@ -56,8 +61,8 @@ export interface CompanyDetail {
       followedCompanies?: number;
       jobs?: number;
     };
-    companyLabels?: any | null;
-    feedbacks?: any[];
+    companyTags?: any[] | null;
+    feedbacks?: any[] | null;
     is_verified?: boolean;
     company_type?: string;
     fields?: any | null;

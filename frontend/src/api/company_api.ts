@@ -5,7 +5,7 @@ import type { CompanyDetail, CompanySummary, CompanyField } from "@/types/compan
 // ========================
 export const getAllCompanies = async (
   page: number,
-  userId?: string
+  userId: string
 ): Promise<{ data: CompanySummary[]; totalPages: number }> => {
   const response = await axiosConfig.get<{
     data: CompanySummary[];
@@ -25,16 +25,23 @@ export const getAllCompanies = async (
 // ========================
 // Get company details by ID
 // ========================
+// 📁 src/api/company_api.ts
 export const getCompanyDetails = async (
+  userId: string,
   companyId: string,
-  userId?: string,
   page: number = 1
-): Promise<CompanyDetail> => {
-  const response = await axiosConfig.get<CompanyDetail>("/company", {
-    params: { companyId, userId, page },
+) => {
+  const res = await axiosConfig.get(`/company`, {
+    params: { userId, companyId, page },
   });
-  return response.data;
+
+  return {
+    success: res.data?.success ?? true,
+    data: res.data?.data ?? {},
+    totalPages: res.data?.totalPages ?? 1,
+  };
 };
+
 
 // ========================
 // Filter companies
@@ -102,3 +109,7 @@ export const feedbackCV = async (
   }
 };
 
+export const followCompany = async (companyId: string) => {
+  const res = await axiosConfig.get(`/follow-company/${companyId}`);
+  return res.data; // backend trả gì thì nhận nguyên
+};
