@@ -32,6 +32,7 @@ import { Loader } from "lucide-react";
 import { CompanyDetailsPage } from "./pages/company";
 import { NotificationList } from "./components/notification/NotificationList";
 import Layout from "./components/layout/layout";
+import CareerPathPage from "./pages/quiz/CareerPathPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -64,11 +65,14 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={
-        <Layout showFooter={false}>
-          <HomePage />
-        </Layout>
-      } />
+      <Route
+        path="/"
+        element={
+          <Layout showFooter={false}>
+            <HomePage />
+          </Layout>
+        }
+      />
       <Route
         path="/login"
         element={
@@ -88,13 +92,15 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       {/* <Route path="/sms" element={<VerifySMS />} /> */}
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/register/email/:token"
+      <Route
+        path="/register/email/:token"
         element={<EmailVerificationPage />}
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/quiz" element={<QuizLandingPage />} />
       <Route path="/quiz/test" element={<QuizPage />} />
       <Route path="/quiz/results" element={<QuizResultsPage />} />
+      <Route path="/quiz/career-path" element={<CareerPathPage />} />
       <Route path="/companies" element={<CompaniesPage />} />
       <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
       <Route path="/jobs" element={<JobsPage />} />
@@ -167,12 +173,7 @@ function App() {
         }
       />
 
-      <Route
-        path="/notifications"
-        element={
-          <NotificationList />
-        }
-      />
+      <Route path="/notifications" element={<NotificationList />} />
 
       <Route path="*" element={<LoginPage />} />
     </Routes>

@@ -1,11 +1,4 @@
-import {
-  MapPin,
-  Briefcase,
-  DollarSign,
-  Building2,
-  Clock,
-  Heart,
-} from "lucide-react";
+import { MapPin, Briefcase, DollarSign, Building2, Heart } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -17,7 +10,7 @@ interface JobCardProps {
   onSave?: () => void;
   onApply?: () => void;
   isSaved?: boolean;
-  compact?: boolean; // For carousel display
+  compact?: boolean;
 }
 
 export default function JobCard({
@@ -28,14 +21,12 @@ export default function JobCard({
   isSaved = false,
   compact = false,
 }: JobCardProps) {
-  // Format salary display
   const formatSalary = (salary?: string[], currency?: string) => {
     if (!salary || salary.length === 0) return "Competitive salary";
     const salaryRange = salary[0];
     return `${salaryRange} ${currency || "VND"}`;
   };
 
-  // Get job status display
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "on_going":
@@ -58,100 +49,93 @@ export default function JobCard({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click if clicking on buttons
-    if ((e.target as HTMLElement).closest("button")) {
-      return;
-    }
+    if ((e.target as HTMLElement).closest("button")) return;
     onClick?.();
   };
 
   return (
     <Card
-      className={`group cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1 border-gray-200 hover:border-blue-300 overflow-hidden ${
-        compact ? "h-full" : ""
-      }`}
       onClick={handleCardClick}
+      className="group cursor-pointer transition-all duration-300
+      hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1
+      border border-gray-200 hover:border-blue-300
+      w-full h-full flex flex-col justify-between
+      rounded-2xl bg-white overflow-hidden"
     >
-      <CardContent className={compact ? "p-4" : "p-6"}>
-        {/* Job Title */}
-        <div className="flex justify-between items-start mb-3">
-          <h3
-            className={`${
-              compact ? "text-base" : "text-lg"
-            } font-semibold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 flex-1 mr-2`}
-          >
-            {job.job_title}
-          </h3>
-          {/* Heart Icon - Always visible */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSave?.();
-            }}
-            className={`p-1 h-8 w-8 flex-shrink-0 border-0 hover:bg-red-50 transition-colors ${
-              compact
-                ? "opacity-80 group-hover:opacity-100"
-                : "opacity-0 group-hover:opacity-100"
-            }`}
-          >
-            <Heart
-              className={`w-4 h-4 transition-colors ${
-                isSaved
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400 hover:text-red-400"
-              }`}
-            />
-          </Button>
-        </div>
+      <CardContent
+        className={`relative flex flex-col justify-between ${
+          compact ? "p-3" : "px-4 py-5 sm:px-6"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-3 w-full">
+            {/* Avatar */}
+            {job.companies?.users?.avatar_url ? (
+              <img
+                src={job.companies.users.avatar_url}
+                alt="Company Avatar"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-100 border border-gray-200 flex-shrink-0">
+                <Building2 className="w-4 h-4 text-gray-400" />
+              </div>
+            )}
 
-        {/* Company Info */}
-        <div className="flex items-center gap-2 mb-4">
-          <Building2 className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-600 truncate">Company Name</span>
+            {/* Job Title + Company */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+                {job.job_title}
+              </h3>
+            </div>
+
+            {/* Save button */}
+            <Button
+              variant="custom"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSave?.();
+              }}
+              className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
+            >
+              <Heart
+                className={`w-4 h-4 transition-colors ${
+                  isSaved
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-400 hover:text-red-400"
+                }`}
+              />
+            </Button>
+          </div>
         </div>
 
         {/* Job Details */}
-        <div className="space-y-2 mb-4">
-          {/* Location */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <MapPin className="w-4 h-4 text-gray-400" />
-            <span>{job.location || "Remote"}</span>
+        <div className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <span className="truncate">{job.location || "Remote"}</span>
           </div>
 
-          {/* Salary */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <DollarSign className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-green-600">
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <span className="font-medium text-green-600 truncate">
               {formatSalary(job.salary, job.currency)}
             </span>
           </div>
 
-          {/* Job Category */}
           {job.jobCategories && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Briefcase className="w-4 h-4 text-gray-400" />
-              <span>{job.jobCategories.job_category}</span>
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="truncate">{job.jobCategories.job_category}</span>
             </div>
           )}
         </div>
 
-        {/* Status & Actions */}
-        <div
-          className={`flex items-center justify-between ${
-            compact ? "pt-3" : "pt-4 border-t border-gray-100"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {getStatusBadge(job.status)}
-            {!compact && (
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Clock className="w-3 h-3" />
-                <span>2 ngày trước</span>
-              </div>
-            )}
-          </div>
+        {/* Footer */}
+        <div className="pt-2 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="w-full sm:w-auto">{getStatusBadge(job.status)}</div>
 
           {!compact && (
             <Button
@@ -160,24 +144,13 @@ export default function JobCard({
                 e.stopPropagation();
                 onApply?.();
               }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              className="shadow-sm rounded-md w-full sm:w-auto"
+              variant="emerald"
             >
               Ứng tuyển
             </Button>
           )}
         </div>
-
-        {/* Hover Effect Indicator - Only for non-compact */}
-        {!compact && (
-          <div className="mt-3 pt-2">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity">
-                Nhấn để xem chi tiết
-              </span>
-              <div className="w-0 group-hover:w-8 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 rounded-full"></div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -8,8 +8,8 @@ import { Layout } from "../../components/layout";
 export default function QuizLandingPage() {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
-  const [loading, setLoading] = useState(false); // For initial questions loading
-  const [starting, setStarting] = useState(false); // For start quiz process
+  const [loading, setLoading] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,13 +37,20 @@ export default function QuizLandingPage() {
     };
   }, []);
 
-  const startQuiz = () => {
-    try {
-      console.log("▶️ Bắt đầu quiz, điều hướng sang trang câu hỏi...");
-      navigate("/quiz/test");
-    } catch (err) {
-      console.error("❌ Lỗi khi bắt đầu quiz:", err);
+  const handleStartQuiz = () => {
+    setStarting(true);
+
+    const isRepeat = window.confirm(
+      "Nếu bạn đã làm quiz trước đó, nhấn OK để làm lại từ đầu. Hủy để làm lần đầu."
+    );
+
+    if (isRepeat) {
+      // Fire-and-forget, không quan tâm kết quả
+      resetAnswer().catch(() => {});
     }
+
+    // navigate luôn
+    navigate("/quiz/test");
   };
 
   return (
@@ -112,7 +119,7 @@ export default function QuizLandingPage() {
 
             {questions && !loading && (
               <Button
-                onClick={startQuiz}
+                onClick={handleStartQuiz}
                 disabled={starting}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"

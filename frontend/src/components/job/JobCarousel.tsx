@@ -176,7 +176,7 @@ export default function JobCarousel({
                           <JobCard
                             job={job}
                             onClick={() => onJobClick?.(job.id)}
-                            compact={true} // Use compact mode for carousel
+                            compact={false}
                           />
                         </div>
                       ))}

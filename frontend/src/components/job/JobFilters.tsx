@@ -9,12 +9,11 @@ import {
   SearchIcon,
 } from "lucide-react";
 import { useJobStore } from "../../store/job.store";
-import JobCard from "./JobCard";
-import type { Job } from "../../types/job";
 import { Button } from "../ui/button";
+import type { Job } from "../../types/job";
 
 interface JobFiltersProps {
-  onJobClick?: (jobId: string) => void;
+  onJobClick?: (job: Job) => void;
 }
 
 export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
@@ -24,98 +23,20 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
   const [selectedSalary, setSalaryRange] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1);
-  const [visibleCount, setVisibleCount] = useState(8); // Show 8 jobs initially (2 rows x 4)
-
-  // dữ liệu hiển thị
-  const [displayedJobs, setDisplayedJobs] = useState<Job[]>([]);
-  const [lastFetchCount, setLastFetchCount] = useState(0);
 
   const {
-    jobs,
-    filteredJobs,
-    jobLabels,
-    isLoading,
     filterJobs,
     getAllJobs,
     fetchJobLabels,
-    saveJob,
-    unsaveJob,
-    checkIfSaved,
+    jobLabels,
+    isLoading,
     clearFilteredJobs,
+    filteredJobs,
   } = useJobStore();
 
-  const handleSaveJob = async (jobId: string) => {
-    const isSaved = checkIfSaved(jobId);
-    if (isSaved) {
-      await unsaveJob(jobId);
-    } else {
-      await saveJob(jobId);
-    }
-  };
-
-  // Wrapper function để save filter states khi click job
-  const handleJobClick = (jobId: string) => {
-    // Save current filter states
-    sessionStorage.setItem(
-      "jobFilterState",
-      JSON.stringify({
-        searchTerm,
-        selectedLocation,
-        selectedField,
-        selectedSalary,
-        isSearching,
-        page,
-        visibleCount,
-        displayedJobsLength: displayedJobs.length,
-        lastFetchCount,
-      })
-    );
-
-    // Save scroll position
-    sessionStorage.setItem("jobScrollPosition", window.scrollY.toString());
-
-    // Call parent handler
-    onJobClick?.(jobId);
-  };
-
-  // Load job labels on mount
   useEffect(() => {
     fetchJobLabels();
   }, [fetchJobLabels]);
-
-  // Restore filter states when returning from job detail
-  useEffect(() => {
-    const savedFilterState = sessionStorage.getItem("jobFilterState");
-    if (savedFilterState) {
-      try {
-        const state = JSON.parse(savedFilterState);
-        setSearchTerm(state.searchTerm || "");
-        setSelectedLocation(state.selectedLocation || "");
-        setSelectedField(state.selectedField || "");
-        setSalaryRange(state.selectedSalary || "");
-        setIsSearching(state.isSearching || false);
-        setPage(state.page || 1);
-        setVisibleCount(state.visibleCount || 8);
-        setLastFetchCount(state.lastFetchCount || 0);
-
-        // Restore search results if was searching
-        if (state.isSearching) {
-          const filteredJobs = useJobStore.getState().filteredJobs ?? [];
-          setDisplayedJobs(
-            filteredJobs.slice(
-              0,
-              state.displayedJobsLength || filteredJobs.length
-            )
-          );
-        }
-
-        // Clear saved state after restoring
-        sessionStorage.removeItem("jobFilterState");
-      } catch (err) {
-        console.error("Error restoring job filter state:", err);
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,17 +45,12 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       !selectedLocation &&
       !selectedField &&
       !selectedSalary
-    ) {
+    )
       return;
-    }
 
     setIsSearching(true);
     setPage(1);
-    setVisibleCount(8);
-    setDisplayedJobs([]);
-    setLastFetchCount(0);
 
-    // Call filter API với all parameters
     await filterJobs({
       page: 1,
       name: searchTerm.trim() || undefined,
@@ -142,10 +58,6 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       field: selectedField || undefined,
       salary: selectedSalary || undefined,
     });
-
-    const latest = useJobStore.getState().filteredJobs ?? [];
-    setDisplayedJobs(latest);
-    setLastFetchCount(latest.length);
   };
 
   const handleReset = async () => {
@@ -155,59 +67,21 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
     setSalaryRange("");
     setIsSearching(false);
     setPage(1);
-    setVisibleCount(8);
-    setDisplayedJobs([]);
-    setLastFetchCount(0);
     clearFilteredJobs();
     await getAllJobs({ page: 1 });
   };
 
-  const handleLoadMore = async () => {
-    const nextVisible = visibleCount + 8;
-
-    // Check if we need to fetch next page
-    if (nextVisible > displayedJobs.length && lastFetchCount >= 8) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      await filterJobs({
-        page: nextPage,
-        name: searchTerm.trim() || undefined,
-        location: selectedLocation || undefined,
-        field: selectedField || undefined,
-        salary: selectedSalary || undefined,
-      });
-      const latestPage = useJobStore.getState().filteredJobs ?? [];
-      setDisplayedJobs((prev) => [...prev, ...latestPage]);
-      setLastFetchCount(latestPage.length);
-    }
-
-    setVisibleCount(nextVisible);
-  };
-
-  const hasResults = isSearching && displayedJobs.length > 0;
-  const noResults = isSearching && displayedJobs.length === 0 && !isLoading;
-
-  const canShowLoadMore =
-    displayedJobs.length > visibleCount || lastFetchCount >= 8;
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
-      {/* Header Section */}
+    <div className="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+      {/* Header */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Briefcase className="w-8 h-8 text-green-600" />
-        </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Tìm kiếm công việc phù hợp với bạn?
+          Bộ lọc công việc - Tìm việc nhanh chóng trên BriPath
         </h2>
-        <p className="text-slate-600">
-          Nhập vị trí công việc hoặc lĩnh vực bạn quan tâm
-        </p>
       </div>
 
       {/* Search Form */}
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-        {/* Main Search Input */}
         <div className="flex gap-3 mb-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -235,7 +109,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
 
         {/* Advanced Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {/* Location Filter */}
+          {/* Location */}
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <select
@@ -251,7 +125,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
             </select>
           </div>
 
-          {/* Field/Category Filter */}
+          {/* Field */}
           <div className="relative">
             <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <select
@@ -268,7 +142,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
             </select>
           </div>
 
-          {/* Salary Filter */}
+          {/* Salary */}
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <select
@@ -300,101 +174,6 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
           </div>
         )}
       </form>
-
-      {/* Results Status */}
-      {hasResults && (
-        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800 text-center">
-            Tìm thấy {displayedJobs.length} công việc phù hợp
-          </p>
-        </div>
-      )}
-
-      {noResults && (
-        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-amber-800 text-center">
-            Không tìm thấy công việc nào phù hợp với bộ lọc
-          </p>
-        </div>
-      )}
-
-      {/* Loading Skeleton */}
-      {isSearching && isLoading && (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="h-8 bg-slate-200 rounded w-48 animate-pulse"></div>
-            <div className="h-8 bg-slate-200 rounded-full w-20 animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg border border-slate-200 p-6 animate-pulse"
-              >
-                <div className="h-6 bg-slate-200 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-slate-200 rounded w-1/2 mb-3"></div>
-                <div className="space-y-2 mb-4">
-                  <div className="h-3 bg-slate-200 rounded w-full"></div>
-                  <div className="h-3 bg-slate-200 rounded w-5/6"></div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="h-6 bg-slate-200 rounded-full w-16"></div>
-                  <div className="h-8 bg-slate-200 rounded w-20"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Filtered Jobs Results */}
-      {isSearching && !isLoading && displayedJobs.length > 0 && (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-slate-900">
-              Kết quả tìm kiếm
-            </h3>
-            <div className="text-slate-600 bg-green-50 px-4 py-2 rounded-lg">
-              <span className="font-semibold text-green-600">
-                {displayedJobs.length}
-              </span>{" "}
-              công việc
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {displayedJobs.slice(0, visibleCount).map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onClick={() => handleJobClick(job.id)}
-                onSave={() => handleSaveJob?.(job.id)}
-                isSaved={job.isSaved || false}
-                compact={true}
-              />
-            ))}
-          </div>
-
-          {/* Show More Button */}
-          {canShowLoadMore && (
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={handleLoadMore}
-                disabled={isLoading}
-                className="px-6 py-3 rounded-lg bg-green-100 hover:bg-green-200 text-green-700 font-semibold disabled:opacity-50 flex items-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" /> Đang tải...
-                  </>
-                ) : (
-                  "Hiển thị thêm"
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
