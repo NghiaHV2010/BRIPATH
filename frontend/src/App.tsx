@@ -34,6 +34,7 @@ import { NotificationList } from "./components/notification/NotificationList";
 import Layout from "./components/layout/layout";
 import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
+import CareerPathPage from "./pages/quiz/CareerPathPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -98,6 +99,8 @@ function App() {
         <Route path="/quiz" element={<QuizLandingPage />} />
         <Route path="/quiz/test" element={<QuizPage />} />
         <Route path="/quiz/results" element={<QuizResultsPage />} />
+        <Route path="/quiz/career-path" element={<CareerPathPage />} />
+
         <Route path="/companies" element={<CompaniesPage />} />
         <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
         <Route path="/jobs" element={<JobsPage />} />

@@ -17,11 +17,9 @@ export const answerQuiz = (questionId: number, answerId: number[]) =>
   axiosConfig.get("/question/finished")
     .then(res => res.data?.data ?? {}); 
 
-export const createCPAPI = (
-  id: number,
-  jobSpecialized: string) =>
-axiosConfig.post("/careerpath", { id, jobSpecialized })
-  .then(res => res.data?.data ?? {});
+export const createCPAPI = (id: number, jobSpecialize: string) =>
+  axiosConfig.post("/careerpath", { id, jobSpecialize })
+    .then(res => res.data ?? {});
 
 
 export const resetAnswer = async () => {
@@ -48,9 +46,42 @@ export interface QuizResult {
 }
 
 
-export interface SuitableJobCategory {
+export type JobType = {
   id: number;
+  job_type: string;
+  description: string;
+  score: number;
+};
+
+export interface SuitableJobCategory {
+id: number;
   job_category: string;
   description: string;
   score: number;
+  job_types: JobType[];
+}
+
+export interface CareerPathStep {
+  id: number;
+  title: string;
+  description: string;
+  resources: string;
+  career_id: number;
+}
+
+export interface CareerPath {
+  id: number;
+  title: string;
+  description: string;
+  resources: string;
+  level: string;
+  estimate_duration: string;
+  user_id: string;
+  jobspecialized_id: number;
+  careerPathSteps: CareerPathStep[];
+}
+
+export interface CareerPathResponse {
+  success: boolean;
+  data: CareerPath;
 }

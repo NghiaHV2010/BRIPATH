@@ -8,6 +8,12 @@ export interface JobLabel {
 }
 
 
+export interface Companies {
+  users?: {
+    avatar_url?: string;
+  }
+}
+
 export interface Job {
   id: string; // UUID format
   job_title: string;
@@ -15,6 +21,7 @@ export interface Job {
   currency?: string; // "VND", "USD", etc.
   location?: string;
   status?: string; 
+  companies?: Companies;
   jobCategories?: JobCategory | null;
   jobLabels?: any | null; 
   isSaved?: boolean; // Được frontend set từ savedJobs array

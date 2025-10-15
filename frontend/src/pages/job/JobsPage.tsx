@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Briefcase } from "lucide-react";
 import {
   JobList,
   JobFilters,
@@ -9,127 +8,140 @@ import {
 } from "../../components/job";
 import { useJobStore } from "../../store/job.store";
 import { Layout } from "../../components/layout";
+import JobCard from "../../components/job/JobCard";
 
 export default function JobsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(10); // Có thể get từ API response
+  const [currentPage, setCurrentPage] = useState(1); // JobList page
+  const [filterPage, setFilterPage] = useState(1); // Filtered jobs page
+  const jobsPerFilterPage = 8;
 
-  const { jobs, isLoading, getAllJobs } = useJobStore();
+  const {
+    jobs,
+    filteredJobs,
+    isLoading,
+    getAllJobs,
+    checkIfSaved,
+    saveJob,
+    unsaveJob,
+    clearFilteredJobs,
+  } = useJobStore();
+
+  // Paginate filtered jobs
+  const totalFilterPages = Math.ceil(filteredJobs.length / jobsPerFilterPage);
+  const paginatedFilteredJobs = filteredJobs.slice(
+    (filterPage - 1) * jobsPerFilterPage,
+    filterPage * jobsPerFilterPage
+  );
 
   useEffect(() => {
     getAllJobs({ page: currentPage });
   }, [currentPage, getAllJobs]);
 
-  // Handle external navigation detection
-  useEffect(() => {
-    // Check if this is external navigation (from navbar, direct URL, etc.)
-    const isExternalNavigation =
-      !sessionStorage.getItem("jobScrollPosition") &&
-      !sessionStorage.getItem("jobPage") &&
-      !sessionStorage.getItem("jobFilterState");
-
-    if (isExternalNavigation) {
-      // Clear any leftover states and start fresh
-      sessionStorage.removeItem("jobScrollPosition");
-      sessionStorage.removeItem("jobPage");
-      sessionStorage.removeItem("jobFilterState");
-
-      // Reset to page 1
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      }
-    }
-  }, [location.pathname, currentPage]);
-
-  // Restore states when returning from job detail (run once on mount)
-  useEffect(() => {
-    const savedScrollPosition = sessionStorage.getItem("jobScrollPosition");
-    const savedPage = sessionStorage.getItem("jobPage");
-
-    if (savedScrollPosition) {
-      setTimeout(() => {
-        window.scrollTo(0, parseInt(savedScrollPosition));
-        sessionStorage.removeItem("jobScrollPosition");
-      }, 100);
-    }
-
-    if (savedPage) {
-      const page = parseInt(savedPage);
-      if (page !== currentPage) {
-        setCurrentPage(page);
-        // Don't call getAllJobs here as it will be handled by the first useEffect
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
-
-  const loadJobs = async (page: number) => {
-    setCurrentPage(page);
-    sessionStorage.setItem("jobPage", page.toString()); // 🔹 lưu page hiện tại
-    await getAllJobs({ page });
-  };
-
   const handleJobClick = (jobId: string) => {
-    // 🔹 lưu vị trí cuộn trước khi rời trang
     sessionStorage.setItem("jobScrollPosition", window.scrollY.toString());
     sessionStorage.setItem("jobPage", currentPage.toString());
     navigate(`/jobs/${jobId}`);
   };
 
+  const handleSaveJob = async (jobId: string) => {
+    const isSaved = checkIfSaved(jobId);
+    if (isSaved) await unsaveJob(jobId);
+    else await saveJob(jobId);
+  };
+
+  const handleResetFilter = async () => {
+    clearFilteredJobs();
+    setFilterPage(1);
+  };
+
   return (
     <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Filters */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16 px-4 mb-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <Briefcase className="w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Explore Jobs</h1>
-              <p className="text-green-100 text-lg">
-                Discover amazing job opportunities and find your dream career
-              </p>
-            </div>
-          </div>
+        <div className="max-w-[1500px] mx-auto flex justify-center">
+          <JobFilters onJobClick={handleJobClick} />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 pb-12">
-        <JobFilters onJobClick={handleJobClick} />
-
-        {jobs.length > 0 && (
-          <JobCarousel
-            jobs={jobs}
-            onJobClick={handleJobClick}
-            title="Công việc nổi bật"
-          />
-        )}
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16 ">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-slate-600 font-medium">Loading jobs...</p>
+      {/* Filtered Jobs */}
+      {filteredJobs.length > 0 && (
+        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-12">
+          <div className="max-w-[1900px] mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-green-800 text-2xl font-semibold">
+                Tìm thấy {filteredJobs.length} công việc phù hợp
+              </h2>
+              <button
+                onClick={handleResetFilter}
+                className="text-slate-600 hover:text-slate-900 flex items-center gap-2"
+              >
+                Xóa bộ lọc
+              </button>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedFilteredJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onClick={() => handleJobClick(job.id)}
+                  onSave={() => handleSaveJob(job.id)}
+                  compact={false}
+                  isSaved={job.isSaved || false}
+                />
+              ))}
+            </div>
+
+            <JobPagination
+              currentPage={filterPage}
+              totalPages={totalFilterPages}
+              onPageChange={setFilterPage}
+              isLoading={isLoading}
+            />
           </div>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-6">
+        </div>
+      )}
+
+      {/* Carousel */}
+      {jobs.length > 0 && (
+        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-12 mt-12">
+          <div className="max-w-[1900px] mx-auto p-8 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl text-white">
+            <JobCarousel
+              jobs={jobs}
+              onJobClick={handleJobClick}
+              title="Công việc nổi bật"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* JobList */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-slate-600 font-medium">Loading jobs...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10">
+          <div className="max-w-[1900px] mx-auto">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
               Tất cả công việc trên{" "}
               <span className="text-green-600">BriPath</span>
             </h2>
             <JobList onJobClick={handleJobClick} />
             <JobPagination
               currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={loadJobs}
+              totalPages={10} // hoặc lấy từ API
+              onPageChange={setCurrentPage}
               isLoading={isLoading}
             />
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
