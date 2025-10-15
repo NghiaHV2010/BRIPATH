@@ -6,9 +6,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { createNotificationData } from "../utils";
 import { embeddingData } from "../utils/cvHandler";
 
-const prisma = new PrismaClient({
-    log: ['query', 'info', 'warn', 'error'],
-});
+const prisma = new PrismaClient();
 const numberOfJobs = 16;
 
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {

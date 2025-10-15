@@ -53,10 +53,9 @@ export default function JobPagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+        className="flex items-center gap-2 px-3 py-3 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
       >
         <ChevronLeft className="w-4 h-4" />
-        Trước
       </button>
 
       {/* Page Numbers */}
@@ -80,10 +79,9 @@ export default function JobPagination({
               disabled={isLoading}
               className={`
                 w-10 h-10 text-sm font-medium rounded-lg transition-colors
-                ${
-                  isActive
-                    ? "bg-green-600 text-white"
-                    : "text-slate-700 bg-white border border-slate-300 hover:bg-slate-50"
+                ${isActive
+                  ? "bg-green-600 text-white"
+                  : "text-slate-700 bg-white border border-slate-300 hover:bg-slate-50"
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
@@ -98,9 +96,8 @@ export default function JobPagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+        className="flex items-center gap-2 px-3 py-3 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
       >
-        Sau
         <ChevronRight className="w-4 h-4" />
       </button>
 

@@ -127,25 +127,24 @@ export default function JobCarousel({
 
         {totalSlides > 1 && (
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={prevSlide}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm text-slate-600">
-              {currentIndex + 1} / {totalSlides}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={nextSlide}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center justify-between absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-10">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={prevSlide}
+                className="h-8 w-8 p-0 rounded-full"
+              >
+                <ChevronLeft className="size-6" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={nextSlide}
+                className="h-8 w-8 p-0 rounded-full"
+              >
+                <ChevronRight className="size-6" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -192,11 +191,10 @@ export default function JobCarousel({
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex
-                      ? "bg-green-600"
-                      : "bg-slate-300 hover:bg-slate-400"
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex
+                    ? "bg-green-600"
+                    : "bg-slate-300 hover:bg-slate-400"
+                    }`}
                 />
               ))}
             </div>

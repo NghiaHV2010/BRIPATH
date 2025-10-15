@@ -10,14 +10,26 @@ cron.schedule("*/5 * * * *", async () => {
     const vietnamTime = new Date(currentTimeString);
     const currentHour = vietnamTime.getHours();
 
-    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 23);
+    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 24);
 
     if (isGoldenHour) {
         const urgentJobs = await prisma.$queryRaw`
-        SELECT  j.id,
-                j.job_title,
-                j.location
+        SELECT 
+            j.id,
+            j.job_title,
+            j.salary,
+            j.currency,
+            j.location,
+            j.status,
+            jc.job_category,
+            jl.label_name,
+            u.avatar_url
         FROM jobs j
+        LEFT JOIN "jobCategories" jc ON jc.id = j."jobCategory_id"
+        LEFT JOIN "jobLabels" jl ON jl.id = j."label_id"
+        LEFT JOIN companies c ON c.id = j."company_id"
+        LEFT JOIN users u ON u."company_id" = c.id
+        LEFT JOIN applicants a ON a.job_id = j.id
         INNER JOIN "jobLabels" l ON j.label_id = l.id
         ORDER BY RANDOM()
         LIMIT 12;
