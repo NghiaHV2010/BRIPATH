@@ -1,4 +1,4 @@
-import { Building2, MapPin, Briefcase } from "lucide-react";
+import { Building2, MapPin, Briefcase, CircleChevronDown } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { CompanyTypeMap, mapEnumValue } from "../../utils/mapping";
@@ -10,7 +10,7 @@ interface CompanyCardProps {
 }
 
 export default function CompanyCard({ company, onClick }: CompanyCardProps) {
-  const { users, company_type, _count } = company;
+  const { users, company_type, _count, is_verified } = company;
 
   // Get company type display using mapping utils
   const getCompanyTypeDisplay = (type?: string) => {
@@ -29,7 +29,10 @@ export default function CompanyCard({ company, onClick }: CompanyCardProps) {
 
       <CardContent className="p-6 -mt-10 relative">
         {/* Company Avatar */}
-        <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 border-4 border-white mx-auto">
+        <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 border-4 border-white mx-auto relative">
+          {is_verified && (
+            <CircleChevronDown className="size-5 absolute -bottom-2 -right-2 text-white bg-cyan-400 rounded-full" />
+          )}
           {users?.avatar_url ? (
             <img
               src={users.avatar_url}
@@ -69,13 +72,6 @@ export default function CompanyCard({ company, onClick }: CompanyCardProps) {
           <Briefcase className="w-4 h-4 text-gray-400" />
           <span>{_count?.jobs || 0} việc làm</span>
         </div>
-
-        {/* Contact Info */}
-        {users?.email && (
-          <p className="text-xs text-gray-500 text-center truncate">
-            {users.email}
-          </p>
-        )}
 
         {/* Hover Effect Indicator */}
         <div className="mt-4 pt-3 border-t border-gray-100">

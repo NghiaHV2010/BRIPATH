@@ -35,6 +35,7 @@ export interface CompanySummary {
   users?: CompInfor | null;
   companyLabels?: any | null;
   fields?: any | null;
+  is_verified?: boolean;
   _count?: {
     jobs?: number;
   };

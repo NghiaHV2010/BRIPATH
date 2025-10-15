@@ -89,12 +89,7 @@ export default function CompaniesPage() {
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
               <Building2 className="w-8 h-8" />
             </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Explore Companies</h1>
-              <p className="text-blue-100 text-lg">
-                Discover top companies and find your next opportunity
-              </p>
-            </div>
+
           </div>
         </div>
       </div>

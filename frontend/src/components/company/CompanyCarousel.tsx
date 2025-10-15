@@ -105,13 +105,18 @@ export default function CompanyCarousel({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          <div className="flex items-center gap-2">
+
+        </div>
+
+        {/* Carousel Container */}
+        <div className="relative overflow-hidden">
+          <div className="flex items-center justify-between absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-10">
             {/* Navigation buttons */}
             <Button
               variant="outline"
               size="sm"
               onClick={handlePrev}
-              className="p-2"
+              className="p-2 rounded-full"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -119,21 +124,16 @@ export default function CompanyCarousel({
               variant="outline"
               size="sm"
               onClick={handleNext}
-              className="p-2"
+              className="p-2 rounded-full"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-
-        {/* Carousel Container */}
-        <div className="relative overflow-hidden">
           <div
-            className="flex gap-4 transition-transform duration-500 ease-in-out"
+            className="flex gap-4 transition-transform duration-1000 ease-in-out"
             style={{
-              transform: `translateX(-${
-                (currentIndex % displayCompanies.length) * (100 / itemsPerView)
-              }%)`,
+              transform: `translateX(-${(currentIndex % displayCompanies.length) * (100 / itemsPerView)
+                }%)`,
             }}
           >
             {/* Render companies multiple times for infinite effect */}
@@ -143,9 +143,8 @@ export default function CompanyCarousel({
                   key={`${company.id}-set-${setIndex}-${companyIndex}`}
                   className="flex-shrink-0"
                   style={{
-                    width: `calc(${100 / itemsPerView}% - ${
-                      ((itemsPerView - 1) * 16) / itemsPerView
-                    }px)`,
+                    width: `calc(${100 / itemsPerView}% - ${((itemsPerView - 1) * 16) / itemsPerView
+                      }px)`,
                   }}
                 >
                   <CompanyCard
@@ -165,11 +164,10 @@ export default function CompanyCarousel({
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentIndex % displayCompanies.length
-                    ? "bg-blue-600 w-8"
-                    : "bg-gray-300 w-2 hover:bg-gray-400"
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex % displayCompanies.length
+                  ? "bg-blue-600 w-8"
+                  : "bg-gray-300 w-2 hover:bg-gray-400"
+                  }`}
                 aria-label={`Chuyển đến slide ${index + 1}`}
               />
             ))}
