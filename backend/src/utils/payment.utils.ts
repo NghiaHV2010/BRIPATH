@@ -21,18 +21,18 @@ export const hasPaymentByTransactionId = async (prisma: any, transactionId?: str
 };
 
 // DB-backed helpers for VNPay order mapping
-export const saveVnpOrderMapping = async (prisma: any, txnRef: string, userId: string, amount: number) => {
+export const saveVnpOrderMapping = async (prisma: any, txnRef: string, userId: string, amount: number, planId: number, companyId?: string) => {
     await prisma.vnpayOrders.upsert({
         where: { vnp_TxnRef: txnRef },
-        update: { user_id: userId, amount: BigInt(amount) },
-        create: { vnp_TxnRef: txnRef, user_id: userId, amount: BigInt(amount) }
+        update: { user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId },
+        create: { vnp_TxnRef: txnRef, user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId }
     });
 };
 
-export const getVnpOrderMapping = async (prisma: any, txnRef: string): Promise<{ user_id: string; amount: number } | null> => {
+export const getVnpOrderMapping = async (prisma: any, txnRef: string): Promise<{ user_id: string; amount: number; plan_id: number; company_id?: string } | null> => {
     const rec = await prisma.vnpayOrders.findUnique({ where: { vnp_TxnRef: txnRef } });
     if (!rec) return null;
-    return { user_id: rec.user_id, amount: Number(rec.amount) };
+    return { user_id: rec.user_id, amount: Number(rec.amount), plan_id: rec.plan_id, company_id: rec.company_id ?? undefined };
 };
 
 export const deleteVnpOrderMapping = async (prisma: any, txnRef: string) => {
@@ -40,18 +40,18 @@ export const deleteVnpOrderMapping = async (prisma: any, txnRef: string) => {
 };
 
 // ZaloPay mapping helpers (DB)
-export const saveZaloOrderMapping = async (prisma: any, appTransId: string, userId: string, amount: number) => {
+export const saveZaloOrderMapping = async (prisma: any, appTransId: string, userId: string, amount: number, planId: number, companyId?: string) => {
     await prisma.zalopayOrders.upsert({
         where: { app_trans_id: appTransId },
-        update: { user_id: userId, amount: BigInt(amount) },
-        create: { app_trans_id: appTransId, user_id: userId, amount: BigInt(amount) }
+        update: { user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId },
+        create: { app_trans_id: appTransId, user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId }
     });
 };
 
-export const getZaloOrderMapping = async (prisma: any, appTransId: string): Promise<{ user_id: string; amount: number } | null> => {
+export const getZaloOrderMapping = async (prisma: any, appTransId: string): Promise<{ user_id: string; amount: number; plan_id: number; company_id?: string } | null> => {
     const rec = await prisma.zalopayOrders.findUnique({ where: { app_trans_id: appTransId } });
     if (!rec) return null;
-    return { user_id: rec.user_id, amount: Number(rec.amount) };
+    return { user_id: rec.user_id, amount: Number(rec.amount), plan_id: rec.plan_id, company_id: rec.company_id ?? undefined };
 };
 
 export const deleteZaloOrderMapping = async (prisma: any, appTransId: string) => {

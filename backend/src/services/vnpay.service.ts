@@ -31,7 +31,9 @@ class VNPayService {
                     vnpayOrderMapping.set(orderData.vnp_TxnRef, { user_id: userId, amount: params.amount });
                     // Also persist to DB for reliability
                     const prisma = new PrismaClient();
-                    await saveVnpOrderMapping(prisma, orderData.vnp_TxnRef, userId, params.amount);
+                    const planId = Number(req.body?.plan_id) || Number(req.query?.plan_id) || 0;
+                    const companyId = (req.body?.company_id as string | undefined) || (req.query?.company_id as string | undefined);
+                    await saveVnpOrderMapping(prisma, orderData.vnp_TxnRef, userId, params.amount, planId, companyId);
                 }
             } catch {}
 

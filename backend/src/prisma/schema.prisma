@@ -358,6 +358,8 @@ model vnpayOrders {
   vnp_TxnRef String   @id
   user_id    String
   amount     BigInt
+  plan_id    Int?
+  company_id String?
   created_at DateTime @default(now())
   users      users    @relation(fields: [user_id], references: [id])
 }
@@ -366,6 +368,8 @@ model zalopayOrders {
   app_trans_id String   @id
   user_id      String
   amount       BigInt
+  plan_id      Int?
+  company_id   String?
   created_at   DateTime @default(now())
   users        users    @relation(fields: [user_id], references: [id])
 }
