@@ -354,6 +354,22 @@ model payments {
   subscriptions   subscriptions?
 }
 
+model vnpayOrders {
+  vnp_TxnRef String   @id
+  user_id    String
+  amount     BigInt
+  created_at DateTime @default(now())
+  users      users    @relation(fields: [user_id], references: [id])
+}
+
+model zalopayOrders {
+  app_trans_id String   @id
+  user_id      String
+  amount       BigInt
+  created_at   DateTime @default(now())
+  users        users    @relation(fields: [user_id], references: [id])
+}
+
 model personalityTestResults {
   user_id     String
   question_id Int
@@ -516,6 +532,8 @@ model users {
   reviews                reviews[]
   userNotifications      userNotifications[]
   roles                  roles                    @relation(fields: [role_id], references: [id])
+  vnpayOrders            vnpayOrders[]
+  zalopayOrders          zalopayOrders[]
 }
 
 enum ApplicantsStatus {

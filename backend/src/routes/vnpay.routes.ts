@@ -8,8 +8,11 @@ import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { verifyReturnSignature, parseAmount, sortObject, generateVNPaySignature } from '../utils/vnpay.utils';
 import { VNPAY_HASH_SECRET } from '../config/env.config';
 import VNPayService from '../services/vnpay.service';
+import { PrismaClient, PaymentGateway, PaymentMethod, PaymentStatus } from '../generated/prisma';
+import { hasPaymentByTransactionId, vnpayOrderMapping, getVnpOrderMapping, deleteVnpOrderMapping } from '../utils/payment.utils';
 
 const vnPayRouter = Router();
+const prisma = new PrismaClient();
 
 vnPayRouter.post('/create-payment-url', validateCreateOrderRequest, async (req: Request, res: Response) => {
     try {
@@ -58,6 +61,39 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
         if (responseCode === VNPAY_RESPONSE_CODE.SUCCESS) {
             status = 'success';
             message = 'Payment successful';
+            try {
+                //@ts-ignore
+                let userId = (req.user?.id as string | undefined);
+                const exists = await hasPaymentByTransactionId(prisma, txnRef);
+                if (!exists) {
+                    if (!userId) {
+                        // Fallback: try mapping from memory or DB
+                        let mapping = vnpayOrderMapping.get(txnRef);
+                        if (!mapping) {
+                            const dbMap = await getVnpOrderMapping(prisma, txnRef);
+                            if (dbMap) mapping = dbMap;
+                        }
+                        userId = mapping?.user_id;
+                    }
+                    if (userId) {
+                        await prisma.payments.create({
+                            data: {
+                                amount: BigInt(amount),
+                                currency: 'VND',
+                                payment_gateway: PaymentGateway.Bank,
+                                payment_method: PaymentMethod.bank_card,
+                                transaction_id: txnRef,
+                                status: PaymentStatus.success,
+                                user_id: userId
+                            }
+                        });
+                        vnpayOrderMapping.delete(txnRef);
+                        await deleteVnpOrderMapping(prisma, txnRef);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to save VNPay payment (return):', err);
+            }
         }
 
         res.status(HTTP_SUCCESS.OK).json({
@@ -125,6 +161,32 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
         }
 
         if (responseCode === VNPAY_RESPONSE_CODE.SUCCESS) {
+            try {
+                const amount = parseAmount(vnpParams.vnp_Amount as string);
+                const exists = await hasPaymentByTransactionId(prisma, orderId);
+                if (!exists) {
+                    let mapping = vnpayOrderMapping.get(orderId);
+                    if (!mapping) {
+                        const dbMap = await getVnpOrderMapping(prisma, orderId);
+                        if (dbMap) mapping = dbMap;
+                    }
+                    await prisma.payments.create({
+                    data: {
+                        amount: BigInt(amount),
+                        currency: 'VND',
+                        payment_gateway: PaymentGateway.Bank,
+                        payment_method: PaymentMethod.bank_card,
+                            transaction_id: orderId,
+                            status: PaymentStatus.success,
+                            user_id: mapping?.user_id || 'unknown'
+                        }
+                    });
+                    vnpayOrderMapping.delete(orderId);
+                    await deleteVnpOrderMapping(prisma, orderId);
+                }
+            } catch (e) {
+                console.error('Failed to save VNPay payment (ipn):', e);
+            }
             result.RspCode = VNPAY_RESPONSE_CODE.SUCCESS;
             result.Message = 'Success';
         } else {

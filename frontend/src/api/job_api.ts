@@ -152,7 +152,7 @@ export const saveJobApi = async (
 // API để lấy danh sách job IDs đã save
 export const getSavedJobIds = async (): Promise<{ success: boolean; data: string[] }> => {
   try {
-    const response = await axiosConfig.get('/saved-jobs');
+    const response = await axiosConfig.get('/save-jobs');
     console.log("Fetched saved job IDs:", response.data);
     // Giả sử backend trả về array jobs, extract IDs
     const jobIds = response.data?.data?.map((job: any) => job.id) || [];
@@ -160,5 +160,30 @@ export const getSavedJobIds = async (): Promise<{ success: boolean; data: string
   } catch (error: any) {
     console.error("Error fetching saved job IDs:", error.response?.data || error.message);
     return { success: false, data: [] };
+  }
+};
+
+export const getSavedJobs = async (): Promise<{ success: boolean; data: any[] }> => {
+  try {
+    const response = await axiosConfig.get('/save-jobs');
+    // Backend trả về dạng: [{ jobs: { ... } }, ...]
+    const jobs = (response.data?.data || []).map((item: any) => item?.jobs).filter(Boolean);
+    return { success: true, data: jobs };
+  } catch (error: any) {
+    console.error("Error fetching saved jobs:", error.response?.data || error.message);
+    return { success: false, data: [] };
+  }
+};
+
+export const unsaveJobApi = async (
+  jobId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axiosConfig.delete(`/save-job/${jobId}`);
+    console.log("Unsaved job:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error unsaving job:", error.response?.data || error.message);
+    throw error;
   }
 };

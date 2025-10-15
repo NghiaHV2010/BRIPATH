@@ -205,3 +205,25 @@ export const createNotificationData = (
 
     return notification;
 };
+
+// ============== VNPay in-memory order mapping (dev/sandbox only) ==============
+const vnpayOrderStore: Map<string, { user_id: string; amount: number }> = new Map();
+
+export const vnpayOrderMapping = {
+    set(txnRef: string, data: { user_id: string; amount: number }) {
+        vnpayOrderStore.set(txnRef, data);
+    },
+    get(txnRef: string) {
+        return vnpayOrderStore.get(txnRef);
+    },
+    delete(txnRef: string) {
+        vnpayOrderStore.delete(txnRef);
+    }
+};
+
+// ============== Idempotency helper ==============
+export const hasPaymentByTransactionId = async (prisma: any, transactionId?: string): Promise<boolean> => {
+    if (!transactionId) return false;
+    const existing = await prisma.payments.findFirst({ where: { transaction_id: transactionId } });
+    return !!existing;
+};
