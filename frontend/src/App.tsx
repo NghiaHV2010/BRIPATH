@@ -121,7 +121,9 @@ function App() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <SettingsPage />
+              <ProfileLayout>
+                <SettingsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -129,7 +131,9 @@ function App() {
           path="/jobs/applied"
           element={
             <ProtectedRoute>
-              <AppliedJobsPage />
+              <ProfileLayout>
+                <AppliedJobsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -137,7 +141,9 @@ function App() {
           path="/jobs/saved"
           element={
             <ProtectedRoute>
-              <SavedJobsPageProfile />
+              <ProfileLayout>
+                <SavedJobsPageProfile />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -145,7 +151,9 @@ function App() {
           path="/cv/suitable"
           element={
             <ProtectedRoute>
-              <CVSuitableJobsPage />
+              <ProfileLayout>
+                <CVSuitableJobsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -178,7 +186,9 @@ function App() {
         <Route
           path="/notifications"
           element={
-            <NotificationList />
+            <ProfileLayout>
+              <NotificationList />
+            </ProfileLayout>
           }
         />
 

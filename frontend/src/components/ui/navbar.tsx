@@ -4,7 +4,6 @@ import { Button } from "./button";
 import { navigateToJobs, navigateToCompanies } from "../../utils/navigation";
 import { useState } from "react";
 import {
-  User as UserIcon,
   LogOut,
   Settings,
   FileText,
@@ -17,6 +16,7 @@ import {
   Building,
   Plus,
   Bell,
+  BriefcaseBusiness,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -33,6 +33,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { AvatarFallback } from "./avatar";
+import { CompanyMenuItems, UserMenuItems } from "@/constants/profileSidebarItems";
 
 interface NavbarProps {
   className?: string;
@@ -176,7 +178,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      <UserIcon className="w-5 h-5" />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                        {authUser?.username.charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </div>
                   )}
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
@@ -185,48 +189,27 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Cài đặt</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>Quản lí hồ sơ</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/jobs/applied")}>
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    <span>Việc làm đã ứng tuyển</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/jobs/saved")}>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    <span>Việc làm đã lưu</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/cv/suitable")}>
-                    <Search className="mr-2 h-4 w-4" />
-                    <span>Việc làm phù hợp</span>
-                  </DropdownMenuItem>
-                  {isCompany() ? (
-                    <>
-                      <DropdownMenuSeparator />
+                  {authUser?.roles.role_name === "User" ? (
+                    UserMenuItems.map((item) => (
                       <DropdownMenuItem
-                        onClick={() => navigate("/company/dashboard")}
+                        key={item.label}
+                        onClick={() => navigate(item.href)}
                       >
-                        <Building className="mr-2 h-4 w-4" />
-                        <span>Quản lý công ty</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                       </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuSeparator />
+                    ))
+                  ) : authUser?.roles.role_name === "Company" ? (
+                    CompanyMenuItems.map((item) => (
                       <DropdownMenuItem
-                        onClick={() => navigate("/companies-create")}
+                        key={item.label}
+                        onClick={() => navigate(item.href)}
                       >
-                        <Plus className="mr-2 h-4 w-4" />
-                        <span>Đăng ký tuyển dụng</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                       </DropdownMenuItem>
-                    </>
-                  )}
+                    ))
+                  ) : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -327,7 +310,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       />
                     ) : (
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <UserIcon className="w-5 h-5 text-blue-600" />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                          {authUser?.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
                       </div>
                     )}
                     <span className="text-sm font-medium text-gray-700">

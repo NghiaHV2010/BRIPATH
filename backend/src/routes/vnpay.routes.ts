@@ -141,8 +141,16 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                                         data: {
                                             is_verified: true,
                                             companyTags: {
-                                                create: {
-                                                    tag_id: tag.id
+                                                connectOrCreate: {
+                                                    where: {
+                                                        company_id_tag_id: {
+                                                            company_id: dbMap.company_id!,
+                                                            tag_id: tag.id
+                                                        }
+                                                    },
+                                                    create: {
+                                                        tag_id: tag.id
+                                                    }
                                                 }
                                             }
                                         }
@@ -301,8 +309,16 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
                                     data: {
                                         is_verified: true,
                                         companyTags: {
-                                            create: {
-                                                tag_id: tag.id
+                                            connectOrCreate: {
+                                                where: {
+                                                    company_id_tag_id: {
+                                                        company_id: dbMap.company_id!,
+                                                        tag_id: tag.id
+                                                    }
+                                                },
+                                                create: {
+                                                    tag_id: tag.id
+                                                }
                                             }
                                         }
                                     }

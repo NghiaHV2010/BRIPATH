@@ -48,6 +48,31 @@ export default function JobCard({
     }
   };
 
+  const getJobLabelBadge = (labelName?: string) => {
+    switch (labelName) {
+      case "Việc gấp":
+        return (
+          <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc Gấp
+          </Badge>
+        );
+      case "Việc Hot":
+        return (
+          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-orange-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc HOT
+          </Badge>
+        );
+      case "Việc chất":
+        return (
+          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc Chất
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     onClick?.();
@@ -60,20 +85,20 @@ export default function JobCard({
       hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1
       border border-gray-200 hover:border-blue-300
       w-full h-full flex flex-col justify-between
-      rounded-2xl bg-white overflow-hidden"
+      rounded-2xl bg-white overflow-hidden relative"
     >
+      {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${
-          compact ? "p-3" : "px-4 py-5 sm:px-6"
-        }`}
+        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6"
+          }`}
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 w-full">
             {/* Avatar */}
-            {job.companies?.users?.avatar_url ? (
+            {(job.companies?.users?.avatar_url || job?.avatar_url) ? (
               <img
-                src={job.companies.users.avatar_url}
+                src={job?.companies?.users?.avatar_url || job.avatar_url}
                 alt="Company Avatar"
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
               />
@@ -101,11 +126,10 @@ export default function JobCard({
               className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
             >
               <Heart
-                className={`w-4 h-4 transition-colors ${
-                  isSaved
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400 hover:text-red-400"
-                }`}
+                className={`w-4 h-4 transition-colors ${isSaved
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-400 hover:text-red-400"
+                  }`}
               />
             </Button>
           </div>

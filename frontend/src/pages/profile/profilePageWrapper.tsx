@@ -39,6 +39,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import { uploadUserCV } from "../../api/cv_api";
 import type { CVRecord } from "../../types/cv";
+import { AvatarFallback } from "@/components/ui/avatar";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
@@ -345,7 +346,9 @@ export default function ProfilePageWrapper() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="w-10 h-10 text-gray-400" />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl">
+                      {formData.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   )}
                 </div>
                 {isEditing && (

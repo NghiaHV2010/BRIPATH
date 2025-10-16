@@ -20,16 +20,20 @@ export interface Job {
   salary?: string[]; // Array of salary ranges
   currency?: string; // "VND", "USD", etc.
   location?: string;
-  status?: string; 
+  status?: string;
   companies?: Companies;
   jobCategories?: JobCategory | null;
-  jobLabels?: any | null; 
+  jobLabels?: {
+    label_name?: "Việc gấp" | "Việc Hot" | "Việc chất";
+  }
   isSaved?: boolean; // Được frontend set từ savedJobs array
   savedJobs?: Array<{
     user_id: string;
     job_id: string;
     saved_at: string;
   }>; // Array từ backend khi truyền userId
+  avatar_url?: string;
+  label_name?: string;
 }
 
 
@@ -49,7 +53,9 @@ export interface JobDetail extends Job {
   created_at?: string;
   updated_at?: string;
   jobCategory_id?: number;
-  label_id?: string | null;
+  jobLabels?: {
+    label_name?: "Việc gấp" | "Việc Hot" | "Việc chất";
+  }
   company_id?: string;
 
   companies?: {
@@ -88,13 +94,13 @@ export interface FilterJobParams {
 export interface CRUDJobParams {
   job_title: string;           // bắt buộc
   description: string;         // bắt buộc
-  location : string;            // bắt buộc
+  location: string;            // bắt buộc
   benefit?: string;            // tuỳ chọn
   working_time?: string;      // tuỳ chọn
-  salary ?: string[];            // tuỳ chọn
-  currency ?: string;           // tuỳ chọn
-  job_type: "remote" | "part_time" | "full_time" | "others"; 
-  status: "on_going" ;
+  salary?: string[];            // tuỳ chọn
+  currency?: string;           // tuỳ chọn
+  job_type: "remote" | "part_time" | "full_time" | "others";
+  status: "on_going";
   job_level: string;          // tuỳ chọn
   quantity: number;           // bắt buộc
   skill_tags?: string[];      // tuỳ chọn
@@ -107,9 +113,9 @@ export interface CRUDJobParams {
 
 
 export interface FetchJobByComId {
-    companyId: string; // bắt buộc
-    page: number; // bắt buộc
-    userId?: string; // tuỳ chọn — có thể bỏ quas
+  companyId: string; // bắt buộc
+  page: number; // bắt buộc
+  userId?: string; // tuỳ chọn — có thể bỏ quas
 }
 
 
