@@ -82,7 +82,7 @@ export default function JobPagination({
                 w-10 h-10 text-sm font-medium rounded-lg transition-colors
                 ${
                   isActive
-                    ? "bg-green-600 text-white"
+                    ? " bg-green-600 text-white"
                     : "text-slate-700 bg-white border border-slate-300 hover:bg-slate-50"
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed

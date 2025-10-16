@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   JobList,
   JobFilters,
@@ -9,10 +9,10 @@ import {
 import { useJobStore } from "../../store/job.store";
 import { Layout } from "../../components/layout";
 import JobCard from "../../components/job/JobCard";
+import type { Job } from "../../types/job";
 
 export default function JobsPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1); // JobList page
   const [filterPage, setFilterPage] = useState(1); // Filtered jobs page
   const jobsPerFilterPage = 8;
@@ -45,12 +45,32 @@ export default function JobsPage() {
     navigate(`/jobs/${jobId}`);
   };
 
-  const handleSaveJob = async (jobId: string) => {
-    const isSaved = checkIfSaved(jobId);
-    if (isSaved) await unsaveJob(jobId);
-    else await saveJob(jobId);
+  // Wrapper for JobFilters to match expected prop type
+  const handleJobClickFromFilters = (job: Job) => {
+    handleJobClick(job.id);
   };
 
+  // const handleSaveJob = async (jobId: string) => {
+  //   const isSaved = checkIfSaved(jobId);
+  //   if (isSaved) await unsaveJob(jobId);
+  //   else await saveJob(jobId);
+  // };
+
+  const handleSaveJob = async (jobId: string) => {
+    const isSaved = checkIfSaved(jobId);
+    if (isSaved) {
+      await unsaveJob(jobId);
+    } else {
+      await saveJob(jobId);
+    }
+    // Update filteredJobs' isSaved state immediately for UI feedback
+    // (Zustand store does not update filteredJobs on save/unsave by default)
+    useJobStore.setState((state) => ({
+      filteredJobs: state.filteredJobs.map((job) =>
+        job.id === jobId ? { ...job, isSaved: !isSaved } : job
+      ),
+    }));
+  };
   const handleResetFilter = async () => {
     clearFilteredJobs();
     setFilterPage(1);
@@ -61,14 +81,14 @@ export default function JobsPage() {
       {/* Filters */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16 px-4 mb-8">
         <div className="max-w-[1500px] mx-auto flex justify-center">
-          <JobFilters onJobClick={handleJobClick} />
+          <JobFilters onJobClick={handleJobClickFromFilters} />
         </div>
       </div>
 
       {/* Filtered Jobs */}
       {filteredJobs.length > 0 && (
         <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-12">
-          <div className="max-w-[1900px] mx-auto">
+          <div className="max-w-[1900px] mx-auto px-10">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-green-800 text-2xl font-semibold">
                 Tìm thấy {filteredJobs.length} công việc phù hợp
@@ -80,18 +100,19 @@ export default function JobsPage() {
                 Xóa bộ lọc
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedFilteredJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onClick={() => handleJobClick(job.id)}
-                  onSave={() => handleSaveJob(job.id)}
-                  compact={false}
-                  isSaved={job.isSaved || false}
-                />
-              ))}
+            <div className="px-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {paginatedFilteredJobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onClick={() => handleJobClick(job.id)}
+                    onSave={() => handleSaveJob(job.id)}
+                    compact={false}
+                    isSaved={job.isSaved || false}
+                  />
+                ))}
+              </div>
             </div>
 
             <JobPagination

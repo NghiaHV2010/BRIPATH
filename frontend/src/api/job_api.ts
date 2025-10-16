@@ -11,6 +11,32 @@ import type {
   JobLabel,
 } from "@/types/job";
 
+export interface CV {
+  id: number;
+  fullname: string;
+  email: string;
+  apply_job: string;
+  phone: string;
+  address: string;
+  career_goal: string;
+  introduction: string;
+  soft_skills: string[];
+  primary_skills: string[];
+  created_at: string;
+  age?: number | null;
+  gender?: string | null;
+  hobbies?: string | null;
+  others?: string | null;
+  users_id?: string;
+  awards?: any[];
+  certificates?: any[];
+  educations?: any[];
+  experiences?: any[];
+  languages?: any[];
+  projects?: any[];
+  references?: any[];
+}
+
 export const fetchAllJobs = async (
   params: FetchJobParams
 ): Promise<JobResponse | null> => {
@@ -187,3 +213,28 @@ export const unsaveJobApi = async (
     throw error;
   }
 };
+
+export const applyjob = async (
+  jobId: string, cv_id: number, description?: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axiosConfig.post(`/apply-job/${jobId}`, { cv_id, description });
+    console.log("Applied to job:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error applying to job:", error.response?.data || error.message);
+    throw error;
+  } 
+};
+
+
+export const getUserCVs = async (): Promise<CV[]> => {
+  try {
+    const response = await axiosConfig.get('/cv');
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching CVs:", error.response?.data || error.message);
+    throw error;
+  }
+};
+  
