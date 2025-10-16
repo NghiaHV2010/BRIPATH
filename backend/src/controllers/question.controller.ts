@@ -193,3 +193,81 @@ export const createCareerPath = async (req: Request, res: Response, next: NextFu
         next(error);
     }
 }
+
+export const getUserCareerPaths = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    try {
+        const careerPaths = await prisma.careerPaths.findMany({
+            where: {
+                user_id
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                level: true,
+                estimate_duration: true,
+                resources: true,
+                jobSpecialized: {
+                    select: {
+                        job_type: true
+                    }
+                },
+                _count: {
+                    select: {
+                        careerPathSteps: true,
+                    }
+                }
+            },
+            orderBy: {
+                id: 'desc'
+            },
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: careerPaths
+        })
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+export const getUserCareerPathById = async (req: Request, res: Response, next: NextFunction) => {
+    const careerPathId = parseInt(req.params.careerPathId as string);
+
+    if (isNaN(careerPathId) || careerPathId < 1) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã lộ trình không hợp lệ!"));
+    }
+    // @ts-ignore
+    const user_id = req.user.id;
+    try {
+        const careerPath = await prisma.careerPaths.findFirst({
+            where: {
+                id: careerPathId,
+                user_id
+            },
+            include: {
+                jobSpecialized: {
+                    select: {
+                        job_type: true
+                    }
+                },
+                careerPathSteps: true,
+            }
+        });
+
+        if (!careerPath) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy lộ trình!"));
+        }
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: careerPath
+        })
+    }
+    catch (error) {
+        next(error);
+    }
+}

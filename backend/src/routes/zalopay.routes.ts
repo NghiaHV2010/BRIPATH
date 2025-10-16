@@ -88,7 +88,7 @@ zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async
                         });
 
                         const plan = await tx.membershipPlans.findFirst({
-                            where: { price: BigInt(amount) } // Default plan, adjust as needed
+                            where: { id: map?.plan_id! } // Default plan, adjust as needed
                         });
 
                         await tx.userActivitiesHistory.create({
@@ -114,6 +114,26 @@ zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async
                                     remaining_total_jobs: plan.total_jobs_limit!
                                 }
                             });
+                        }
+
+                        if (map?.company_id) {
+                            const tag = await tx.tags.findFirst({
+                                where: { label_name: "Đề xuất" }
+                            })
+
+                            if (tag) {
+                                await tx.companies.update({
+                                    where: { id: map.company_id! },
+                                    data: {
+                                        is_verified: true,
+                                        companyTags: {
+                                            create: {
+                                                tag_id: tag.id
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         }
                     });
                     await deleteZaloOrderMapping(prisma, app_trans_id);
@@ -164,8 +184,9 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                 const amount = dataJson.amount as number;
                 let appUser = dataJson.app_user as string | undefined;
                 const transId = dataJson.app_trans_id || dataJson.zp_trans_id?.toString();
+                let map: { user_id: string; amount: number; plan_id: number; company_id?: string } | null = null;
                 if (!appUser && dataJson.app_trans_id) {
-                    const map = await getZaloOrderMapping(prisma, dataJson.app_trans_id);
+                    map = await getZaloOrderMapping(prisma, dataJson.app_trans_id);
                     if (map) appUser = map.user_id;
                 }
                 const exists = await hasPaymentByTransactionId(prisma, transId);
@@ -192,8 +213,10 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                             }
                         });
 
+                        console.log(map);
+
                         const plan = await tx.membershipPlans.findFirst({
-                            where: { price: BigInt(amount) } // Check bang 
+                            where: { id: map?.plan_id }
                         });
 
                         await tx.userActivitiesHistory.create({
@@ -221,11 +244,25 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                             });
                         }
 
-                        // await tx.companyTags.create({
-                        //     data: {
+                        if (map?.company_id) {
+                            const tag = await tx.tags.findFirst({
+                                where: { label_name: "Đề xuất" }
+                            })
 
-                        //     }
-                        // })
+                            if (tag) {
+                                await tx.companies.update({
+                                    where: { id: map.company_id! },
+                                    data: {
+                                        is_verified: true,
+                                        companyTags: {
+                                            create: {
+                                                tag_id: tag.id
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
                     });
                     if (dataJson.app_trans_id) {
                         await deleteZaloOrderMapping(prisma, dataJson.app_trans_id);

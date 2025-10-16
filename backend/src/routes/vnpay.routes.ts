@@ -66,14 +66,17 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                 let userId = (req.user?.id as string | undefined);
                 const exists = await hasPaymentByTransactionId(prisma, txnRef);
                 if (!exists) {
+                    let dbMap: { user_id: string, amount: number, plan_id: number, company_id?: string } | null = null;
                     if (!userId) {
                         // Fallback: try mapping from memory or DB
                         let mapping = vnpayOrderMapping.get(txnRef);
                         if (!mapping) {
-                            const dbMap = await getVnpOrderMapping(prisma, txnRef);
+                            dbMap = await getVnpOrderMapping(prisma, txnRef);
                             if (dbMap) mapping = dbMap;
                         }
                         userId = mapping?.user_id;
+                        console.log(dbMap);
+
                     }
                     if (userId) {
                         await prisma.$transaction(async (tx) => {
@@ -99,7 +102,7 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                             });
 
                             const plan = await tx.membershipPlans.findFirst({
-                                where: { price: BigInt(amount) } // Default plan, adjust as needed
+                                where: { id: dbMap?.plan_id! } // Default plan, adjust as needed
                             });
 
                             await tx.userActivitiesHistory.create({
@@ -125,6 +128,26 @@ vnPayRouter.get('/return', async (req: Request, res: Response) => {
                                         remaining_total_jobs: plan.total_jobs_limit!
                                     }
                                 });
+                            }
+
+                            if (dbMap?.company_id) {
+                                const tag = await tx.tags.findFirst({
+                                    where: { label_name: "Đề xuất" }
+                                })
+
+                                if (tag) {
+                                    await tx.companies.update({
+                                        where: { id: dbMap.company_id! },
+                                        data: {
+                                            is_verified: true,
+                                            companyTags: {
+                                                create: {
+                                                    tag_id: tag.id
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         });
                         vnpayOrderMapping.delete(txnRef);
@@ -210,8 +233,10 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
                 const exists = await hasPaymentByTransactionId(prisma, orderId);
                 if (!exists) {
                     let mapping = vnpayOrderMapping.get(orderId);
+
+                    let dbMap: { user_id: string, amount: number, plan_id: number, company_id?: string } | null = null;
                     if (!mapping) {
-                        const dbMap = await getVnpOrderMapping(prisma, orderId);
+                        dbMap = await getVnpOrderMapping(prisma, orderId);
                         if (dbMap) mapping = dbMap;
                     }
                     await prisma.$transaction(async (tx) => {
@@ -237,7 +262,7 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
                         });
 
                         const plan = await tx.membershipPlans.findFirst({
-                            where: { price: BigInt(amount) } // Default plan, adjust as needed
+                            where: { id: dbMap?.plan_id! } // Default plan, adjust as needed
                         });
 
                         await tx.userActivitiesHistory.create({
@@ -263,6 +288,26 @@ vnPayRouter.get('/ipn', async (req: Request, res: Response) => {
                                     remaining_total_jobs: plan.total_jobs_limit!
                                 }
                             });
+                        }
+
+                        if (dbMap?.company_id) {
+                            const tag = await tx.tags.findFirst({
+                                where: { label_name: "Đề xuất" }
+                            })
+
+                            if (tag) {
+                                await tx.companies.update({
+                                    where: { id: dbMap.company_id! },
+                                    data: {
+                                        is_verified: true,
+                                        companyTags: {
+                                            create: {
+                                                tag_id: tag.id
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         }
                     });
                     vnpayOrderMapping.delete(orderId);
