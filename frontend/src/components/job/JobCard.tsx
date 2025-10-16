@@ -23,8 +23,7 @@ export default function JobCard({
 }: JobCardProps) {
   const formatSalary = (salary?: string[], currency?: string) => {
     if (!salary || salary.length === 0) return "Competitive salary";
-    const salaryRange = salary[0];
-    return `${salaryRange} ${currency || "VND"}`;
+    return `${salary[0]} ${currency || "VND"}`;
   };
 
   const getStatusBadge = (status?: string) => {
@@ -78,6 +77,9 @@ export default function JobCard({
     onClick?.();
   };
 
+  // ✅ Check if user has applied
+  const hasApplied = (job.applicants?.length ?? 0) > 0;
+
   return (
     <Card
       onClick={handleCardClick}
@@ -108,9 +110,8 @@ export default function JobCard({
               </div>
             )}
 
-            {/* Job Title + Company */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+              <h3 className="text-base font-semibold text-gray-900 line-clamp-2">
                 {job.job_title}
               </h3>
             </div>
@@ -166,12 +167,15 @@ export default function JobCard({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onApply?.();
+                onClick?.(); // navigate sang job detail
               }}
-              className="shadow-sm rounded-md w-full sm:w-auto"
-              variant="emerald"
+              className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
+                  ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
+                  : "bg-emerald-400 text-white hover:bg-emerald-500"
+                }`}
+              disabled={hasApplied}
             >
-              Ứng tuyển
+              {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
             </Button>
           )}
         </div>

@@ -46,22 +46,24 @@ export default function JobList({ onJobClick }: JobListProps = {}) {
     );
   }
   return (
-    <div
-      className="
+    <div className="px-20">
+      <div
+        className="
   grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
-  gap-6
+  gap-4
 "
-    >
-      {jobs.map((job) => (
-        <JobCard
-          key={job.id}
-          job={job}
-          onClick={() => onJobClick?.(job.id)}
-          onSave={() => handleSaveJob(job.id)}
-          compact={false}
-          isSaved={job.isSaved || false}
-        />
-      ))}
+      >
+        {jobs.map((job) => (
+          <JobCard
+            key={job.id}
+            job={job}
+            onClick={() => onJobClick?.(job.id)}
+            onSave={() => handleSaveJob(job.id)}
+            compact={false}
+            isSaved={job.isSaved || false}
+          />
+        ))}
+      </div>
     </div>
   );
 }

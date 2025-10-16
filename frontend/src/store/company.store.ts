@@ -10,7 +10,8 @@ interface CompanyStore {
   isLoading: boolean;
 
   fetchCompanies: (page: number, userId?: string) => Promise<void>;
-  fetchCompanyDetail: (companyId: string, userId?: string, page?: number) => Promise<void>;
+
+  fetchCompanyDetail: (userId?: string, companyId: string,  page?: number) => Promise<void>;
   filterCompanies: (
     page: number,
     name?: string,
@@ -40,15 +41,21 @@ export const useCompanyStore = create<CompanyStore>((set) => ({
   },
 
   // Fetch single company detail
-  fetchCompanyDetail: async (companyId, userId, page = 1) => {
-    set({ isLoading: true });
-    try {
-      const data = await getCompanyDetails(companyId, userId, page);
-      set({ companyDetail: data, totalPages: data.totalPages });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+  fetchCompanyDetail: async (userId, companyId, page = 1) => {
+  set({ isLoading: true });
+  try {
+    const res = await getCompanyDetails(userId!, companyId!, page);
+    set({
+      companyDetail: res.data,
+      totalPages: res.totalPages,
+    });
+  } catch (err) {
+    console.error("❌ Lỗi khi gọi fetchCompanyDetail:", err);
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
 
   // Filter companies (search)
   filterCompanies: async (page, name, location, field, userId) => {

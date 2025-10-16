@@ -93,12 +93,32 @@ export default function JobsPage() {
     navigate(`/jobs/${jobId}`);
   };
 
-  const handleSaveJob = async (jobId: string) => {
-    const isSaved = checkIfSaved(jobId);
-    if (isSaved) await unsaveJob(jobId);
-    else await saveJob(jobId);
+  // Wrapper for JobFilters to match expected prop type
+  const handleJobClickFromFilters = (job: Job) => {
+    handleJobClick(job.id);
   };
 
+  // const handleSaveJob = async (jobId: string) => {
+  //   const isSaved = checkIfSaved(jobId);
+  //   if (isSaved) await unsaveJob(jobId);
+  //   else await saveJob(jobId);
+  // };
+
+  const handleSaveJob = async (jobId: string) => {
+    const isSaved = checkIfSaved(jobId);
+    if (isSaved) {
+      await unsaveJob(jobId);
+    } else {
+      await saveJob(jobId);
+    }
+    // Update filteredJobs' isSaved state immediately for UI feedback
+    // (Zustand store does not update filteredJobs on save/unsave by default)
+    useJobStore.setState((state) => ({
+      filteredJobs: state.filteredJobs.map((job) =>
+        job.id === jobId ? { ...job, isSaved: !isSaved } : job
+      ),
+    }));
+  };
   const handleResetFilter = async () => {
     clearFilteredJobs();
     setFilterPage(1);
@@ -109,7 +129,7 @@ export default function JobsPage() {
       {/* Filters */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16 px-4 mb-8">
         <div className="max-w-[1500px] mx-auto flex justify-center">
-          <JobFilters onJobClick={() => handleJobClick} />
+          <JobFilters onJobClick={() => handleJobClickFromFilters} />
         </div>
       </div>
 
@@ -164,18 +184,19 @@ export default function JobsPage() {
                 Xóa bộ lọc
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedFilteredJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onClick={() => handleJobClick(job.id)}
-                  onSave={() => handleSaveJob(job.id)}
-                  compact={false}
-                  isSaved={job.isSaved || false}
-                />
-              ))}
+            <div className="px-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {paginatedFilteredJobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onClick={() => handleJobClick(job.id)}
+                    onSave={() => handleSaveJob(job.id)}
+                    compact={false}
+                    isSaved={job.isSaved || false}
+                  />
+                ))}
+              </div>
             </div>
 
             <JobPagination

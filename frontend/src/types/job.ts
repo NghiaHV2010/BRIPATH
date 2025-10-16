@@ -1,3 +1,4 @@
+import { applicants } from './../../../backend/src/generated/prisma/index.d';
 export type JobCategory = {
   job_category: string;
 };
@@ -34,6 +35,13 @@ export interface Job {
   }>; // Array từ backend khi truyền userId
   avatar_url?: string;
   label_name?: string;
+}>
+  applicants ?: Array<{
+    cv_id?: number;
+    apply_date: string;
+    status: string;
+    description?: string;
+  }>; 
 }
 
 
@@ -57,7 +65,6 @@ export interface JobDetail extends Job {
     label_name?: "Việc gấp" | "Việc Hot" | "Việc chất";
   }
   company_id?: string;
-
   companies?: {
     id: string;
     users: {
@@ -70,6 +77,12 @@ export interface JobDetail extends Job {
     };
     fields?: { field_name: string } | null;
   };
+  applicants?: Array<{
+    cv_id?: number;
+    apply_date: string;
+    status: string;
+    description?: string;
+  }>;
 }
 
 export interface FetchJobParams {
