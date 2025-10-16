@@ -80,3 +80,40 @@ export const getAllActivities = async (page: number): Promise<ActivityResponse |
   }
   return response.data;
 }
+
+export const followCompanyApi = async (
+  companyId: string
+): Promise<{ success: boolean; message: string; data?: any | null }> => {
+  try {
+    const response = await axiosConfig.get(`/follow-company/${companyId}`);
+    console.log("Followed company:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error following company:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const unfollowCompanyApi = async (
+  companyId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axiosConfig.delete(`/follow-company/${companyId}`);
+    console.log("Unfollowed company:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error unfollowing company:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getFollowedCompanies = async (): Promise<{ success: boolean; data: any[] }> => {
+  try {
+    const response = await axiosConfig.get('/followed-companies');
+    const companies = (response.data?.data || []).map((item: any) => item?.companies).filter(Boolean);
+    return { success: true, data: companies };
+  } catch (error: any) {
+    console.error("Error fetching followed companies:", error.response?.data || error.message);
+    return { success: false, data: [] };
+  }
+};
