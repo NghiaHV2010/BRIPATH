@@ -1,4 +1,4 @@
-import { applicants } from './../../../backend/src/generated/prisma/index.d';
+
 export type JobCategory = {
   job_category: string;
 };
@@ -35,13 +35,12 @@ export interface Job {
   }>; // Array từ backend khi truyền userId
   avatar_url?: string;
   label_name?: string;
-}>
-  applicants ?: Array<{
+  applicants?: Array<{
     cv_id?: number;
     apply_date: string;
     status: string;
     description?: string;
-  }>; 
+  }>;
 }
 
 

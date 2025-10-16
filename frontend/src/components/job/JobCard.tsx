@@ -100,7 +100,7 @@ export default function JobCard({
             {/* Avatar */}
             {(job.companies?.users?.avatar_url || job?.avatar_url) ? (
               <img
-                src={job?.companies?.users?.avatar_url || job.avatar_url}
+                src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
               />
@@ -170,8 +170,8 @@ export default function JobCard({
                 onClick?.(); // navigate sang job detail
               }}
               className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
-                  ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
-                  : "bg-emerald-400 text-white hover:bg-emerald-500"
+                ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
+                : "bg-emerald-400 text-white hover:bg-emerald-500"
                 }`}
               disabled={hasApplied}
             >
