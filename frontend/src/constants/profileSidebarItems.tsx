@@ -7,6 +7,7 @@ import {
     BriefcaseBusiness,
     User,
     Bookmark,
+    UserRoundCheck,
 } from 'lucide-react';
 
 interface CompanyMenuItem {
@@ -39,5 +40,6 @@ export const UserMenuItems: UserMenuItem[] = [
     { label: 'Việc làm đã ứng tuyển', icon: <BriefcaseBusiness className="w-4 h-4" />, badge: 5, href: '/jobs/applied' },
     { label: 'Công việc đã lưu', icon: <Bookmark className="w-4 h-4" />, href: '/jobs/saved' },
     { label: 'Thông báo', icon: <Bell className="w-4 h-4" />, badge: 1, href: '/notifications' },
+    { label: 'Công ty đã theo dõi', icon: <UserRoundCheck className="w-4 h-4" />, href: '/profile/followed-companies' },
     { label: 'Cài đặt', icon: <Settings className="w-4 h-4" />, href: '/settings' },
 ];

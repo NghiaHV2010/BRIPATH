@@ -166,7 +166,9 @@ function App() {
           path="/profile/followed-companies"
           element={
             <ProtectedRoute>
-              <FollowedCompaniesPage />
+              <ProfileLayout>
+                <FollowedCompaniesPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />

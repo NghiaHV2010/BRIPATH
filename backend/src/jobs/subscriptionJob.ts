@@ -12,7 +12,7 @@ cron.schedule("* * * * *", async () => {
 
     console.log(`⏰ Checking for urgent jobs at ${vietnamTime.toLocaleTimeString("vi-VN")}`);
 
-    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 23);
+    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 24);
 
     if (isGoldenHour) {
         const urgentJobs = await prisma.$queryRaw`
