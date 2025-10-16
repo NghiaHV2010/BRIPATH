@@ -40,6 +40,7 @@ export function CompanyProfileSidebar({
         { label: 'Quản lí hồ sơ', icon: <FileText className="w-4 h-4" /> },
         { label: 'Việc làm đã ứng tuyển', icon: <Briefcase className="w-4 h-4" /> },
         { label: 'Việc làm đã lưu', icon: <BookmarkCheck className="w-4 h-4" /> },
+        { label: 'Công ty đã lưu', icon: <BookmarkCheck className="w-4 h-4" /> },
         { label: 'Việc làm phù hợp', icon: <Search className="w-4 h-4" /> },
         { label: 'Đăng ký tuyển dụng', icon: <Plus className="w-4 h-4" /> },
     ];

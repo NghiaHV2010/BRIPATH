@@ -202,6 +202,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Việc làm đã lưu</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile/followed-companies")}>
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    <span>Công ty đã lưu</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/cv/suitable")}>
                     <Search className="mr-2 h-4 w-4" />
                     <span>Việc làm phù hợp</span>

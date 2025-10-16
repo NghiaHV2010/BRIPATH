@@ -26,6 +26,7 @@ import AdminRoute from "./components/auth/AdminRoute";
 import SettingsPage from "./pages/settings/settingsPage";
 import AppliedJobsPage from "./pages/jobs/appliedJobsPage";
 import SavedJobsPageProfile from "./pages/profile/savedJobsPage";
+import FollowedCompaniesPage from "./pages/profile/followedCompaniesPage";
 import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
 import { Loader } from "lucide-react";
@@ -146,6 +147,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CVSuitableJobsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/followed-companies"
+          element={
+            <ProtectedRoute>
+              <FollowedCompaniesPage />
             </ProtectedRoute>
           }
         />
