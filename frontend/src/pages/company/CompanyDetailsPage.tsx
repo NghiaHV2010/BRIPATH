@@ -23,8 +23,10 @@ import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
 import { CompanyDetailSkeleton } from "../../components/company";
 import CompanyMap from "@/components/utils/CompanyMap";
-import { followCompany, getCompanyDetails } from "@/api/company_api";
-import { useAuthStore } from "@/store";
+import { getCompanyDetails } from "@/api/company_api";
+import { useAuthStore } from "../../store/auth";
+import { useCompanyStore } from "../../store/company.store";
+import { LoginDialog } from "../../components/login/LoginDialog";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -33,10 +35,15 @@ export default function CompanyDetailsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isFollowed, setIsFollowed] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const {
+    followCompany: followCompanyStore,
+    unfollowCompany: unfollowCompanyStore,
+  } = useCompanyStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthStore();
-  const userId = user?.id; // 👈 lấy userId trực tiếp
+  const authUser = useAuthStore((s) => s.authUser);
+  const userId = authUser?.id; // 👈 lấy userId trực tiếp
 
   // Khôi phục vị trí scroll khi quay lại
   const navigationState = location.state as {
@@ -56,6 +63,11 @@ export default function CompanyDetailsPage() {
         );
         setCompanyDetail(res.data);
         setTotalPages(res.totalPages);
+        // Initialize follow state from backend response
+        setIsFollowed(
+          Array.isArray(res.data?.followedCompanies) &&
+            res.data.followedCompanies.length > 0
+        );
       } catch (err) {
         console.error("Error fetching company details:", err);
       } finally {
@@ -66,12 +78,23 @@ export default function CompanyDetailsPage() {
   }, [companyId, currentPage, userId]);
 
   const handleFollow = async () => {
-    if (!userId) return;
+    if (!authUser) {
+      setLoginOpen(true);
+      return;
+    }
+
+    if (!companyId) return;
+
     try {
-      const res = await followCompany(companyId ?? "");
-      setIsFollowed(res?.isFollowed ?? true); // backend trả gì thì cập nhật
+      if (isFollowed) {
+        await unfollowCompanyStore(companyId);
+        setIsFollowed(false);
+      } else {
+        await followCompanyStore(companyId);
+        setIsFollowed(true);
+      }
     } catch (err) {
-      console.error("Error following company:", err);
+      console.error("Error following/unfollowing company:", err);
     }
   };
 
@@ -183,11 +206,8 @@ export default function CompanyDetailsPage() {
                 <div className="flex gap-4 items-center">
                   <Button
                     onClick={handleFollow}
-                    disabled={isFollowed}
                     className={
-                      isFollowed
-                        ? "bg-red-400 cursor-not-allowed"
-                        : "!bg-white-600"
+                      isFollowed ? "!bg-blue-400" : "!bg-white !text-blue-600"
                     }
                   >
                     {isFollowed ? "Đã theo dõi" : "Theo dõi công ty"}
@@ -398,6 +418,12 @@ export default function CompanyDetailsPage() {
           </div>
         </div>
       </div>
+      {/* Login Dialog for follow action when unauthenticated */}
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        redirectTo={window.location.pathname}
+      />
     </Layout>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -24,6 +24,8 @@ import { Separator } from "../../components/ui/separator";
 import { useJobStore } from "../../store/job.store";
 import { JobDetailSkeleton } from "../../components/job";
 import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
+import { LoginDialog } from "../../components/login/LoginDialog";
+import { useAuthStore } from "../../store/auth";
 
 export default function JobDetailsPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -38,6 +40,10 @@ export default function JobDetailsPage() {
     checkIfSaved,
   } = useJobStore();
   const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const pendingActionRef = useRef<null | "apply" | "save">(null);
+
+  const authUser = useAuthStore((s) => s.authUser);
 
   // Safe isSaved
   const isSaved = !!(selectedJob?.isSaved || (jobId && checkIfSaved(jobId)));
@@ -58,6 +64,31 @@ export default function JobDetailsPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Resume pending action after successful login
+  useEffect(() => {
+    if (authUser && pendingActionRef.current) {
+      const action = pendingActionRef.current;
+      pendingActionRef.current = null;
+
+      if (action === "apply") {
+        setLoginOpen(false);
+        setShowApplyDialog(true);
+      } else if (action === "save") {
+        setLoginOpen(false);
+        // trigger save flow
+        if (jobId) {
+          // fire and forget
+          (async () => {
+            if (isSaved) await unsaveJob(jobId);
+            else await saveJob(jobId);
+          })();
+        }
+      }
+    }
+    // Only watch authUser
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUser]);
 
   if (isLoading || !selectedJob) {
     return (
@@ -82,10 +113,8 @@ export default function JobDetailsPage() {
     quantity = 1,
     skill_tags = [],
     education = "",
-    start_date,
     end_date,
     companies,
-    jobCategories,
   } = selectedJob;
 
   const salary =
@@ -109,14 +138,19 @@ export default function JobDetailsPage() {
       }
     : null;
 
-  const jobCategory = jobCategories?.job_category || "";
-
   const formatDeadline = () => {
     if (!end_date) return "Không giới hạn";
     return new Date(end_date).toLocaleDateString("vi-VN");
   };
 
   const handleApply = () => {
+    // If user is not logged in, open login dialog instead of apply dialog
+    if (!authUser) {
+      pendingActionRef.current = "apply";
+      setLoginOpen(true);
+      return;
+    }
+
     setShowApplyDialog(true);
   };
 
@@ -128,6 +162,14 @@ export default function JobDetailsPage() {
 
   const handleSave = async () => {
     if (!jobId) return;
+
+    // Require login for saving jobs
+    if (!authUser) {
+      pendingActionRef.current = "save";
+      setLoginOpen(true);
+      return;
+    }
+
     if (isSaved) await unsaveJob(jobId);
     else await saveJob(jobId);
   };
@@ -256,51 +298,56 @@ export default function JobDetailsPage() {
                       </Button>
                       <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 hidden group-hover:block z-50">
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                        {selectedJob.applicants.map((a: any, idx: number) => {
-                          const applyDate = new Date(a.apply_date);
-                          const date = applyDate.toLocaleDateString("vi-VN", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          });
-                          const time = applyDate.toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          });
+                        {selectedJob.applicants.map(
+                          (
+                            a: { apply_date: string; description?: string },
+                            idx: number
+                          ) => {
+                            const applyDate = new Date(a.apply_date);
+                            const date = applyDate.toLocaleDateString("vi-VN", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            });
+                            const time = applyDate.toLocaleTimeString("vi-VN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            });
 
-                          return (
-                            <div
-                              key={idx}
-                              className="bg-white text-black rounded-lg shadow-xl p-4 min-w-[280px] text-sm space-y-2 border border-gray-300"
-                            >
-                              <div className="flex flex-wrap gap-4">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4 text-black" />
-                                  <span>
-                                    Ngày ứng tuyển: <strong>{date}</strong>
-                                  </span>
+                            return (
+                              <div
+                                key={idx}
+                                className="bg-white text-black rounded-lg shadow-xl p-4 min-w-[280px] text-sm space-y-2 border border-gray-300"
+                              >
+                                <div className="flex flex-wrap gap-4">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-4 h-4 text-black" />
+                                    <span>
+                                      Ngày ứng tuyển: <strong>{date}</strong>
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-4 h-4 text-black" />
+                                    <span>
+                                      Thời gian: <strong>{time}</strong>
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4 text-black" />
-                                  <span>
-                                    Thời gian: <strong>{time}</strong>
-                                  </span>
-                                </div>
+
+                                {a.description && (
+                                  <div className="pt-1">
+                                    <div className="font-semibold mb-1">
+                                      Cover letter:
+                                    </div>
+                                    <div className="text-black leading-relaxed line-clamp-3">
+                                      {a.description}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-
-                              {a.description && (
-                                <div className="pt-1">
-                                  <div className="font-semibold mb-1">
-                                    Cover letter:
-                                  </div>
-                                  <div className="text-black leading-relaxed line-clamp-3">
-                                    {a.description}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
+                            );
+                          }
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -549,6 +596,8 @@ export default function JobDetailsPage() {
             onSuccess={handleApplySuccess}
           />
         )}
+        {/* Login Dialog shown when unauthenticated users try to apply or save */}
+        <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
       </div>
     </Layout>
   );
