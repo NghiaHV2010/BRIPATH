@@ -26,6 +26,7 @@ import { JobDetailSkeleton } from "../../components/job";
 import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
+import { toast } from "sonner";
 
 export default function JobDetailsPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -170,8 +171,17 @@ export default function JobDetailsPage() {
       return;
     }
 
-    if (isSaved) await unsaveJob(jobId);
-    else await saveJob(jobId);
+    if (isSaved) {
+      await unsaveJob(jobId);
+      toast.success("Hủy lưu công việc thành công", {
+        duration: 3000,
+      });
+    } else {
+      await saveJob(jobId);
+      toast.success("Lưu công việc thành công", {
+        duration: 3000,
+      });
+    }
   };
 
   const handleShare = () => navigator.clipboard.writeText(window.location.href);
@@ -214,9 +224,14 @@ export default function JobDetailsPage() {
                 <Share2 className="w-4 h-4" />
               </Button>
               <Button
-                variant={isSaved ? "default" : "outline"}
+                variant={isSaved ? "outline" : "outline"}
                 size="sm"
                 onClick={handleSave}
+                className={
+                  isSaved
+                    ? "bg-white text-red-500 border-red-500 hover:bg-red-50"
+                    : ""
+                }
               >
                 <Heart
                   className={`w-4 h-4 mr-2 ${isSaved ? "fill-current" : ""}`}
@@ -317,29 +332,41 @@ export default function JobDetailsPage() {
                             return (
                               <div
                                 key={idx}
-                                className="bg-white text-black rounded-lg shadow-xl p-4 min-w-[280px] text-sm space-y-2 border border-gray-300"
+                                className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-5 min-w-[280px] border border-gray-200 hover:border-gray-300"
                               >
-                                <div className="flex flex-wrap gap-4">
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4 text-black" />
-                                    <span>
-                                      Ngày ứng tuyển: <strong>{date}</strong>
+                                {/* Header with date/time info */}
+                                <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-100">
+                                  <div className="flex items-center gap-2 text-gray-700">
+                                    <Calendar className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm">
+                                      <span className="text-gray-500">
+                                        Ngày ứng tuyển:
+                                      </span>{" "}
+                                      <strong className="text-gray-900 font-semibold">
+                                        {date}
+                                      </strong>
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4 text-black" />
-                                    <span>
-                                      Thời gian: <strong>{time}</strong>
+                                  <div className="flex items-center gap-2 text-gray-700">
+                                    <Calendar className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm">
+                                      <span className="text-gray-500">
+                                        Thời gian:
+                                      </span>{" "}
+                                      <strong className="text-gray-900 font-semibold">
+                                        {time}
+                                      </strong>
                                     </span>
                                   </div>
                                 </div>
 
+                                {/* Cover letter section */}
                                 {a.description && (
-                                  <div className="pt-1">
-                                    <div className="font-semibold mb-1">
+                                  <div className="pt-4">
+                                    <div className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                                       Cover letter:
                                     </div>
-                                    <div className="text-black leading-relaxed line-clamp-3">
+                                    <div className="text-sm text-gray-600 leading-relaxed line-clamp-3">
                                       {a.description}
                                     </div>
                                   </div>

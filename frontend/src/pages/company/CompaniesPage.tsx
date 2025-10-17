@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Building2 } from "lucide-react";
+// lucide icons not required in this page
 import {
   CompanyList,
   CompanyFilters,
@@ -12,9 +12,16 @@ import { Layout } from "../../components/layout";
 
 export default function CompaniesPage() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterPage, setFilterPage] = useState(1);
 
-  const { companies, isLoading, totalPages, fetchCompanies } =
-    useCompanyStore();
+  const {
+    companies,
+    filteredCompanies,
+    isLoading,
+    totalPages,
+    fetchCompanies,
+    clearFilteredCompanies,
+  } = useCompanyStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,6 +49,17 @@ export default function CompaniesPage() {
       }
     }
   }, [location.pathname, currentPage]);
+
+  // Clear filtered search results when entering or leaving CompaniesPage
+  useEffect(() => {
+    // clear on mount (in case user refreshed or navigated here with stale filters)
+    clearFilteredCompanies();
+    return () => {
+      // clear on unmount (when navigating away)
+      clearFilteredCompanies();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Restore states when returning from company detail (run once on mount)
   useEffect(() => {
@@ -81,32 +99,77 @@ export default function CompaniesPage() {
 
   const featuredCompanies = companies.slice(0, 6);
 
+  const companiesPerFilterPage = 9;
+  const totalFilterPages = Math.ceil(
+    filteredCompanies.length / companiesPerFilterPage
+  );
+  const paginatedFilteredCompanies = filteredCompanies.slice(
+    (filterPage - 1) * companiesPerFilterPage,
+    filterPage * companiesPerFilterPage
+  );
+
+  const handleResetFilter = async () => {
+    clearFilteredCompanies();
+    setFilterPage(1);
+    // Refresh companies to first page
+    await fetchCompanies(1);
+  };
+
   return (
     <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-4 mb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <Building2 className="w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Explore Companies</h1>
-              <p className="text-blue-100 text-lg">
-                Discover top companies and find your next opportunity
-              </p>
+          {/* Filters (moved into hero, centered like JobsPage) */}
+          <div className="mt-8 max-w-[1500px] mx-auto">
+            <div className="flex justify-center">
+              <CompanyFilters />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Filtered companies (from CompanyFilters) */}
+      {filteredCompanies && filteredCompanies.length > 0 && (
+        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-12">
+          <div className="max-w-[1700px] mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-green-800 text-2xl font-semibold">
+                Tìm thấy {filteredCompanies.length} công ty phù hợp
+              </h2>
+              <button
+                onClick={handleResetFilter}
+                className="text-slate-600 hover:text-slate-900 flex items-center gap-2"
+              >
+                Xóa bộ lọc
+              </button>
+            </div>
+
+            <div className="px-10">
+              <CompanyList
+                companies={paginatedFilteredCompanies}
+                onCompanyClick={handleCompanyClick}
+              />
+            </div>
+
+            <CompanyPagination
+              currentPage={filterPage}
+              totalPages={totalFilterPages}
+              onPageChange={setFilterPage}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 pb-12">
-        <CompanyFilters onCompanyClick={handleCompanyClick} />
         {featuredCompanies.length > 0 && (
-          <CompanyCarousel
-            companies={featuredCompanies}
-            onCompanyClick={handleCompanyClick}
-            title="Featured Companies"
-          />
+          <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
+            <CompanyCarousel
+              companies={featuredCompanies}
+              onCompanyClick={handleCompanyClick}
+              title="Featured Companies"
+            />
+          </div>
         )}
 
         {isLoading ? (
@@ -118,20 +181,23 @@ export default function CompaniesPage() {
           </div>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-6">
-              Các công ty đang liên kết với{" "}
-              <span className="text-blue-600">BriPath</span>
-            </h2>
-            <CompanyList
-              companies={companies}
-              onCompanyClick={handleCompanyClick}
-            />
-            <CompanyPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={loadCompanies}
-              isLoading={isLoading}
-            />
+            <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-8">
+              <div className="max-w-[1700px] mx-auto">
+                <h2 className="text-2xl font-bold text-slate-900 mt-6 mb-6">
+                  Các công ty đang liên kết với{" "}
+                  <span className="text-blue-600">BriPath</span>
+                </h2>
+
+                <CompanyList onCompanyClick={handleCompanyClick} />
+
+                <CompanyPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={loadCompanies}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
           </>
         )}
       </div>

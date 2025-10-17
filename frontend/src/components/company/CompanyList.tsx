@@ -1,13 +1,24 @@
 import { useCompanyStore } from "../../store/company.store";
 import CompanyCard from "./CompanyCard";
+import type { CompanySummary } from "@/types/company";
 
 interface CompanyListProps {
+  companies?: (CompanySummary & { isFollowed?: boolean })[];
   onCompanyClick?: (companyId: string) => void;
 }
 
-export default function CompanyList({ onCompanyClick }: CompanyListProps = {}) {
-  const { companies, isLoading, followCompany, unfollowCompany, checkIfFollowed } =
-    useCompanyStore();
+export default function CompanyList({
+  companies: companiesProp,
+  onCompanyClick,
+}: CompanyListProps = {}) {
+  const {
+    companies,
+    isLoading,
+    followCompany,
+    unfollowCompany,
+    checkIfFollowed,
+  } = useCompanyStore();
+  const list = companiesProp ?? companies;
 
   const handleFollow = async (companyId: string) => {
     const isFollowed = checkIfFollowed(companyId);
@@ -31,7 +42,7 @@ export default function CompanyList({ onCompanyClick }: CompanyListProps = {}) {
     );
   }
 
-  if (!companies || companies.length === 0) {
+  if (!list || list.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -61,7 +72,7 @@ export default function CompanyList({ onCompanyClick }: CompanyListProps = {}) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {companies.map((company) => (
+      {list.map((company) => (
         <CompanyCard
           key={company.id}
           company={company}

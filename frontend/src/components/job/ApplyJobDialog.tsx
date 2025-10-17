@@ -19,7 +19,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { AlertCircle, FileText, Loader2, Upload } from "lucide-react";
 import { applyjob, getUserCVs, type CV } from "@/api/job_api";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
 import { uploadUserCV } from "@/api/cv_api";
 
 interface ApplyJobDialogProps {
@@ -45,7 +45,6 @@ export function ApplyJobDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
@@ -96,9 +95,9 @@ export function ApplyJobDialog({
 
     try {
       await uploadUserCV(file);
-      toast({
-        title: "Upload thành công",
+      toast.success("Upload thành công", {
         description: "CV của bạn đã được tải lên.",
+        duration: 3000,
       });
       // Reload CVs after successful upload
       await loadCVs();
@@ -108,6 +107,12 @@ export function ApplyJobDialog({
           "Có lỗi xảy ra khi tải CV. Vui lòng thử lại."
       );
       console.error(err);
+      toast.error("Lỗi khi tải CV", {
+        description:
+          (err?.response?.data?.message as string) ||
+          "Có lỗi xảy ra khi tải CV. Vui lòng thử lại.",
+        duration: 3000,
+      });
     } finally {
       setIsUploading(false);
       // Reset file input
@@ -128,9 +133,9 @@ export function ApplyJobDialog({
 
     try {
       await applyjob(jobId, parseInt(selectedCvId), coverLetter || undefined);
-      toast({
-        title: "Ứng tuyển thành công",
+      toast.success("Ứng tuyển thành công", {
         description: "Đơn ứng tuyển của bạn đã được gửi đi.",
+        duration: 3000,
       });
       onSuccess();
       onOpenChange(false);
@@ -140,6 +145,12 @@ export function ApplyJobDialog({
         err.response?.data?.message ||
           "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại."
       );
+      toast.error("Ứng tuyển thất bại", {
+        description:
+          (err?.response?.data?.message as string) ||
+          "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại.",
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }

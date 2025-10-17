@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Building2,
-  MapPin,
-  Briefcase,
-  Bookmark,
-  BookmarkCheck,
-} from "lucide-react";
+import { Building2, MapPin, Briefcase, Bookmark } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { CompanyTypeMap, mapEnumValue } from "../../utils/mapping";
@@ -13,18 +7,29 @@ import type { CompanySummary } from "../../types/company";
 import { useCompanyStore } from "../../store/company.store";
 import { useAuthStore } from "../../store/auth";
 import { LoginDialog } from "../login/LoginDialog";
+import { toast } from "sonner";
 
 interface CompanyCardProps {
   company: CompanySummary;
   onClick?: () => void;
+  onFollow?: () => void;
+  isFollowed?: boolean;
 }
 
-export default function CompanyCard({ company, onClick }: CompanyCardProps) {
+export default function CompanyCard({
+  company,
+  onClick,
+  onFollow,
+  isFollowed: isFollowedProp,
+}: CompanyCardProps) {
   const { users, company_type, _count, is_verified } = company;
 
   // 🌟 Store
   const { checkIfFollowed, followCompany, unfollowCompany } = useCompanyStore();
-  const isFollowed = checkIfFollowed(company.id);
+  const isFollowed =
+    typeof isFollowedProp === "boolean"
+      ? isFollowedProp
+      : checkIfFollowed(company.id);
 
   const authUser = useAuthStore((s) => s.authUser);
 
@@ -34,19 +39,26 @@ export default function CompanyCard({ company, onClick }: CompanyCardProps) {
   const getCompanyTypeDisplay = (type?: string) =>
     mapEnumValue(CompanyTypeMap, type as keyof typeof CompanyTypeMap);
 
-  const handleFollowClick = (e: React.MouseEvent) => {
+  const handleFollowClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!authUser) {
-      // Nếu chưa login, mở dialog
       setLoginOpen(true);
       return;
     }
 
+    if (onFollow) {
+      // If parent provided an onFollow handler prefer it
+      await onFollow();
+      return;
+    }
+
     if (isFollowed) {
-      unfollowCompany(company.id);
+      await unfollowCompany(company.id);
+      toast.success("Đã bỏ theo dõi công ty", { duration: 3000 });
     } else {
-      followCompany(company.id);
+      await followCompany(company.id);
+      toast.success("Đã theo dõi công ty", { duration: 3000 });
     }
   };
 
@@ -65,11 +77,11 @@ export default function CompanyCard({ company, onClick }: CompanyCardProps) {
             onClick={handleFollowClick}
             className="absolute top-2 right-2 bg-blue-600 p-2 rounded-full shadow cursor-pointer hover:bg-blue-700 transition"
           >
-            {isFollowed ? (
-              <BookmarkCheck className="w-5 h-5 text-white" />
-            ) : (
-              <Bookmark className="w-5 h-5 text-white" />
-            )}
+            <Bookmark
+              className={`w-5 h-5 text-white transition-colors ${
+                isFollowed ? "fill-white" : ""
+              }`}
+            />
           </div>
         </div>
 

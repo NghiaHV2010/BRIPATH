@@ -12,25 +12,17 @@ import { useCompanyStore } from "@/store/company.store";
 import { fetchFields } from "@/api/company_api";
 import type { CompanyField } from "@/types/company";
 
-interface CompanyFiltersProps {
-  userId?: string;
-}
-
-export default function CompanyFilters({ userId }: CompanyFiltersProps) {
+export default function CompanyFilters() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedField, setSelectedField] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [page, setPage] = useState(1);
+
+  const [selectedSize, setSelectedSize] = useState("");
   const [fields, setFields] = useState<CompanyField[]>([]);
 
-  const {
-    filterCompanies,
-    clearFilteredCompanies,
-    fetchCompanies,
-    isLoading,
-    filteredCompanies,
-  } = useCompanyStore();
+  const { filterCompanies, clearFilteredCompanies, fetchCompanies, isLoading } =
+    useCompanyStore();
 
   // ✅ Load danh sách field (ngành nghề)
   useEffect(() => {
@@ -51,14 +43,12 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
     if (!searchTerm.trim() && !selectedLocation && !selectedField) return;
 
     setIsSearching(true);
-    setPage(1);
 
     await filterCompanies(
       1,
       searchTerm.trim(),
       selectedLocation,
-      selectedField,
-      userId
+      selectedField
     );
   };
 
@@ -68,9 +58,8 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
     setSelectedLocation("");
     setSelectedField("");
     setIsSearching(false);
-    setPage(1);
     clearFilteredCompanies();
-    await fetchCompanies(1, userId);
+    await fetchCompanies(1);
   };
 
   return (
@@ -92,7 +81,7 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
               placeholder="Nhập tên công ty..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 text-lg border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full pl-12 pr-4 py-4 text-lg border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
             />
           </div>
           <Button
@@ -110,14 +99,14 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
         </div>
 
         {/* Advanced Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {/* Location */}
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white"
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
             >
               <option value="">Tất cả địa điểm</option>
               <option value="Hồ Chí Minh">Hồ Chí Minh</option>
@@ -133,7 +122,7 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
             <select
               value={selectedField}
               onChange={(e) => setSelectedField(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white"
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
             >
               <option value="">Tất cả lĩnh vực</option>
               {fields.map((f) => (
@@ -141,6 +130,22 @@ export default function CompanyFilters({ userId }: CompanyFiltersProps) {
                   {f.field_name}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Company size (layout parity) */}
+          <div className="relative">
+            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
+            >
+              <option value="">Tất cả quy mô</option>
+              <option value="1-10">1 - 10 nhân viên</option>
+              <option value="10-50">10 - 50 nhân viên</option>
+              <option value="50-200">50 - 200 nhân viên</option>
+              <option value="200+">200+ nhân viên</option>
             </select>
           </div>
         </div>

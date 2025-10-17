@@ -29,11 +29,8 @@ export default function JobCard({
   // Ref used to temporarily ignore card clicks (covers dialog overlay clicks)
   const ignoreClicksRef = useRef(false);
   const closeTimerRef = useRef<number | null>(null);
-
-  // Wrapper to open/close login dialog and manage ignore-clicks window
   const handleLoginOpenChange = (open: boolean) => {
     if (open) {
-      // when opening dialog, start ignoring underlying clicks
       ignoreClicksRef.current = true;
       // ensure any pending timer is cleared
       if (closeTimerRef.current) {
@@ -42,9 +39,7 @@ export default function JobCard({
       }
       setLoginOpen(true);
     } else {
-      // on close, keep ignoring clicks for a short grace period to swallow the closing click
       setLoginOpen(false);
-      // keep ignoring for 250ms then allow clicks again
       closeTimerRef.current = window.setTimeout(() => {
         ignoreClicksRef.current = false;
         closeTimerRef.current = null;
@@ -112,9 +107,7 @@ export default function JobCard({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Ignore clicks that originate from buttons
     if ((e.target as HTMLElement).closest("button")) return;
-    // If dialog was recently opened/closed, ignore this card click to avoid accidental navigation
     if (ignoreClicksRef.current) return;
     onClick?.();
   };

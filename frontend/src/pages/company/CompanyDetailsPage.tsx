@@ -27,6 +27,7 @@ import { getCompanyDetails } from "@/api/company_api";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
+import { toast } from "sonner";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -88,9 +89,15 @@ export default function CompanyDetailsPage() {
     try {
       if (isFollowed) {
         await unfollowCompanyStore(companyId);
+        toast.success("Đã bỏ theo dõi công ty", {
+          duration: 3000,
+        });
         setIsFollowed(false);
       } else {
         await followCompanyStore(companyId);
+        toast.success("Đã theo dõi công ty", {
+          duration: 3000,
+        });
         setIsFollowed(true);
       }
     } catch (err) {
