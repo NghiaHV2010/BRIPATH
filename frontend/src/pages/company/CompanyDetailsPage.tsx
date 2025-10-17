@@ -186,8 +186,8 @@ export default function CompanyDetailsPage() {
                     disabled={isFollowed}
                     className={
                       isFollowed
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-600"
+                        ? "bg-red-400 cursor-not-allowed"
+                        : "!bg-white-600"
                     }
                   >
                     {isFollowed ? "Đã theo dõi" : "Theo dõi công ty"}

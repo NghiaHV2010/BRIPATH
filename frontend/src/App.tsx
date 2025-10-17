@@ -207,7 +207,14 @@ function App() {
           }
         />
 
-        <Route path="*" element={<LoginPage />} />
+        <Route
+          path="*"
+          element={
+            <Layout showFooter={false}>
+              <HomePage />
+            </Layout>
+          }
+        />
       </Routes>
       <Toaster />
     </>

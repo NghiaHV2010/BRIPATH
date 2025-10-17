@@ -14,13 +14,13 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isChecking && !authUser) {
-      navigate("/login", {
+      navigate("/", {
         replace: true,
         state: { redirectTo: location.pathname + location.search },
       });
     }
   }, [authUser, isChecking, navigate, location]);
 
-  if (!authUser) return null; // while redirecting or checking
+  if (!authUser) return null;
   return <>{children}</>;
 }

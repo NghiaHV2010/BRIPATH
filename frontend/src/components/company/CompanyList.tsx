@@ -1,16 +1,37 @@
+import { useCompanyStore } from "../../store/company.store";
 import CompanyCard from "./CompanyCard";
-import type { CompanySummary } from "../../types/company";
 
 interface CompanyListProps {
-  companies: CompanySummary[];
   onCompanyClick?: (companyId: string) => void;
 }
 
-export default function CompanyList({
-  companies,
-  onCompanyClick,
-}: CompanyListProps) {
-  if (companies.length === 0) {
+export default function CompanyList({ onCompanyClick }: CompanyListProps = {}) {
+  const { companies, isLoading, followCompany, unfollowCompany, checkIfFollowed } =
+    useCompanyStore();
+
+  const handleFollow = async (companyId: string) => {
+    const isFollowed = checkIfFollowed(companyId);
+    if (isFollowed) {
+      await unfollowCompany(companyId);
+    } else {
+      await followCompany(companyId);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div
+            key={index}
+            className="animate-pulse bg-gray-100 rounded-lg h-48"
+          ></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!companies || companies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -29,10 +50,10 @@ export default function CompanyList({
           </svg>
         </div>
         <h3 className="text-xl font-semibold text-slate-900 mb-2">
-          No Companies Found
+          Không có công ty nào
         </h3>
         <p className="text-slate-600 max-w-md">
-          Try adjusting your filters or search criteria to find more companies.
+          Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm khác để xem thêm công ty.
         </p>
       </div>
     );
@@ -45,6 +66,8 @@ export default function CompanyList({
           key={company.id}
           company={company}
           onClick={() => onCompanyClick?.(company.id)}
+          onFollow={() => handleFollow(company.id)}
+          isFollowed={checkIfFollowed(company.id)}
         />
       ))}
     </div>

@@ -1,3 +1,4 @@
+
 import axiosConfig from "@/config/axios.config";
 import type { CompanyDetail, CompanySummary, CompanyField } from "@/types/company";
 // ========================
@@ -21,7 +22,6 @@ export const getAllCompanies = async (
   );
   return response.data;
 };
-
 // ========================
 // Get company details by ID
 // ========================
@@ -30,16 +30,12 @@ export const getCompanyDetails = async (
   userId: string,
   companyId: string,
   page: number = 1
-) => {
-  const res = await axiosConfig.get(`/company`, {
+): Promise<CompanyDetail> => {
+  const res = await axiosConfig.get<CompanyDetail>("/company", {
     params: { userId, companyId, page },
   });
 
-  return {
-    success: res.data?.success ?? true,
-    data: res.data?.data ?? {},
-    totalPages: res.data?.totalPages ?? 1,
-  };
+  return res.data;
 };
 
 
@@ -97,19 +93,37 @@ export const feedbackCV = async (
     saved_at: string;
   };
 }> => {
-  try {
-    const response = await axiosConfig.post(`/feedback/cv/${cvId}`, {
-      is_good,
-      job_id,
-    });
+  const response = await axiosConfig.post(`/feedback/cv/${cvId}`, {
+    is_good,
+    job_id,
+  });
 
-    return response.data;
-  } catch (error: unknown) {
-    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+  return response.data;
+};
+
+// ========================
+// follow company
+// ========================
+export const followCompany = async (companyId: number): Promise<{ success: boolean; data: any }> => {
+  try {
+    const response = await axiosConfig.get(`/follow-company/${companyId}`);
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    console.error("Error following company:", error.response?.data || error.message);
+    return { success: false, data: null };
   }
 };
 
-export const followCompany = async (companyId: string) => {
-  const res = await axiosConfig.get(`/follow-company/${companyId}`);
-  return res.data; // backend trả gì thì nhận nguyên
+
+export const unfollowCompany = async (
+  companyId: number
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axiosConfig.delete(`/follow-company/${companyId}`);
+    console.log("Unfollow comp:", response.data); 
+    return response.data;
+  } catch (error: any) {
+    console.error("Error unfollowing company:", error.response?.data || error.message);
+    throw error;
+  }
 };
