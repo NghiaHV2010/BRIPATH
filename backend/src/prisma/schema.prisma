@@ -491,7 +491,7 @@ model subscriptions {
 
 model userActivitiesHistory {
   id            Int      @default(autoincrement())
-  activity_name String   @db.VarChar(100)
+  activity_name String   @db.Text
   time          DateTime @default(now())
   user_id       String
   users         users    @relation(fields: [user_id], references: [id])
@@ -502,8 +502,8 @@ model userActivitiesHistory {
 model userNotifications {
   id      Int               @default(autoincrement())
   user_id String
-  title   String            @db.VarChar(150)
-  content String?           @db.VarChar(255)
+  title   String            @db.Text
+  content String?           @db.Text
   type    NotificationsType @default(system)
   is_read Boolean           @default(false)
   sent_at DateTime          @default(now())

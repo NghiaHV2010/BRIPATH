@@ -1,4 +1,3 @@
-import { companies } from './../generated/prisma/index.d';
 import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "../generated/prisma";
 import { errorHandler } from "../utils/error";
@@ -563,10 +562,11 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 embeddingData(content)
             ]);
 
-            if (!jobStatsResult || typeof jobStatsResult !== 'object') {
-                throw new Error('Failed to analyze job stats');
+            if (!jobStatsResult) {
+                throw new Error('Failed to analyze CV stats');
             }
 
+            // @ts-ignore
             const jobStats: JobStats = jobStatsResult as JobStats;
 
             await tx.$queryRaw`UPDATE jobs SET embedding=${vector} WHERE id=${job.id}`;
