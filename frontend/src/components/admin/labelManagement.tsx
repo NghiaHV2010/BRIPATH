@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { createJobLabel, createCompanyLabel, getAllJobLabels, getAllCompanyLabels } from "../../api/admin_api";
-import { Tags, Plus, Building2, Briefcase } from "lucide-react";
+import { Plus, Building2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 
 interface JobLabel {

@@ -1,38 +1,67 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { TrendingUp, Star, Crown } from "lucide-react";
+import { TrendingUp, Star, Crown, Loader2 } from "lucide-react";
 import { getRevenueStats } from "../../api/admin_api";
 
-// Mock data for revenue analysis
-const mockRevenueData = {
-  monthlyRevenue: [
-    { month: "Jan", revenue: 45000000 },
-    { month: "Feb", revenue: 27000000 },
-    { month: "Mar", revenue: 30000000 },
-    { month: "Apr", revenue: 27000000 },
-    { month: "May", revenue: 17000000 },
-    { month: "Jun", revenue: 21000000 },
-    { month: "Jul", revenue: 35000000 },
-    { month: "Aug", revenue: 50000000 },
-    { month: "Sep", revenue: 23000000 },
-    { month: "Oct", revenue: 17000000 },
-    { month: "Nov", revenue: 48000000 },
-    { month: "Dec", revenue: 30000000 },
-  ],
-};
+interface RevenueData {
+  totalRevenue: number;
+  currentMonthRevenue: number;
+  lastMonthRevenue: number;
+  growthRate: number;
+  totalTransactions: number;
+  currentMonthTransactions: number;
+  monthlyRevenue: Array<{
+    month: string;
+    revenue: number;
+    year: number;
+    monthNumber: number;
+  }>;
+  revenueByGateway: Array<{
+    gateway: string;
+    revenue: number;
+    transactions: number;
+  }>;
+}
 
 export default function RevenueCharts() {
+  const [data, setData] = useState<RevenueData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   useEffect(() => {
     const fetchRevenueData = async () => {
       try {
-        await getRevenueStats();
+        setLoading(true);
+        setError(null);
+        const response = await getRevenueStats();
+        setData(response.data);
       } catch (error) {
         console.error("Error fetching revenue data:", error);
+        setError("Không thể tải dữ liệu doanh thu");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchRevenueData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">Đang tải dữ liệu...</span>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">{error || "Không có dữ liệu"}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -79,13 +108,14 @@ export default function RevenueCharts() {
                   </text>
                 ))}
                 
-                {/* Package Bars */}
-                {[
-                  { name: "Trial", count: 45, color: "#10B981" },
-                  { name: "Basic", count: 23, color: "#3B82F6" },
-                  { name: "VIP", count: 8, color: "#8B5CF6" },
-                  { name: "Premium", count: 3, color: "#F59E0B" },
-                ].map((pkg, index) => {
+                {/* Package Bars - Using real data from revenueByGateway */}
+                {data.revenueByGateway.map((gateway, index) => {
+                  const colors = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B"];
+                  const pkg = {
+                    name: gateway.gateway,
+                    count: gateway.transactions,
+                    color: colors[index % colors.length]
+                  };
                   const barWidth = 80;
                   const barSpacing = 120;
                   const startX = 120 + (index * barSpacing);
@@ -174,7 +204,7 @@ export default function RevenueCharts() {
                   </text>
                 ))}
                 
-                {/* Line Chart */}
+                {/* Line Chart - Using real monthly revenue data */}
                 <defs>
                   <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#22C55E"/>
@@ -182,31 +212,20 @@ export default function RevenueCharts() {
                   </linearGradient>
                 </defs>
                 
-                {/* Line Path */}
-                <path
-                  d="M 80,140 L 140,120 L 200,100 L 260,80 L 320,90 L 380,70 L 440,85"
-                  stroke="url(#lineGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                
-                {/* Data Points */}
-                {[
-                  { day: "Mon", value: 12 },
-                  { day: "Tue", value: 15 },
-                  { day: "Wed", value: 20 },
-                  { day: "Thu", value: 22 },
-                  { day: "Fri", value: 18 },
-                  { day: "Sat", value: 8 },
-                  { day: "Sun", value: 6 },
-                ].map((item, index) => {
+                {/* Line Path - Using last 7 months of data */}
+                {data.monthlyRevenue.slice(-7).map((item, index) => {
                   const x = 80 + (index * 60);
-                  const y = 190 - (item.value / 25) * 150;
+                  const y = 190 - (item.revenue / 50000000) * 150; // Scale to max 50M
+                  return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
+                }).join(' ')}
+                
+                {/* Data Points - Using real monthly revenue data */}
+                {data.monthlyRevenue.slice(-7).map((item, index) => {
+                  const x = 80 + (index * 60);
+                  const y = 190 - (item.revenue / 50000000) * 150; // Scale to max 50M
                   
                   return (
-                    <g key={item.day}>
+                    <g key={item.month}>
                       <circle
                         cx={x}
                         cy={y}
@@ -222,7 +241,7 @@ export default function RevenueCharts() {
                         className="text-xs fill-gray-600"
                         fontSize="12"
                       >
-                        {item.day}
+                        {item.month}
                       </text>
                       <text
                         x={x}
@@ -231,7 +250,7 @@ export default function RevenueCharts() {
                         className="text-xs fill-gray-900 font-medium"
                         fontSize="10"
                       >
-                        {item.value}M
+                        {(item.revenue / 1000000).toFixed(0)}M
                       </text>
                     </g>
                   );
@@ -242,15 +261,17 @@ export default function RevenueCharts() {
         </Card>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Using real data */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-0 shadow-md bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Tháng cao nhất</p>
-                <p className="text-2xl font-bold text-green-600">Aug</p>
-                <p className="text-xs text-gray-500">50M VND</p>
+                <p className="text-sm text-gray-600">Tổng doanh thu</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {(data.totalRevenue / 1000000).toFixed(0)}M
+                </p>
+                <p className="text-xs text-gray-500">VND</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
@@ -261,9 +282,11 @@ export default function RevenueCharts() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Gói bán chạy</p>
-                <p className="text-2xl font-bold text-blue-600">Basic</p>
-                <p className="text-xs text-gray-500">23 gói</p>
+                <p className="text-sm text-gray-600">Tăng trưởng</p>
+                <p className={`text-2xl font-bold ${data.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {data.growthRate >= 0 ? '+' : ''}{data.growthRate.toFixed(1)}%
+                </p>
+                <p className="text-xs text-gray-500">so với tháng trước</p>
               </div>
               <Star className="h-8 w-8 text-blue-500" />
             </div>
@@ -274,9 +297,11 @@ export default function RevenueCharts() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Tháng thấp nhất</p>
-                <p className="text-2xl font-bold text-orange-600">May</p>
-                <p className="text-xs text-gray-500">17M VND</p>
+                <p className="text-sm text-gray-600">Giao dịch tháng này</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {data.currentMonthTransactions}
+                </p>
+                <p className="text-xs text-gray-500">giao dịch</p>
               </div>
               <Crown className="h-8 w-8 text-orange-500" />
             </div>

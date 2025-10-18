@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, type ConfirmationResult } from "firebase/auth";
+import { initializeFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -21,5 +23,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  ignoreUndefinedProperties: true,
+});
 
-export { analytics, auth, signInWithPhoneNumber, RecaptchaVerifier, type ConfirmationResult };
+// Firebase Storage configuration for hybrid approach
+const storageBucket = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string | undefined;
+const storage = storageBucket ? getStorage(app, `gs://${storageBucket}`) : getStorage(app);
+
+// Firebase configuration for hybrid approach
+// We'll use Firebase Storage for HTML content and Backend for metadata
+
+export { analytics, auth, db, storage, signInWithPhoneNumber, RecaptchaVerifier, type ConfirmationResult };
