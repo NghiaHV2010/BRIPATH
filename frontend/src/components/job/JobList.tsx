@@ -2,6 +2,7 @@ import { useJobStore } from "../../store/job.store";
 import JobCard from "./JobCard";
 import { Briefcase } from "lucide-react";
 import { JobDetailSkeleton } from "./JobDetailSkeleton";
+import { toast } from "sonner";
 
 interface JobListProps {
   onJobClick?: (jobId: string) => void;
@@ -14,8 +15,14 @@ export default function JobList({ onJobClick }: JobListProps = {}) {
     const isSaved = checkIfSaved(jobId);
     if (isSaved) {
       await unsaveJob(jobId);
+      toast.success("Đã hủy lưu công việc", {
+        duration: 3000,
+      });
     } else {
       await saveJob(jobId);
+      toast.success("Lưu công việc thành công", {
+        duration: 3000,
+      });
     }
   };
 

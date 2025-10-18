@@ -24,10 +24,21 @@ export const createCPAPI = (id: number, jobSpecialize: string) =>
 
 export const resetAnswer = async () => {
   const res = await axiosConfig.delete("/question/restart");
-  console.log("dit me mayf");
   return res.status; 
 };
 
+
+export const getUserCareerPath = async (): Promise<CareerPathResponse> => {
+  const response = await axiosConfig.get('/careerpath');
+  return response.data;
+};
+
+export const getUserCareerPathById = async (careerPathId: number): Promise<CareerPathResponse> => {
+  const response = await axiosConfig.get(`/careerpath/${careerPathId}`);
+  return response.data;
+};
+
+  
 export interface QuizQuestion {
   id: number;
   question: string;

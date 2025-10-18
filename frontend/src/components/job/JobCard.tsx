@@ -3,6 +3,9 @@ import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import type { Job } from "../../types/job";
+import { LoginDialog } from "../login/LoginDialog";
+import { useAuthStore } from "../../store/auth";
+import { useState, useRef, useEffect } from "react";
 
 interface JobCardProps {
   job: Job;
@@ -21,6 +24,37 @@ export default function JobCard({
   isSaved = false,
   compact = false,
 }: JobCardProps) {
+  const authUser = useAuthStore((s) => s.authUser);
+  const [loginOpen, setLoginOpen] = useState(false);
+  // Ref used to temporarily ignore card clicks (covers dialog overlay clicks)
+  const ignoreClicksRef = useRef(false);
+  const closeTimerRef = useRef<number | null>(null);
+  const handleLoginOpenChange = (open: boolean) => {
+    if (open) {
+      ignoreClicksRef.current = true;
+      // ensure any pending timer is cleared
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      setLoginOpen(true);
+    } else {
+      setLoginOpen(false);
+      closeTimerRef.current = window.setTimeout(() => {
+        ignoreClicksRef.current = false;
+        closeTimerRef.current = null;
+      }, 250);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
   const formatSalary = (salary?: string[], currency?: string) => {
     if (!salary || salary.length === 0) return "Competitive salary";
     return `${salary[0]} ${currency || "VND"}`;
@@ -74,6 +108,7 @@ export default function JobCard({
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
+    if (ignoreClicksRef.current) return;
     onClick?.();
   };
 
@@ -98,7 +133,7 @@ export default function JobCard({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 w-full">
             {/* Avatar */}
-            {(job.companies?.users?.avatar_url || job?.avatar_url) ? (
+            {job.companies?.users?.avatar_url || job?.avatar_url ? (
               <img
                 src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
@@ -125,14 +160,19 @@ export default function JobCard({
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
+                if (!authUser) {
+                  // open login dialog via wrapper so we ignore the following click
+                  handleLoginOpenChange(true);
+                  return;
+                }
                 onSave?.();
               }}
               className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
             >
               <Heart
                 className={`w-4 h-4 transition-colors ${isSaved
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400 hover:text-red-400"
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-400 hover:text-red-400"
                   }`}
               />
             </Button>
@@ -173,8 +213,8 @@ export default function JobCard({
                 onClick?.(); // navigate sang job detail
               }}
               className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
-                ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
-                : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
+                  : "bg-emerald-400 text-white hover:bg-emerald-500"
                 }`}
               disabled={hasApplied}
             >
@@ -183,6 +223,13 @@ export default function JobCard({
           )}
         </div>
       </CardContent>
+
+      {/* Login Dialog */}
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={handleLoginOpenChange}
+        redirectTo={window.location.pathname}
+      />
     </Card>
   );
 }

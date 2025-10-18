@@ -3,7 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import JobCard from "./JobCard";
+import { useJobStore } from "../../store/job.store";
 import type { Job } from "../../types/job";
+import { toast } from "sonner";
 
 interface JobCarouselProps {
   jobs: Job[];
@@ -175,6 +177,37 @@ export default function JobCarousel({
                           <JobCard
                             job={job}
                             onClick={() => onJobClick?.(job.id)}
+                            onSave={async () => {
+                              try {
+                                const isSaved = useJobStore
+                                  .getState()
+                                  .checkIfSaved(job.id);
+
+                                if (isSaved) {
+                                  await useJobStore
+                                    .getState()
+                                    .unsaveJob(job.id);
+                                  toast.success("Đã hủy lưu công việc", {
+                                    duration: 3000,
+                                  });
+                                } else {
+                                  await useJobStore.getState().saveJob(job.id);
+                                  toast.success("Lưu công việc thành công", {
+                                    duration: 3000,
+                                  });
+                                }
+                              } catch (error) {
+                                toast.error(
+                                  "Có lỗi xảy ra, vui lòng thử lại!",
+                                  {
+                                    duration: 3000,
+                                  }
+                                );
+                              }
+                            }}
+                            isSaved={useJobStore
+                              .getState()
+                              .checkIfSaved(job.id)}
                             compact={false}
                           />
                         </div>
@@ -191,10 +224,11 @@ export default function JobCarousel({
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex
-                    ? "bg-green-600"
-                    : "bg-slate-300 hover:bg-slate-400"
-                    }`}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentIndex
+                      ? "bg-green-600"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
                 />
               ))}
             </div>
