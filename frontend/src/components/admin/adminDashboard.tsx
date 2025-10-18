@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
+import { PostComposer } from "../ui/PostComposer";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -117,6 +118,35 @@ export default function AdminDashboard() {
       
       case "payments":
         return <PaymentsManagement />;
+      
+      case "post-composer":
+        return (
+          <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
+            <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+              <div>
+                <PostComposer userName="Admin" userAvatar="/default-avatar.png" />
+              </div>
+              <aside className="hidden lg:block space-y-4">
+                <div className="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-gray-200 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Gợi ý khi đăng</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Thêm ảnh chất lượng (≤ 5MB), định dạng JPG/PNG.</li>
+                    <li>• Dùng tiêu đề rõ ràng, nội dung ngắn gọn.</li>
+                    <li>• Gắn hashtag phù hợp (#hiring #remote ...).</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-2xl shadow border p-4">
+                  <h4 className="text-sm font-semibold mb-2">Tài nguyên</h4>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>Quy định nội dung cộng đồng</p>
+                    <p>Size ảnh khuyến nghị: 1200×628px</p>
+                    <p>Mẹo tăng tương tác với hình ảnh</p>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        );
       
       case "labels":
         return <LabelManagement />;

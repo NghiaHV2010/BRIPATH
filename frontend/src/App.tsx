@@ -18,6 +18,7 @@ import {
   CompaniesPage,
   AdminPage,
 } from "./pages";
+import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
 import GuestOnly from "./components/auth/GuestOnly";
@@ -173,6 +174,9 @@ function App() {
         />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+
+        {/* Demo Routes */}
+        <Route path="/demo/post-composer" element={<PostComposerDemo />} />
 
         {/* Admin Routes */}
         <Route

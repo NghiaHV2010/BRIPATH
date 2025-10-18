@@ -211,7 +211,7 @@ export default function EventsManagement() {
                               </Button>
                             </>
                           )}
-                          <Button size="sm" variant="ghost">
+                          <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </div>
