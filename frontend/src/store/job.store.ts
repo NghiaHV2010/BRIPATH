@@ -70,11 +70,11 @@ export const useJobStore = create<JobState>((set, get) => ({
         set((state) => ({
           savedJobs: [...new Set([...state.savedJobs, jobId])], // tránh trùng
           // Cập nhật selectedJob nếu đó là job đang được view
-          selectedJob: state.selectedJob?.id === jobId 
+          selectedJob: state.selectedJob?.id === jobId
             ? { ...state.selectedJob, isSaved: true }
             : state.selectedJob,
           // Cập nhật jobs array nếu có
-          jobs: state.jobs.map(job => 
+          jobs: state.jobs.map(job =>
             job.id === jobId ? { ...job, isSaved: true } : job
           ),
         }));
@@ -99,11 +99,11 @@ export const useJobStore = create<JobState>((set, get) => ({
         set((state) => ({
           savedJobs: state.savedJobs.filter(id => id !== jobId),
           // Cập nhật selectedJob nếu đó là job đang được view
-          selectedJob: state.selectedJob?.id === jobId 
+          selectedJob: state.selectedJob?.id === jobId
             ? { ...state.selectedJob, isSaved: false }
             : state.selectedJob,
           // Cập nhật jobs array nếu có
-          jobs: state.jobs.map(job => 
+          jobs: state.jobs.map(job =>
             job.id === jobId ? { ...job, isSaved: false } : job
           ),
         }));
@@ -132,7 +132,7 @@ export const useJobStore = create<JobState>((set, get) => ({
         ...params,
         userId: authUser?.id || params.userId,
       };
-      
+
       const res = await fetchAllJobs(enrichedParams);
       if (res && res.data) {
         // Process jobs để set isSaved từ savedJobs array
@@ -140,14 +140,14 @@ export const useJobStore = create<JobState>((set, get) => ({
           ...job,
           isSaved: job.savedJobs && job.savedJobs.length > 0
         }));
-        
+
         // Update store savedJobs array để sync với checkIfSaved method
         const savedJobIds = res.data
           .filter(job => job.savedJobs && job.savedJobs.length > 0)
           .map(job => job.id);
-        
-        set({ 
-          jobs: processedJobs, 
+
+        set({
+          jobs: processedJobs,
           totalPages: res.totalPages || 1,
           savedJobs: savedJobIds
         });
@@ -166,38 +166,38 @@ export const useJobStore = create<JobState>((set, get) => ({
   },
 
   // ✅ Lấy job theo ID
-getJobById: async (params) => {
-  set({ isLoading: true, error: null });
-  try {
-    const authUser = useAuthStore.getState().authUser;
-    const enrichedParams = {
-      ...params,
-      userId: authUser?.id || params.userId,
-    };
-
-    const data = await fetchJobById(enrichedParams);
-    if (data) {
-      const processedJob = {
-        ...data,
-        isSaved: data.savedJobs && data.savedJobs.length > 0,
-        isApplied:
-          data.applicants?.some(
-            (app) => app.cv_id === authUser?.cv_id // hoặc userId nếu bạn lưu theo user
-          ) || false,
+  getJobById: async (params) => {
+    set({ isLoading: true, error: null });
+    try {
+      const authUser = useAuthStore.getState().authUser;
+      const enrichedParams = {
+        ...params,
+        userId: authUser?.id || params.userId,
       };
-      set({ selectedJob: processedJob });
-    } else {
-      set({ selectedJob: null });
+
+      const data = await fetchJobById(enrichedParams);
+      if (data) {
+        const processedJob = {
+          ...data,
+          isSaved: data.savedJobs && data.savedJobs.length > 0,
+          isApplied:
+            data.applicants?.some(
+              (app) => app.cv_id === authUser?.cv_id // hoặc userId nếu bạn lưu theo user
+            ) || false,
+        };
+        set({ selectedJob: processedJob });
+      } else {
+        set({ selectedJob: null });
+      }
+    } catch (err) {
+      const axiosErr = err as AxiosError;
+      const message =
+        (axiosErr.response?.data as any)?.message || "Không thể tải chi tiết công việc";
+      set({ error: message });
+    } finally {
+      set({ isLoading: false });
     }
-  } catch (err) {
-    const axiosErr = err as AxiosError;
-    const message =
-      (axiosErr.response?.data as any)?.message || "Không thể tải chi tiết công việc";
-    set({ error: message });
-  } finally {
-    set({ isLoading: false });
-  }
-},
+  },
 
 
   // ✅ Lọc job
@@ -210,7 +210,7 @@ getJobById: async (params) => {
         ...params,
         userId: authUser?.id || params.userId,
       };
-      
+
       const res = await filterJobs(enrichedParams);
       if (res && res.data) {
         // Process jobs để set isSaved từ savedJobs array
@@ -218,13 +218,13 @@ getJobById: async (params) => {
           ...job,
           isSaved: job.savedJobs && job.savedJobs.length > 0
         }));
-        
+
         // Update store savedJobs array
         const savedJobIds = res.data
           .filter(job => job.savedJobs && job.savedJobs.length > 0)
           .map(job => job.id);
-        
-        set({ 
+
+        set({
           filteredJobs: processedJobs, // Lưu vào filteredJobs thay vì jobs
           totalPages: res.totalPages || 1,
           savedJobs: [...new Set([...get().savedJobs, ...savedJobIds])] // Merge với existing
@@ -252,7 +252,7 @@ getJobById: async (params) => {
         ...params,
         userId: authUser?.id || params.userId,
       };
-      
+
       const res = await fetchJobsByComId(enrichedParams);
       if (res && res.data) {
         // Process jobs để set isSaved từ savedJobs array
@@ -260,14 +260,14 @@ getJobById: async (params) => {
           ...job,
           isSaved: job.savedJobs && job.savedJobs.length > 0
         }));
-        
+
         // Update store savedJobs array
         const savedJobIds = res.data
           .filter(job => job.savedJobs && job.savedJobs.length > 0)
           .map(job => job.id);
-        
-        set({ 
-          jobs: processedJobs, 
+
+        set({
+          jobs: processedJobs,
           totalPages: res.totalPages || 1,
           savedJobs: [...new Set([...get().savedJobs, ...savedJobIds])] // Merge với existing
         });

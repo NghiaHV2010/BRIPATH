@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { embeddingData, extractTextFromCV, formatText } from "../utils/cvHandler";
+import { analystDataStats, embeddingData, extractTextFromCV, formatText } from "../utils/cvHandler";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { PrismaClient } from "../generated/prisma";
 import { convertDate } from "../utils";
 import { errorHandler } from "../utils/error";
+import { CVSTATSPROMPT } from "../constants/prompt";
 
 interface IFILE {
     name: string;
@@ -82,6 +83,16 @@ interface CV {
     ];
 }
 
+interface CVStats {
+    technical: number;
+    communication: number;
+    teamwork: number;
+    problem_solving: number;
+    creativity: number;
+    leadership: number;
+    summary: string
+}
+
 const prisma = new PrismaClient();
 
 export const uploadCV = async (req: Request, res: Response, next: NextFunction) => {
@@ -107,7 +118,17 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
             Địa chỉ: ${formatedCV.address}.
             `;
 
-        const vector = await embeddingData(content);
+        const [vector, cvStatsResult] = await Promise.all([
+            embeddingData(content),
+            analystDataStats(CVSTATSPROMPT + JSON.stringify(formatedCV))
+        ]);
+
+        if (!cvStatsResult) {
+            throw new Error('Failed to analyze CV stats');
+        }
+
+        // @ts-ignore
+        const cvStats: CVStats = cvStatsResult as CVStats;
 
         await prisma.$transaction(async (tx) => {
             cv = await tx.cvs.create({
@@ -193,14 +214,25 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
 
             await tx.$queryRaw`UPDATE cvs SET embedding=${vector} WHERE id=${cv.id}`;
 
+            await tx.cv_stats.create({
+                data: {
+                    cv_id: cv.id,
+                    technical: cvStats.technical,
+                    communication: cvStats.communication,
+                    teamwork: cvStats.teamwork,
+                    problem_solving: cvStats.problem_solving,
+                    creativity: cvStats.creativity,
+                    leadership: cvStats.leadership,
+                    summary: cvStats.summary
+                }
+            });
+
             await tx.userActivitiesHistory.create({
                 data: {
                     user_id,
                     activity_name: `Bạn vừa đăng tải CV #${cv.id} lên hệ thống.`
                 }
             });
-
-            console.log(cv);
         }).catch((e) => next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi! Vui lòng thử lại")));
 
         res.status(HTTP_SUCCESS.OK).json({
@@ -221,16 +253,25 @@ export const getUserCV = async (req: Request, res: Response, next: NextFunction)
             where: {
                 users_id: user_id
             },
-            include: {
-                awards: true,
-                certificates: true,
-                educations: true,
-                experiences: true,
-                languages: true,
-                projects: true,
-                references: true,
+            select: {
+                id: true,
+                fullname: true,
+                apply_job: true,
+                created_at: true,
+                primary_skills: true,
+                _count: {
+                    select: {
+                        projects: true,
+                        experiences: true,
+                        educations: true,
+                        certificates: true,
+                        languages: true,
+                        references: true,
+                        awards: true,
+                    }
+                }
             }
-        })
+        });
 
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -263,7 +304,7 @@ export const deleteCV = async (req: Request, res: Response, next: NextFunction) 
             });
         })
 
-        res.status(HTTP_SUCCESS.NO_CONTENT);
+        return res.status(HTTP_SUCCESS.NO_CONTENT).send();
     } catch (error) {
         next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));
     }
@@ -355,11 +396,26 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
         SELECT 
             j.id, 
             j.job_title,
+            j.salary,
+            j.currency,
+            j.location,
+            j.status,
+            jc.job_category,
+            jl.label_name,
+            u.avatar_url,
+            u.username,
             1 - (j.embedding <=> up.embedding) AS score
-        FROM jobs j, user_profile up
+        FROM jobs j
+        JOIN user_profile up ON true
+        LEFT JOIN "jobCategories" jc ON jc.id = j."jobCategory_id"
+        LEFT JOIN "jobLabels" jl ON jl.id = j."label_id"
+        LEFT JOIN companies c ON c.id = j."company_id"
+        LEFT JOIN users u ON u."company_id" = c.id
+        LEFT JOIN applicants a ON a.job_id = j.id
         ORDER BY score DESC
         LIMIT 10;
         `);
+
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -402,6 +458,37 @@ export const getUserCVById = async (req: Request, res: Response, next: NextFunct
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: cv
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getCVStats = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const cv_id = parseInt(req.params.id as string);
+
+    if (cv_id < 1 || isNaN(cv_id)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "CV không hợp lệ!"));
+    }
+
+    try {
+        const cvStats = await prisma.cv_stats.findFirst({
+            where: {
+                cv_id,
+                cvs: {
+                    users_id: user_id
+                }
+            }
+        });
+        if (!cvStats) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Thống kê CV không tồn tại!"));
+        }
+
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: cvStats
         });
     } catch (error) {
         next(error);

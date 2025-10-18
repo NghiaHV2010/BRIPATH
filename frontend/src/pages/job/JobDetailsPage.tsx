@@ -95,18 +95,18 @@ export default function JobDetailsPage() {
 
   const company = companies
     ? {
-        id: companies.id,
-        name: companies.users?.username || "Công ty",
-        avatar_url: companies.users?.avatar_url || "",
-        field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
-        address: [
-          companies.users?.address_street,
-          companies.users?.address_ward,
-          companies.users?.address_city,
-        ]
-          .filter(Boolean)
-          .join(", "),
-      }
+      id: companies.id,
+      name: companies.users?.username || "Công ty",
+      avatar_url: companies.users?.avatar_url || "",
+      field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
+      address: [
+        companies.users?.address_street,
+        companies.users?.address_ward,
+        companies.users?.address_city,
+      ]
+        .filter(Boolean)
+        .join(", "),
+    }
     : null;
 
   const jobCategory = jobCategories?.job_category || "";
@@ -191,15 +191,9 @@ export default function JobDetailsPage() {
             {/* Job Hero */}
             <Card>
               <CardContent className="p-6 space-y-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {job_title}
-                  </h1>
-                  <div className="flex items-center gap-2 text-lg text-blue-600">
-                    <Building2 className="w-5 h-5" />
-                    <span>{company?.name}</span>
-                  </div>
-                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                  {job_title}
+                </h2>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-4">
@@ -246,7 +240,7 @@ export default function JobDetailsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {selectedJob.applicants &&
-                  selectedJob.applicants.length > 0 ? (
+                    selectedJob.applicants.length > 0 ? (
                     <div className="relative group flex-1">
                       <Button
                         disabled
@@ -536,6 +530,9 @@ export default function JobDetailsPage() {
                 <p>• Chỉ nộp CV qua hệ thống chính thức của platform</p>
               </CardContent>
             </Card>
+
+            {/* Add company*/}
+            {/* Add job*/}
           </div>
         </div>
 

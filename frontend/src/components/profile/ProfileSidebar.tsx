@@ -36,12 +36,12 @@ export function ProfileSidebar({
     };
 
     return (
-        <div className="max-w-64 max-h-[80vh] bg-white border rounded-xl border-gray-200 flex flex-col flex-1 mt-6 sticky top-0 left-0 shadow-sm">
+        <div className="max-w-64 max-h-[80vh] hidden xl:flex bg-white border rounded-xl border-gray-200 flex-col flex-1 mt-6 sticky top-0 left-0 shadow-sm">
             <div className="p-6 flex flex-col items-center">
                 <div className="relative">
                     <Avatar className="w-24 h-24 border-4  shadow-md rounded-full">
                         {avatar ? (
-                            <AvatarImage src={avatar} alt={username} />
+                            <AvatarImage src={avatar} alt={username} className='object-cover' />
                         ) : (
                             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl">
                                 {username.charAt(0).toUpperCase()}

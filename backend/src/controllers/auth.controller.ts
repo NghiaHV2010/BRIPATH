@@ -67,12 +67,18 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
 
 
 export const sendOTP = async (req: Request, res: Response, next: NextFunction) => {
-    const { email } = req.user as { email: string };
+    const { id, email } = req.user as { id?: string; email: string };
 
     const buf = crypto.randomBytes(32);
     const otp = jwt.sign({ otp: buf.toString('hex') }, ACCESS_SECRET, { expiresIn: "10m" });
 
-    const url = `http://localhost:5173/register/email/${otp}`;
+    let url;
+
+    if (id) {
+        url = `http://localhost:5173/forgot/password/${otp}`;
+    } else {
+        url = `http://localhost:5173/register/email/${otp}`;
+    }
 
     try {
         sendEmail(email, "BRIPATH - Verify Email", emailTemplate(url));
@@ -345,6 +351,178 @@ export const verifySMS = async (req: Request, res: Response, next: NextFunction)
                 }
             });
         }
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // @ts-ignore
+        const userId = req.user.id;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng điền đầy đủ thông tin!"));
+        }
+
+        if (newPassword.length < 8) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mật khẩu mới không đủ mạnh! (Tối thiểu 8 ký tự)"));
+        }
+
+        // Get user with password
+        const user = await prisma.users.findUnique({
+            where: { id: userId }
+        });
+
+        if (!user) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Không tìm thấy người dùng!"));
+        }
+
+        // Verify old password
+        const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isOldPasswordValid) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mật khẩu cũ không chính xác!"));
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashNewPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password
+        await prisma.$transaction(async (tx) => {
+            await tx.users.update({
+                where: { id: userId },
+                data: { password: hashNewPassword }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id: userId,
+                    activity_name: "Bạn đã thay đổi mật khẩu."
+                }
+            });
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Đổi mật khẩu thành công!"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập email!"));
+        }
+
+        if (!validateEmail(email)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Email không hợp lệ!"));
+        }
+
+        // Check if user exists
+        const user = await prisma.users.findFirst({
+            where: { email },
+            omit: { password: true }
+        });
+
+        if (!user) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Email không tồn tại trong hệ thống!"));
+        }
+
+        const data = jwt.sign({ id: user.id, email: user.email }, ACCESS_SECRET, { expiresIn: "30m" });
+
+        res.cookie("data", data, {
+            maxAge: 30 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Thành công!"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { id, email } = req.user;
+    const { newPassword } = req.body;
+    const { otp }: { otp: string } = req.params as { otp: string };
+
+    if (!newPassword) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng nhập mật khẩu mới!"));
+    }
+
+    if (newPassword.length < 8) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mật khẩu mới không đủ mạnh! (Tối thiểu 8 ký tự)"));
+    }
+
+    if (!otp) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP không hợp lệ!"));
+    }
+
+    const otpDecoded = jwt.verify(otp, ACCESS_SECRET);
+
+    // @ts-ignore
+    if (req.otp.otp !== otpDecoded.otp) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "OTP không hợp lệ!"));
+    }
+
+    try {
+        // Find user with valid reset token
+        const user = await prisma.users.findFirst({
+            where: {
+                id,
+                email
+            }
+        });
+
+        if (!user) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Người dùng không tồn tại!"));
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password and clear reset token
+        await prisma.$transaction(async (tx) => {
+            await tx.users.update({
+                where: { id: user.id },
+                data: {
+                    password: hashPassword
+                }
+            });
+
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id: user.id,
+                    activity_name: "Bạn đã đặt lại mật khẩu."
+                }
+            });
+        });
+
+        res.cookie("data", '', { maxAge: 0 });
+
+        res.cookie("otp", '', { maxAge: 0 });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Đặt lại mật khẩu thành công!"
+        });
+
     } catch (error) {
         next(error);
     }

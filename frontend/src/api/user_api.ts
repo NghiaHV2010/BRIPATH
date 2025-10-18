@@ -3,6 +3,7 @@ import axiosConfig from "@/config/axios.config";
 import type { NotificationResponse } from "@/types/notification";
 import type { ChatResponse } from "@/types/chatbot";
 import type { ActivityResponse } from "@/types/activity";
+import type { UpdateUserProfileRequest, UserProfileResponse } from "@/types/profile";
 
 export const fetchCurrentUserProfile = async (): Promise<AuthUser | null> => {
   const response = await axiosConfig.get("/check", {
@@ -14,6 +15,103 @@ export const fetchCurrentUserProfile = async (): Promise<AuthUser | null> => {
   }
 
   return null;
+};
+
+export const getUserProfile = async (): Promise<UserProfileResponse | null> => {
+  try {
+    const response = await axiosConfig.get("/user/profile", {
+      withCredentials: true,
+    });
+
+    if (response.status === 200 && response.data.success) {
+      return response.data as UserProfileResponse;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+};
+
+export const updateUserProfile = async (profileData: UpdateUserProfileRequest): Promise<UserProfileResponse | null> => {
+  try {
+    const response = await axiosConfig.put("/user/profile", profileData);
+
+    if (response.status === 200 && response.data.success) {
+      return response.data as UserProfileResponse;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return null;
+  }
+};
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  newPassword: string;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+}
+
+export const changePassword = async (passwordData: ChangePasswordRequest): Promise<ApiResponse | null> => {
+  try {
+    const response = await axiosConfig.post("/change-password", passwordData, {
+      withCredentials: true,
+    });
+
+    if (response.status === 200) {
+      return response.data as ApiResponse;
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error("Error changing password:", error);
+    throw new Error(error.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu");
+  }
+};
+
+export const forgotPassword = async (emailData: ForgotPasswordRequest): Promise<ApiResponse | null> => {
+  try {
+    const response = await axiosConfig.post("/forgot-password", emailData);
+
+    if (response.status === 200) {
+      return response.data as ApiResponse;
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error("Error sending forgot password email:", error);
+    throw new Error(error.response?.data?.message || "Có lỗi xảy ra khi gửi email");
+  }
+};
+
+export const resetPassword = async (token: string, passwordData: ResetPasswordRequest): Promise<ApiResponse | null> => {
+  try {
+    const response = await axiosConfig.post(`/reset-password/${token}`, passwordData);
+
+    if (response.status === 200) {
+      return response.data as ApiResponse;
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error("Error resetting password:", error);
+    throw new Error(error.response?.data?.message || "Có lỗi xảy ra khi đặt lại mật khẩu");
+  }
 };
 
 

@@ -102,13 +102,13 @@ export const emailVerifyMiddleware = async (req: Request, res: Response, next: N
     const user = req.cookies?.data;
 
     if (!user) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng đăng ký lại!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng điền lại thông tin!"));
     }
 
     const userDecoded = jwt.verify(user, ACCESS_SECRET);
 
     if (!userDecoded) {
-        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng đăng ký lại!"));
+        return next(errorHandler(HTTP_ERROR.REQUEST_TIMEOUT, "Vui lòng điền lại thông tin!"));
     }
 
     req.user = userDecoded;

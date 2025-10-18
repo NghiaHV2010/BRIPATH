@@ -368,5 +368,6 @@ h1 {
 
   body {
     @apply bg-background text-foreground;
+    margin-right: 0 !important;
   }
 }

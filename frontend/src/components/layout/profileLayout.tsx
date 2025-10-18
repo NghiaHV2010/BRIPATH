@@ -12,8 +12,6 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
     const authUser = useAuthStore((s) => s.authUser);
     const logout = useAuthStore((s) => s.logout);
 
-    console.log(authUser);
-
     const handleLogout = () => {
         logout?.();
     };

@@ -203,7 +203,7 @@ export default function CompanyDetailsPage() {
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
                   {description.split("\n")[0]?.trim() ||
                     description.substring(0, 200) +
-                      (description.length > 200 ? "..." : "")}
+                    (description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -255,9 +255,9 @@ export default function CompanyDetailsPage() {
                   {description
                     ?.split("\n")
                     .filter((p) => p.trim())
-                    .map((p, i) => (
+                    .map((p, index) => (
                       <p
-                        key={i}
+                        key={index}
                         className="text-slate-700 text-lg leading-relaxed"
                       >
                         {p.trim()}
@@ -305,9 +305,8 @@ export default function CompanyDetailsPage() {
                                 <div className="flex items-center gap-2">
                                   <DollarSign className="w-4 h-4" />
                                   {job.salary?.[0]
-                                    ? `${job.salary[0]} ${
-                                        job.currency || "VND"
-                                      }`
+                                    ? `${job.salary[0]} ${job.currency || "VND"
+                                    }`
                                     : "Thỏa thuận"}
                                 </div>
                               </div>

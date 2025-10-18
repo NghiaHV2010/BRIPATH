@@ -4,7 +4,8 @@ import { PrismaClient } from "../generated/prisma";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { createNotificationData } from "../utils";
-import { embeddingData } from "../utils/cvHandler";
+import { analystDataStats, embeddingData } from "../utils/cvHandler";
+import { JOBSTATSPROMPT } from '../constants/prompt';
 
 const prisma = new PrismaClient();
 const numberOfJobs = 16;
@@ -34,6 +35,7 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
                         users: {
                             select: {
                                 avatar_url: true,
+                                username: true,
                             }
                         }
                     }
@@ -60,6 +62,9 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
                         }
                     },
                 } : false
+            },
+            orderBy: {
+                created_at: 'desc'
             },
             take: numberOfJobs,
             skip: page * numberOfJobs,
@@ -220,6 +225,7 @@ export const getJobsByFilter = async (req: Request, res: Response, next: NextFun
                         users: {
                             select: {
                                 avatar_url: true,
+                                username: true,
                             }
                         }
                     }
@@ -317,6 +323,12 @@ export const getJobsByCompanyId = async (req: Request, res: Response, next: Next
                         users: {
                             where: {
                                 company_id: companyId,
+                            },
+                            omit: {
+                                firebase_uid: true,
+                                password: true,
+                                is_deleted: true,
+                                id: true,
                             }
                         }
                     }
@@ -336,6 +348,16 @@ export const getJobsByCompanyId = async (req: Request, res: Response, next: Next
 }
 
 export const createJob = async (req: Request, res: Response, next: NextFunction) => {
+    type JobStats = {
+        technical: number;
+        communication: number;
+        teamwork: number;
+        problem_solving: number;
+        creativity: number;
+        leadership: number;
+        summary: string;
+    }
+
     type RequestBody = {
         job_title: string,
         description: string,
@@ -359,7 +381,6 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
 
     //@ts-ignore
     const { id, username, company_id } = req.user;
-
 
     const {
         job_title,
@@ -537,8 +558,31 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
                 Địa chỉ: ${location}.
             `;
 
-            const vector = await embeddingData(content);
+            const [jobStatsResult, vector] = await Promise.all([
+                analystDataStats(JOBSTATSPROMPT + content),
+                embeddingData(content)
+            ]);
+
+            if (!jobStatsResult || typeof jobStatsResult !== 'object') {
+                throw new Error('Failed to analyze job stats');
+            }
+
+            const jobStats: JobStats = jobStatsResult as JobStats;
+
             await tx.$queryRaw`UPDATE jobs SET embedding=${vector} WHERE id=${job.id}`;
+
+            await tx.job_stats.create({
+                data: {
+                    technical: jobStats.technical,
+                    communication: jobStats.communication,
+                    teamwork: jobStats.teamwork,
+                    problem_solving: jobStats.problem_solving,
+                    creativity: jobStats.creativity,
+                    leadership: jobStats.leadership,
+                    summary: jobStats.summary,
+                    job_id: job.id,
+                }
+            });
 
             return job;
         });
@@ -1010,6 +1054,65 @@ export const getAllSuitableCVs = async (req: Request, res: Response, next: NextF
             success: true,
             data: suitableCVs
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createJobView = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { jobId } = req.params;
+
+    try {
+        const job = await prisma.jobs.findUnique({
+            where: {
+                id: jobId
+            }
+        });
+
+        if (!job) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        const today = new Date();
+        today.setUTCHours(17, 0, 0, 0); // UTC+7 for Vietnam (17:00 UTC = 00:00 Vietnam time)
+
+        console.log(today);
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const existingView = await prisma.job_views.findFirst({
+            where: {
+                job_id: jobId,
+                user_id,
+                viewed_at: {
+                    gte: today,
+                    lt: tomorrow
+                }
+            }
+        });
+
+        if (existingView) {
+            await prisma.job_views.update({
+                where: {
+                    id: existingView.id
+                },
+                data: {
+                    viewed_at: new Date()
+                }
+            });
+        } else {
+            await prisma.job_views.create({
+                data: {
+                    job_id: jobId,
+                    user_id,
+                }
+            });
+        }
+
+        return res.status(HTTP_SUCCESS.NO_CONTENT);
     } catch (error) {
         next(error);
     }

@@ -1,8 +1,9 @@
 import pdfParse from "pdf-parse";
 import { extractRawText } from "mammoth";
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_API_KEY } from "../config/env.config";
+import { GEMINI_API_KEY, OPENAI_API_KEY } from "../config/env.config";
 import { CVPROMPT } from "../constants/prompt";
+import OpenAI from "openai";
 
 const PDF = 'application/pdf';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -49,5 +50,29 @@ export const embeddingData = async (data: string) => {
         return vector.embeddings[0].values;
     } catch (error) {
         return error;
+    }
+}
+
+export const analystDataStats = async (prompt: string) => {
+    const openai = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+    });
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-4-turbo",
+            messages: [
+                { role: "user", content: prompt },
+            ],
+            response_format: {
+                type: "json_object",
+            },
+            temperature: 0.3
+        });
+
+        const content = response.choices[0].message.content;
+        return JSON.parse(content ?? "{}");
+    } catch (error) {
+        console.error("Error analyzing CV:", error);
     }
 }

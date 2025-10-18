@@ -22,6 +22,7 @@ export default function JobsPage() {
 
   const {
     jobs,
+    totalPages,
     filteredJobs,
     isLoading,
     getAllJobs,
@@ -75,7 +76,7 @@ export default function JobsPage() {
       const event = JSON.parse(message.data.toString());
 
       if (event.type === 'urgentJobsUpdate') {
-        console.log('🔥 Cập nhật job việc gấp:', event.data);
+        // console.log('🔥 Cập nhật job việc gấp:', event.data);
         setUrgentJobs(event.data);
       }
     };
@@ -93,16 +94,10 @@ export default function JobsPage() {
     navigate(`/jobs/${jobId}`);
   };
 
-  // Wrapper for JobFilters to match expected prop type
   const handleJobClickFromFilters = (job: Job) => {
     handleJobClick(job.id);
   };
 
-  // const handleSaveJob = async (jobId: string) => {
-  //   const isSaved = checkIfSaved(jobId);
-  //   if (isSaved) await unsaveJob(jobId);
-  //   else await saveJob(jobId);
-  // };
 
   const handleSaveJob = async (jobId: string) => {
     const isSaved = checkIfSaved(jobId);
@@ -172,9 +167,9 @@ export default function JobsPage() {
       {/* Filtered Jobs */}
       {filteredJobs.length > 0 && (
         <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-12">
-          <div className="max-w-[1700px] mx-auto">
+          <div className="w-full max-w-[1700px] mx-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-green-800 text-2xl font-semibold">
+              <h2 className="text-slate-800 text-xl font-bold">
                 Tìm thấy {filteredJobs.length} công việc phù hợp
               </h2>
               <button
@@ -184,19 +179,17 @@ export default function JobsPage() {
                 Xóa bộ lọc
               </button>
             </div>
-            <div className="px-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {paginatedFilteredJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    onClick={() => handleJobClick(job.id)}
-                    onSave={() => handleSaveJob(job.id)}
-                    compact={false}
-                    isSaved={job.isSaved || false}
-                  />
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {paginatedFilteredJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onClick={() => handleJobClick(job.id)}
+                  onSave={() => handleSaveJob(job.id)}
+                  compact={false}
+                  isSaved={job.isSaved || false}
+                />
+              ))}
             </div>
 
             <JobPagination
@@ -238,7 +231,7 @@ export default function JobsPage() {
             <JobList onJobClick={handleJobClick} />
             <JobPagination
               currentPage={currentPage}
-              totalPages={10} // hoặc lấy từ API
+              totalPages={totalPages || 10} // hoặc lấy từ API
               onPageChange={setCurrentPage}
               isLoading={isLoading}
             />

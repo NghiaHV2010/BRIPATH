@@ -862,6 +862,9 @@ export const getUserNotification = async (req: Request, res: Response, next: Nex
             where: {
                 user_id
             },
+            orderBy: {
+                sent_at: 'desc'
+            },
             take: numberOfNotifications,
             skip: page * numberOfNotifications
         });
@@ -944,6 +947,9 @@ export const getUserActivityHistory = async (req: Request, res: Response, next: 
             where: {
                 user_id
             },
+            orderBy: {
+                time: 'desc'
+            },
             take: numberOfActivities,
             skip: page * numberOfActivities
         });
@@ -981,6 +987,7 @@ export const getAllUserSavedJobs = async (req: Request, res: Response, next: Nex
                                 users: {
                                     select: {
                                         avatar_url: true,
+                                        username: true,
                                     }
                                 }
                             }
@@ -1008,7 +1015,11 @@ export const getAllUserSavedJobs = async (req: Request, res: Response, next: Nex
                             },
                         } : false
                     }
-                }
+                },
+                saved_at: true,
+            },
+            orderBy: {
+                saved_at: 'desc'
             }
         });
 

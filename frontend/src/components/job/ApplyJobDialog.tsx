@@ -59,7 +59,7 @@ export function ApplyJobDialog({
     try {
       const data = await getUserCVs();
       setCvs(
-        Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+        Array.isArray(data) ? data : Array.isArray(data) ? data : []
       );
     } catch (err: any) {
       setError("Không thể tải danh sách CV. Vui lòng thử lại.");
@@ -105,7 +105,7 @@ export function ApplyJobDialog({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "Có lỗi xảy ra khi tải CV. Vui lòng thử lại."
+        "Có lỗi xảy ra khi tải CV. Vui lòng thử lại."
       );
       console.error(err);
     } finally {
@@ -138,7 +138,7 @@ export function ApplyJobDialog({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại."
+        "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại."
       );
     } finally {
       setIsLoading(false);

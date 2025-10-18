@@ -10,8 +10,6 @@ cron.schedule("* * * * *", async () => {
     const vietnamTime = new Date(currentTimeString);
     const currentHour = vietnamTime.getHours();
 
-    console.log(`⏰ Checking for urgent jobs at ${vietnamTime.toLocaleTimeString("vi-VN")}`);
-
     const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 24);
 
     if (isGoldenHour) {
@@ -25,7 +23,8 @@ cron.schedule("* * * * *", async () => {
             j.status,
             jc.job_category,
             jl.label_name,
-            u.avatar_url
+            u.avatar_url,
+            u.username
         FROM jobs j
         LEFT JOIN "jobCategories" jc ON jc.id = j."jobCategory_id"
         LEFT JOIN "jobLabels" jl ON jl.id = j."label_id"

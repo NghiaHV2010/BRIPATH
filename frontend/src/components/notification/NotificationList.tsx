@@ -64,7 +64,7 @@ export function NotificationList() {
 
     if (loading && notifications.length === 0) {
         return (
-            <div className="w-full max-w-3xl mx-auto p-6 space-y-4">
+            <div className="w-full max-w-5xl mx-auto p-6 space-y-4">
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
@@ -74,7 +74,7 @@ export function NotificationList() {
 
     if (error) {
         return (
-            <div className="w-full max-w-3xl mx-auto p-6">
+            <div className="w-full max-w-5xl mx-auto p-6">
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>

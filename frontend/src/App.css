@@ -34,9 +34,11 @@ nav a.text-white:active {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -45,6 +47,7 @@ nav a.text-white:active {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -66,23 +69,31 @@ nav a.text-white:active {
 
 /* Custom Scrollbar giống TopCV */
 ::-webkit-scrollbar {
-  width: 12px;              /* Thanh cuộn mảnh */
-  height: 10px;             /* Cho cả ngang */
+  width: 12px;
+  /* Thanh cuộn mảnh */
+  height: 10px;
+  /* Cho cả ngang */
 }
 
 ::-webkit-scrollbar-track {
-  background: #f9f9f9;     /* Nền sáng */
+  background: #f9f9f9;
+  /* Nền sáng */
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #d1d5db; /* Màu xám nhạt (#d1d5db = Tailwind gray-300) */
-  border-radius: 9999px;     /* Bo tròn */
-  border: 2px solid #f9f9f9; /* Tạo khoảng cách với track */
+  background-color: #d1d5db;
+  /* Màu xám nhạt (#d1d5db = Tailwind gray-300) */
+  border-radius: 9999px;
+  /* Bo tròn */
+  border: 2px solid #f9f9f9;
+  /* Tạo khoảng cách với track */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af; /* Hover đậm hơn (Tailwind gray-400) */
+  background-color: #9ca3af;
+  /* Hover đậm hơn (Tailwind gray-400) */
 }
+
 /* Kết thúc custom scrollbar */
 
 /* Embla Carousel Styles */

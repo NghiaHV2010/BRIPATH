@@ -9,6 +9,7 @@ import type {
   JobResponse,
   CreateJobResponse,
   JobLabel,
+  SavedJobs,
 } from "@/types/job";
 
 export interface CV {
@@ -189,12 +190,10 @@ export const getSavedJobIds = async (): Promise<{ success: boolean; data: string
   }
 };
 
-export const getSavedJobs = async (): Promise<{ success: boolean; data: any[] }> => {
+export const getSavedJobs = async (): Promise<{ success: boolean; data: SavedJobs[] }> => {
   try {
     const response = await axiosConfig.get('/save-jobs');
-    // Backend trả về dạng: [{ jobs: { ... } }, ...]
-    const jobs = (response.data?.data || []).map((item: any) => item?.jobs).filter(Boolean);
-    return { success: true, data: jobs };
+    return response.data;
   } catch (error: any) {
     console.error("Error fetching saved jobs:", error.response?.data || error.message);
     return { success: false, data: [] };
@@ -224,17 +223,19 @@ export const applyjob = async (
   } catch (error: any) {
     console.error("Error applying to job:", error.response?.data || error.message);
     throw error;
-  } 
+  }
 };
 
 
 export const getUserCVs = async (): Promise<CV[]> => {
   try {
     const response = await axiosConfig.get('/cv');
-    return response.data;
+    if (response.status !== 200) {
+      return [];
+    }
+    return response.data.data;
   } catch (error: any) {
     console.error("Error fetching CVs:", error.response?.data || error.message);
     throw error;
   }
 };
-  

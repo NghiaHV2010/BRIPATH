@@ -172,6 +172,7 @@ model cvs {
   created_at     DateTime               @default(now())
   users_id       String
   embedding      Unsupported("vector")?
+  cv_stats       cv_stats?
   applicants     applicants[]
   awards         awards[]
   certificates   certificates[]
@@ -182,6 +183,37 @@ model cvs {
   languages      languages[]
   aiFeedbacks    aiFeedbacks[]
   users          users                  @relation(fields: [users_id], references: [id])
+}
+
+model cv_stats {
+  id              Int      @id @default(autoincrement())
+  cv_id           Int      @unique // 🔹 Mỗi cv_id chỉ xuất hiện 1 lần
+  technical       Float    @default(0)
+  communication   Float    @default(0)
+  teamwork        Float    @default(0)
+  problem_solving Float    @default(0)
+  creativity      Float    @default(0)
+  leadership      Float    @default(0)
+  summary         String?  @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  cvs             cvs      @relation(fields: [cv_id], references: [id], onDelete: Cascade)
+}
+
+model job_stats {
+  id              Int      @id @default(autoincrement())
+  job_id          String   @unique
+  technical       Float    @default(0)
+  communication   Float    @default(0)
+  teamwork        Float    @default(0)
+  problem_solving Float    @default(0)
+  creativity      Float    @default(0)
+  leadership      Float    @default(0)
+  summary         String?  @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  jobs jobs @relation(fields: [job_id], references: [id])
 }
 
 model educations {
@@ -297,12 +329,24 @@ model jobs {
   jobCategory_id Int?
   label_id       Int?
   company_id     String
+  job_stats      job_stats?
   companies      companies              @relation(fields: [company_id], references: [id])
   applicants     applicants[]
   jobCategories  jobCategories?         @relation(fields: [jobCategory_id], references: [id])
   jobLabels      jobLabels?             @relation(fields: [label_id], references: [id])
   savedJobs      savedJobs[]
+  job_views      job_views[]
   aiFeedbacks    aiFeedbacks[]
+}
+
+model job_views {
+  id        Int      @id @default(autoincrement())
+  job_id    String
+  user_id   String? // Có thể null nếu người dùng chưa đăng nhập
+  viewed_at DateTime @default(now()) // Thời gian người dùng xem job
+
+  jobs  jobs   @relation(fields: [job_id], references: [id])
+  users users? @relation(fields: [user_id], references: [id])
 }
 
 model membershipPlans {
@@ -534,6 +578,7 @@ model users {
   subscriptions          subscriptions[]
   userActivitiesHistory  userActivitiesHistory[]
   reviews                reviews[]
+  job_views              job_views[]
   userNotifications      userNotifications[]
   roles                  roles                    @relation(fields: [role_id], references: [id])
   vnpayOrders            vnpayOrders[]

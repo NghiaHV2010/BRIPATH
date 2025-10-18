@@ -11,9 +11,9 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Badge } from "../../components/ui/badge";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -32,21 +32,30 @@ import {
   Phone,
   Upload,
   FileText,
-  Download,
+  Loader,
+  BarChart3
 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import { uploadUserCV } from "../../api/cv_api";
-import type { CVRecord } from "../../types/cv";
+import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
 import { AvatarFallback } from "@/components/ui/avatar";
+import { Resume } from "../../components/resume/resume";
+import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
+import type { ResumeListItem } from "@/types/resume";
+import { ResumeCard } from "@/components/resume/resumeCard";
+import { CVStatsRadarChart } from "@/components/resume/resumeStats";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userProfileData, setUserProfileData] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     username: user?.username || "",
-    avatar_url: user?.avatar_url || null,
+    avatar_url: user?.avatar_url || "",
     address_street: user?.address_street || "",
     address_ward: user?.address_ward || "",
     address_city: user?.address_city || "",
@@ -62,48 +71,58 @@ export default function ProfilePageWrapper() {
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
-  // CV Management state
-  const [cvData, setCvData] = useState<CVRecord | null>(null);
   const [cvLoading, setCvLoading] = useState(true);
   const [isEditingCV, setIsEditingCV] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadError, setUploadError] = useState("");
-  const [cvFormData, setCvFormData] = useState({
-    fullname: "",
-    email: "",
-    phone: "",
-    address: "",
-    apply_job: "",
-    introduction: "",
-    primary_skills: [] as string[],
-    soft_skills: [] as string[],
-  });
+  const [cvCard, setCvCard] = useState<ResumeListItem[]>([]);
+  const [selectedCvId, setSelectedCvId] = useState<number | null>(null);
+  const [showStats, setShowStats] = useState(false);
 
-  // Load CV data
+  // Load user profile data
   useEffect(() => {
     if (user) {
+      loadUserProfileData();
       loadCVData();
     }
   }, [user]);
 
+  const loadUserProfileData = async () => {
+    try {
+      setIsLoading(true);
+      const profileResponse = await getUserProfile();
+
+      if (profileResponse?.success) {
+        const userData = profileResponse.data;
+        setUserProfileData(userData);
+
+        // Update form data with fetched user data
+        setFormData({
+          username: userData.username || "",
+          avatar_url: userData.avatar_url || "",
+          address_street: userData.address_street || "",
+          address_ward: userData.address_ward || "",
+          address_city: userData.address_city || "",
+          address_country: userData.address_country || "",
+          gender: userData.gender || "others",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+      toast.error("Không thể tải thông tin người dùng");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const loadCVData = async () => {
     try {
       setCvLoading(true);
-      const data = await fetchUserCVs<CVRecord[]>();
+      const data = await fetchUserCVs();
       if (data && data.length > 0) {
-        setCvData(data[0]); // Only one CV per user
-        setCvFormData({
-          fullname: data[0].fullname || "",
-          email: data[0].email || "",
-          phone: data[0].phone || "",
-          address: data[0].address || "",
-          apply_job: data[0].apply_job || "",
-          introduction: data[0].introduction || "",
-          primary_skills: data[0].primary_skills || [],
-          soft_skills: data[0].soft_skills || [],
-        });
+        setCvCard(data);
       }
     } catch (error) {
       console.error("Error loading CV:", error);
@@ -117,6 +136,11 @@ export default function ProfilePageWrapper() {
     setUploadFile(null);
     setUploadError("");
     setUploadLoading(false);
+  };
+
+  const handleResumeCardClick = (cvId: number) => {
+    setSelectedCvId(cvId);
+    setShowStats(false); // Reset to show CV by default when switching
   };
 
   if (!user) {
@@ -152,26 +176,26 @@ export default function ProfilePageWrapper() {
   const handleEdit = () => {
     setIsEditing(true);
     setFormData({
-      username: user?.username || "",
-      avatar_url: user?.avatar_url || null,
-      address_street: user?.address_street || "",
-      address_ward: user?.address_ward || "",
-      address_city: user?.address_city || "",
-      address_country: user?.address_country || "",
-      gender: user?.gender || "others",  //'male' | 'female' | 'others'
+      username: userProfileData?.username || user?.username || "",
+      avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
+      address_street: userProfileData?.address_street || user?.address_street || "",
+      address_ward: userProfileData?.address_ward || user?.address_ward || "",
+      address_city: userProfileData?.address_city || user?.address_city || "",
+      address_country: userProfileData?.address_country || user?.address_country || "",
+      gender: userProfileData?.gender || user?.gender || "others",
     });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setFormData({
-      username: user?.username || "",
-      avatar_url: user?.avatar_url || null,
-      address_street: user?.address_street || "",
-      address_ward: user?.address_ward || "",
-      address_city: user?.address_city || "",
-      address_country: user?.address_country || "",
-      gender: user?.gender || "others",  //'male' | 'female' | 'others'
+      username: userProfileData?.username || user?.username || "",
+      avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
+      address_street: userProfileData?.address_street || user?.address_street || "",
+      address_ward: userProfileData?.address_ward || user?.address_ward || "",
+      address_city: userProfileData?.address_city || user?.address_city || "",
+      address_country: userProfileData?.address_country || user?.address_country || "",
+      gender: userProfileData?.gender || user?.gender || "others",
     });
 
     setShowPasswordForm(false);
@@ -184,23 +208,47 @@ export default function ProfilePageWrapper() {
 
   const handleSave = async () => {
     try {
-      // TODO: Call API to update user profile
-      console.log("Updating profile:", formData);
+      setIsLoading(true);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Prepare the update request
+      const updateRequest: UpdateUserProfileRequest = {
+        username: formData.username,
+        avatar_url: formData.avatar_url,
+        address_street: formData.address_street,
+        address_ward: formData.address_ward,
+        address_city: formData.address_city,
+        address_country: formData.address_country,
+        gender: formData.gender as 'male' | 'female' | 'others'
+      };
 
-      setIsEditing(false);
-      toast.success("Cập nhật thông tin thành công!", {
-        duration: 3000,
-        position: "top-right",
-      });
+      console.log("Updating profile:", updateRequest);
+
+      // Call the API to update user profile
+      const response = await updateUserProfile(updateRequest);
+
+      if (response?.success) {
+        // Update local user profile data
+        setUserProfileData(response.data);
+
+        // Refresh auth user data
+        await checkAuth();
+
+        setIsEditing(false);
+        toast.success("Cập nhật thông tin thành công!", {
+          duration: 3000,
+          position: "top-right",
+        });
+      } else {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
+      console.error("Error updating profile:", error);
       toast.error("Có lỗi xảy ra khi cập nhật thông tin!", {
         duration: 4000,
         position: "top-right",
       });
-      console.error("Error updating profile:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -221,8 +269,8 @@ export default function ProfilePageWrapper() {
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự!", {
+    if (passwordData.newPassword.length < 8) {
+      toast.error("Mật khẩu mới phải có ít nhất 8 ký tự!", {
         duration: 4000,
         position: "top-right",
       });
@@ -230,28 +278,34 @@ export default function ProfilePageWrapper() {
     }
 
     try {
-      // TODO: Call API to change password
-      console.log("Changing password...");
+      setIsLoading(true);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const changePasswordRequest: ChangePasswordRequest = {
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      };
 
-      setShowPasswordForm(false);
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      toast.success("Đổi mật khẩu thành công!", {
-        duration: 3000,
-        position: "top-right",
-      });
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi đổi mật khẩu!", {
+      const response = await changePassword(changePasswordRequest);
+
+      if (response?.success) {
+        setShowPasswordForm(false);
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        toast.success(response.message || "Đổi mật khẩu thành công!", {
+          duration: 3000,
+          position: "top-right",
+        });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Có lỗi xảy ra khi đổi mật khẩu!", {
         duration: 4000,
         position: "top-right",
       });
-      console.error("Error changing password:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -293,20 +347,32 @@ export default function ProfilePageWrapper() {
   return (
     <AccountLayout>
       {/* Container thu hẹp cho trang profile */}
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Profile Card */}
         <Card className="overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <User className="w-6 h-6 text-blue-600" />
-                  Cài đặt tài khoản
-                </CardTitle>
-                <CardDescription className="text-gray-600 mt-1">
-                  Quản lý thông tin tài khoản của bạn
-                </CardDescription>
-              </div>
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-indigo-50 border-b">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-base text-gray-900 flex items-center gap-12">
+                <div className="flex flex-col items-center">
+                  <span className="text-blue-600 text-4xl font-bold">
+                    {(() => {
+                      const count = userProfileData?._count.savedJobs ?? 0;
+                      return count < 10 ? `0${count}` : String(count);
+                    })()}
+                  </span>
+                  Đã lưu
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <span className="text-blue-600 text-4xl font-bold">
+                    {(() => {
+                      const count = userProfileData?._count.followedCompanies ?? 0;
+                      return count < 10 ? `0${count}` : String(count);
+                    })()}
+                  </span>
+                  Đang theo dõi
+                </div>
+              </CardTitle>
 
               {!isEditing ? (
                 <Button
@@ -320,12 +386,13 @@ export default function ProfilePageWrapper() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSave}
+                    disabled={isLoading}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Lưu
+                    {isLoading ? "Đang lưu..." : "Lưu"}
                   </Button>
-                  <Button onClick={handleCancel} variant="outline">
+                  <Button onClick={handleCancel} variant="outline" disabled={isLoading}>
                     <X className="w-4 h-4 mr-2" />
                     Hủy
                   </Button>
@@ -335,50 +402,10 @@ export default function ProfilePageWrapper() {
           </CardHeader>
 
           <CardContent className="p-6">
-            {/* Avatar Section */}
-            <div className="flex items-center gap-6 mb-8">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                  {formData.avatar_url || user.avatar_url ? (
-                    <img
-                      src={formData.avatar_url || user.avatar_url || undefined}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl">
-                      {formData.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </div>
-                {isEditing && (
-                  <>
-                    <input
-                      type="file"
-                      id="avatar-upload"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="avatar-upload"
-                      className="absolute -bottom-2 -right-2 bg-blue-600 text-white rounded-full p-1.5 hover:bg-blue-700 cursor-pointer"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </label>
-                  </>
-                )}
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Ảnh đại diện</h3>
-                <p className="text-sm text-gray-500">
-                  Định dạng JPG, PNG. Tối đa 2MB
-                </p>
-              </div>
-            </div>
 
             {/* Form Fields */}
             <div className="grid lg:grid-cols-2 gap-8">
+              {/* Add code for user's profile data here */}
               {/* Left Column - Editable Fields */}
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -613,10 +640,9 @@ export default function ProfilePageWrapper() {
             {cvLoading ? (
               // Loading state
               <div className="animate-pulse space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-32 bg-gray-200 rounded"></div>
+                <Loader className="w-8 h-8 text-blue-600 animate-spin" />
               </div>
-            ) : !cvData ? (
+            ) : !cvCard || cvCard.length === 0 ? (
               // Empty state with animation
               <div className="text-center py-12">
                 <div className="mb-6 flex justify-center">
@@ -791,469 +817,66 @@ export default function ProfilePageWrapper() {
                 </div>
               </div>
             ) : (
-              // CV exists - display full info
-              <div>
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <Badge variant="secondary" className="mb-2">
-                      ✅ Đã có CV
-                    </Badge>
-                  </div>
-                  <div className="flex gap-2">
-                    {isEditingCV ? (
-                      <>
-                        <Button
-                          onClick={() => {
-                            // TODO: Save CV changes
-                            setIsEditingCV(false);
-                            toast.success("Cập nhật CV thành công!");
-                          }}
-                          className="bg-green-600 hover:bg-green-700"
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-wrap gap-4 justify-between">
+                  {cvCard.map((cv) => (
+                    <ResumeCard
+                      key={cv.id}
+                      resume={cv}
+                      onClick={handleResumeCardClick}
+                      isSelected={selectedCvId === cv.id}
+                    />
+                  ))}
+                </div>
+
+                {/* Resume Preview Modal */}
+                <Dialog
+                  open={selectedCvId !== null}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setSelectedCvId(null);
+                      setShowStats(false); // Reset stats view when closing
+                    }
+                  }}
+                >
+                  <DialogContent className="!max-w-5xl w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
+                    <div className="flex w-full sticky top-0 justify-between items-center bg-slate-100 shadow-md z-50 px-4 py-2 rounded-xl">
+                      <DialogHeader>
+                        <div className="flex items-center gap-4">
+                          <DialogTitle>
+                            {showStats ? "Thống kê CV" : "Xem trước CV"}
+                          </DialogTitle>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowStats(!showStats)}
+                            className="flex items-center gap-2"
+                          >
+                            <BarChart3 className="w-4 h-4" />
+                            {showStats ? "Xem CV" : "Xem thống kê"}
+                          </Button>
+                        </div>
+                      </DialogHeader>
+
+                      <DialogClose id="dialog-close-button" asChild className="bg-red-100 text-center flex justify-center items-center size-10">
+                        <button
+                          className="text-red-500 hover:text-red-700 hover:bg-red-200 rounded-full p-2 transition-colors"
+                          aria-label="Đóng"
                         >
-                          <Save className="w-4 h-4 mr-2" />
-                          Lưu
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setIsEditingCV(false);
-                            // Reset form data
-                            setCvFormData({
-                              fullname: cvData.fullname || "",
-                              email: cvData.email || "",
-                              phone: cvData.phone || "",
-                              address: cvData.address || "",
-                              apply_job: cvData.apply_job || "",
-                              introduction: cvData.introduction || "",
-                              primary_skills: cvData.primary_skills || [],
-                              soft_skills: cvData.soft_skills || [],
-                            });
-                          }}
-                        >
-                          <X className="w-4 h-4 mr-2" />
-                          Hủy
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="outline"
-                          disabled={cvLoading || uploadLoading}
-                          onClick={() => setIsEditingCV(true)}
-                        >
-                          <Edit2 className="w-4 h-4 mr-2" />
-                          Sửa
-                        </Button>
+                          <X className="w-5 h-5" />
+                        </button>
+                      </DialogClose>
+                    </div>
 
-                        <Dialog
-                          open={showUploadDialog}
-                          onOpenChange={(open) => {
-                            setShowUploadDialog(open);
-                            if (!open) resetUploadState();
-                          }}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              disabled={cvLoading || uploadLoading}
-                            >
-                              <Upload className="w-4 h-4 mr-2" />
-                              Upload mới
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Tải CV mới</DialogTitle>
-                              <DialogDescription>
-                                CV mới sẽ thay thế CV hiện tại
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="p-4">
-                              {!uploadFile ? (
-                                <div
-                                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400"
-                                  onClick={() =>
-                                    document
-                                      .getElementById("cv-upload-new")
-                                      ?.click()
-                                  }
-                                >
-                                  <input
-                                    id="cv-upload-new"
-                                    type="file"
-                                    accept=".pdf,.doc,.docx"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-
-                                      if (!file.name.match(/\.(pdf|docx?)$/i)) {
-                                        setUploadError(
-                                          "Chỉ chấp nhận file PDF, DOC hoặc DOCX"
-                                        );
-                                        return;
-                                      }
-
-                                      if (file.size > 10 * 1024 * 1024) {
-                                        setUploadError(
-                                          "File quá lớn (>10MB). Vui lòng chọn file nhỏ hơn."
-                                        );
-                                        return;
-                                      }
-
-                                      setUploadFile(file);
-                                      setUploadError("");
-                                    }}
-                                    className="hidden"
-                                  />
-
-                                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                                  <h3 className="text-md font-medium mb-2">
-                                    Chọn file CV mới
-                                  </h3>
-                                  <p className="text-sm text-gray-500">
-                                    File mới sẽ thay thế CV hiện tại (PDF, DOC,
-                                    DOCX - Max 10MB)
-                                  </p>
-                                </div>
-                              ) : (
-                                <div className="space-y-4">
-                                  <div className="flex items-center p-3 bg-gray-50 rounded">
-                                    <div className="flex-1">
-                                      <p className="font-medium text-sm">
-                                        {uploadFile.name}
-                                      </p>
-                                      <p className="text-xs text-gray-500">
-                                        {(
-                                          uploadFile.size /
-                                          1024 /
-                                          1024
-                                        ).toFixed(2)}{" "}
-                                        MB
-                                      </p>
-                                    </div>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setUploadFile(null);
-                                        setUploadError("");
-                                      }}
-                                      className="text-red-500 hover:text-red-700"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-
-                                  <div className="flex gap-2">
-                                    <Button
-                                      className="bg-blue-600 hover:bg-blue-700 flex-1"
-                                      disabled={uploadLoading}
-                                      onClick={async () => {
-                                        if (!uploadFile) return;
-
-                                        setUploadLoading(true);
-                                        setUploadError("");
-
-                                        try {
-                                          await uploadUserCV(uploadFile);
-                                          toast.success(
-                                            "Thay thế CV thành công! Thông tin mới sẽ được cập nhật tự động."
-                                          );
-                                          setShowUploadDialog(false);
-                                          resetUploadState();
-                                          loadCVData(); // Reload CV data
-                                        } catch (err) {
-                                          const error = err as {
-                                            response?: {
-                                              data?: { message?: string };
-                                            };
-                                          };
-                                          setUploadError(
-                                            error.response?.data?.message ||
-                                            "Upload thất bại"
-                                          );
-                                        } finally {
-                                          setUploadLoading(false);
-                                        }
-                                      }}
-                                    >
-                                      {uploadLoading
-                                        ? "Đang tải..."
-                                        : "Thay thế CV"}
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => {
-                                        setShowUploadDialog(false);
-                                        resetUploadState();
-                                      }}
-                                    >
-                                      Hủy
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-
-                              {uploadError && (
-                                <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
-                                  {uploadError}
-                                </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-
-                        <Button
-                          className="bg-red-600 hover:bg-red-700"
-                          disabled={cvLoading || uploadLoading}
-                          onClick={() => {
-                            // TODO: Export CV to PDF
-                            toast.success("Đang tạo file PDF...");
-                          }}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          PDF
-                        </Button>
-                      </>
+                    {selectedCvId && (
+                      showStats ? (
+                        <CVStatsRadarChart cvId={selectedCvId} />
+                      ) : (
+                        <Resume cvId={selectedCvId} avatar_url={formData?.avatar_url} />
+                      )
                     )}
-                  </div>
-                </div>
-
-                {/* CV Information Display/Edit */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2 text-gray-700">
-                        <User className="w-4 h-4" />
-                        Họ tên
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={cvFormData.fullname}
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              fullname: e.target.value,
-                            }))
-                          }
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border">
-                          {cvData.fullname || "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2 text-gray-700">
-                        <Mail className="w-4 h-4" />
-                        Email
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={cvFormData.email}
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              email: e.target.value,
-                            }))
-                          }
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border">
-                          {cvData.email || "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2 text-gray-700">
-                        <Phone className="w-4 h-4" />
-                        Số điện thoại
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={cvFormData.phone}
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              phone: e.target.value,
-                            }))
-                          }
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border">
-                          {cvData.phone || "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2 text-gray-700">
-                        <MapPin className="w-4 h-4" />
-                        Địa chỉ
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={cvFormData.address}
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              address: e.target.value,
-                            }))
-                          }
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border">
-                          {cvData.address || "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2 text-gray-700">
-                        <FileText className="w-4 h-4" />
-                        Vị trí ứng tuyển
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={cvFormData.apply_job}
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              apply_job: e.target.value,
-                            }))
-                          }
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border">
-                          {cvData.apply_job || "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Skills Section */}
-                <div className="mt-6 pt-6 border-t">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 font-medium">
-                        ⚡ Kỹ năng chuyên môn
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={
-                            Array.isArray(cvFormData.primary_skills)
-                              ? cvFormData.primary_skills.join(", ")
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              primary_skills: e.target.value.split(", "),
-                            }))
-                          }
-                          placeholder="VD: React, Node.js, TypeScript"
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border text-sm">
-                          {Array.isArray(cvData.primary_skills) &&
-                            cvData.primary_skills.length > 0
-                            ? cvData.primary_skills.join(", ")
-                            : "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 font-medium">
-                        🎯 Kỹ năng mềm
-                      </Label>
-                      {isEditingCV ? (
-                        <Input
-                          value={
-                            Array.isArray(cvFormData.soft_skills)
-                              ? cvFormData.soft_skills.join(", ")
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setCvFormData((prev) => ({
-                              ...prev,
-                              soft_skills: e.target.value.split(", "),
-                            }))
-                          }
-                          placeholder="VD: Teamwork, Leadership, Communication"
-                        />
-                      ) : (
-                        <p className="px-3 py-2 bg-gray-50 rounded-md border text-sm">
-                          {Array.isArray(cvData.soft_skills) &&
-                            cvData.soft_skills.length > 0
-                            ? cvData.soft_skills.join(", ")
-                            : "Chưa cập nhật"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Experience & Education Preview */}
-                {!isEditingCV && (
-                  <div className="mt-6 pt-6 border-t">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {cvData.experiences && cvData.experiences.length > 0 && (
-                        <div>
-                          <Label className="text-gray-700 font-medium mb-3 block">
-                            💼 Kinh nghiệm làm việc
-                          </Label>
-                          <div className="space-y-3">
-                            {cvData.experiences.slice(0, 2).map((exp) => (
-                              <div
-                                key={exp.id}
-                                className="border-l-2 border-blue-200 pl-4"
-                              >
-                                <p className="font-medium text-sm">
-                                  {exp.title}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  {exp.company_name}
-                                </p>
-                              </div>
-                            ))}
-                            {cvData.experiences.length > 2 && (
-                              <p className="text-xs text-gray-500">
-                                +{cvData.experiences.length - 2} kinh nghiệm
-                                khác
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {cvData.educations && cvData.educations.length > 0 && (
-                        <div>
-                          <Label className="text-gray-700 font-medium mb-3 block">
-                            🎓 Học vấn
-                          </Label>
-                          <div className="space-y-2">
-                            {cvData.educations.slice(0, 2).map((edu) => (
-                              <div key={edu.id}>
-                                <p className="font-medium text-sm">
-                                  {edu.school}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  {edu.graduated_type}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                  </DialogContent>
+                </Dialog>
               </div>
             )}
           </CardContent>

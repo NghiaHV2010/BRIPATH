@@ -12,6 +12,7 @@ export interface JobLabel {
 export interface Companies {
   users?: {
     avatar_url?: string;
+    username?: string;
   }
 }
 
@@ -35,6 +36,7 @@ export interface Job {
   }>; // Array từ backend khi truyền userId
   avatar_url?: string;
   label_name?: string;
+  username?: string;
   applicants?: Array<{
     cv_id?: number;
     apply_date: string;
@@ -43,6 +45,10 @@ export interface Job {
   }>;
 }
 
+export interface SavedJobs {
+  jobs: Job;
+  saved_at: Date;
+}
 
 // chi tiết cho trang job detail
 export interface JobDetail extends Job {

@@ -84,14 +84,14 @@ export default function JobCard({
     <Card
       onClick={handleCardClick}
       className="group cursor-pointer transition-all duration-300
-      hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1
+      hover:shadow-lg hover:shadow-blue-100
       border border-gray-200 hover:border-blue-300
       w-full h-full flex flex-col justify-between
-      rounded-2xl bg-white overflow-hidden relative"
+      rounded-xl bg-white overflow-hidden relative"
     >
       {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6"
+        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
           }`}
       >
         {/* Header */}
@@ -110,10 +110,13 @@ export default function JobCard({
               </div>
             )}
 
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 flex-col min-w-0 justify-between">
               <h3 className="text-base font-semibold text-gray-900 line-clamp-2">
                 {job.job_title}
               </h3>
+              <p className="text-sm text-gray-500 truncate line-clamp-1">
+                {job.companies?.users?.username || job?.username}
+              </p>
             </div>
 
             {/* Save button */}
@@ -137,7 +140,7 @@ export default function JobCard({
         </div>
 
         {/* Job Details */}
-        <div className="flex flex-col gap-2 mb-4 text-sm text-gray-600">
+        <div className="flex flex-col gap-2 mb-4 text-sm mt-auto text-gray-600">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="truncate">{job.location || "Remote"}</span>
@@ -171,7 +174,7 @@ export default function JobCard({
               }}
               className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
                 ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
-                : "bg-emerald-400 text-white hover:bg-emerald-500"
+                : "bg-emerald-600 text-white hover:bg-emerald-700"
                 }`}
               disabled={hasApplied}
             >

@@ -9,6 +9,8 @@ import {
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Upload, FileText } from "lucide-react";
+import { JobCard } from "@/components/job";
+import type { Job } from "@/types/job";
 
 interface CVRecord {
   id: number;
@@ -17,19 +19,10 @@ interface CVRecord {
   created_at: string;
 }
 
-interface SuitableJob {
-  id: string;
-  job_title: string;
-  company_name?: string;
-  location?: string;
-  salary?: string;
-  created_at: string;
-}
-
 export default function CVSuitableJobsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [cvs, setCvs] = useState<CVRecord[]>([]);
-  const [suitableJobs, setSuitableJobs] = useState<SuitableJob[]>([]);
+  const [suitableJobs, setSuitableJobs] = useState<Job[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<number | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +59,7 @@ export default function CVSuitableJobsPage() {
       const loadSuitableJobs = async () => {
         try {
           setIsLoadingJobs(true);
-          const jobs = await fetchSuitableJobs<SuitableJob[]>(selectedCvId);
+          const jobs = await fetchSuitableJobs<Job[]>(selectedCvId);
           setSuitableJobs(jobs || []);
         } catch (error) {
           console.error("Error fetching suitable jobs:", error);
@@ -176,7 +169,7 @@ export default function CVSuitableJobsPage() {
   // Has CV state - show CV selector and suitable jobs
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
             Việc làm phù hợp với CV
@@ -258,49 +251,14 @@ export default function CVSuitableJobsPage() {
                 </Button>
               </div>
             ) : suitableJobs.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4">
                 {suitableJobs.map((job) => (
-                  <Card
+                  <JobCard
                     key={job.id}
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {job.job_title}
-                          </h3>
-                          {job.company_name && (
-                            <p className="text-gray-600 mb-1">
-                              {job.company_name}
-                            </p>
-                          )}
-                          {job.location && (
-                            <p className="text-sm text-gray-500 mb-1">
-                              📍 {job.location}
-                            </p>
-                          )}
-                          {job.salary && (
-                            <p className="text-sm text-green-600 font-medium mb-2">
-                              💰 {job.salary}
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-400">
-                            Đăng{" "}
-                            {new Date(job.created_at).toLocaleDateString(
-                              "vi-VN"
-                            )}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => navigate(`/jobs/${job.id}`)}
-                        >
-                          Xem chi tiết
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    job={job}
+                    onClick={() => navigate(`/jobs/${job.id}`)}
+                    isSaved={job.isSaved || false}
+                  />
                 ))}
               </div>
             ) : selectedCvId ? (

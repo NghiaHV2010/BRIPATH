@@ -168,6 +168,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   {authUser?.roles.role_name === "User" ? (
                     UserMenuItems.map((item) => (
