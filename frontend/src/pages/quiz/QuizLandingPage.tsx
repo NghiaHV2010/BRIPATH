@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
+import UserCareerPath from "./UserCareerPath";
 import { fetchQuestions, resetAnswer } from "../../api/quiz_api";
 import type { QuizQuestion } from "../../api/quiz_api";
 import { Layout } from "../../components/layout";
@@ -101,6 +102,9 @@ export default function QuizLandingPage() {
               </p>
             </div>
           </div>
+
+          {/* User saved career paths (if any) */}
+          <UserCareerPath />
 
           {/* Start Button */}
           <div className="space-y-4">

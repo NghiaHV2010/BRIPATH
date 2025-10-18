@@ -187,12 +187,12 @@ export default function JobCarousel({
                                   await useJobStore
                                     .getState()
                                     .unsaveJob(job.id);
-                                  toast.success("Đã bỏ theo dõi công ty", {
+                                  toast.success("Đã hủy lưu công việc", {
                                     duration: 3000,
                                   });
                                 } else {
                                   await useJobStore.getState().saveJob(job.id);
-                                  toast.success("Đã theo dõi công ty", {
+                                  toast.success("Lưu công việc thành công", {
                                     duration: 3000,
                                   });
                                 }
