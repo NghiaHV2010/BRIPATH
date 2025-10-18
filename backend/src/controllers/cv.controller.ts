@@ -369,3 +369,41 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
         next(error);
     }
 }
+
+export const getUserCVById = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const cv_id = parseInt(req.params.id as string);
+
+    if (cv_id < 1 || isNaN(cv_id)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "CV không hợp lệ!"));
+    }
+
+    try {
+        const cv = await prisma.cvs.findFirst({
+            where: {
+                id: cv_id,
+                users_id: user_id
+            },
+            include: {
+                awards: true,
+                certificates: true,
+                projects: true,
+                educations: true,
+                experiences: true,
+                languages: true,
+                references: true,
+            },
+        })
+
+        if (!cv) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));
+        }
+        res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: cv
+        });
+    } catch (error) {
+        next(error);
+    }
+};

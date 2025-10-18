@@ -7,6 +7,7 @@ import {
   fetchJobsByComId,
   fetchJobLabels,
   saveJobApi,
+  unsaveJobApi,
 } from "@/api/job_api";
 import { useAuthStore } from "./auth";
 import type {
@@ -93,7 +94,7 @@ export const useJobStore = create<JobState>((set, get) => ({
   // ✅ Bỏ lưu job
   unsaveJob: async (jobId: string) => {
     try {
-      const res = await saveJobApi(jobId); // API toggle save/unsave
+      const res = await unsaveJobApi(jobId); // API toggle save/unsave
       if (res?.success) {
         set((state) => ({
           savedJobs: state.savedJobs.filter(id => id !== jobId),
@@ -165,37 +166,39 @@ export const useJobStore = create<JobState>((set, get) => ({
   },
 
   // ✅ Lấy job theo ID
-  getJobById: async (params) => {
-    set({ isLoading: true, error: null });
-    try {
-      // Tự động thêm userId nếu user đã đăng nhập
-      const authUser = useAuthStore.getState().authUser;
-      const enrichedParams = {
-        ...params,
-        userId: authUser?.id || params.userId,
+getJobById: async (params) => {
+  set({ isLoading: true, error: null });
+  try {
+    const authUser = useAuthStore.getState().authUser;
+    const enrichedParams = {
+      ...params,
+      userId: authUser?.id || params.userId,
+    };
+
+    const data = await fetchJobById(enrichedParams);
+    if (data) {
+      const processedJob = {
+        ...data,
+        isSaved: data.savedJobs && data.savedJobs.length > 0,
+        isApplied:
+          data.applicants?.some(
+            (app) => app.cv_id === authUser?.cv_id // hoặc userId nếu bạn lưu theo user
+          ) || false,
       };
-      
-      const data = await fetchJobById(enrichedParams);
-      if (data) {
-        // Process selectedJob để set isSaved từ savedJobs array
-        const processedJob = {
-          ...data,
-          isSaved: data.savedJobs && data.savedJobs.length > 0
-        };
-        set({ selectedJob: processedJob });
-      } else {
-        set({ selectedJob: null });
-      }
-    } catch (err) {
-      const axiosErr = err as AxiosError;
-      const message =
-        (axiosErr.response?.data as any)?.message ||
-        "Không thể tải chi tiết công việc";
-      set({ error: message });
-    } finally {
-      set({ isLoading: false });
+      set({ selectedJob: processedJob });
+    } else {
+      set({ selectedJob: null });
     }
-  },
+  } catch (err) {
+    const axiosErr = err as AxiosError;
+    const message =
+      (axiosErr.response?.data as any)?.message || "Không thể tải chi tiết công việc";
+    set({ error: message });
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
 
   // ✅ Lọc job
   filterJobs: async (params) => {

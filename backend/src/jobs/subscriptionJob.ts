@@ -5,14 +5,14 @@ import { broadcastToClients } from "../libs/wsServer";
 const prisma = new PrismaClient();
 
 // Cron mỗi 5 phút kiểm tra "Việc gấp" trong giờ vàng
-cron.schedule("*/5 * * * *", async () => {
+cron.schedule("* * * * *", async () => {
     const currentTimeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
     const vietnamTime = new Date(currentTimeString);
     const currentHour = vietnamTime.getHours();
 
     console.log(`⏰ Checking for urgent jobs at ${vietnamTime.toLocaleTimeString("vi-VN")}`);
 
-    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 23);
+    const isGoldenHour = (currentHour >= 12 && currentHour < 14) || (currentHour >= 19 && currentHour < 24);
 
     if (isGoldenHour) {
         const urgentJobs = await prisma.$queryRaw`

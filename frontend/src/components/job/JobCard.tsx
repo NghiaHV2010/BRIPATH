@@ -23,8 +23,7 @@ export default function JobCard({
 }: JobCardProps) {
   const formatSalary = (salary?: string[], currency?: string) => {
     if (!salary || salary.length === 0) return "Competitive salary";
-    const salaryRange = salary[0];
-    return `${salaryRange} ${currency || "VND"}`;
+    return `${salary[0]} ${currency || "VND"}`;
   };
 
   const getStatusBadge = (status?: string) => {
@@ -48,10 +47,38 @@ export default function JobCard({
     }
   };
 
+  const getJobLabelBadge = (labelName?: string) => {
+    switch (labelName) {
+      case "Việc gấp":
+        return (
+          <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc Gấp
+          </Badge>
+        );
+      case "Việc Hot":
+        return (
+          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-orange-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc HOT
+          </Badge>
+        );
+      case "Việc chất":
+        return (
+          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 absolute -top-1 right-0 z-10 p-2 rounded-br-none">
+            Việc Chất
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     onClick?.();
   };
+
+  // ✅ Check if user has applied
+  const hasApplied = (job.applicants?.length ?? 0) > 0;
 
   return (
     <Card
@@ -60,20 +87,20 @@ export default function JobCard({
       hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1
       border border-gray-200 hover:border-blue-300
       w-full h-full flex flex-col justify-between
-      rounded-2xl bg-white overflow-hidden"
+      rounded-2xl bg-white overflow-hidden relative"
     >
+      {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${
-          compact ? "p-3" : "px-4 py-5 sm:px-6"
-        }`}
+        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6"
+          }`}
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 w-full">
             {/* Avatar */}
-            {job.companies?.users?.avatar_url ? (
+            {(job.companies?.users?.avatar_url || job?.avatar_url) ? (
               <img
-                src={job.companies.users.avatar_url}
+                src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
               />
@@ -83,9 +110,8 @@ export default function JobCard({
               </div>
             )}
 
-            {/* Job Title + Company */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+              <h3 className="text-base font-semibold text-gray-900 line-clamp-2">
                 {job.job_title}
               </h3>
             </div>
@@ -101,11 +127,10 @@ export default function JobCard({
               className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
             >
               <Heart
-                className={`w-4 h-4 transition-colors ${
-                  isSaved
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400 hover:text-red-400"
-                }`}
+                className={`w-4 h-4 transition-colors ${isSaved
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-400 hover:text-red-400"
+                  }`}
               />
             </Button>
           </div>
@@ -142,12 +167,15 @@ export default function JobCard({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onApply?.();
+                onClick?.(); // navigate sang job detail
               }}
-              className="shadow-sm rounded-md w-full sm:w-auto"
-              variant="emerald"
+              className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
+                ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
+                : "bg-emerald-400 text-white hover:bg-emerald-500"
+                }`}
+              disabled={hasApplied}
             >
-              Ứng tuyển
+              {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
             </Button>
           )}
         </div>

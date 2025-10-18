@@ -127,8 +127,16 @@ zaloPayRouter.get('/query-order/:app_trans_id', validateQueryOrderRequest, async
                                     data: {
                                         is_verified: true,
                                         companyTags: {
-                                            create: {
-                                                tag_id: tag.id
+                                            connectOrCreate: {
+                                                where: {
+                                                    company_id_tag_id: {
+                                                        company_id: map.company_id!,
+                                                        tag_id: tag.id
+                                                    }
+                                                },
+                                                create: {
+                                                    tag_id: tag.id
+                                                }
                                             }
                                         }
                                     }
@@ -255,8 +263,16 @@ zaloPayRouter.post('/callback', async (req: Request, res: Response) => {
                                     data: {
                                         is_verified: true,
                                         companyTags: {
-                                            create: {
-                                                tag_id: tag.id
+                                            connectOrCreate: {
+                                                where: {
+                                                    company_id_tag_id: {
+                                                        company_id: map.company_id!,
+                                                        tag_id: tag.id
+                                                    }
+                                                },
+                                                create: {
+                                                    tag_id: tag.id
+                                                }
                                             }
                                         }
                                     }

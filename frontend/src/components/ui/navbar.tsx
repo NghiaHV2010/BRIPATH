@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
-import { navigateToJobs, navigateToCompanies } from "../../utils/navigation";
+import {
+  navigateToJobs,
+  navigateToCompanies,
+  navigateToCareerPath,
+} from "../../utils/navigation";
 import { useState } from "react";
 import {
-  User as UserIcon,
   LogOut,
   Settings,
   FileText,
@@ -17,6 +20,7 @@ import {
   Building,
   Plus,
   Bell,
+  BriefcaseBusiness,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -33,6 +37,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { AvatarFallback } from "./avatar";
+import { CompanyMenuItems, UserMenuItems } from "@/constants/profileSidebarItems";
 
 interface NavbarProps {
   className?: string;
@@ -99,55 +105,25 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="h-10">
-                    Tính Năng
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                      <div className="row-span-3">
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/quiz"
-                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          >
-                            <Briefcase className="h-6 w-6" />
-                            <div className="mb-2 mt-4 text-lg font-medium">
-                              Career Map
-                            </div>
-                            <p className="text-sm leading-tight text-muted-foreground">
-                              Khám phá và lập kế hoạch sự nghiệp của bạn với AI
-                            </p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </div>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/blog"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">
-                            Blogs
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Chia sẻ kinh nghiệm và bí quyết tuyển dụng
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/cv-builder"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">
-                            CV Builder
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Tạo CV chuyên nghiệp với AI
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
+                  <NavigationMenuLink asChild>
+                    <button
+                      onClick={() => navigateToCareerPath(navigate)}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Lộ trình nghề nghiệp
+                    </button>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <button
+                      onClick={() => navigateToCompanies(navigate)}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Blog
+                    </button>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -156,12 +132,18 @@ export default function Navbar({ className = "" }: NavbarProps) {
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {authUser && (
-              <div className="rounded-full relative hover:bg-gray-100 p-2 cursor-pointer" onClick={() => navigate("/notifications")}>
-                {authUser?._count && authUser?._count?.userNotifications > 0 && (
-                  <div className="absolute top-0 right-0 size-4 bg-red-500 rounded-full flex items-center justify-center">
-                    <p className="text-xs text-white">{authUser._count.userNotifications}</p>
-                  </div>
-                )}
+              <div
+                className="rounded-full relative hover:bg-gray-100 p-2 cursor-pointer"
+                onClick={() => navigate("/notifications")}
+              >
+                {authUser?._count &&
+                  authUser?._count?.userNotifications > 0 && (
+                    <div className="absolute top-0 right-0 size-4 bg-red-500 rounded-full flex items-center justify-center">
+                      <p className="text-xs text-white">
+                        {authUser._count.userNotifications}
+                      </p>
+                    </div>
+                  )}
                 <Bell className="size-full text-gray-500 " />
               </div>
             )}
@@ -176,7 +158,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      <UserIcon className="w-5 h-5" />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                        {authUser?.username.charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </div>
                   )}
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
@@ -185,52 +169,27 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Cài đặt</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>Quản lí hồ sơ</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/jobs/applied")}>
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    <span>Việc làm đã ứng tuyển</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/jobs/saved")}>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    <span>Việc làm đã lưu</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/profile/followed-companies")}>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    <span>Công ty đã lưu</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/cv/suitable")}>
-                    <Search className="mr-2 h-4 w-4" />
-                    <span>Việc làm phù hợp</span>
-                  </DropdownMenuItem>
-                  {isCompany() ? (
-                    <>
-                      <DropdownMenuSeparator />
+                  {authUser?.roles.role_name === "User" ? (
+                    UserMenuItems.map((item) => (
                       <DropdownMenuItem
-                        onClick={() => navigate("/company/dashboard")}
+                        key={item.label}
+                        onClick={() => navigate(item.href)}
                       >
-                        <Building className="mr-2 h-4 w-4" />
-                        <span>Quản lý công ty</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                       </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuSeparator />
+                    ))
+                  ) : authUser?.roles.role_name === "Company" ? (
+                    CompanyMenuItems.map((item) => (
                       <DropdownMenuItem
-                        onClick={() => navigate("/companies-create")}
+                        key={item.label}
+                        onClick={() => navigate(item.href)}
                       >
-                        <Plus className="mr-2 h-4 w-4" />
-                        <span>Đăng ký tuyển dụng</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                       </DropdownMenuItem>
-                    </>
-                  )}
+                    ))
+                  ) : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -331,7 +290,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       />
                     ) : (
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <UserIcon className="w-5 h-5 text-blue-600" />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                          {authUser?.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
                       </div>
                     )}
                     <span className="text-sm font-medium text-gray-700">

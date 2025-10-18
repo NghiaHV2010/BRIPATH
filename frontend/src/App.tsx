@@ -70,11 +70,14 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={
-          <Layout showFooter={false}>
-            <HomePage />
-          </Layout>
-        } />
+        <Route
+          path="/"
+          element={
+            <Layout showFooter={false}>
+              <HomePage />
+            </Layout>
+          }
+        />
         <Route
           path="/login"
           element={
@@ -94,7 +97,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         {/* <Route path="/sms" element={<VerifySMS />} /> */}
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/register/email/:token"
+        <Route
+          path="/register/email/:token"
           element={<EmailVerificationPage />}
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -123,7 +127,9 @@ function App() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <SettingsPage />
+              <ProfileLayout>
+                <SettingsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -131,7 +137,9 @@ function App() {
           path="/jobs/applied"
           element={
             <ProtectedRoute>
-              <AppliedJobsPage />
+              <ProfileLayout>
+                <AppliedJobsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -139,7 +147,9 @@ function App() {
           path="/jobs/saved"
           element={
             <ProtectedRoute>
-              <SavedJobsPageProfile />
+              <ProfileLayout>
+                <SavedJobsPageProfile />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -147,7 +157,9 @@ function App() {
           path="/cv/suitable"
           element={
             <ProtectedRoute>
-              <CVSuitableJobsPage />
+              <ProfileLayout>
+                <CVSuitableJobsPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -155,7 +167,9 @@ function App() {
           path="/profile/followed-companies"
           element={
             <ProtectedRoute>
-              <FollowedCompaniesPage />
+              <ProfileLayout>
+                <FollowedCompaniesPage />
+              </ProfileLayout>
             </ProtectedRoute>
           }
         />
@@ -191,7 +205,9 @@ function App() {
         <Route
           path="/notifications"
           element={
-            <NotificationList />
+            <ProfileLayout>
+              <NotificationList />
+            </ProfileLayout>
           }
         />
 

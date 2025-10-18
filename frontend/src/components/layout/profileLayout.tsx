@@ -1,7 +1,8 @@
 import { useAuthStore } from '@/store';
 import { type ReactNode } from 'react';
-import { UserProfileSidebar } from '@/components/profile/UserProfileSidebar';
-import { CompanyProfileSidebar } from '@/components/profile/CompanyProfileSidebar';
+import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
+import Layout from './layout';
+import { CompanyMenuItems, UserMenuItems } from '@/constants/profileSidebarItems';
 
 interface ProfileLayoutProps {
     children: ReactNode;
@@ -10,6 +11,8 @@ interface ProfileLayoutProps {
 const ProfileLayout = ({ children }: ProfileLayoutProps) => {
     const authUser = useAuthStore((s) => s.authUser);
     const logout = useAuthStore((s) => s.logout);
+
+    console.log(authUser);
 
     const handleLogout = () => {
         logout?.();
@@ -20,27 +23,27 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
     }
 
     return (
-        <div className="min-h-screen fle w-full relative bg-white">
-            {authUser && authUser?.roles.role_name === 'Company' ? (
-                <CompanyProfileSidebar
-                    companyName={authUser.username}
-                    industry={'IT Software | Saas'}
-                    companyLogo={authUser.avatar_url ?? undefined}
-                    onLogout={handleLogout}
-                />
-            ) : authUser?.roles.role_name === 'User' ? (
-                <UserProfileSidebar
-                    userName={authUser.username}
-                    userAvatar={authUser.avatar_url ?? undefined}
-                    onLogout={handleLogout}
-                />
-            ) : null}
+        <Layout className="!min-h-0">
+            <div className="w-full relative flex justify-center bg-gray-50">
+                {authUser && (
+                    <ProfileSidebar
+                        username={authUser.username}
+                        role={authUser.roles.role_name}
+                        avatar={authUser.avatar_url ?? undefined}
+                        navitems={
+                            authUser?.roles.role_name === 'Company' ?
+                                CompanyMenuItems : authUser?.roles.role_name === 'User' ?
+                                    UserMenuItems : []
+                        }
+                        onLogout={handleLogout}
+                    />
+                )}
 
-            <div className={`${authUser ? 'ml-64' : ''} h-full overflow-auto`}>
                 {children}
             </div>
-        </div>
+        </Layout>
     );
 };
 
 export default ProfileLayout;
+

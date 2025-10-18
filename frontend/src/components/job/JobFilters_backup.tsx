@@ -301,7 +301,8 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+         
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {displayedJobs.slice(0, visibleCount).map((job) => (
               <JobCard
                 key={job.id}
@@ -311,6 +312,7 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
               />
             ))}
           </div>
+        
 
           {/* Show More Button */}
           {jobs.length > visibleCount && (

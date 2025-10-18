@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from '../ui/alert';
 import type { Notification } from '../../types/notification';
 import { ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import { getAllNotifications, markNotificationAsRead } from '@/api';
-import { Layout } from '../layout';
 
 export function NotificationList() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -84,67 +83,65 @@ export function NotificationList() {
     }
 
     return (
-        <Layout>
-            <div className="w-full max-w-3xl h-[90vh] mx-auto p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-gray-500 rounded-md">
-                            <Bell className="size-8 text-gray-200 " />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900">Thông báo</h1>
+        <div className="w-full max-w-4xl h-screen p-6 space-y-6">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-1.5 bg-gray-500 rounded-md">
+                        <Bell className="size-8 text-gray-200 " />
                     </div>
-                    <div className="text-sm text-gray-500">
-                        {notifications.filter((n) => !n.is_read).length} chưa đọc
-                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900">Thông báo</h3>
                 </div>
-
-                {notifications.length === 0 ? (
-                    <div className="text-center py-12">
-                        <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">Chưa có thông báo nào!</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="space-y-3">
-                            {notifications.map((notification) => (
-                                <NotificationItem
-                                    key={notification.id}
-                                    notification={notification}
-                                    onRead={handleMarkAsRead}
-                                />
-                            ))}
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-between pt-4 border-t">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handlePreviousPage}
-                                    disabled={currentPage === 1 || loading}
-                                >
-                                    <ChevronLeft className="w-4 h-4 mr-1" />
-                                    Trước
-                                </Button>
-
-                                <span className="text-sm text-gray-600">
-                                    Trang {currentPage} / {totalPages}
-                                </span>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleNextPage}
-                                    disabled={currentPage === totalPages || loading}
-                                >
-                                    Tiếp
-                                    <ChevronRight className="w-4 h-4 ml-1" />
-                                </Button>
-                            </div>
-                        )}
-                    </>
-                )}
+                <div className="text-sm text-gray-500">
+                    {notifications.filter((n) => !n.is_read).length} chưa đọc
+                </div>
             </div>
-        </Layout>
+
+            {notifications.length === 0 ? (
+                <div className="text-center py-12">
+                    <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">Chưa có thông báo nào!</p>
+                </div>
+            ) : (
+                <>
+                    <div className="space-y-3">
+                        {notifications.map((notification) => (
+                            <NotificationItem
+                                key={notification.id}
+                                notification={notification}
+                                onRead={handleMarkAsRead}
+                            />
+                        ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1 || loading}
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" />
+                                Trước
+                            </Button>
+
+                            <span className="text-sm text-gray-600">
+                                Trang {currentPage} / {totalPages}
+                            </span>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages || loading}
+                            >
+                                Tiếp
+                                <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
     );
 }
