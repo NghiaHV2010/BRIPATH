@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-// lucide icons not required in this page
 import {
   CompanyList,
   CompanyFilters,
@@ -161,17 +160,20 @@ export default function CompaniesPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 pb-12">
-        {featuredCompanies.length > 0 && (
-          <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
-            <CompanyCarousel
-              companies={featuredCompanies}
-              onCompanyClick={handleCompanyClick}
-              title="Featured Companies"
-            />
-          </div>
-        )}
+      {/* THAY ĐỔI LỚN: KHỐI COMPANY CAROUSEL ĐƯỢC ĐƯA RA NGOÀI CONTAINER CÓ PX-4 */}
+      {featuredCompanies.length > 0 && (
+        <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
+          <CompanyCarousel
+            companies={featuredCompanies}
+            onCompanyClick={handleCompanyClick}
+            title="Featured Companies"
+          />
+        </div>
+      )}
+      {/* END THAY ĐỔI */}
 
+      {/* Khối này giữ lại cho Company List bên dưới */}
+      <div className="max-w-7xl mx-auto px-4 pb-12">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 ">
             <div className="flex flex-col items-center gap-4">

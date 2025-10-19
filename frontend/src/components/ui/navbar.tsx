@@ -5,6 +5,7 @@ import {
   navigateToJobs,
   navigateToCompanies,
   navigateToCareerPath,
+  navigateToSubscription,
 } from "../../utils/navigation";
 import { useState } from "react";
 import {
@@ -38,7 +39,10 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { AvatarFallback } from "./avatar";
-import { CompanyMenuItems, UserMenuItems } from "@/constants/profileSidebarItems";
+import {
+  CompanyMenuItems,
+  UserMenuItems,
+} from "@/constants/profileSidebarItems";
 
 interface NavbarProps {
   className?: string;
@@ -82,6 +86,16 @@ export default function Navbar({ className = "" }: NavbarProps) {
           <div className="hidden md:flex">
             <NavigationMenu>
               <NavigationMenuList className="space-x-2">
+                {/* <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <button
+                      onClick={() => navigateToSubscription(navigate)}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Sự kiện
+                    </button>
+                  </NavigationMenuLink>
+                </NavigationMenuItem> */}
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <button
@@ -122,6 +136,17 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                     >
                       Blog
+                    </button>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <button
+                      onClick={() => navigateToSubscription(navigate)}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    >
+                      Gói dịch vụ
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -170,27 +195,27 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  {authUser?.roles.role_name === "User" ? (
-                    UserMenuItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.label}
-                        onClick={() => navigate(item.href)}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </DropdownMenuItem>
-                    ))
-                  ) : authUser?.roles.role_name === "Company" ? (
-                    CompanyMenuItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.label}
-                        onClick={() => navigate(item.href)}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </DropdownMenuItem>
-                    ))
-                  ) : null}
+                  {authUser?.roles.role_name === "User"
+                    ? UserMenuItems.map((item) => (
+                        <DropdownMenuItem
+                          key={item.label}
+                          onClick={() => navigate(item.href)}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </DropdownMenuItem>
+                      ))
+                    : authUser?.roles.role_name === "Company"
+                    ? CompanyMenuItems.map((item) => (
+                        <DropdownMenuItem
+                          key={item.label}
+                          onClick={() => navigate(item.href)}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </DropdownMenuItem>
+                      ))
+                    : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -273,6 +298,17 @@ export default function Navbar({ className = "" }: NavbarProps) {
               >
                 Blogs
               </Link>
+              {authUser?.roles?.role_name === "Company" && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigateToSubscription(navigate);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                >
+                  Gói dịch vụ
+                </button>
+              )}
             </div>
 
             <div className="pt-4 pb-3 border-t border-gray-200">

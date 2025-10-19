@@ -251,3 +251,14 @@ export const resetPasswordApi = async (otp: string, newPassword: string) => {
     throw err.response?.data || err;
   }
 };
+
+
+export const getAllPricingPlans = async (): Promise<any[]> => {
+  try {
+    const response = await axiosConfig.get('/pricings');
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching pricing plans:", error);
+    return [];
+  }
+};

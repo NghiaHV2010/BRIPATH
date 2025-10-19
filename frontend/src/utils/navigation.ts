@@ -36,3 +36,8 @@ export const navigateToCareerPath = (navigate: (path: string) => void) => {
   clearNavigationStates();
   navigate("/quiz");
 };
+
+export const navigateToSubscription = (navigate: (path: string) => void) => {
+  clearNavigationStates();
+  navigate("/subscriptions");
+};
