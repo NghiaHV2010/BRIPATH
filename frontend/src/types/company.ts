@@ -31,6 +31,22 @@ export interface JobSummary {
 }
 
 // ========================
+// FEEDBACK TYPE
+// ========================
+export interface CompanyFeedback {
+  stars: number;
+  description: string;
+  work_environment?: string | null;
+  benefit?: string | null;
+  created_at: string;
+  users: {
+    avatar_url?: string | null;
+    gender?: string | null;
+    username: string;
+  };
+}
+
+// ========================
 // FOLLOW RECORD TYPE
 // (represents items inside `followedCompanies`)
 // There are two shapes from API:
@@ -80,7 +96,7 @@ export interface CompanyDetail {
       jobs?: number;
     };
     companyTags?: any[] | null;
-    feedbacks?: any[] | null;
+    feedbacks?: CompanyFeedback[] | null;
     is_verified?: boolean;
     company_type?: string;
     fields?: any | null;

@@ -6,7 +6,6 @@ import {
   Briefcase,
   Building2,
   Clock,
-  Plus,
   Copy,
   ArrowLeft,
   CircleChevronDown,
@@ -21,7 +20,7 @@ import { Button } from "../../components/ui/button";
 // import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
-import { CompanyDetailSkeleton } from "../../components/company";
+import { CompanyDetailSkeleton, CompanyFeedback } from "../../components/company";
 import CompanyMap from "@/components/utils/CompanyMap";
 import { getCompanyDetails } from "@/api/company_api";
 import { useAuthStore } from "../../store/auth";
@@ -281,8 +280,8 @@ export default function CompanyDetailsPage() {
                 <CardContent className="p-8 space-y-4">
                   {description
                     ?.split("\n")
-                    .filter((p) => p.trim())
-                    .map((p, index) => (
+                    .filter((p: string) => p.trim())
+                    .map((p: string, index: number) => (
                       <p
                         key={index}
                         className="text-slate-700 text-lg leading-relaxed"
@@ -381,6 +380,14 @@ export default function CompanyDetailsPage() {
                     Chưa có vị trí tuyển dụng nào.
                   </Card>
                 )}
+              </div>
+
+              {/* Company Feedback */}
+              <div className="space-y-8">
+                <CompanyFeedback 
+                  feedbacks={companyDetail?.feedbacks || []} 
+                  companyName={users?.username || "Company"}
+                />
               </div>
             </div>
 
