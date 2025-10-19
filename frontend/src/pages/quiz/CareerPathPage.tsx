@@ -99,7 +99,7 @@ const CareerPathPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto pb-30">
         <CareerPathTimeline careerPath={careerPathData.data} />
       </div>
     </Layout>
