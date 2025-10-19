@@ -20,7 +20,6 @@ import {
   Calendar,
   Trash2,
   ExternalLink,
-  Filter,
   Search,
   Eye,
   Globe
@@ -31,7 +30,7 @@ export default function FollowedCompaniesPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [unfollowing, setUnfollowing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterField, setFilterField] = useState("");
+  const [filterField] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,14 +81,15 @@ export default function FollowedCompaniesPage() {
   };
 
   const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.field?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesField = !filterField || company.field === filterField;
+    const companyName = company.users?.username || '';
+    const companyLocation = company.users?.address_city || '';
+    const matchesSearch = companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      companyLocation.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = !filterField; // Simplified for now since we don't have field data
     return matchesSearch && matchesField;
   });
 
-  const fields = [...new Set(companies.map(company => company.field).filter(Boolean))];
+  // const fields = [...new Set(companies.map(company => company.field).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -118,19 +118,7 @@ export default function FollowedCompaniesPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <select
-                value={filterField}
-                onChange={(e) => setFilterField(e.target.value)}
-                className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="">Tất cả lĩnh vực</option>
-                {fields.map(field => (
-                  <option key={field} value={field}>{field}</option>
-                ))}
-              </select>
-            </div>
+            {/* Temporarily removed field filter since we don't have field data */}
           </div>
         </div>
 
@@ -178,31 +166,31 @@ export default function FollowedCompaniesPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <Link
-                            to={`/company/${company.id}`}
+                            to={`/companies/${company.id}`}
                             className="group block"
                           >
                             <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-1">
-                              {company.name}
+                              {company.users?.username || 'Công ty'}
                             </h3>
                           </Link>
 
                           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                            {company.field && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                {company.field}
-                              </span>
-                            )}
-                            {company.location && (
+                            {company.users?.address_city && (
                               <div className="flex items-center gap-1">
                                 <MapPin className="h-4 w-4" />
-                                <span>{company.location}</span>
+                                <span>{company.users.address_city}</span>
                               </div>
                             )}
-                            {company.employee_count && (
+                            {company._count?.jobs && (
                               <div className="flex items-center gap-1">
                                 <Users className="h-4 w-4" />
-                                <span>{company.employee_count} nhân viên</span>
+                                <span>{company._count.jobs} vị trí tuyển dụng</span>
                               </div>
+                            )}
+                            {company.is_verified && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Đã xác thực
+                              </span>
                             )}
                           </div>
 
@@ -233,18 +221,11 @@ export default function FollowedCompaniesPage() {
 
                     <div className="flex items-center gap-2 ml-4">
                       <Link
-                        to={`/company/${company.id}`}
+                        to={`/companies/${company.id}`}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <Eye className="h-4 w-4" />
                         Xem chi tiết
-                      </Link>
-                      <Link
-                        to={`/jobs?company=${company.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Xem việc làm
                       </Link>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -264,7 +245,7 @@ export default function FollowedCompaniesPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Bỏ theo dõi công ty</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Bạn có chắc chắn muốn bỏ theo dõi công ty "{company.name}"?
+                              Bạn có chắc chắn muốn bỏ theo dõi công ty "{company.users?.username || 'Công ty'}"?
                               Bạn sẽ không nhận được thông báo về việc làm mới từ công ty này nữa.
                             </AlertDialogDescription>
                           </AlertDialogHeader>

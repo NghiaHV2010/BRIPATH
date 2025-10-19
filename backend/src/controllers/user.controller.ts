@@ -1040,6 +1040,27 @@ export const getAllUserFollowedCompanies = async (req: Request, res: Response, n
         const followedCompanies = await prisma.followedCompanies.findMany({
             where: {
                 user_id
+            },
+            include: {
+                companies: {
+                    select: {
+                        id: true,
+                        is_verified: true,
+                        users: {
+                            select: {
+                                username: true,
+                                avatar_url: true,
+                                address_city: true,
+                            }
+                        },
+                        _count: {
+                            select: {
+                                jobs: true,
+                                followedCompanies: true
+                            }
+                        }
+                    }
+                }
             }
         });
 

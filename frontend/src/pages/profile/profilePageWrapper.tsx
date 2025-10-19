@@ -46,6 +46,7 @@ import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
 import type { ResumeListItem } from "@/types/resume";
 import { ResumeCard } from "@/components/resume/resumeCard";
 import { CVStatsRadarChart } from "@/components/resume/resumeStats";
+import FollowedCompanies from "@/components/profile/FollowedCompanies";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
@@ -881,6 +882,7 @@ export default function ProfilePageWrapper() {
             )}
           </CardContent>
         </Card>
+        <FollowedCompanies />
       </div>
 
       {/* React Hot Toast */}
