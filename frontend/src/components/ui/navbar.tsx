@@ -76,16 +76,16 @@ export default function Navbar({ className = "" }: NavbarProps) {
           <div className="flex-shrink-0">
             <Link
               to="/"
-              className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              className="text-3xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
             >
               BRIPATH
             </Link>
           </div>
 
           {/* Navigation Menu */}
-          <div className="hidden md:flex">
+          <div className="hidden md:flex *:ml-40">
             <NavigationMenu>
-              <NavigationMenuList className="space-x-2">
+              <NavigationMenuList className="space-x-15 ">
                 {/* <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <button

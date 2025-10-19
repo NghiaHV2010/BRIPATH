@@ -27,7 +27,6 @@ import { getCompanyDetails } from "@/api/company_api";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
-import { toast } from "sonner";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -89,15 +88,11 @@ export default function CompanyDetailsPage() {
     try {
       if (isFollowed) {
         await unfollowCompanyStore(companyId);
-        toast.success("Đã bỏ theo dõi công ty", {
-          duration: 3000,
-        });
+
         setIsFollowed(false);
       } else {
         await followCompanyStore(companyId);
-        toast.success("Đã theo dõi công ty", {
-          duration: 3000,
-        });
+
         setIsFollowed(true);
       }
     } catch (err) {
@@ -230,7 +225,7 @@ export default function CompanyDetailsPage() {
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
                   {description.split("\n")[0]?.trim() ||
                     description.substring(0, 200) +
-                    (description.length > 200 ? "..." : "")}
+                      (description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -332,8 +327,9 @@ export default function CompanyDetailsPage() {
                                 <div className="flex items-center gap-2">
                                   <DollarSign className="w-4 h-4" />
                                   {job.salary?.[0]
-                                    ? `${job.salary[0]} ${job.currency || "VND"
-                                    }`
+                                    ? `${job.salary[0]} ${
+                                        job.currency || "VND"
+                                      }`
                                     : "Thỏa thuận"}
                                 </div>
                               </div>

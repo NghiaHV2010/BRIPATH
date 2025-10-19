@@ -113,15 +113,15 @@ const UserCareerPath = () => {
 
   return (
     <div className="max-w-4xl mx-auto mb-8">
-      <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
+      <div className="p-6 ">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg font-semibold ">
             Bạn đã tạo {paths.length} lộ trình
           </h3>
         </div>
 
         {/* Danh sách card */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl text-center mx-auto">
           {paginatedPaths.map((p) => (
             <div
               key={p.id}
@@ -142,7 +142,7 @@ const UserCareerPath = () => {
                 <Button
                   onClick={() => handleOpen(p.id)}
                   size="sm"
-                  className="w-full max-w-[160px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:scale-[1.02] transition-transform"
+                  variant={"emerald"}
                   disabled={fetchingId === p.id}
                 >
                   {fetchingId === p.id ? "Đang tải..." : "Xem chi tiết"}

@@ -65,12 +65,11 @@ export default function SubscriptionPlansPage() {
         <div className="relative z-10 container mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-              Chọn Gói Đăng Ký
+            <h1 className="text-4xl md:text-6xl font-bold  text-black mb-4">
+              Các gói dịch vụ của BriPath
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Khám phá tiềm năng nghề nghiệp của bạn với các gói dịch vụ phù hợp
-              cho mọi nhu cầu.
+            <p className="text-xl text-gray-600 ">
+              Từ cơ bản đến cao cấp, hãy lựa chọn gói dịch vụ phù hợp với bạn
             </p>
           </div>
 

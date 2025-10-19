@@ -15,14 +15,8 @@ export default function JobList({ onJobClick }: JobListProps = {}) {
     const isSaved = checkIfSaved(jobId);
     if (isSaved) {
       await unsaveJob(jobId);
-      toast.success("Đã hủy lưu công việc", {
-        duration: 3000,
-      });
     } else {
       await saveJob(jobId);
-      toast.success("Lưu công việc thành công", {
-        duration: 3000,
-      });
     }
   };
 
