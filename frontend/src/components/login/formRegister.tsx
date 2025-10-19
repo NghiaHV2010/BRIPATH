@@ -402,6 +402,7 @@ export default function FormRegister() {
                     required
                   />
                   <button
+                    tabIndex={-1}
                     type="button"
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     onClick={() => setShowPassword((p) => !p)}
@@ -438,6 +439,7 @@ export default function FormRegister() {
                     required
                   />
                   <button
+                    tabIndex={-1}
                     type="button"
                     aria-label={
                       showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
@@ -459,12 +461,21 @@ export default function FormRegister() {
                 <ul className="space-y-1">
                   <li
                     className={`${
-                      /^(?=.*[A-Za-z])(?=.*\d).+$/.test(password)
+                      /^(?=.*\d).{8,}$/.test(password)
                         ? "text-green-600"
                         : "text-gray-400"
                     }`}
                   >
-                    • Chứa ít nhất 1 chữ và 1 số
+                    • Chứa ít nhất 1 kí tự số
+                  </li>
+                  <li
+                    className={`${
+                      password && password.length >= 8
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    • Ít nhất 8 ký tự
                   </li>
                   <li
                     className={`${
@@ -518,6 +529,7 @@ export default function FormRegister() {
                 Đã có tài khoản?{" "}
                 <a
                   href="/login"
+                  tabIndex={-1}
                   className="text-emerald-600 hover:underline font-medium transition-colors"
                 >
                   Đăng nhập

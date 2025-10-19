@@ -84,18 +84,26 @@ const CareerPathPage = () => {
 
   if (!careerPathData || !careerPathData.success) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Không thể tải lộ trình sự nghiệp. Vui lòng thử lại sau.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Không thể tải lộ trình sự nghiệp. Vui lòng thử lại sau.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
     );
   }
 
-  return <CareerPathTimeline careerPath={careerPathData.data} />;
+  return (
+    <Layout>
+      <div className="max-w-6xl mx-auto p-6">
+        <CareerPathTimeline careerPath={careerPathData.data} />
+      </div>
+    </Layout>
+  );
 };
 
 export default CareerPathPage;

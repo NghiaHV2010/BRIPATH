@@ -5,6 +5,7 @@ import {
   ForgotPasswordPage,
   LoginPage,
   RegisterPage,
+  ResetPasswordPage,
   EmailVerificationPage,
   SubscriptionPlansPage,
   SubscriptionDetailPage,
@@ -102,6 +103,9 @@ function App() {
           element={<EmailVerificationPage />}
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        {/* Alias route: some emails may include this older path format */}
+        <Route path="/forgot/password/:token" element={<ResetPasswordPage />} />
         <Route path="/quiz" element={<QuizLandingPage />} />
         <Route path="/quiz/test" element={<QuizPage />} />
         <Route path="/quiz/results" element={<QuizResultsPage />} />

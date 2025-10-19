@@ -118,6 +118,7 @@ export function LoginDialog({
               </Label>
               <a
                 href="/forgot-password"
+                tabIndex={-1}
                 className="text-xs text-blue-600 hover:underline"
                 onClick={() => onOpenChange(false)}
               >
@@ -188,6 +189,7 @@ export function LoginDialog({
             Chưa có tài khoản?{" "}
             <a
               href="/register"
+              tabIndex={-1}
               className="text-blue-600 hover:underline font-medium"
               onClick={() => onOpenChange(false)}
             >

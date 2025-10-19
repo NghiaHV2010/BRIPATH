@@ -215,3 +215,39 @@ export const getFollowedCompanies = async (): Promise<{ success: boolean; data: 
     return { success: false, data: [] };
   }
 };
+
+
+
+
+
+export const forgotPasswordApi = async (email: string) => {
+  try {
+    const res = await axiosConfig.post(`/forgot-password`, { email });
+    return res.data;
+  } catch (err: any) {
+    console.error("❌ forgotPasswordApi error:", err.response?.data || err);
+    throw err.response?.data || err;
+  }
+};
+
+export const sendResetOtpApi  = async () => {
+  try {
+    const res = await axiosConfig.get(`/register/email`);
+    return res.data;
+  } catch (err: any) {
+    console.error("❌ sendResetOtpApi error:", err.response?.data || err);
+    throw err.response?.data || err;
+  }
+};
+
+export const resetPasswordApi = async (otp: string, newPassword: string) => {
+  try {
+    const res = await axiosConfig.post(`/reset-password/${otp}`, {
+      newPassword,
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error("❌ resetPasswordApi error:", err.response?.data || err);
+    throw err.response?.data || err;
+  }
+};
