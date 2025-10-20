@@ -304,7 +304,7 @@ export default function CompanyDetailsPage() {
                           onClick={handlePreviousPage}
                           disabled={currentPage === 1 || isLoading}
                         >
-                          <ChevronLeft className="w-4 h-4 mr-1" /> Trước
+                          <ChevronLeft className="w-4 h-4 mr-1" />
                         </Button>
                         <span>
                           Trang {currentPage} / {totalPages}
@@ -315,7 +315,7 @@ export default function CompanyDetailsPage() {
                           onClick={handleNextPage}
                           disabled={currentPage === totalPages || isLoading}
                         >
-                          Tiếp <ChevronRight className="w-4 h-4 ml-1" />
+                          <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                       </div>
                     )}

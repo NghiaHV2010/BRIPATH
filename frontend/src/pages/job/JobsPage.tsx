@@ -66,7 +66,7 @@ export default function JobsPage() {
   }, [currentPage, getAllJobs]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3000");
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL || "ws://localhost:3000");
 
     ws.onopen = () => {
       console.log("✅ Connected to WebSocket server");

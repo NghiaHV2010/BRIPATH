@@ -47,10 +47,6 @@ export function BlogPage() {
 
   const carouselPosts = allPosts;
   const totalPages = Math.ceil(carouselPosts.length / carouselItemsPerPage);
-  const currentCarouselPosts = carouselPosts.slice(
-    carouselIndex * carouselItemsPerPage,
-    (carouselIndex + 1) * carouselItemsPerPage
-  );
 
   const handleCarouselNext = () => {
     setCarouselIndex((prev) => (prev + 1) % totalPages);
@@ -132,40 +128,40 @@ export function BlogPage() {
             <div className="space-y-4">
               {sideFeatured.length > 0
                 ? sideFeatured.map((post) => (
-                    <Card
-                      key={post.id}
-                      className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-0 cursor-pointer"
-                    >
-                      <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80">
-                        <img
-                          src={post.image || "/placeholder.svg"}
-                          alt={post.title}
-                          className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
-                        />
+                  <Card
+                    key={post.id}
+                    className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-0 cursor-pointer"
+                  >
+                    <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80">
+                      <img
+                        src={post.image || "/placeholder.svg"}
+                        alt={post.title}
+                        className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <div className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wide">
+                        {post.category}
                       </div>
-                      <div className="p-4">
-                        <div className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wide">
-                          {post.category}
-                        </div>
-                        <h3 className="font-bold text-gray-900 line-clamp-2 text-sm">
-                          {post.title}
-                        </h3>
-                      </div>
-                    </Card>
-                  ))
+                      <h3 className="font-bold text-gray-900 line-clamp-2 text-sm">
+                        {post.title}
+                      </h3>
+                    </div>
+                  </Card>
+                ))
                 : // 🧩 Placeholder khi chưa có dữ liệu
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <Card
-                      key={i}
-                      className="overflow-hidden border-0 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 animate-pulse"
-                    >
-                      <div className="h-32 w-full bg-emerald-300/40"></div>
-                      <div className="p-4 space-y-2">
-                        <div className="h-3 w-16 bg-white/50 rounded"></div>
-                        <div className="h-4 w-3/4 bg-white/60 rounded"></div>
-                      </div>
-                    </Card>
-                  ))}
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Card
+                    key={i}
+                    className="overflow-hidden border-0 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 animate-pulse"
+                  >
+                    <div className="h-32 w-full bg-emerald-300/40"></div>
+                    <div className="p-4 space-y-2">
+                      <div className="h-3 w-16 bg-white/50 rounded"></div>
+                      <div className="h-4 w-3/4 bg-white/60 rounded"></div>
+                    </div>
+                  </Card>
+                ))}
             </div>
           </div>
 
@@ -248,9 +244,8 @@ export function BlogPage() {
                   <button
                     key={idx}
                     onClick={() => setCarouselIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      idx === carouselIndex ? "bg-emerald-600" : "bg-gray-300"
-                    }`}
+                    className={`w-2 h-2 rounded-full transition-colors ${idx === carouselIndex ? "bg-emerald-600" : "bg-gray-300"
+                      }`}
                   />
                 ))}
               </div>

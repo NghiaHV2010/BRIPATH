@@ -19,7 +19,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import axiosConfig from "../../config/axios.config";
 import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
-import { AvatarFallback } from "../../components/ui/avatar";
 import { Resume } from "../../components/resume/resume";
 import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
 import type { ResumeListItem } from "@/types/resume";
@@ -54,7 +53,7 @@ export default function ProfilePageWrapper() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const [cvLoading, setCvLoading] = useState(true);
-  const [isEditingCV, setIsEditingCV] = useState(false);
+  // const [isEditingCV, setIsEditingCV] = useState(false);
   const [cvCard, setCvCard] = useState<ResumeListItem[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<number | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -291,41 +290,6 @@ export default function ProfilePageWrapper() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file size (2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("Kích thước file không được vượt quá 2MB!", {
-          duration: 4000,
-          position: "top-right",
-        });
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error("Vui lòng chọn file hình ảnh (JPG, PNG)!", {
-          duration: 4000,
-          position: "top-right",
-        });
-        return;
-      }
-
-      // TODO: Upload file to server and get URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setFormData((prev) => ({ ...prev, avatar_url: result }));
-        toast.success("Tải ảnh lên thành công!", {
-          duration: 3000,
-          position: "top-right",
-        });
-      };
-      reader.readAsDataURL(file);
     }
   };
 

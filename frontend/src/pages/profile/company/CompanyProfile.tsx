@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import axiosConfig from "@/config/axios.config"
 import { JobCard } from "@/components/job"
-import { CreateJobDialog } from "@/components/jobs/CreateJobDialog"
+import { CreateJobDialog } from "@/components/job/CreateJobDialog"
 import { useAuthStore } from "@/store"
 
 export function CompanyProfile() {

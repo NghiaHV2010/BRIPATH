@@ -8,7 +8,6 @@ import {
   ResetPasswordPage,
   EmailVerificationPage,
   SubscriptionPlansPage,
-  SubscriptionDetailPage,
   AboutPage,
   ContactPage,
   QuizLandingPage,
@@ -181,19 +180,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-        path="/companies-create"
-        element={
-          <ProtectedRoute>
-            <CompanyRegistrationPage />
-          </ProtectedRoute>
-        }
-      /> */}
+
         <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
-        <Route
-          path="/subscriptions/:planId"
-          element={<SubscriptionDetailPage />}
-        />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
 

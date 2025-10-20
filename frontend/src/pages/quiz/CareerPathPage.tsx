@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Clock, BookOpen, Target } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Layout, type CareerPathResponse } from "@/index";
 import { CareerPathTimeline } from "@/components/quiz/CareerPathTimeline";
 
@@ -52,9 +52,8 @@ const CareerPathPage = () => {
 
                   {/* Card skeleton */}
                   <div
-                    className={`grid grid-cols-2 gap-8 ${
-                      isLeft ? "" : "grid-flow-dense"
-                    }`}
+                    className={`grid grid-cols-2 gap-8 ${isLeft ? "" : "grid-flow-dense"
+                      }`}
                   >
                     <div className={isLeft ? "" : "col-start-2"}>
                       <div className="p-6 rounded-lg border border-border bg-card space-y-4">
@@ -103,7 +102,7 @@ const CareerPathPage = () => {
         careerPath={{
           ...careerPathData.data,
           _count: careerPathData.data._count ?? { careerPathSteps: 0 },
-          careerPathSteps: careerPathData.data.careerPathSteps ?? [],
+          careerPathSteps: careerPathData.data?.careerPathSteps ?? [],
         }}
       />
     </Layout>

@@ -21,7 +21,6 @@ export default function JobCard({
   job,
   onClick,
   onSave,
-  onApply,
   isSaved = false,
   compact = false,
   role = "User",
@@ -158,6 +157,7 @@ export default function JobCard({
 
             {/* Save button */}
             <Button
+              variant='custom'
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();

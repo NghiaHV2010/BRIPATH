@@ -26,7 +26,6 @@ import { JobDetailSkeleton } from "../../components/job";
 import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
-import { toast } from "sonner";
 import axiosConfig from "../../config/axios.config";
 
 export default function JobDetailsPage() {
@@ -158,18 +157,18 @@ export default function JobDetailsPage() {
 
   const company = companies
     ? {
-        id: companies.id,
-        name: companies.users?.username || "Công ty",
-        avatar_url: companies.users?.avatar_url || "",
-        field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
-        address: [
-          companies.users?.address_street,
-          companies.users?.address_ward,
-          companies.users?.address_city,
-        ]
-          .filter(Boolean)
-          .join(", "),
-      }
+      id: companies.id,
+      name: companies.users?.username || "Công ty",
+      avatar_url: companies.users?.avatar_url || "",
+      field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
+      address: [
+        companies.users?.address_street,
+        companies.users?.address_ward,
+        companies.users?.address_city,
+      ]
+        .filter(Boolean)
+        .join(", "),
+    }
     : null;
 
   const formatDeadline = () => {
@@ -324,7 +323,7 @@ export default function JobDetailsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {selectedJob.applicants &&
-                  selectedJob.applicants.length > 0 ? (
+                    selectedJob.applicants.length > 0 ? (
                     <div className="relative group flex-1">
                       <Button
                         disabled

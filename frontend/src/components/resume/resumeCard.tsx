@@ -20,7 +20,7 @@ interface ResumeCardSummaryProps {
     isSelected?: boolean;
 }
 
-export function ResumeCard({ resume, onViewDetails, onClick, isSelected }: ResumeCardSummaryProps) {
+export function ResumeCard({ resume, onClick, isSelected }: ResumeCardSummaryProps) {
     const filterUndefined = (value: string | null | undefined) => {
         if (!value || value === 'undefined' || value === 'null') return null;
         return value;

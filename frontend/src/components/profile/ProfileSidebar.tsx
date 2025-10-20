@@ -158,7 +158,7 @@ export function ProfileSidebar({
                 <p className="text-sm text-gray-500 text-center">{role}</p>
 
                 <Button
-                    variant={'link'}
+                    variant='custom'
                     size="default"
                     className="mt-2 text-blue-600 h-auto p-0 hover:scale-none cursor-pointer"
                     onClick={() => navigate('/profile?edit=true')}

@@ -2,8 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components";
 import { SubscriptionCard } from "../../components/subscription/subscriptionCard";
-import type { SubscriptionPlan } from "../../components/subscription/subscriptionCard";
 import { getAllPricingPlans } from "../../api/user_api";
+
+type SubscriptionPlan = {
+  id: string;
+  name: string;
+  tier: "trial" | "bronze" | "silver" | "gold";
+  price: number;
+  durationMonths: number;
+  description: string;
+  features: string[];
+  isRecommended: boolean;
+  isPopular: boolean;
+};
 
 export default function SubscriptionPlansPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -26,12 +37,16 @@ export default function SubscriptionPlansPage() {
             if (lower.includes("vip")) return "silver";
             if (lower.includes("premium")) return "gold";
             return "bronze";
-          })(),
+          })() as SubscriptionPlan['tier'],
           price: Number(p.price) || 0,
           durationMonths: p.duration_months || 1,
           description: p.description || "",
           features: Array.isArray(p.features)
-            ? p.features.map((f: any) => f.feature_name)
+            ? p.features
+              .map((f: { feature_name?: string } | string) =>
+                typeof f === "string" ? f : f.feature_name || ""
+              )
+              .filter(Boolean)
             : [],
           isRecommended: Boolean(p.recommended_labels),
           isPopular: Boolean(p.verified_badge),

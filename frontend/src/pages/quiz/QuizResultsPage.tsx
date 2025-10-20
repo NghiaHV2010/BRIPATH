@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../store/quiz.store";
 import { createCPAPI } from "../../api/quiz_api";
-import type { SuitableJobCategory, JobType } from "../../api/quiz_api";
+import type { JobType } from "../../api/quiz_api";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
 import { Trophy, Briefcase } from "lucide-react";

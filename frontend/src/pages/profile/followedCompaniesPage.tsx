@@ -12,14 +12,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Building2,
   MapPin,
   Users,
   Calendar,
   Trash2,
-  ExternalLink,
   Search,
   Eye,
   Globe,
@@ -31,7 +29,6 @@ export default function FollowedCompaniesPage() {
   const [unfollowing, setUnfollowing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterField] = useState("");
-  const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -67,7 +64,6 @@ export default function FollowedCompaniesPage() {
       setCompanies(companies.filter((company) => company.id !== companyId));
     } catch (error) {
       console.error("Error unfollowing company:", error);
-      s
     } finally {
       setUnfollowing(null);
     }
