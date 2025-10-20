@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2020",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -11,7 +11,8 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "ES2023"
+      "ES2020",
+      "DOM"
     ],
     "baseUrl": ".",
     "paths": {
@@ -21,14 +22,16 @@
       "effect/*": [
         "src/types/shims/effect/*"
       ]
-    }
+    },
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*",
     "global.d.ts"
   ],
   "exclude": [
-    "node_modules",
-    "node_modules/effect/**"
+    "node_modules"
   ]
 }
