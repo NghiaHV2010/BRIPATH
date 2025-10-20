@@ -85,7 +85,7 @@ const CareerPathPage = () => {
   if (!careerPathData || !careerPathData.success) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-xl min-h-[418px] mx-auto pt-40 text-center">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -100,7 +100,12 @@ const CareerPathPage = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto pb-30">
-        <CareerPathTimeline careerPath={careerPathData.data} />
+        <CareerPathTimeline
+          careerPath={{
+            ...careerPathData.data,
+            _count: careerPathData.data._count ?? { careerPathSteps: 0 },
+          }}
+        />
       </div>
     </Layout>
   );

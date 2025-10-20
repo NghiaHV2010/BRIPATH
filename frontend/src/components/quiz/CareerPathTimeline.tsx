@@ -8,33 +8,33 @@ interface CareerPathTimelineProps {
 
 export const CareerPathTimeline = ({ careerPath }: CareerPathTimelineProps) => {
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-16 text-center">
         <h1 className="text-5xl font-bold mb-6 mt-10 text-foreground">
           {careerPath.title}
         </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-xl text-muted-foreground mb-8 max-w-5xl mx-auto leading-relaxed">
           {careerPath.description}
         </p>
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <Clock className="w-5 h-5 text-primary" />
           <span className="text-base font-medium">
-            {careerPath.estimate_duration}
+            Thời gian ước tính: {careerPath.estimate_duration}
           </span>
         </div>
         {careerPath.resources && (
-          <Card className="mt-8 max-w-3xl mx-auto border-primary/20">
+          <Card className="mt-8 max-w-sm mx-auto border-primary/20 ">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="w-5 h-5 text-primary" />
+              <CardTitle className="gap-2 text-2xl flex items-center justify-center ">
+                <BookOpen className="w-8 h-8 text-primary " />
                 Tài nguyên tổng quan
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-left">
+              <ul className="space-y-3 text-center">
                 {careerPath.resources.split(",").map((resource, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
+                  <li key={idx} className="flex items-center pl-20 gap-2">
                     <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-muted-foreground">
                       {resource.trim()}

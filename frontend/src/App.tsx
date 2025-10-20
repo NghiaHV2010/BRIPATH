@@ -38,6 +38,7 @@ import Layout from "./components/layout/layout";
 import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
+import { BlogPage } from "./pages/blog/BlogPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -115,6 +116,8 @@ function App() {
         <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+
+        <Route path="/blog" element={<BlogPage />} />
 
         <Route
           path="/profile"

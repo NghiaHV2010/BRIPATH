@@ -77,6 +77,7 @@ export const deleteBlogPost = async (blogId: number): Promise<DeleteBlogResponse
 export const getAllBlogPosts = async (): Promise<{ success: boolean; data: BlogPost[] }> => {
   try {
     const response = await axiosConfig.get<{ success: boolean; data: BlogPost[] }>('/dashboard/blogs');
+    console.log("Fetched blog posts:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching blog posts:", error.response?.data || error.message);

@@ -89,9 +89,11 @@ export interface CareerPath {
   estimate_duration: string;
   user_id: string;
   jobspecialized_id: number;
-  careerPathSteps: CareerPathStep[];
+  _count?: {
+    careerPathSteps: number;
+  };
+  // careerPathSteps: CareerPathStep[];
 }
-
 export interface CareerPathResponse {
   success: boolean;
   data: CareerPath;

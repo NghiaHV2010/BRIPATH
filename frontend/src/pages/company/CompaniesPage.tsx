@@ -160,13 +160,12 @@ export default function CompaniesPage() {
         </div>
       )}
 
-      {/* THAY ĐỔI LỚN: KHỐI COMPANY CAROUSEL ĐƯỢC ĐƯA RA NGOÀI CONTAINER CÓ PX-4 */}
       {featuredCompanies.length > 0 && (
         <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
           <CompanyCarousel
             companies={featuredCompanies}
             onCompanyClick={handleCompanyClick}
-            title="Featured Companies"
+            title="Công ty nổi bật"
           />
         </div>
       )}
