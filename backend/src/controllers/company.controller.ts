@@ -65,7 +65,7 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
             }
         );
 
-        const faxCodeData = await isFaxCodeExisted.json();
+        const faxCodeData = (await isFaxCodeExisted.json()) as { data?: unknown };
 
 
         if (!faxCodeData.data) {
