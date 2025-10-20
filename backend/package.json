@@ -39,11 +39,11 @@
     "passport-google-oauth20": "^2.0.0",
     "pdf-parse": "^1.1.1",
     "prisma": "^6.16.2",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "@swc/cli": "^0.7.8",
+    "@swc/core": "^1.13.5"
   },
   "devDependencies": {
-    "@swc/cli": "^0.7.8",
-    "@swc/core": "^1.13.5",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
