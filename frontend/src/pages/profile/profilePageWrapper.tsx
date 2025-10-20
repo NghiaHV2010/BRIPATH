@@ -21,10 +21,11 @@ import axiosConfig from "../../config/axios.config";
 import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
 import { AvatarFallback } from "../../components/ui/avatar";
 import { Resume } from "../../components/resume/resume";
-import type { UpdateUserProfileRequest, UserProfile } from "../../types/profile";
-import type { ResumeListItem } from "../../types/resume";
-import { ResumeCard } from "../../components/resume/resumeCard";
-import { CVStatsRadarChart } from "../../components/resume/resumeStats";
+import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
+import type { ResumeListItem } from "@/types/resume";
+import { ResumeCard } from "@/components/resume/resumeCard";
+import { CVStatsRadarChart } from "@/components/resume/resumeStats";
+import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
 
 export default function ProfilePageWrapper() {
@@ -763,6 +764,7 @@ export default function ProfilePageWrapper() {
             )}
           </CardContent>
         </Card>
+        <FollowedCompanies />
       </div>
 
       {/* Delete Confirmation Dialog */}

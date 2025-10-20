@@ -14,6 +14,42 @@ export interface CompInfor {
 }
 
 // ========================
+// JOB TYPE (for CompanyDetail)
+// ========================
+export interface JobSummary {
+  _count?: {
+    applications?: number | 0;
+    savedJobs?: number | 0;
+    aiFeedbacks?: number | 0;
+  };
+  id: string;
+  job_title: string;
+  status: string;
+  location: string;
+  salary: string[]; // keep as array if API returns array
+  currency: string;
+  jobCategories?: {
+    job_category: string;
+  };
+}
+
+// ========================
+// FEEDBACK TYPE
+// ========================
+export interface CompanyFeedback {
+  stars: number;
+  description: string;
+  work_environment?: string | null;
+  benefit?: string | null;
+  created_at: string;
+  users: {
+    avatar_url?: string | null;
+    gender?: string | null;
+    username: string;
+  };
+}
+
+// ========================
 // FOLLOW RECORD TYPE
 // (represents items inside `followedCompanies`)
 // There are two shapes from API:
@@ -51,26 +87,28 @@ export interface CompanySummary {
 // COMPANY DETAIL TYPE
 // ========================
 export interface CompanyDetail {
-  id: string;
-  background_url?: string | null;
-  description?: string | null;
-  employees?: number | null;
-  users?: CompInfor | null;
-  _count?: {
-    followedCompanies?: number;
-    jobs?: number;
-  };
-  companyTags?: any[] | null;
-  feedbacks?: any[] | null;
-  is_verified?: boolean;
-  company_type?: string;
-  fields?: any | null;
-  jobs?: Job[];
+  success: boolean;
+  data: {
+    id: string;
+    background_url?: string | null;
+    description?: string | null;
+    employees?: number | null;
+    users?: CompInfor | null;
+    _count?: {
+      followedCompanies?: number;
+      jobs?: number;
+    };
+    companyTags?: any[] | null;
+    feedbacks?: CompanyFeedback[] | null;
+    is_verified?: boolean;
+    company_type?: string;
+    fields?: any | null;
+    jobs?: Job[];
 
-  followedCompanies?: FollowRecord[];
+    followedCompanies?: FollowRecord[];
 
-  isFollowed?: boolean;
-}
+    isFollowed?: boolean;
+  }
 
 export interface CompanyDetailResponse {
   success: boolean;
