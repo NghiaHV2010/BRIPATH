@@ -30,6 +30,7 @@
     "crypto": "^1.0.1",
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.2",
+    "effect": "^3.18.4",
     "express": "^5.1.0",
     "express-fileupload": "^1.5.2",
     "firebase-admin": "^13.5.0",
