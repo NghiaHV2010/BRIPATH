@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "npx @swc/cli src -d dist",
+    "build": "swc src -d dist",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +20,8 @@
     "@arcjet/node": "^1.0.0-beta.12",
     "@google/genai": "^1.20.0",
     "@prisma/client": "^6.16.2",
+    "@swc/cli": "^0.7.8",
+    "@swc/core": "^1.13.5",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
@@ -39,9 +41,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pdf-parse": "^1.1.1",
     "prisma": "^6.16.2",
-    "ws": "^8.18.3",
-    "@swc/cli": "^0.7.8",
-    "@swc/core": "^1.13.5"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
