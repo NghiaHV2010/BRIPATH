@@ -1,16 +1,20 @@
 import { defineConfig } from 'vite'
 import path from 'path'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   css: {
-    transformer: 'postcss', // dùng postcss thay vì lightningcss
+    postcss: './postcss.config.js',
+  },
+  build: {
+    rollupOptions: {
+      external: ['lightningcss'],
+    },
   },
 })
