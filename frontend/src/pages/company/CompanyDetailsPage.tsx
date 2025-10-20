@@ -11,6 +11,7 @@ import {
   UserRoundCheck,
   ChevronLeft,
   ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
@@ -18,7 +19,8 @@ import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
 import { CompanyDetailSkeleton, CompanyFeedback } from "../../components/company";
 import CompanyMap from "@/components/utils/CompanyMap";
-import { getCompanyDetails } from "@/api/company_api";
+import { getCompanyDetails, feedbackCompany } from "@/api/company_api";
+import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
@@ -33,6 +35,16 @@ export default function CompanyDetailsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isFollowed, setIsFollowed] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  // Feedback form state
+  const [stars, setStars] = useState<number>(5);
+  const [description, setDescription] = useState<string>("");
+  const [benefit, setBenefit] = useState<string>("");
+  const [workEnvironment, setWorkEnvironment] = useState<string>("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [descriptionError, setDescriptionError] = useState<string>("");
+  const [starsError, setStarsError] = useState<string>("");
+  const [benefitError, setBenefitError] = useState<string>("");
+  const [workEnvError, setWorkEnvError] = useState<string>("");
   const {
     followCompany: followCompanyStore,
     unfollowCompany: unfollowCompanyStore,
@@ -329,6 +341,161 @@ export default function CompanyDetailsPage() {
 
               {/* Company Feedback */}
               <div className="space-y-8">
+                {/* Feedback form */}
+                <Card className="bg-white shadow-lg rounded-2xl">
+                  <CardHeader className="bg-blue-50 pb-6">
+                    <h2 className="text-2xl font-bold text-slate-900">Gửi đánh giá công ty</h2>
+                  </CardHeader>
+                  <CardContent className="p-8 space-y-4">
+                    {!authUser ? (
+                      <div className="text-slate-700">Vui lòng đăng nhập để gửi đánh giá.</div>
+                    ) : (
+                      <form
+                        className="space-y-4"
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          if (!companyId) return;
+                          // reset errors
+                          setDescriptionError("");
+                          setStarsError("");
+                          setBenefitError("");
+                          setWorkEnvError("");
+
+                          let hasError = false;
+                          if (description.trim().length < 10) {
+                            setDescriptionError("Mô tả phải có ít nhất 10 ký tự");
+                            hasError = true;
+                          }
+                          if (stars < 1 || stars > 5) {
+                            setStarsError("Số sao đánh giá phải từ 1 đến 5");
+                            hasError = true;
+                          }
+                          if (benefit.trim().length > 0 && benefit.trim().length < 10) {
+                            setBenefitError("Lợi ích phải có ít nhất 10 ký tự khi nhập");
+                            hasError = true;
+                          }
+                          if (workEnvironment.trim().length > 0 && workEnvironment.trim().length < 10) {
+                            setWorkEnvError("Môi trường làm việc phải có ít nhất 10 ký tự khi nhập");
+                            hasError = true;
+                          }
+                          if (hasError) {
+                            toast({
+                              title: "Vui lòng kiểm tra lại thông tin",
+                              description: "Một số trường chưa hợp lệ",
+                            });
+                            return;
+                          }
+                          try {
+                            setIsSubmittingFeedback(true);
+                            await feedbackCompany(companyId, {
+                              description: description.trim(),
+                              stars,
+                              benefit: benefit.trim() || undefined,
+                              work_environment: workEnvironment.trim() || undefined,
+                            });
+                            // reset form
+                            setDescription("");
+                            setBenefit("");
+                            setWorkEnvironment("");
+                            setStars(5);
+                            // refresh details to show latest feedbacks
+                            const res = await getCompanyDetails(
+                              userId ?? "",
+                              companyId,
+                              currentPage
+                            );
+                            setCompanyDetail(res.data || null);
+                            toast({
+                              title: "Đã gửi đánh giá",
+                              description: "Cảm ơn bạn đã chia sẻ trải nghiệm",
+                            });
+                          } catch (err: any) {
+                            console.error("Submit feedback error:", err);
+                            toast({
+                              title: "Không thể gửi đánh giá",
+                              description: err?.response?.data?.message || "Vui lòng thử lại",
+                            });
+                          } finally {
+                            setIsSubmittingFeedback(false);
+                          }
+                        }}
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Số sao</label>
+                            <select
+                              className="w-full border rounded-lg p-2"
+                              value={stars}
+                              onChange={(e) => setStars(parseInt(e.target.value))}
+                            >
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
+                            {starsError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {starsError}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
+                          <textarea
+                            className="w-full border rounded-lg p-3 min-h-[100px]"
+                            placeholder="Chia sẻ trải nghiệm của bạn..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                          />
+                          {descriptionError && (
+                            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-4 h-4" />
+                              {descriptionError}
+                            </p>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Lợi ích (tuỳ chọn)</label>
+                            <input
+                              className="w-full border rounded-lg p-2"
+                              value={benefit}
+                              onChange={(e) => setBenefit(e.target.value)}
+                              placeholder="Ví dụ: Bảo hiểm, thưởng..."
+                            />
+                            {benefitError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {benefitError}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Môi trường làm việc (tuỳ chọn)</label>
+                            <input
+                              className="w-full border rounded-lg p-2"
+                              value={workEnvironment}
+                              onChange={(e) => setWorkEnvironment(e.target.value)}
+                              placeholder="Ví dụ: Thân thiện, chuyên nghiệp..."
+                            />
+                            {workEnvError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {workEnvError}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button type="submit" disabled={isSubmittingFeedback}>
+                            {isSubmittingFeedback ? "Đang gửi..." : "Gửi đánh giá"}
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </CardContent>
+                </Card>
                 <CompanyFeedback
                   feedbacks={companyDetail?.feedbacks || []}
                   companyName={companyDetail.users?.username || "Company"}

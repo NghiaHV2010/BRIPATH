@@ -106,6 +106,34 @@ export const feedbackCV = async (
 };
 
 // ========================
+// Feedback Company (User -> Company)
+// ========================
+export const feedbackCompany = async (
+  companyId: string,
+  payload: {
+    description: string;
+    stars: number;
+    benefit?: string;
+    work_environment?: string;
+  }
+): Promise<{
+  success: boolean;
+  data: {
+    id: number;
+    description: string;
+    stars: number;
+    benefit?: string | null;
+    work_environment?: string | null;
+    company_id: string;
+    user_id: string;
+    created_at: string;
+  };
+}> => {
+  const res = await axiosConfig.post(`/feedback/company/${companyId}`, payload);
+  return res.data;
+};
+
+// ========================
 // follow company
 // ========================
 export const followCompany = async (companyId: number): Promise<{ success: boolean; data: any }> => {
