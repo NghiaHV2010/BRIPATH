@@ -15,8 +15,12 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "effect": ["src/types/shims/effect/index"],
-      "effect/*": ["src/types/shims/effect/*"]
+      "effect": [
+        "src/types/shims/effect/index"
+      ],
+      "effect/*": [
+        "src/types/shims/effect/*"
+      ]
     }
   },
   "include": [
