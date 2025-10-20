@@ -50,7 +50,7 @@ export const CareerPathTimeline = ({ careerPath }: CareerPathTimelineProps) => {
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl min-h-20 font-bold  text-balance bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl min-h-30 font-bold  text-balance bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
                 {careerPath.title}
               </h1>
 
@@ -206,7 +206,7 @@ export const CareerPathTimeline = ({ careerPath }: CareerPathTimelineProps) => {
           </div>
         </div>
 
-        {/* Completion Message */}
+        {/* Completion Message
         <div className="w-full bg-gradient-to-r from-blue-50 to-emerald-50 py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex flex-col items-center gap-4 px-8 py-8 rounded-2xl bg-white border-2 border-emerald-200">
@@ -224,7 +224,7 @@ export const CareerPathTimeline = ({ careerPath }: CareerPathTimelineProps) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
