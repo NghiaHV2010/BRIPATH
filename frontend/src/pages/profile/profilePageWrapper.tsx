@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import AccountLayout from "../../components/layout/accountLayout";
 import { Button } from "../../components/ui/button";
 import {
@@ -11,43 +11,24 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { useAuthStore } from "../../store/auth";
-import {
-  Edit2,
-  Save,
-  X,
-  User,
-  Calendar,
-  MapPin,
-  Mail,
-  Phone,
-  Upload,
-  FileText,
-  Loader,
-  BarChart3
-} from "lucide-react";
+import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
-import { uploadUserCV } from "../../api/cv_api";
+import axiosConfig from "../../config/axios.config";
 import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
-import { AvatarFallback } from "@/components/ui/avatar";
+import { AvatarFallback } from "../../components/ui/avatar";
 import { Resume } from "../../components/resume/resume";
-import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
-import type { ResumeListItem } from "@/types/resume";
-import { ResumeCard } from "@/components/resume/resumeCard";
-import { CVStatsRadarChart } from "@/components/resume/resumeStats";
+import type { UpdateUserProfileRequest, UserProfile } from "../../types/profile";
+import type { ResumeListItem } from "../../types/resume";
+import { ResumeCard } from "../../components/resume/resumeCard";
+import { CVStatsRadarChart } from "../../components/resume/resumeStats";
+import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
 
 export default function ProfilePageWrapper() {
+
   const user = useAuthStore((state) => state.authUser);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
@@ -73,13 +54,22 @@ export default function ProfilePageWrapper() {
 
   const [cvLoading, setCvLoading] = useState(true);
   const [isEditingCV, setIsEditingCV] = useState(false);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
   const [cvCard, setCvCard] = useState<ResumeListItem[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<number | null>(null);
   const [showStats, setShowStats] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [cvToDelete, setCvToDelete] = useState<string | null>(null);
+
+  // Check URL parameters for edit mode
+  const [searchParams] = useSearchParams();
+
+  // Set default editing state based on URL parameter
+  useEffect(() => {
+    const editParam = searchParams.get('edit');
+    if (editParam === 'true') {
+      setIsEditing(true);
+    }
+  }, [searchParams]);
 
   // Load user profile data
   useEffect(() => {
@@ -130,12 +120,6 @@ export default function ProfilePageWrapper() {
     } finally {
       setCvLoading(false);
     }
-  };
-
-  const resetUploadState = () => {
-    setUploadFile(null);
-    setUploadError("");
-    setUploadLoading(false);
   };
 
   const handleResumeCardClick = (cvId: number) => {
@@ -341,6 +325,47 @@ export default function ProfilePageWrapper() {
         });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteCV = (id: number) => {
+    setCvToDelete(id.toString());
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteCV = async () => {
+    if (!cvToDelete) return;
+
+    try {
+      setIsLoading(true);
+
+      // Call delete API using axiosConfig
+      const response = await axiosConfig.delete(`/cv/${cvToDelete}`);
+
+      // Check for 204 No Content status
+      if (response.status === 204) {
+        // Remove CV from local state
+        setCvCard(prev => prev.filter(cv => cv.id !== parseInt(cvToDelete)));
+
+        // Close dialog if deleted CV was being viewed
+        if (selectedCvId === parseInt(cvToDelete)) {
+          setSelectedCvId(null);
+          setShowStats(false);
+        }
+
+      } else {
+        throw new Error(`Unexpected response status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error deleting CV:", error);
+      toast.error("Không thể xóa CV. Vui lòng thử lại!", {
+        duration: 4000,
+        position: "top-right",
+      });
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirmation(false);
+      setCvToDelete(null);
     }
   };
 
@@ -623,8 +648,8 @@ export default function ProfilePageWrapper() {
         {/* CV Management Card */}
         <Card>
           <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b mb-4">
-            <div className="flex justify-between items-start">
-              <div>
+            <div className="w-full flex items-center justify-between">
+              <div className="flex flex-col">
                 <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <FileText className="w-6 h-6 text-blue-600" />
                   CV & Hồ sơ ứng tuyển
@@ -632,6 +657,12 @@ export default function ProfilePageWrapper() {
                 <CardDescription className="text-gray-600 mt-1">
                   Quản lý thông tin CV và hồ sơ cá nhân của bạn
                 </CardDescription>
+              </div>
+              <div className="flex gap-3 justify-center">
+                <CVUploadDialog
+                  disabled={cvLoading}
+                  onUploadSuccess={loadCVData}
+                />
               </div>
             </div>
           </CardHeader>
@@ -654,178 +685,24 @@ export default function ProfilePageWrapper() {
                   />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Chưa có CV nào
+                  Chưa có Hồ Sơ nào
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Hãy tạo hoặc tải CV để hoàn thiện hồ sơ của bạn
+                  Đăng tải CV để hoàn thiện hồ sơ của bạn
                 </p>
-                <div className="flex gap-3 justify-center">
-                  <Button
-                    onClick={() => setIsEditingCV(true)}
-                    disabled={cvLoading || uploadLoading}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Tự tạo CV
-                  </Button>
-
-                  <Dialog
-                    open={showUploadDialog}
-                    onOpenChange={setShowUploadDialog}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        disabled={cvLoading || uploadLoading}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload CV
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Tải CV lên</DialogTitle>
-                        <DialogDescription>
-                          Chọn file CV của bạn để tải lên hệ thống
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="p-4">
-                        {!uploadFile ? (
-                          <div
-                            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400"
-                            onClick={() =>
-                              document.getElementById("cv-upload")?.click()
-                            }
-                          >
-                            <input
-                              id="cv-upload"
-                              type="file"
-                              accept=".pdf,.doc,.docx"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-
-                                if (!file.name.match(/\.(pdf|docx?)$/i)) {
-                                  setUploadError(
-                                    "Chỉ chấp nhận file PDF, DOC hoặc DOCX"
-                                  );
-                                  return;
-                                }
-
-                                if (file.size > 10 * 1024 * 1024) {
-                                  setUploadError(
-                                    "File quá lớn (>10MB). Vui lòng chọn file nhỏ hơn."
-                                  );
-                                  return;
-                                }
-
-                                setUploadFile(file);
-                                setUploadError("");
-                              }}
-                              className="hidden"
-                            />
-
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                            <h3 className="text-md font-medium mb-2">
-                              Chọn file CV
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              Nhấp để chọn file (PDF, DOC, DOCX - Max 10MB)
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="flex items-center p-3 bg-gray-50 rounded">
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">
-                                  {uploadFile.name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {(uploadFile.size / 1024 / 1024).toFixed(2)}{" "}
-                                  MB
-                                </p>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setUploadFile(null);
-                                  setUploadError("");
-                                }}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-
-                            <div className="flex gap-2">
-                              <Button
-                                className="bg-blue-600 hover:bg-blue-700 flex-1"
-                                disabled={uploadLoading}
-                                onClick={async () => {
-                                  if (!uploadFile) return;
-
-                                  setUploadLoading(true);
-                                  setUploadError("");
-
-                                  try {
-                                    await uploadUserCV(uploadFile);
-                                    toast.success(
-                                      "Upload thành công! Hệ thống sẽ tự động điền thông tin từ CV của bạn."
-                                    );
-                                    setShowUploadDialog(false);
-                                    resetUploadState();
-                                    loadCVData(); // Reload CV data
-                                  } catch (err) {
-                                    const error = err as {
-                                      response?: {
-                                        data?: { message?: string };
-                                      };
-                                    };
-                                    setUploadError(
-                                      error.response?.data?.message ||
-                                      "Upload thất bại"
-                                    );
-                                  } finally {
-                                    setUploadLoading(false);
-                                  }
-                                }}
-                              >
-                                {uploadLoading ? "Đang tải..." : "Tải lên"}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setShowUploadDialog(false);
-                                  resetUploadState();
-                                }}
-                              >
-                                Hủy
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {uploadError && (
-                          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
-                            {uploadError}
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap gap-4 justify-between">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cvCard.map((cv) => (
-                    <ResumeCard
-                      key={cv.id}
-                      resume={cv}
-                      onClick={handleResumeCardClick}
-                      isSelected={selectedCvId === cv.id}
-                    />
+                    <div className="relative" key={cv.id}>
+                      <ResumeCard
+                        resume={cv}
+                        onClick={handleResumeCardClick}
+                        isSelected={selectedCvId === cv.id}
+                      />
+                      <Trash2 className="absolute p-2 right-3 bottom-2 size-10 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 cursor-pointer" onClick={() => handleDeleteCV(cv.id)} />
+                    </div>
                   ))}
                 </div>
 
@@ -842,10 +719,15 @@ export default function ProfilePageWrapper() {
                   <DialogContent className="!max-w-5xl w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
                     <div className="flex w-full sticky top-0 justify-between items-center bg-slate-100 shadow-md z-50 px-4 py-2 rounded-xl">
                       <DialogHeader>
-                        <div className="flex items-center gap-4">
-                          <DialogTitle>
-                            {showStats ? "Thống kê CV" : "Xem trước CV"}
-                          </DialogTitle>
+                        <div className="flex items-center gap-8">
+                          <div className="flex flex-col">
+                            <DialogTitle>
+                              {showStats ? "Thống kê CV" : "Xem trước CV"}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {showStats ? "Xem chi tiết thống kê kỹ năng của CV" : "Xem trước nội dung CV đã tải lên"}
+                            </DialogDescription>
+                          </div>
                           <Button
                             variant="outline"
                             size="sm"
@@ -882,6 +764,44 @@ export default function ProfilePageWrapper() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa CV</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa CV này không? Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                setCvToDelete(null);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="custom"
+              onClick={confirmDeleteCV}
+              disabled={isLoading}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isLoading ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Đang xóa...
+                </>
+              ) : (
+                "Xóa CV"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* React Hot Toast */}
       <Toaster

@@ -1,6 +1,6 @@
 
 import axiosConfig from "@/config/axios.config";
-import type { CompanyDetail, CompanySummary, CompanyField } from "@/types/company";
+import type { CompanySummary, CompanyField, CompanyDetailResponse } from "@/types/company";
 // ========================
 // Get all companies
 // ========================
@@ -30,10 +30,14 @@ export const getCompanyDetails = async (
   userId: string,
   companyId: string,
   page: number = 1
-): Promise<CompanyDetail> => {
-  const res = await axiosConfig.get<CompanyDetail>("/company", {
+): Promise<CompanyDetailResponse> => {
+  const res = await axiosConfig.get<CompanyDetailResponse>("/company", {
     params: { userId, companyId, page },
   });
+
+  if (!res.data.success) {
+    throw new Error("Failed to fetch company details");
+  }
 
   return res.data;
 };
@@ -120,7 +124,7 @@ export const unfollowCompany = async (
 ): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await axiosConfig.delete(`/follow-company/${companyId}`);
-    console.log("Unfollow comp:", response.data); 
+    console.log("Unfollow comp:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error unfollowing company:", error.response?.data || error.message);

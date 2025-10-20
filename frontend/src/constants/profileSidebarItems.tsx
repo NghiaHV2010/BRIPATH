@@ -27,7 +27,7 @@ interface UserMenuItem {
 
 export const CompanyMenuItems: CompanyMenuItem[] = [
     { label: 'Hồ sơ cá nhân', icon: <Building2 className="w-4 h-4" />, href: '/profile' },
-    { label: 'Quản lí công việc', icon: <BriefcaseBusiness className="w-4 h-4" />, href: '/company/profile' },
+    { label: 'Quản lí công việc', icon: <BriefcaseBusiness className="w-4 h-4" />, href: '/profile/company/jobs' },
     { label: 'Hồ sơ ứng tuyển', icon: <FileUser className="w-4 h-4" />, href: '/company/applications' },
     { label: 'Xem đánh giá', icon: <Star className="w-4 h-4" />, href: '/company/saved-jobs' },
     { label: 'Thông báo', icon: <Bell className="w-4 h-4" />, href: '/notifications' },

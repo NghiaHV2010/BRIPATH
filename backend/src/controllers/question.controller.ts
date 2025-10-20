@@ -135,7 +135,7 @@ export const restartUserAnswer = async (req: Request, res: Response, next: NextF
             }
         });
 
-        return res.status(HTTP_SUCCESS.NO_CONTENT);
+        return res.status(HTTP_SUCCESS.NO_CONTENT).send();
     } catch (error) {
         next(error);
     }

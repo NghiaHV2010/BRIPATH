@@ -9,26 +9,16 @@ import {
 import { useState } from "react";
 import {
   LogOut,
-  Settings,
-  FileText,
-  Bookmark,
-  Briefcase,
   ChevronDown,
   Menu,
   X,
-  Search,
-  Building,
-  Plus,
   Bell,
-  BriefcaseBusiness,
 } from "lucide-react";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "./navigation-menu";
 import {
   DropdownMenu,
@@ -48,7 +38,6 @@ export default function Navbar({ className = "" }: NavbarProps) {
   const navigate = useNavigate();
   const authUser = useAuthStore((s) => s.authUser);
   const logout = useAuthStore((s) => s.logout);
-  const isCompany = useAuthStore((s) => s.isCompany);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!authUser;
@@ -164,7 +153,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     </div>
                   )}
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
-                    {authUser?.username || authUser?.email?.split("@")[0]}
+                    <p className=" line-clamp-1">
+                      {authUser?.username || authUser?.email?.split("@")[0]}
+                    </p>
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </DropdownMenuTrigger>

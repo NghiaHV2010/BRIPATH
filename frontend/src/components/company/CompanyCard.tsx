@@ -78,9 +78,8 @@ export default function CompanyCard({
             className="absolute top-2 right-2 bg-blue-600 p-2 rounded-full shadow cursor-pointer hover:bg-blue-700 transition"
           >
             <Bookmark
-              className={`w-5 h-5 text-white transition-colors ${
-                isFollowed ? "fill-white" : ""
-              }`}
+              className={`w-5 h-5 text-white transition-colors ${isFollowed ? "fill-white" : ""
+                }`}
             />
           </div>
         </div>
@@ -97,7 +96,7 @@ export default function CompanyCard({
               <img
                 src={users.avatar_url}
                 alt={users.username || "Company"}
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full rounded-full object-contain"
               />
             ) : (
               <Building2 className="w-8 h-8 text-blue-600" />

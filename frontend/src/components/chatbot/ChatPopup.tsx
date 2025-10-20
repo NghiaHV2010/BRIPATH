@@ -178,7 +178,7 @@ export function ChatPopup() {
                                 size="icon"
                                 onClick={sendMessage}
                                 disabled={!inputMessage.trim() || sending}
-                                className="bg-black hover:bg-gray-800 shrink-0"
+                                className="bg-blue-500 hover:bg-blue-600 shrink-0 text-white"
                             >
                                 <Send className="w-4 h-4" />
                             </Button>

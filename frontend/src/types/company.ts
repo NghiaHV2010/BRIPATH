@@ -1,5 +1,8 @@
 // ========================
 // USER TYPE
+
+import type { Job } from "./job";
+
 // ========================
 export interface CompInfor {
   username: string;
@@ -8,26 +11,6 @@ export interface CompInfor {
   address_ward?: string | null;
   address_city?: string | null;
   address_country?: string | null;
-}
-
-// ========================
-// JOB TYPE (for CompanyDetail)
-// ========================
-export interface JobSummary {
-  _count?: {
-    applications?: number | 0;
-    savedJobs?: number | 0;
-    aiFeedbacks?: number | 0;
-  };
-  id: string;
-  job_title: string;
-  status: string;
-  location: string;
-  salary: string[]; // keep as array if API returns array
-  currency: string;
-  jobCategories?: {
-    job_category: string;
-  };
 }
 
 // ========================
@@ -68,31 +51,31 @@ export interface CompanySummary {
 // COMPANY DETAIL TYPE
 // ========================
 export interface CompanyDetail {
-  success: boolean;
-  data: {
-    id: string;
-    background_url?: string | null;
-    description?: string | null;
-    employees?: number | null;
-    users?: CompInfor | null;
-    _count?: {
-      followedCompanies?: number;
-      jobs?: number;
-    };
-    companyTags?: any[] | null;
-    feedbacks?: any[] | null;
-    is_verified?: boolean;
-    company_type?: string;
-    fields?: any | null;
-    jobs?: JobSummary[];
-
-    // raw followed info from API (detail endpoint often returns shorter objects)
-    followedCompanies?: FollowRecord[];
-
-    // convenient flag for UI/store (computed from followedCompanies)
-    isFollowed?: boolean;
+  id: string;
+  background_url?: string | null;
+  description?: string | null;
+  employees?: number | null;
+  users?: CompInfor | null;
+  _count?: {
+    followedCompanies?: number;
+    jobs?: number;
   };
-  totalPages: number;
+  companyTags?: any[] | null;
+  feedbacks?: any[] | null;
+  is_verified?: boolean;
+  company_type?: string;
+  fields?: any | null;
+  jobs?: Job[];
+
+  followedCompanies?: FollowRecord[];
+
+  isFollowed?: boolean;
+}
+
+export interface CompanyDetailResponse {
+  success: boolean;
+  data?: CompanyDetail;
+  totalPages?: number;
 }
 
 export interface CompanyField {

@@ -6,6 +6,19 @@ type UploadCVResponse<T> = {
   message?: string;
 };
 
+type FeedbackJobResponse = {
+  success: boolean;
+  message?: string;
+  data?: {
+    id: number;
+    role: string;
+    job_id: string;
+    cv_id: number;
+    is_good: boolean;
+    saved_at: string;
+  };
+};
+
 export const uploadUserCV = async <T>(file: File) => {
   const formData = new FormData();
   formData.append("cv", file);
@@ -51,6 +64,19 @@ export const fetchCVStats = async (cvId: number) => {
   const response = await axiosConfig.get<CVStatsResponse>(`/cv-stats/${cvId}`);
   if (!response.data.success) {
     return null;
+  }
+
+  return response.data.data;
+};
+
+export const feedbackJobForCV = async (jobId: string, cvId: number, isGood: boolean) => {
+  const response = await axiosConfig.post<FeedbackJobResponse>(`/feedback/job/${jobId}`, {
+    cv_id: cvId,
+    is_good: isGood
+  });
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to submit job feedback");
   }
 
   return response.data.data;

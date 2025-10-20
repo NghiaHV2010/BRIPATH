@@ -5,20 +5,15 @@ import {
   Users,
   Briefcase,
   Building2,
-  Clock,
-  Plus,
   Copy,
   ArrowLeft,
   CircleChevronDown,
   UserRoundCheck,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
 } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
-// import { Badge } from "../../components/ui/badge";
-// import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
 import { CompanyDetailSkeleton } from "../../components/company";
@@ -28,10 +23,13 @@ import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { toast } from "sonner";
+import type { CompanyDetail } from "@/types/company";
+import { JobCard } from "@/components/job";
+import { saveJobApi, unsaveJobApi } from "@/api/job_api";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
-  const [companyDetail, setCompanyDetail] = useState<any>(null);
+  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -62,12 +60,13 @@ export default function CompanyDetailsPage() {
           companyId,
           currentPage
         );
-        setCompanyDetail(res.data);
-        setTotalPages(res.totalPages);
+
+        setCompanyDetail(res.data || null);
+        setTotalPages(res.totalPages || 1);
         // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
-            res.data.followedCompanies.length > 0
+          res.data.followedCompanies.length > 0
         );
       } catch (err) {
         console.error("Error fetching company details:", err);
@@ -75,6 +74,7 @@ export default function CompanyDetailsPage() {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, [companyId, currentPage, userId]);
 
@@ -124,16 +124,6 @@ export default function CompanyDetailsPage() {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  const handleJobClick = (jobId: string) => {
-    const currentState = {
-      fromCompanyDetail: true,
-      companyId,
-      previousRoute: `/companies/${companyId}`,
-      scrollPosition: window.scrollY,
-    };
-    navigate(`/jobs/${jobId}`, { state: currentState });
-  };
-
   const handleCopyLink = () => {
     const url = `${window.location.origin}/companies/${companyId}`;
     navigator.clipboard.writeText(url);
@@ -146,9 +136,6 @@ export default function CompanyDetailsPage() {
       </Layout>
     );
   }
-
-  const { users, description, employees, jobs, _count, is_verified } =
-    companyDetail || {};
 
   return (
     <Layout>
@@ -172,7 +159,7 @@ export default function CompanyDetailsPage() {
               </Link>
               <span className="text-slate-400">›</span>
               <span className="text-slate-900 font-medium">
-                {users?.username || "Company"}
+                {companyDetail.users?.username || "Company"}
               </span>
             </div>
           </div>
@@ -188,14 +175,14 @@ export default function CompanyDetailsPage() {
           <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col lg:flex-row gap-8">
             {/* Logo */}
             <div className="relative">
-              {is_verified && (
+              {companyDetail.is_verified && (
                 <CircleChevronDown className="size-8 absolute -top-1 -right-2 text-white bg-cyan-400 rounded-full" />
               )}
               <div className="w-36 h-36 bg-white rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl">
-                {users?.avatar_url ? (
+                {companyDetail.users?.avatar_url ? (
                   <img
-                    src={users.avatar_url}
-                    alt={users.username}
+                    src={companyDetail.users.avatar_url}
+                    alt={companyDetail.users.username}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -209,7 +196,7 @@ export default function CompanyDetailsPage() {
             {/* Info */}
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <h1 className="text-5xl font-bold">{users?.username}</h1>
+                <h1 className="text-5xl font-bold">{companyDetail.users?.username}</h1>
                 <div className="flex gap-4 items-center">
                   <Button
                     onClick={handleFollow}
@@ -221,16 +208,16 @@ export default function CompanyDetailsPage() {
                   </Button>
                   <span className="flex items-center gap-2 text-sm text-blue-100">
                     <UserRoundCheck className="size-4" />
-                    <p>{_count?.followedCompanies || 0} Người theo dõi</p>
+                    <p>{companyDetail._count?.followedCompanies || 0} Người theo dõi</p>
                   </span>
                 </div>
               </div>
 
-              {description && (
+              {companyDetail.description && (
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
-                  {description.split("\n")[0]?.trim() ||
-                    description.substring(0, 200) +
-                    (description.length > 200 ? "..." : "")}
+                  {companyDetail.description.split("\n")[0]?.trim() ||
+                    companyDetail.description.substring(0, 200) +
+                    (companyDetail.description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -240,7 +227,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-blue-200">Địa điểm</div>
                     <div className="font-semibold">
-                      {users?.address_city || "Chưa cập nhật"}
+                      {companyDetail.users?.address_city || "Chưa cập nhật"}
                     </div>
                   </div>
                 </div>
@@ -249,7 +236,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-blue-200">Quy mô</div>
                     <div className="font-semibold">
-                      {employees || "N/A"} nhân viên
+                      {companyDetail.employees || "N/A"} nhân viên
                     </div>
                   </div>
                 </div>
@@ -258,7 +245,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-green-200">Tuyển dụng</div>
                     <div className="font-semibold">
-                      {_count?.jobs || 0} vị trí
+                      {companyDetail._count?.jobs || 0} vị trí
                     </div>
                   </div>
                 </div>
@@ -279,7 +266,7 @@ export default function CompanyDetailsPage() {
                   </h2>
                 </CardHeader>
                 <CardContent className="p-8 space-y-4">
-                  {description
+                  {companyDetail.description
                     ?.split("\n")
                     .filter((p) => p.trim())
                     .map((p, index) => (
@@ -298,58 +285,21 @@ export default function CompanyDetailsPage() {
                 <h2 className="text-3xl font-bold text-slate-900">
                   Vị trí tuyển dụng
                   <span className="ml-3 text-lg font-normal text-slate-500">
-                    ({_count?.jobs || 0} vị trí)
+                    ({companyDetail._count?.jobs || 0} vị trí)
                   </span>
                 </h2>
 
-                {jobs && jobs.length > 0 ? (
+                {companyDetail.jobs && companyDetail.jobs.length > 0 ? (
                   <div className="space-y-6">
-                    {jobs.map((job: any) => (
-                      <Card
+                    {companyDetail.jobs.map((job) => (
+                      <JobCard
                         key={job.id}
-                        onClick={() => handleJobClick(job.id)}
-                        className="cursor-pointer hover:shadow-xl transition"
-                      >
-                        <CardContent className="p-8 flex justify-between items-start">
-                          <div className="flex gap-6 flex-1">
-                            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center">
-                              <Briefcase className="w-8 h-8 text-green-600" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold mb-3">
-                                {job.job_title}
-                              </h3>
-                              <div className="grid grid-cols-3 gap-4 mb-4 text-sm text-slate-600">
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="w-4 h-4" />
-                                  {job.location || "Remote"}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4" />
-                                  {job.jobCategories?.job_category ||
-                                    "Full-time"}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <DollarSign className="w-4 h-4" />
-                                  {job.salary?.[0]
-                                    ? `${job.salary[0]} ${job.currency || "VND"
-                                    }`
-                                    : "Thỏa thuận"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJobClick(job.id);
-                            }}
-                          >
-                            Ứng tuyển ngay
-                          </Button>
-                        </CardContent>
-                      </Card>
+                        job={job}
+                        onClick={() => navigate(`/jobs/${job.id}`)}
+                        // onSave={() => handleSaveJob(job.id)}
+                        compact={false}
+                        isSaved={job.isSaved || false}
+                      />
                     ))}
 
                     {totalPages > 1 && (
@@ -388,7 +338,7 @@ export default function CompanyDetailsPage() {
             <div className="space-y-8">
               <Card className="bg-white shadow-lg rounded-2xl">
                 <CompanyMap
-                  companyName={users?.username || "Company"}
+                  companyName={companyDetail.users?.username || "Company"}
                   lat={10.77611}
                   lng={106.69583}
                 />

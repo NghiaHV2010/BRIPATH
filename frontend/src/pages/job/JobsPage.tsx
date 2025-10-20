@@ -114,6 +114,7 @@ export default function JobsPage() {
       ),
     }));
   };
+
   const handleResetFilter = async () => {
     clearFilteredJobs();
     setFilterPage(1);

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { Resume as ResumeType, ResumeResponse } from '../../types/resume';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
     Mail,
     Phone,
@@ -21,7 +21,7 @@ import {
     User,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import axiosConfig from '@/config/axios.config';
+import axiosConfig from '../../config/axios.config';
 
 interface ResumeProps {
     cvId: number;
@@ -80,7 +80,7 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
     }
 
     const formatDate = (dateString: string | null) => {
-        if (!dateString) return 'Hiện tại';
+        if (!dateString) return '';
         try {
             return format(new Date(dateString), 'MM/yyyy');
         } catch {
@@ -166,11 +166,15 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             <div className="space-y-6">
                                 {resume.experiences.map((exp) => (
                                     <div key={exp.id} className="border-l-2 border-blue-600 pl-4">
-                                        <h3 className="font-semibold text-lg text-gray-900">{exp.title}</h3>
-                                        <p className="text-blue-600 font-medium">{exp.company_name}</p>
-                                        <p className="text-sm text-gray-500 mb-2">
-                                            {formatDate(exp?.start_date || null)} - {formatDate(exp?.end_date || null)}
-                                        </p>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="">
+                                                <h3 className="font-semibold text-lg text-gray-900">{exp.title}</h3>
+                                                <p className="text-blue-600 font-medium">{exp.company_name}</p>
+                                            </div>
+                                            <p className="text-sm text-gray-500 mb-2">
+                                                {formatDate(exp?.start_date || null)}{exp?.start_date && exp?.end_date && ` - `}{exp?.end_date && `${formatDate(exp.end_date)}`}
+                                            </p>
+                                        </div>
                                         <p className="text-gray-700 leading-relaxed">{exp.description}</p>
                                     </div>
                                 ))}
@@ -187,11 +191,15 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             <div className="space-y-4">
                                 {resume.educations.map((edu) => (
                                     <div key={edu.id} className="border-l-2 border-blue-600 pl-4">
-                                        <h3 className="font-semibold text-lg text-gray-900">{edu.school}</h3>
-                                        <p className="text-gray-700">{edu.graduated_type}</p>
-                                        <p className="text-sm text-gray-500">
-                                            {formatDate(edu?.start_date || null)} - {formatDate(edu?.end_date || null)}
-                                        </p>
+                                        <div className="flex justify-between items-start mb-1 gap-4">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-lg text-gray-900">{edu.school}</h3>
+                                                <p className="text-gray-700">{edu.graduated_type}</p>
+                                            </div>
+                                            <p className="text-sm text-gray-500">
+                                                {formatDate(edu?.start_date || null)}{edu?.start_date && edu?.end_date && ` - `}{edu?.end_date && `${formatDate(edu.end_date)}`}
+                                            </p>
+                                        </div>
                                         {edu.gpa && <p className="text-gray-700">GPA: {edu.gpa}</p>}
                                     </div>
                                 ))}
@@ -208,7 +216,12 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             <div className="grid gap-4">
                                 {resume.projects.map((project) => (
                                     <Card key={project.id} className="p-4 hover:shadow-md transition-shadow">
-                                        <h3 className="font-semibold text-gray-900 mb-2">{project.title}</h3>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-semibold text-gray-900">{project.title}</h3>
+                                            <span className="text-gray-500 text-sm">
+                                                {formatDate(project?.start_date || null)}{project?.start_date && project?.end_date && ` - `}{project?.end_date && `${formatDate(project.end_date)}`}
+                                            </span>
+                                        </div>
                                         <p className="text-gray-700 text-sm">{project.description}</p>
                                     </Card>
                                 ))}
@@ -225,7 +238,12 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             <div className="space-y-3">
                                 {resume.certificates.map((cert) => (
                                     <div key={cert.id} className="border-l-2 border-blue-600 pl-4">
-                                        <h3 className="font-semibold text-gray-900">{cert.title}</h3>
+                                        <div className="flex justify-between gap-4 items-start mb-1">
+                                            <h3 className="flex-1 font-semibold text-gray-900">{cert.title}</h3>
+                                            <span className="text-gray-500 text-sm">
+                                                {formatDate(cert?.start_date || null)}{cert?.start_date && cert?.end_date && ` - `}{cert?.end_date && `${formatDate(cert.end_date)}`}
+                                            </span>
+                                        </div>
                                         <p className="text-gray-700 text-sm">{cert.description}</p>
                                         {filterUndefined(cert.link) && (
                                             <a
@@ -252,9 +270,13 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             <div className="space-y-3">
                                 {resume.awards.map((award) => (
                                     <div key={award.id} className="border-l-2 border-blue-600 pl-4">
-                                        <h3 className="font-semibold text-gray-900">{award.title}</h3>
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h3 className="font-semibold text-gray-900">{award.title}</h3>
+                                            <span className="text-gray-500 text-sm">
+                                                {formatDate(award?.start_date || null)}{award?.start_date && award?.end_date && ` - `}{award?.end_date && `${formatDate(award.end_date)}`}
+                                            </span>
+                                        </div>
                                         <p className="text-gray-700 text-sm">{award.description}</p>
-                                        <p className="text-gray-500 text-sm">{formatDate(award?.start_date || null)}</p>
                                     </div>
                                 ))}
                             </div>
@@ -272,7 +294,7 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {resume.primary_skills.map((skill, index) => (
-                                    <Badge key={index} variant="secondary" className="text-sm">
+                                    <Badge key={index} variant="default" className="text-sm text-green-700 bg-green-100 hover:bg-green-100">
                                         {skill}
                                     </Badge>
                                 ))}

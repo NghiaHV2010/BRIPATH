@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createJob, getAllJobs, getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob, getAllJobCategories, getAllJobLabels, deleteJob, filterSuitableCVforJob, getAllSuitableCVs, createJobView } from "../controllers/job.controller";
+import { createJob, getAllJobs, getJobByID, getJobsByCompanyId, getJobsByFilter, updateJob, getAllJobCategories, getAllJobLabels, deleteJob, filterSuitableCVforJob, getAllSuitableCVs, createJobView, getRecommendedJobs, createMockStats } from "../controllers/job.controller";
 import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
 import { subscriptionMiddleware, subscriptionPermissionMiddleware } from "../middlewares/subscription.middleware";
 
@@ -8,7 +8,8 @@ const jobRouter = Router();
 jobRouter.get('/jobs', getAllJobs);
 jobRouter.get('/job', getJobByID);
 jobRouter.get('/filter-jobs', getJobsByFilter);
-jobRouter.get('/jobs/:companyId', getJobsByCompanyId);
+jobRouter.get('/recommend-jobs', getRecommendedJobs);
+jobRouter.get('/my-jobs', authenticationMiddleware, authorizationMiddleware("Company"), getJobsByCompanyId);
 
 jobRouter.post('/job-view/:jobId', authenticationMiddleware, createJobView);
 
@@ -21,5 +22,7 @@ jobRouter.get('/job/suitable-all/:jobId', authenticationMiddleware, authorizatio
 
 jobRouter.get('/job/categories', getAllJobCategories);
 jobRouter.get('/job/labels', getAllJobLabels);
+
+jobRouter.get('/create-mock-data', authenticationMiddleware, createMockStats);
 
 export default jobRouter;

@@ -27,6 +27,7 @@ import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
 import { toast } from "sonner";
+import axiosConfig from "../../config/axios.config";
 
 export default function JobDetailsPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -43,6 +44,8 @@ export default function JobDetailsPage() {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const pendingActionRef = useRef<null | "apply" | "save">(null);
+  const [hasViewedJob, setHasViewedJob] = useState(false);
+  const viewTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const authUser = useAuthStore((s) => s.authUser);
 
@@ -65,6 +68,27 @@ export default function JobDetailsPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Track job view after 10 seconds
+  useEffect(() => {
+    if (jobId && authUser && !hasViewedJob) {
+      viewTimerRef.current = setTimeout(async () => {
+        try {
+          await axiosConfig.post(`/job-view/${jobId}`);
+          setHasViewedJob(true);
+        } catch (error) {
+          console.error('Failed to track job view:', error);
+        }
+      }, 10000); // 10 seconds
+
+      // Cleanup timer on component unmount or dependencies change
+      return () => {
+        if (viewTimerRef.current) {
+          clearTimeout(viewTimerRef.current);
+        }
+      };
+    }
+  }, [jobId, authUser, hasViewedJob]);
 
   // Resume pending action after successful login
   useEffect(() => {
@@ -90,6 +114,15 @@ export default function JobDetailsPage() {
     // Only watch authUser
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (viewTimerRef.current) {
+        clearTimeout(viewTimerRef.current);
+      }
+    };
+  }, []);
 
   if (isLoading || !selectedJob) {
     return (

@@ -1,19 +1,20 @@
-import { MapPin, Briefcase, DollarSign, Building2, Heart } from "lucide-react";
+import { MapPin, Briefcase, DollarSign, Building2, Heart, Eye, Users, Bookmark } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import type { Job } from "../../types/job";
+import type { Job, JobsCountDetails } from "../../types/job";
 import { LoginDialog } from "../login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
 import { useState, useRef, useEffect } from "react";
 
 interface JobCardProps {
-  job: Job;
+  job: Job & JobsCountDetails;
   onClick?: () => void;
   onSave?: () => void;
   onApply?: () => void;
   isSaved?: boolean;
   compact?: boolean;
+  role?: "User" | "Company" | undefined;
 }
 
 export default function JobCard({
@@ -23,6 +24,7 @@ export default function JobCard({
   onApply,
   isSaved = false,
   compact = false,
+  role = "User",
 }: JobCardProps) {
   const authUser = useAuthStore((s) => s.authUser);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -137,7 +139,7 @@ export default function JobCard({
               <img
                 src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-contain border border-gray-200 shadow-sm flex-shrink-0"
               />
             ) : (
               <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-100 border border-gray-200 flex-shrink-0">
@@ -156,7 +158,6 @@ export default function JobCard({
 
             {/* Save button */}
             <Button
-              variant="custom"
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
@@ -171,8 +172,8 @@ export default function JobCard({
             >
               <Heart
                 className={`w-4 h-4 transition-colors ${isSaved
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400 hover:text-red-400"
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-400 hover:text-red-400"
                   }`}
               />
             </Button>
@@ -202,26 +203,55 @@ export default function JobCard({
         </div>
 
         {/* Footer */}
-        <div className="pt-2 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="w-full sm:w-auto">{getStatusBadge(job.status)}</div>
+        {!role || role === "User" ? (
+          <div className="pt-2 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="w-full sm:w-auto">{getStatusBadge(job.status)}</div>
 
-          {!compact && (
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.(); // navigate sang job detail
-              }}
-              className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
+            {!compact && (
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.(); // navigate sang job detail
+                }}
+                className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
                   ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
                   : "bg-emerald-400 text-white hover:bg-emerald-500"
-                }`}
-              disabled={hasApplied}
-            >
-              {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
-            </Button>
-          )}
-        </div>
+                  }`}
+                disabled={hasApplied}
+              >
+                {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
+              </Button>
+            )}
+          </div>
+        ) : role === "Company" ? (
+          <div className="pt-2 border-t border-gray-100">
+            <div className="flex justify-between items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <Users className="w-4 h-4 text-blue-500" />
+                <span className="font-medium">{job._count?.applicants || 0}</span>
+                <span className="text-xs">ứng viên</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Eye className="w-4 h-4 text-green-500" />
+                <span className="font-medium">{job._count?.job_views || 0}</span>
+                <span className="text-xs">lượt xem</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Bookmark className="w-4 h-4 text-purple-500" />
+                <span className="font-medium">{job._count?.savedJobs || 0}</span>
+                <span className="text-xs">lượt lưu</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Default case for other roles
+          <div className="pt-2 border-t border-gray-100">
+            <div className="w-full">{getStatusBadge(job.status)}</div>
+          </div>
+        )}
       </CardContent>
 
       {/* Login Dialog */}

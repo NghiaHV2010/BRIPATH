@@ -37,6 +37,7 @@ import Layout from "./components/layout/layout";
 import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
+import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -217,6 +218,18 @@ function App() {
             <Layout showFooter={false}>
               <HomePage />
             </Layout>
+          }
+        />
+
+        {/* Company Profile */}
+        <Route
+          path="/profile/company/jobs"
+          element={
+            <ProtectedRoute>
+              <ProfileLayout>
+                <CompanyProfile />
+              </ProfileLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>

@@ -404,6 +404,7 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
             jl.label_name,
             u.avatar_url,
             u.username,
+            af.is_good,
             1 - (j.embedding <=> up.embedding) AS score
         FROM jobs j
         JOIN user_profile up ON true
@@ -412,6 +413,8 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
         LEFT JOIN companies c ON c.id = j."company_id"
         LEFT JOIN users u ON u."company_id" = c.id
         LEFT JOIN applicants a ON a.job_id = j.id
+        LEFT JOIN "aiFeedbacks" af ON af.job_id = j.id AND af.cv_id = ${cv_id} AND af.role = 'User'
+        WHERE af.is_good IS DISTINCT FROM false
         ORDER BY score DESC
         LIMIT 10;
         `);

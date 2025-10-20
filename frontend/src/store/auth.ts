@@ -42,6 +42,7 @@ interface AuthState {
 	clearError: () => void;
 	login?: (email: string, password: string) => Promise<void>;
 	logout?: () => Promise<void>;
+	updateUser: (updates: Partial<AuthUser>) => void;
 	// Helper methods for role checking
 	isCompany: () => boolean;
 	isCandidate: () => boolean;
@@ -101,6 +102,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 	},
 
 	clearError: () => set({ error: null }),
+
+	updateUser: (updates: Partial<AuthUser>) => {
+		const { authUser } = get();
+		if (authUser) {
+			set({ authUser: { ...authUser, ...updates } });
+		}
+	},
 
 	login: async (email: string, password: string) => {
 		set({ isProcessing: true, error: null });
