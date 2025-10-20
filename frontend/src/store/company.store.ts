@@ -5,7 +5,7 @@ import {
   getAllCompanies,
   getCompanyDetails,
   apiFilterCompanies,
- 
+
 } from "@/api/company_api";
 import { followCompanyApi, unfollowCompanyApi } from "@/api";
 
@@ -77,9 +77,9 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
       const companyDetailWithFollow = {
         ...res.data,
         isFollowed:
-          Array.isArray(res.data.followedCompanies) &&
-          res.data.followedCompanies.length > 0,
-      };
+          Array.isArray(res.data?.followedCompanies) &&
+          res.data?.followedCompanies.length > 0,
+      } as CompanyDetail & { isFollowed: boolean };
 
       set({
         companyDetail: companyDetailWithFollow,

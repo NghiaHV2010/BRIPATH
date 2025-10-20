@@ -785,7 +785,6 @@ export default function ProfilePageWrapper() {
               Hủy
             </Button>
             <Button
-              variant="custom"
               onClick={confirmDeleteCV}
               disabled={isLoading}
               className="bg-red-600 hover:bg-red-700 text-white"

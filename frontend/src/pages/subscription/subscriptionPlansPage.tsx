@@ -100,117 +100,114 @@ export default function SubscriptionPlansPage() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-100/20 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Chọn Gói Đăng Ký
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Khám phá tiềm năng nghề nghiệp của bạn với các gói dịch vụ được thiết kế phù hợp cho mọi nhu cầu
-          </p>
-        </div>
-
-        {/* Billing Cycle Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-white/50 backdrop-blur-sm rounded-full p-2 border border-white/20 shadow-lg">
-            <div className="flex space-x-2">
-              <Button
-                variant="custom"
-                onClick={() => {
-                  window.scrollTo(0, 0);
-                  setBillingCycle('monthly');
-                }}
-                className={`px-6 py-2 rounded-full transition-all duration-300 ${
-                  billingCycle === 'monthly'
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
-                    : 'bg-transparent text-gray-600 hover:text-gray-800 hover:bg-white/30'
-                }`}
-              >
-                Thanh toán hàng tháng
-              </Button>
-              <Button
-                variant="custom"
-                onClick={() => {
-                  window.scrollTo(0, 0);
-                  setBillingCycle('yearly');
-                }}
-                className={`px-6 py-2 rounded-full transition-all duration-300 relative ${
-                  billingCycle === 'yearly'
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
-                    : 'bg-transparent text-gray-600 hover:text-gray-800 hover:bg-white/30'
-                }`}
-              >
-                Thanh toán hàng năm
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
-                  -20%
-                </span>
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Subscription Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-4 max-w-7xl mx-auto mb-16">
-          {subscriptionPlans.map((plan, index) => (
-            <div
-              key={plan.id}
-              className="animate-fade-in-up h-full"
-              style={{ animationDelay: `${index * 200}ms` }}
-            >
-              <SubscriptionCard
-                plan={plan}
-                billingCycle={billingCycle}
-                onSelect={handlePlanSelect}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Additional Info Section */}
-        <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-xl max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              🎯 Tại Sao Chọn Chúng Tôi?
-            </h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              Hệ thống định hướng nghề nghiệp hàng đầu với công nghệ AI tiên tiến
+        <div className="relative z-10 container mx-auto px-4 py-12">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              Chọn Gói Đăng Ký
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Khám phá tiềm năng nghề nghiệp của bạn với các gói dịch vụ được thiết kế phù hợp cho mọi nhu cầu
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 text-center">
-            <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
-              <div className="text-4xl mb-4">🤖</div>
-              <h3 className="font-semibold text-gray-800 mb-2">AI Thông Minh</h3>
-              <p className="text-gray-600 text-sm">
-                Phân tích dựa trên thuật toán học máy và tâm lý học nghề nghiệp
-              </p>
-            </div>
-            <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="font-semibold text-gray-800 mb-2">Báo Cáo Chi Tiết</h3>
-              <p className="text-gray-600 text-sm">
-                Kết quả được trình bày rõ ràng với lộ trình phát triển cụ thể
-              </p>
-            </div>
-            <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
-              <div className="text-4xl mb-4">🎓</div>
-              <h3 className="font-semibold text-gray-800 mb-2">Chuyên Gia Tư Vấn</h3>
-              <p className="text-gray-600 text-sm">
-                Đội ngũ chuyên gia giàu kinh nghiệm trong định hướng nghề nghiệp
-              </p>
+          {/* Billing Cycle Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-white/50 backdrop-blur-sm rounded-full p-2 border border-white/20 shadow-lg">
+              <div className="flex space-x-2">
+                <Button
+                  variant="custom"
+                  onClick={() => {
+                    window.scrollTo(0, 0);
+                    setBillingCycle('monthly');
+                  }}
+                  className={`px-6 py-2 rounded-full transition-all duration-300 ${billingCycle === 'monthly'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
+                      : 'bg-transparent text-gray-600 hover:text-gray-800 hover:bg-white/30'
+                    }`}
+                >
+                  Thanh toán hàng tháng
+                </Button>
+                <Button
+                  onClick={() => {
+                    window.scrollTo(0, 0);
+                    setBillingCycle('yearly');
+                  }}
+                  className={`px-6 py-2 rounded-full transition-all duration-300 relative ${billingCycle === 'yearly'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105'
+                      : 'bg-transparent text-gray-600 hover:text-gray-800 hover:bg-white/30'
+                    }`}
+                >
+                  Thanh toán hàng năm
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                    -20%
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Guarantee Section */}
-        <div className="text-center mt-12">
-          <div className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-6 py-3 rounded-full border border-green-200">
-            <span className="text-2xl">✅</span>
-            <span className="font-semibold">30 ngày đảm bảo hoàn tiền 100%</span>
+          {/* Subscription Cards */}
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-4 max-w-7xl mx-auto mb-16">
+            {subscriptionPlans.map((plan, index) => (
+              <div
+                key={plan.id}
+                className="animate-fade-in-up h-full"
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                <SubscriptionCard
+                  plan={plan}
+                  billingCycle={billingCycle}
+                  onSelect={handlePlanSelect}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Additional Info Section */}
+          <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-xl max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                🎯 Tại Sao Chọn Chúng Tôi?
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Hệ thống định hướng nghề nghiệp hàng đầu với công nghệ AI tiên tiến
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
+                <div className="text-4xl mb-4">🤖</div>
+                <h3 className="font-semibold text-gray-800 mb-2">AI Thông Minh</h3>
+                <p className="text-gray-600 text-sm">
+                  Phân tích dựa trên thuật toán học máy và tâm lý học nghề nghiệp
+                </p>
+              </div>
+              <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
+                <div className="text-4xl mb-4">📊</div>
+                <h3 className="font-semibold text-gray-800 mb-2">Báo Cáo Chi Tiết</h3>
+                <p className="text-gray-600 text-sm">
+                  Kết quả được trình bày rõ ràng với lộ trình phát triển cụ thể
+                </p>
+              </div>
+              <div className="p-6 bg-white/30 rounded-2xl border border-white/20">
+                <div className="text-4xl mb-4">🎓</div>
+                <h3 className="font-semibold text-gray-800 mb-2">Chuyên Gia Tư Vấn</h3>
+                <p className="text-gray-600 text-sm">
+                  Đội ngũ chuyên gia giàu kinh nghiệm trong định hướng nghề nghiệp
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Guarantee Section */}
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-6 py-3 rounded-full border border-green-200">
+              <span className="text-2xl">✅</span>
+              <span className="font-semibold">30 ngày đảm bảo hoàn tiền 100%</span>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </Layout>
   );

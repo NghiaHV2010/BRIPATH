@@ -1,5 +1,6 @@
-import type { CVStatsResponse, ResumeListResponse } from "@/types/resume";
+import type { CVStatsResponse, ResumeListItem, ResumeListResponse } from "@/types/resume";
 import axiosConfig from "../config/axios.config";
+import type { CV } from "./job_api";
 
 type UploadCVResponse<T> = {
   data: T;
@@ -36,7 +37,7 @@ export const uploadUserCV = async <T>(file: File) => {
   return response.data.data;
 };
 
-export const fetchUserCVs = async () => {
+export const fetchUserCVs = async (): Promise<ResumeListItem[]> => {
   const response = await axiosConfig.get<ResumeListResponse>("/cv");
 
   if (!response.data.success) {
