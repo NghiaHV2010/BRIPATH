@@ -69,6 +69,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "rollup": "4.18.0",
     "@eslint/js": "^9.35.0",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^24.6.2",
