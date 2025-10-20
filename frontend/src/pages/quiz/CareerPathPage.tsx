@@ -98,15 +98,14 @@ const CareerPathPage = () => {
   }
 
   return (
-    <Layout>
-      <div className="max-w-6xl mx-auto pb-30">
-        <CareerPathTimeline
-          careerPath={{
-            ...careerPathData.data,
-            _count: careerPathData.data._count ?? { careerPathSteps: 0 },
-          }}
-        />
-      </div>
+    <Layout className="bg-gradient-to-br from-blue-50 via-white to-emerald-50/20">
+      <CareerPathTimeline
+        careerPath={{
+          ...careerPathData.data,
+          _count: careerPathData.data._count ?? { careerPathSteps: 0 },
+          careerPathSteps: careerPathData.data.careerPathSteps ?? [],
+        }}
+      />
     </Layout>
   );
 };

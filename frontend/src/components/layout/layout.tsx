@@ -20,8 +20,14 @@ export default function Layout({
   // Scroll logic moved to App.tsx - only runs on app initial load
   // No need for auto scroll in Layout component
 
+  const hasBgClass = /\bbg-/.test(className);
+
   return (
-    <div className={`min-h-screen relative bg-white ${className}`}>
+    <div
+      className={`min-h-screen relative ${
+        hasBgClass ? className : `bg-white ${className}`
+      }`}
+    >
       {showNavbar && <Navbar />}
       <main className={`${showNavbar ? "pt-16" : ""} relative`}>
         {children}

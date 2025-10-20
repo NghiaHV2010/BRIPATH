@@ -18,7 +18,7 @@ export interface CareerPath {
   _count: {
     careerPathSteps: number;
   };
-  // careerPathSteps: CareerPathStep[];
+  careerPathSteps: CareerPathStep[];
 }
 
 export interface CareerPathResponse {
