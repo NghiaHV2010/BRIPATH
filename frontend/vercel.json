@@ -1,3 +1,0 @@
-{
-    "buildCommand": "pnpm rebuild rollup --force && pnpm run build"
-}
