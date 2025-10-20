@@ -5,6 +5,7 @@ import {
   ForgotPasswordPage,
   LoginPage,
   RegisterPage,
+  ResetPasswordPage,
   EmailVerificationPage,
   SubscriptionPlansPage,
   SubscriptionDetailPage,
@@ -37,6 +38,7 @@ import Layout from "./components/layout/layout";
 import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
+import { BlogPage } from "./pages/blog/BlogPage";
 import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
 
 function App() {
@@ -103,6 +105,9 @@ function App() {
           element={<EmailVerificationPage />}
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        {/* Alias route: some emails may include this older path format */}
+        <Route path="/forgot/password/:token" element={<ResetPasswordPage />} />
         <Route path="/quiz" element={<QuizLandingPage />} />
         <Route path="/quiz/test" element={<QuizPage />} />
         <Route path="/quiz/results" element={<QuizResultsPage />} />
@@ -112,6 +117,8 @@ function App() {
         <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+
+        <Route path="/blog" element={<BlogPage />} />
 
         <Route
           path="/profile"

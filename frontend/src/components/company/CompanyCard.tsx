@@ -55,10 +55,8 @@ export default function CompanyCard({
 
     if (isFollowed) {
       await unfollowCompany(company.id);
-      toast.success("Đã bỏ theo dõi công ty", { duration: 3000 });
     } else {
       await followCompany(company.id);
-      toast.success("Đã theo dõi công ty", { duration: 3000 });
     }
   };
 

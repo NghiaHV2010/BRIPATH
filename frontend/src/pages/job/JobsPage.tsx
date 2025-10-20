@@ -49,15 +49,15 @@ export default function JobsPage() {
   }, []);
 
   const formatVietnamTime = (date: Date) => {
-    return new Intl.DateTimeFormat('vi-VN', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
+    return new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
     }).format(date);
   };
 
@@ -66,23 +66,23 @@ export default function JobsPage() {
   }, [currentPage, getAllJobs]);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3000');
+    const ws = new WebSocket("ws://localhost:3000");
 
     ws.onopen = () => {
-      console.log('✅ Connected to WebSocket server');
+      console.log("✅ Connected to WebSocket server");
     };
 
     ws.onmessage = (message) => {
       const event = JSON.parse(message.data.toString());
 
-      if (event.type === 'urgentJobsUpdate') {
+      if (event.type === "urgentJobsUpdate") {
         // console.log('🔥 Cập nhật job việc gấp:', event.data);
         setUrgentJobs(event.data);
       }
     };
 
     ws.onclose = () => {
-      console.log('❌ Disconnected from WebSocket server');
+      console.log("❌ Disconnected from WebSocket server");
     };
 
     return () => ws.close();
@@ -97,7 +97,6 @@ export default function JobsPage() {
   const handleJobClickFromFilters = (job: Job) => {
     handleJobClick(job.id);
   };
-
 
   const handleSaveJob = async (jobId: string) => {
     const isSaved = checkIfSaved(jobId);

@@ -36,6 +36,7 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: events,
             totalPages: Math.ceil(total_events / numberOfEvents)
         });

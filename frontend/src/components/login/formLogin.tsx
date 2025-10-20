@@ -111,6 +111,7 @@ export default function FormLogin() {
                   </label>
                   <a
                     href="/forgot-password"
+                    tabIndex={-1}
                     className="text-sm text-blue-600 hover:underline transition-colors"
                   >
                     Quên mật khẩu?
@@ -179,6 +180,7 @@ export default function FormLogin() {
                 Chưa có tài khoản?{" "}
                 <a
                   href="/register"
+                  tabIndex={-1}
                   className="text-blue-600 hover:underline font-medium transition-colors"
                 >
                   Đăng ký ngay

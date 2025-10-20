@@ -23,7 +23,7 @@ import {
   Filter,
   Search,
   Eye,
-  Globe
+  Globe,
 } from "lucide-react";
 
 export default function FollowedCompaniesPage() {
@@ -32,8 +32,6 @@ export default function FollowedCompaniesPage() {
   const [unfollowing, setUnfollowing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterField, setFilterField] = useState("");
-  const { toast } = useToast();
-
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -43,7 +41,9 @@ export default function FollowedCompaniesPage() {
         if (mounted && res.success) {
           setCompanies(res.data);
         } else if (mounted) {
-          alert("Không thể tải danh sách công ty đã theo dõi. Vui lòng thử lại.");
+          alert(
+            "Không thể tải danh sách công ty đã theo dõi. Vui lòng thử lại."
+          );
         }
       } catch (error) {
         console.error("Error loading followed companies:", error);
@@ -63,33 +63,26 @@ export default function FollowedCompaniesPage() {
     setUnfollowing(companyId);
     try {
       await unfollowCompanyApi(companyId);
-      setCompanies(companies.filter(company => company.id !== companyId));
-      toast({
-        variant: "success",
-        title: "Thành công!",
-        description: "Đã bỏ theo dõi công ty thành công.",
-      });
+      setCompanies(companies.filter((company) => company.id !== companyId));
     } catch (error) {
       console.error("Error unfollowing company:", error);
-      toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: "Có lỗi xảy ra khi bỏ theo dõi công ty. Vui lòng thử lại.",
-      });
-    } finally {
+    s} finally {
       setUnfollowing(null);
     }
   };
 
-  const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredCompanies = companies.filter((company) => {
+    const matchesSearch =
+      company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       company.field?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       company.location?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesField = !filterField || company.field === filterField;
     return matchesSearch && matchesField;
   });
 
-  const fields = [...new Set(companies.map(company => company.field).filter(Boolean))];
+  const fields = [
+    ...new Set(companies.map((company) => company.field).filter(Boolean)),
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -98,10 +91,13 @@ export default function FollowedCompaniesPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="h-8 w-8 text-blue-600" />
-            <h3 className="text-2xl font-bold text-gray-900">Công ty đã theo dõi</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              Công ty đã theo dõi
+            </h3>
           </div>
           <p className="text-gray-600">
-            Quản lý và theo dõi các công ty bạn đã follow. Tìm thấy {companies.length} công ty đã theo dõi.
+            Quản lý và theo dõi các công ty bạn đã follow. Tìm thấy{" "}
+            {companies.length} công ty đã theo dõi.
           </p>
         </div>
 
@@ -126,8 +122,10 @@ export default function FollowedCompaniesPage() {
                 className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">Tất cả lĩnh vực</option>
-                {fields.map(field => (
-                  <option key={field} value={field}>{field}</option>
+                {fields.map((field) => (
+                  <option key={field} value={field}>
+                    {field}
+                  </option>
                 ))}
               </select>
             </div>
@@ -147,13 +145,14 @@ export default function FollowedCompaniesPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
               <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {companies.length === 0 ? "Chưa theo dõi công ty nào" : "Không tìm thấy công ty phù hợp"}
+                {companies.length === 0
+                  ? "Chưa theo dõi công ty nào"
+                  : "Không tìm thấy công ty phù hợp"}
               </h3>
               <p className="text-gray-500 mb-6">
                 {companies.length === 0
                   ? "Hãy khám phá và theo dõi những công ty bạn quan tâm để nhận thông báo về việc làm mới."
-                  : "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy công ty phù hợp."
-                }
+                  : "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy công ty phù hợp."}
               </p>
               {companies.length === 0 && (
                 <Link
@@ -166,7 +165,10 @@ export default function FollowedCompaniesPage() {
             </div>
           ) : (
             filteredCompanies.map((company) => (
-              <div key={company.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div
+                key={company.id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -223,7 +225,12 @@ export default function FollowedCompaniesPage() {
                             {company.created_at && (
                               <div className="flex items-center gap-1 text-gray-500">
                                 <Calendar className="h-4 w-4" />
-                                <span>Tham gia {new Date(company.created_at).toLocaleDateString('vi-VN')}</span>
+                                <span>
+                                  Tham gia{" "}
+                                  {new Date(
+                                    company.created_at
+                                  ).toLocaleDateString("vi-VN")}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -262,10 +269,13 @@ export default function FollowedCompaniesPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Bỏ theo dõi công ty</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Bỏ theo dõi công ty
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Bạn có chắc chắn muốn bỏ theo dõi công ty "{company.name}"?
-                              Bạn sẽ không nhận được thông báo về việc làm mới từ công ty này nữa.
+                              Bạn có chắc chắn muốn bỏ theo dõi công ty "
+                              {company.name}"? Bạn sẽ không nhận được thông báo
+                              về việc làm mới từ công ty này nữa.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

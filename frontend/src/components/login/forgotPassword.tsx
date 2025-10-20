@@ -57,15 +57,12 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
         <div className="w-full max-w-md animate-fade-in-right">
           <div className="bg-white rounded-2xl shadow-xl border border-orange-200 p-8 transform transition-all duration-300 hover:shadow-2xl">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-4 animate-bounce-subtle">
-                🔐
-              </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Quên mật khẩu?
               </h2>
               <p className="text-gray-600 text-sm">
-                Nhập địa chỉ email của bạn và chúng tôi sẽ gửi mã xác minh để
-                đặt lại mật khẩu.
+                Nhập địa chỉ email của bạn và chúng tôi xác nhận để đặt lại mật
+                khẩu.
               </p>
             </div>
 
@@ -98,10 +95,10 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Đang gửi mã...</span>
+                    <span>Đang xác thực...</span>
                   </div>
                 ) : (
-                  "Gửi mã khôi phục"
+                  "Xác nhận email"
                 )}
               </Button>
 
@@ -109,6 +106,7 @@ export default function ForgotPassword({ onEmailSubmit }: ForgotPasswordProps) {
                 Nhớ lại mật khẩu?{" "}
                 <a
                   href="/login"
+                  tabIndex={-1}
                   className="text-orange-600 hover:underline font-medium transition-colors"
                 >
                   Quay lại đăng nhập

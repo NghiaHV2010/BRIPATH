@@ -9,42 +9,31 @@ interface CompanyCarouselProps {
   companies: CompanySummary[];
   onCompanyClick?: (companyId: string) => void;
   title?: string;
-  isFixed?: boolean; // Giữ nguyên company list khi thay đổi trang
+  // isFixed prop not used for simplicity and consistency with JobCarousel's display approach
 }
 
 export default function CompanyCarousel({
   companies,
   onCompanyClick,
   title = "Công ty nổi bật",
-  isFixed = false,
 }: CompanyCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(3);
-  const [fixedCompanies, setFixedCompanies] = useState<CompanySummary[]>([]);
+  const [itemsPerView, setItemsPerView] = useState(3); // Thay đổi mặc định thành 3
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use fixed companies or current companies
-  const displayCompanies =
-    isFixed && fixedCompanies.length > 0 ? fixedCompanies : companies;
+  // Giới hạn số lượng công ty hiển thị trong carousel (ví dụ: 12 công ty, tức 4 slide)
+  const displayCompanies = companies.slice(0, 12);
 
-  // Store first 8 companies when isFixed is true
-  useEffect(() => {
-    if (isFixed && companies.length > 0 && fixedCompanies.length === 0) {
-      setFixedCompanies(companies.slice(0, 8));
-    }
-  }, [companies, isFixed, fixedCompanies.length]);
-
-  // Update items per view based on screen size
+  // Cập nhật số lượng item/slide dựa trên kích thước màn hình
   useEffect(() => {
     const updateItemsPerView = () => {
       if (window.innerWidth < 768) {
         setItemsPerView(1);
       } else if (window.innerWidth < 1024) {
         setItemsPerView(2);
-      } else if (window.innerWidth < 1280) {
-        setItemsPerView(3);
       } else {
-        setItemsPerView(4);
+        // Trên màn hình lớn (>= 1024px), hiển thị tối đa 3 cột
+        setItemsPerView(3);
       }
     };
 
@@ -53,12 +42,23 @@ export default function CompanyCarousel({
     return () => window.removeEventListener("resize", updateItemsPerView);
   }, []);
 
-  // Auto-play functionality with true infinite loop
+  // Chức năng tự động chuyển slide (4 giây)
   useEffect(() => {
-    if (displayCompanies.length > 0) {
+    const startAutoSlide = () => {
       intervalRef.current = setInterval(() => {
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-      }, 2000);
+        setCurrentIndex((prevIndex) => {
+          const maxIndex = Math.max(
+            0,
+            Math.ceil(displayCompanies.length / itemsPerView) - 1
+          );
+          return prevIndex >= maxIndex ? 0 : prevIndex + 1;
+        });
+      }, 4000);
+    };
+
+    // Chỉ bắt đầu tự động chuyển nếu có nhiều hơn 1 slide
+    if (displayCompanies.length > itemsPerView) {
+      startAutoSlide();
     }
 
     return () => {
@@ -66,114 +66,140 @@ export default function CompanyCarousel({
         clearInterval(intervalRef.current);
       }
     };
-  }, [displayCompanies.length]);
+  }, [displayCompanies.length, itemsPerView]);
 
-  // Reset position when reaching end to create infinite effect
-  useEffect(() => {
-    if (
-      currentIndex >= displayCompanies.length &&
-      displayCompanies.length > 0
-    ) {
-      const timer = setTimeout(() => {
-        setCurrentIndex(0);
-      }, 500); // Match transition duration
-      return () => clearTimeout(timer);
+  // Tạm dừng tự động chuyển slide khi di chuột vào
+  const handleMouseEnter = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
-  }, [currentIndex, displayCompanies.length]);
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => prev - 1);
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => prev + 1);
+  const handleMouseLeave = () => {
+    if (displayCompanies.length <= itemsPerView) return;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const maxIndex = Math.max(
+          0,
+          Math.ceil(displayCompanies.length / itemsPerView) - 1
+        );
+        return prevIndex >= maxIndex ? 0 : prevIndex + 1;
+      });
+    }, 4000);
   };
 
-  if (companies.length === 0) {
-    return (
-      <Card className="mb-8">
-        <CardContent className="p-8 text-center">
-          <p className="text-gray-500">Chưa có công ty nào để hiển thị</p>
-        </CardContent>
-      </Card>
+  const nextSlide = () => {
+    const maxIndex = Math.max(
+      0,
+      Math.ceil(displayCompanies.length / itemsPerView) - 1
     );
+    setCurrentIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
+  };
+
+  const prevSlide = () => {
+    const maxIndex = Math.max(
+      0,
+      Math.ceil(displayCompanies.length / itemsPerView) - 1
+    );
+    setCurrentIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
+  };
+
+  if (!displayCompanies || displayCompanies.length === 0) {
+    return null;
   }
 
+  const totalSlides = Math.ceil(displayCompanies.length / itemsPerView);
+
   return (
-    <Card className="mb-8 overflow-hidden">
-      <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+    <div className="mb-12">
+      {/* HEADER: Tiêu đề (và loại bỏ nút điều hướng khỏi đây) */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
+        {/* LƯU Ý: Loại bỏ phần nút điều hướng cũ ở đây */}
+      </div>
 
-        </div>
-
-        {/* Carousel Container */}
-        <div className="relative overflow-hidden">
-          <div className="flex items-center justify-between absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-10">
-            {/* Navigation buttons */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrev}
-              className="p-2 rounded-full"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNext}
-              className="p-2 rounded-full"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
+      <Card className="overflow-hidden">
+        <CardContent className="p-6">
           <div
-            className="flex gap-4 transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(-${(currentIndex % displayCompanies.length) * (100 / itemsPerView)
-                }%)`,
-            }}
+            // THAY ĐỔI: Thêm relative để các nút absolute căn chỉnh theo div này
+            className="relative overflow-hidden"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
-            {/* Render companies multiple times for infinite effect */}
-            {Array.from({ length: 3 }).map((_, setIndex) =>
-              displayCompanies.map((company, companyIndex) => (
-                <div
-                  key={`${company.id}-set-${setIndex}-${companyIndex}`}
-                  className="flex-shrink-0"
-                  style={{
-                    width: `calc(${100 / itemsPerView}% - ${((itemsPerView - 1) * 16) / itemsPerView
-                      }px)`,
-                  }}
+            {/* Nút Điều hướng MỚI: Đặt tuyệt đối bên trong container tương đối */}
+            {totalSlides > 1 && (
+              <div className="flex items-center justify-between absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={prevSlide}
+                  className="h-8 w-8 p-0 rounded-full text-blue-600 border-blue-200 hover:bg-blue-50"
                 >
-                  <CompanyCard
-                    company={company}
-                    onClick={() => onCompanyClick?.(company.id)}
-                  />
-                </div>
-              ))
+                  <ChevronLeft className="size-6" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={nextSlide}
+                  className="h-8 w-8 p-0 rounded-full text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <ChevronRight className="size-6" />
+                </Button>
+              </div>
             )}
-          </div>
-        </div>
 
-        {/* Pagination Dots */}
-        {displayCompanies.length > itemsPerView && (
-          <div className="flex justify-center gap-2 mt-6">
-            {displayCompanies.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex % displayCompanies.length
-                  ? "bg-blue-600 w-8"
-                  : "bg-gray-300 w-2 hover:bg-gray-400"
-                  }`}
-                aria-label={`Chuyển đến slide ${index + 1}`}
-              />
-            ))}
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: `translateX(-${currentIndex * 100}%)`,
+              }}
+            >
+              {/* Render mỗi slide */}
+              {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                <div key={slideIndex} className="w-full flex-shrink-0">
+                  {/* Grid hiển thị 1, 2, hoặc 3 cột */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {displayCompanies
+                      .slice(
+                        slideIndex * itemsPerView,
+                        (slideIndex + 1) * itemsPerView
+                      )
+                      .map((company) => (
+                        <div key={company.id} className="h-full">
+                          <CompanyCard
+                            company={company}
+                            onClick={() => onCompanyClick?.(company.id)}
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Chấm phân trang - Căn giữa */}
+          {totalSlides > 1 && (
+            <div className="flex justify-center mt-6 gap-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentIndex
+                      ? "bg-blue-600"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                  aria-label={`Chuyển đến slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

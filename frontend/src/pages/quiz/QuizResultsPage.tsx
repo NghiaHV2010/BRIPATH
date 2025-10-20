@@ -126,11 +126,7 @@ export default function QuizResultsPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              onClick={handleExploreJobs}
-              size="lg"
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 flex items-center gap-2"
-            >
+            <Button onClick={handleExploreJobs} size="lg" variant={"emerald"}>
               <Briefcase className="w-5 h-5" />
               Khám Phá Việc Làm
             </Button>
@@ -141,7 +137,7 @@ export default function QuizResultsPage() {
               variant="outline"
               className="flex items-center gap-2"
             >
-              Làm Lại Quiz
+              Làm Lại Bài Quiz
             </Button>
           </div>
         </div>

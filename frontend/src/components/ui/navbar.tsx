@@ -1,19 +1,17 @@
-import { Link, useNavigate } from "react-router-dom";
+"use client";
+
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
 import {
   navigateToJobs,
   navigateToCompanies,
   navigateToCareerPath,
+  navigateToSubscription,
+  navigateToBlog,
 } from "../../utils/navigation";
 import { useState } from "react";
-import {
-  LogOut,
-  ChevronDown,
-  Menu,
-  X,
-  Bell,
-} from "lucide-react";
+import { LogOut, ChevronDown, Menu, X, Bell } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -28,7 +26,10 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { AvatarFallback } from "./avatar";
-import { CompanyMenuItems, UserMenuItems } from "@/constants/profileSidebarItems";
+import {
+  CompanyMenuItems,
+  UserMenuItems,
+} from "@/constants/profileSidebarItems";
 
 interface NavbarProps {
   className?: string;
@@ -36,11 +37,29 @@ interface NavbarProps {
 
 export default function Navbar({ className = "" }: NavbarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const authUser = useAuthStore((s) => s.authUser);
   const logout = useAuthStore((s) => s.logout);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!authUser;
+
+  const isRouteActive = (path: string) => {
+    return location.pathname.startsWith(path);
+  };
+
+  const getNavItemClass = (path: string) => {
+    const isActive = isRouteActive(path);
+
+    return `
+    group inline-flex h-10 w-max items-center justify-center rounded-md px-3 lg:px-4 py-2 text-sm font-medium 
+    transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 active:scale-105
+    ${isActive
+        ? "text-blue-700  scale-120 cursor-default hover:!text-blue-700 hover:!scale-115"
+        : "text-gray-700 hover:text-blue-700 hover:scale-100"
+      }
+  `;
+  };
 
   const handleLogout = async () => {
     try {
@@ -59,23 +78,20 @@ export default function Navbar({ className = "" }: NavbarProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link
-              to="/"
-              className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
-            >
+            <Link to="/" className="text-3xl sm:text-4xl font-bold">
               BRIPATH
             </Link>
           </div>
 
-          {/* Navigation Menu */}
-          <div className="hidden md:flex">
+          {/* Navigation Menu - Desktop */}
+          <div className="hidden md:flex items-center">
             <NavigationMenu>
-              <NavigationMenuList className="space-x-2">
+              <NavigationMenuList className="flex gap-3 lg:gap-4">
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <button
                       onClick={() => navigateToJobs(navigate)}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                      className={getNavItemClass("/jobs")}
                     >
                       Việc Làm
                     </button>
@@ -86,7 +102,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <NavigationMenuLink asChild>
                     <button
                       onClick={() => navigateToCompanies(navigate)}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                      className={getNavItemClass("/companies")}
                     >
                       Công Ty
                     </button>
@@ -97,7 +113,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <NavigationMenuLink asChild>
                     <button
                       onClick={() => navigateToCareerPath(navigate)}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                      className={getNavItemClass("/quiz")}
                     >
                       Lộ trình nghề nghiệp
                     </button>
@@ -107,10 +123,21 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <button
-                      onClick={() => navigateToCompanies(navigate)}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                      onClick={() => navigateToBlog(navigate)}
+                      className={getNavItemClass("/blog")}
                     >
                       Blog
+                    </button>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <button
+                      onClick={() => navigateToSubscription(navigate)}
+                      className={getNavItemClass("/subscription")}
+                    >
+                      Gói dịch vụ
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -119,10 +146,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {authUser && (
               <div
-                className="rounded-full relative hover:bg-gray-100 p-2 cursor-pointer"
+                className="rounded-full relative p-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
                 onClick={() => navigate("/notifications")}
               >
                 {authUser?._count &&
@@ -133,21 +160,21 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       </p>
                     </div>
                   )}
-                <Bell className="size-full text-gray-500 " />
+                <Bell className="size-5 text-gray-500" />
               </div>
             )}
             {isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors outline-none">
+                <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-full bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200">
                   {authUser?.avatar_url ? (
                     <img
-                      src={authUser.avatar_url}
+                      src={authUser.avatar_url || "/placeholder.svg"}
                       className="w-8 h-8 rounded-full object-cover"
                       alt="Avatar"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                      <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
                         {authUser?.username.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </div>
@@ -157,12 +184,12 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       {authUser?.username || authUser?.email?.split("@")[0]}
                     </p>
                   </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown className="w-4 h-4 text-gray-500 hidden sm:block" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  {authUser?.roles.role_name === "User" ? (
-                    UserMenuItems.map((item) => (
+                  {authUser?.roles.role_name === "User"
+                    ? UserMenuItems.map((item) => (
                       <DropdownMenuItem
                         key={item.label}
                         onClick={() => navigate(item.href)}
@@ -171,17 +198,17 @@ export default function Navbar({ className = "" }: NavbarProps) {
                         <span>{item.label}</span>
                       </DropdownMenuItem>
                     ))
-                  ) : authUser?.roles.role_name === "Company" ? (
-                    CompanyMenuItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.label}
-                        onClick={() => navigate(item.href)}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </DropdownMenuItem>
-                    ))
-                  ) : null}
+                    : authUser?.roles.role_name === "Company"
+                      ? CompanyMenuItems.map((item) => (
+                        <DropdownMenuItem
+                          key={item.label}
+                          onClick={() => navigate(item.href)}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </DropdownMenuItem>
+                      ))
+                      : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -197,34 +224,34 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 <Button
                   asChild
                   variant="outline"
-                  className="hidden sm:inline-flex"
+                  className="hidden sm:inline-flex text-sm bg-transparent"
                 >
                   <Link to="/subscriptions">Nhà Tuyển Dụng</Link>
                 </Button>
                 <Button
                   asChild
                   variant={"default"}
-                  className="hidden sm:inline-flex"
+                  className="hidden sm:inline-flex text-sm"
                 >
                   <Link to="/login">Đăng nhập</Link>
                 </Button>
               </>
             )}
-          </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
-            </Button>
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-4 w-4" />
+                ) : (
+                  <Menu className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -237,7 +264,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToJobs(navigate);
                 }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/jobs")
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
+                  }`}
               >
                 Việc Làm
               </button>
@@ -246,24 +276,51 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToCompanies(navigate);
                 }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/companies")
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
+                  }`}
               >
                 Công Ty
               </button>
-              <Link
-                to="/quiz"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateToCareerPath(navigate);
+                }}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/quiz")
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
+                  }`}
               >
-                Career Map
-              </Link>
-              <Link
-                to="/blog"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                onClick={() => setMobileMenuOpen(false)}
+                Lộ trình nghề nghiệp!
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateToBlog(navigate);
+                }}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/blog")
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
+                  }`}
               >
-                Blogs
-              </Link>
+                Blog
+              </button>
+              {authUser?.roles?.role_name === "Company" && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigateToSubscription(navigate);
+                  }}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/subscription")
+                      ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                      : "text-gray-600"
+                    }`}
+                >
+                  Gói dịch vụ
+                </button>
+              )}
             </div>
 
             <div className="pt-4 pb-3 border-t border-gray-200">
@@ -271,18 +328,18 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 <div className="space-y-3">
                   <Link
                     to="/profile"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100"
+                    className="flex items-center px-3 py-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {authUser?.avatar_url ? (
                       <img
-                        src={authUser.avatar_url}
+                        src={authUser.avatar_url || "/placeholder.svg"}
                         alt="Avatar"
                         className="w-8 h-8 rounded-full object-cover mr-3"
                       />
                     ) : (
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-md">
+                      <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                        <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
                           {authUser?.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </div>
@@ -297,7 +354,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       handleLogout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full mx-3 text-red-600 border-red-600 hover:bg-red-50"
+                    className="w-full mx-3 text-red-600 border-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Đăng xuất
@@ -305,7 +362,11 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 </div>
               ) : (
                 <div className="space-y-2 px-3">
-                  <Button asChild className="w-full" variant="outline">
+                  <Button
+                    asChild
+                    className="w-full bg-transparent"
+                    variant="outline"
+                  >
                     <Link
                       to="/subscriptions"
                       onClick={() => setMobileMenuOpen(false)}

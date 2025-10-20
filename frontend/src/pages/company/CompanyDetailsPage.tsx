@@ -89,15 +89,11 @@ export default function CompanyDetailsPage() {
     try {
       if (isFollowed) {
         await unfollowCompanyStore(companyId);
-        toast.success("Đã bỏ theo dõi công ty", {
-          duration: 3000,
-        });
+
         setIsFollowed(false);
       } else {
         await followCompanyStore(companyId);
-        toast.success("Đã theo dõi công ty", {
-          duration: 3000,
-        });
+
         setIsFollowed(true);
       }
     } catch (err) {

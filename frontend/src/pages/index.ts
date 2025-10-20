@@ -4,6 +4,7 @@ export { default as ForgotPasswordPage } from "./login/forgotPasswordPage";
 export { default as LoginPage } from "./login/loginPage";
 export { default as RegisterPage } from "./login/registerPage";
 export { default as EmailVerificationPage } from "./login/emailVerificationPage";
+export { default as ResetPasswordPage } from "./login/resetPasswordPage";
 
 // Subscription pages
 export { default as SubscriptionPlansPage } from "./subscription/subscriptionPlansPage";
