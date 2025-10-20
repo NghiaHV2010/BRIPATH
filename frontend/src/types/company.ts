@@ -87,28 +87,26 @@ export interface CompanySummary {
 // COMPANY DETAIL TYPE
 // ========================
 export interface CompanyDetail {
-  success: boolean;
-  data: {
-    id: string;
-    background_url?: string | null;
-    description?: string | null;
-    employees?: number | null;
-    users?: CompInfor | null;
-    _count?: {
-      followedCompanies?: number;
-      jobs?: number;
-    };
-    companyTags?: any[] | null;
-    feedbacks?: CompanyFeedback[] | null;
-    is_verified?: boolean;
-    company_type?: string;
-    fields?: any | null;
-    jobs?: Job[];
+  id: string;
+  background_url?: string | null;
+  description?: string | null;
+  employees?: number | null;
+  users?: CompInfor | null;
+  _count?: {
+    followedCompanies?: number;
+    jobs?: number;
+  };
+  companyTags?: any[] | null;
+  feedbacks?: CompanyFeedback[] | null;
+  is_verified?: boolean;
+  company_type?: string;
+  fields?: any | null;
+  jobs?: Job[];
 
-    followedCompanies?: FollowRecord[];
+  followedCompanies?: FollowRecord[];
 
-    isFollowed?: boolean;
-  }
+  isFollowed?: boolean;
+}
 
 export interface CompanyDetailResponse {
   success: boolean;

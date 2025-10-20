@@ -5,7 +5,6 @@ import {
   Users,
   Briefcase,
   Building2,
-  Clock,
   Copy,
   ArrowLeft,
   CircleChevronDown,
@@ -23,10 +22,8 @@ import { getCompanyDetails } from "@/api/company_api";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
-import { toast } from "sonner";
 import type { CompanyDetail } from "@/types/company";
 import { JobCard } from "@/components/job";
-import { saveJobApi, unsaveJobApi } from "@/api/job_api";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -334,7 +331,7 @@ export default function CompanyDetailsPage() {
               <div className="space-y-8">
                 <CompanyFeedback
                   feedbacks={companyDetail?.feedbacks || []}
-                  companyName={users?.username || "Company"}
+                  companyName={companyDetail.users?.username || "Company"}
                 />
               </div>
             </div>
