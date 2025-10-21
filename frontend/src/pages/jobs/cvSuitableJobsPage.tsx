@@ -304,10 +304,10 @@ export default function CVSuitableJobsPage() {
                       </p>
                       <button
                         className={`mx-2 transition-colors ${job.is_good === true
-                            ? "text-green-600"
-                            : job.is_good === false
-                              ? "text-gray-300 cursor-not-allowed"
-                              : "text-gray-400 hover:text-green-600 cursor-pointer"
+                          ? "text-green-600"
+                          : job.is_good === false
+                            ? "text-gray-300 cursor-not-allowed"
+                            : "text-gray-400 hover:text-green-600 cursor-pointer"
                           }`}
                         onClick={() => job.is_good === null || job.is_good === undefined ? handleFeedbackJob(job.id, true) : undefined}
                         disabled={job.is_good !== null && job.is_good !== undefined}
@@ -323,10 +323,10 @@ export default function CVSuitableJobsPage() {
                       </button>
                       <button
                         className={`transition-colors ${job.is_good === false
-                            ? "text-red-600"
-                            : job.is_good === true
-                              ? "text-gray-300 cursor-not-allowed"
-                              : "text-gray-400 hover:text-red-600 cursor-pointer"
+                          ? "text-red-600"
+                          : job.is_good === true
+                            ? "text-gray-300 cursor-not-allowed"
+                            : "text-gray-400 hover:text-red-600 cursor-pointer"
                           }`}
                         onClick={() => job.is_good === null || job.is_good === undefined ? handleFeedbackJob(job.id, false) : undefined}
                         disabled={job.is_good !== null && job.is_good !== undefined}
@@ -371,7 +371,7 @@ export default function CVSuitableJobsPage() {
 
         {/* Resume Detail Dialog */}
         <Dialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
-          <DialogContent className="!max-w-5xl w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
+          <DialogContent className="max-w-5xl! w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
             <div className="flex w-full sticky top-0 justify-between items-center bg-slate-100 shadow-md z-50 px-4 py-2 rounded-xl">
               <DialogHeader>
                 <DialogTitle>Chi tiết CV</DialogTitle>

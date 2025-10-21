@@ -95,9 +95,9 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
 
     return (
         <div className="w-full mx-auto bg-white shadow-lg">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8">
-                <div className="flex items-center justify-start gap-6 mb-2">
-                    <Avatar className="size-32 border-4 border-white shadow-lg">
+            <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white p-8">
+                <div className="flex items-start md:items-center justify-start gap-6 mb-2">
+                    <Avatar className="size-24 md:size-32 border-4 border-white shadow-lg">
                         {avatar_url ? (
                             <AvatarImage src={avatar_url} alt={resume.fullname} className='object-cover' />
                         ) : (
@@ -108,7 +108,7 @@ export function Resume({ cvId, avatar_url }: ResumeProps) {
                     </Avatar>
                     <div className="flex flex-col">
                         <div className='flex-1'>
-                            <h1 className="text-4xl font-bold">{resume.fullname}</h1>
+                            <h2 className="text-3xl md:text-4xl font-bold">{resume.fullname}</h2>
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm mt-4">
                             {resume.email && (

@@ -3,23 +3,12 @@ import dotenv from "dotenv";
 interface Config {
     PORT: number;
     FRONTEND_URL: string;
-    ZALOPAY_APP_ID: string;
-    ZALOPAY_KEY1: string;
-    ZALOPAY_KEY2: string;
-    ZALOPAY_ENDPOINT: string;
-    ZALOPAY_CALLBACK_URL: string;
-    VNPAY_TMN_CODE: string;
-    VNPAY_HASH_SECRET: string;
-    VNPAY_URL: string;
-    VNPAY_API: string;
-    VNPAY_RETURN_URL: string;
+    FRONTEND_URLS: string[]; // Array of allowed origins
     DATABASE_URL: string;
     ACCESS_SECRET: string;
     REFRESH_SECRET: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
-    ARCJET_ENV: string;
-    ARCJET_KEY: string;
     GMAIL_USER: string;
     GMAIL_APP_PASSWORD: string;
     GEMINI_API_KEY: string;
@@ -28,6 +17,16 @@ interface Config {
     COOKIE_CONFIG_SAME_SITE: "none" | "lax" | "strict";
     COOKIE_CONFIG_SECURE: boolean;
     NODE_ENV: string;
+    RESEND_API_KEY: string;
+    SEPAY_API_KEY: string;
+    SEPAY_WEBHOOK_URL: string;
+    SEPAY_RETURN_URL: string;
+    // Rate limiting configuration
+    RATE_LIMIT_WINDOW_MS: number;
+    RATE_LIMIT_MAX_REQUESTS: number;
+    RATE_LIMIT_AUTH_MAX: number;
+    RATE_LIMIT_API_MAX: number;
+    REQUEST_TIMEOUT_MS: number;
 }
 
 dotenv.config();
@@ -35,23 +34,14 @@ dotenv.config();
 const config: Config = {
     PORT: Number(process.env.PORT) || 3000,
     FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
-    ZALOPAY_APP_ID: process.env.ZALOPAY_APP_ID || '',
-    ZALOPAY_KEY1: process.env.ZALOPAY_KEY1 || '',
-    ZALOPAY_KEY2: process.env.ZALOPAY_KEY2 || '',
-    ZALOPAY_ENDPOINT: process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn/v2',
-    ZALOPAY_CALLBACK_URL: process.env.ZALOPAY_CALLBACK_URL || 'http://localhost:3000/api/zalopay/callback',
-    VNPAY_TMN_CODE: process.env.VNPAY_TMN_CODE || '',
-    VNPAY_HASH_SECRET: process.env.VNPAY_HASH_SECRET || '',
-    VNPAY_URL: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-    VNPAY_API: process.env.VNPAY_API || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction',
-    VNPAY_RETURN_URL: process.env.VNPAY_RETURN_URL || 'http://localhost:3000/api/vnpay/return',
+    FRONTEND_URLS: process.env.FRONTEND_URL
+        ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+        : ['http://localhost:5173'],
     DATABASE_URL: process.env.DATABASE_URL!,
     ACCESS_SECRET: process.env.ACCESS_SECRET!,
     REFRESH_SECRET: process.env.REFRESH_SECRET!,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
-    ARCJET_ENV: process.env.ARCJET_ENV || 'development',
-    ARCJET_KEY: process.env.ARCJET_KEY!,
     GMAIL_USER: process.env.GMAIL_USER!,
     GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD!,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
@@ -60,28 +50,27 @@ const config: Config = {
     COOKIE_CONFIG_SAME_SITE: process.env.COOKIE_CONFIG_SAME_SITE as "none" | "lax" | "strict" || 'none',
     COOKIE_CONFIG_SECURE: process.env.COOKIE_CONFIG_SECURE === 'true',
     NODE_ENV: process.env.NODE_ENV || 'development',
+    RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+    SEPAY_API_KEY: process.env.SEPAY_API_KEY!,
+    SEPAY_WEBHOOK_URL: process.env.SEPAY_WEBHOOK_URL!,
+    SEPAY_RETURN_URL: process.env.SEPAY_RETURN_URL!,
+    // Rate limiting configuration with defaults
+    RATE_LIMIT_WINDOW_MS: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+    RATE_LIMIT_MAX_REQUESTS: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // 1000 requests per window
+    RATE_LIMIT_AUTH_MAX: Number(process.env.RATE_LIMIT_AUTH_MAX) || 20, // 20 auth attempts per window
+    RATE_LIMIT_API_MAX: Number(process.env.RATE_LIMIT_API_MAX) || 100, // 100 API requests per minute
+    REQUEST_TIMEOUT_MS: Number(process.env.REQUEST_TIMEOUT_MS) || 30000, // 30 seconds
 };
 
 export const {
     PORT,
     FRONTEND_URL,
-    ZALOPAY_APP_ID,
-    ZALOPAY_KEY1,
-    ZALOPAY_KEY2,
-    ZALOPAY_ENDPOINT,
-    ZALOPAY_CALLBACK_URL,
-    VNPAY_TMN_CODE,
-    VNPAY_HASH_SECRET,
-    VNPAY_URL,
-    VNPAY_API,
-    VNPAY_RETURN_URL,
+    FRONTEND_URLS,
     DATABASE_URL,
     ACCESS_SECRET,
     REFRESH_SECRET,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    ARCJET_ENV,
-    ARCJET_KEY,
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
     GEMINI_API_KEY,
@@ -89,6 +78,15 @@ export const {
     OPENAI_MODEL,
     COOKIE_CONFIG_SAME_SITE,
     COOKIE_CONFIG_SECURE,
-    NODE_ENV
+    NODE_ENV,
+    RESEND_API_KEY,
+    SEPAY_API_KEY,
+    SEPAY_WEBHOOK_URL,
+    SEPAY_RETURN_URL,
+    RATE_LIMIT_WINDOW_MS,
+    RATE_LIMIT_MAX_REQUESTS,
+    RATE_LIMIT_AUTH_MAX,
+    RATE_LIMIT_API_MAX,
+    REQUEST_TIMEOUT_MS,
 } = config;
 

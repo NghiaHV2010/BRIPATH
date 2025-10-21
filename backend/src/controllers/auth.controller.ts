@@ -81,7 +81,7 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
     }
 
     try {
-        await sendEmailWithRetry(email, "BRIPATH - Verify Email", emailTemplate(url));
+        await sendEmailWithRetry(email, "BRIPATH - Xác thực email", emailTemplate(url));
 
         res.cookie("otp", otp, {
             maxAge: 10 * 60 * 1000,

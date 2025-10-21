@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_API_KEY, GMAIL_USER } from "../config/env.config";
-import transporter from "../config/nodemailer.config";
+import { GEMINI_API_KEY } from "../config/env.config";
+import resend from "../config/resend.config";
 import { CAREERPATHPROMPT } from "../constants/prompt";
 
 /**
@@ -20,59 +20,59 @@ export function convertDate(dateStr?: string): Date | undefined {
     return isNaN(d.getTime()) ? undefined : d;
 }
 
-export function sendEmail(email: string, subject: string, content: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+export async function sendEmail(email: string, subject: string, content: string): Promise<boolean> {
+    try {
         // Validate inputs
         if (!email || !validateEmail(email)) {
             console.error('Invalid email address:', email);
-            return reject(new Error('Invalid email address'));
+            throw new Error('Invalid email address');
         }
 
         if (!subject || !content) {
             console.error('Missing subject or content');
-            return reject(new Error('Missing subject or content'));
+            throw new Error('Missing subject or content');
         }
-
-        const mailOptions = {
-            from: GMAIL_USER,
-            to: email,
-            subject: subject,
-            html: content
-        };
 
         // Log email attempt (without sensitive data)
         console.log(`Attempting to send email to: ${email.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Email sending failed:', {
-                    error: error.message,
-                    code: (error as any).code || 'UNKNOWN',
-                    command: (error as any).command || 'UNKNOWN',
-                    to: email.replace(/(.{2}).*(@.*)/, '$1***$2')
-                });
+        const { data, error } = await resend.emails.send({
+            from: 'BRIPATH <no-reply@bripath.online>', // Use resend's test domain for now
+            to: [email],
+            subject: subject,
+            html: content,
+        });
 
-                // Return a more specific error message based on error type
-                const errorCode = (error as any).code;
-                if (errorCode === 'EAUTH') {
-                    return reject(new Error('Email authentication failed - check credentials'));
-                } else if (errorCode === 'ECONNECTION') {
-                    return reject(new Error('Email connection failed - check network'));
-                } else if (errorCode === 'ETIMEDOUT') {
-                    return reject(new Error('Email sending timed out'));
-                } else {
-                    return reject(new Error(`Email sending failed: ${error.message}`));
-                }
-            }
-
-            console.log('Email sent successfully:', {
-                messageId: info.messageId,
+        if (error) {
+            console.error('Email sending failed:', {
+                error: error.message || error,
                 to: email.replace(/(.{2}).*(@.*)/, '$1***$2')
             });
 
-            resolve(true);
+            // Return a more specific error message based on error type
+            if (error.message?.includes('API key')) {
+                throw new Error('Email authentication failed - check API key');
+            } else if (error.message?.includes('rate limit')) {
+                throw new Error('Email rate limit exceeded');
+            } else if (error.message?.includes('domain')) {
+                throw new Error('Email domain not verified');
+            } else {
+                throw new Error(`Email sending failed: ${error.message || 'Unknown error'}`);
+            }
+        }
+
+        console.log('Email sent successfully:', {
+            id: data?.id,
+            to: email.replace(/(.{2}).*(@.*)/, '$1***$2')
         });
-    });
+
+        return true;
+
+    } catch (error) {
+        const err = error as Error;
+        console.error('Email sending error:', err.message);
+        throw err;
+    }
 }
 
 // Enhanced email sending with retry mechanism for production
@@ -96,8 +96,10 @@ export async function sendEmailWithRetry(
             lastError = error as Error;
             console.error(`Email sending attempt ${attempt} failed:`, lastError.message);
 
-            // Don't retry for authentication errors
-            if (lastError.message.includes('authentication failed')) {
+            // Don't retry for authentication errors or domain verification issues
+            if (lastError.message.includes('authentication failed') ||
+                lastError.message.includes('domain not verified') ||
+                lastError.message.includes('API key')) {
                 throw lastError;
             }
 

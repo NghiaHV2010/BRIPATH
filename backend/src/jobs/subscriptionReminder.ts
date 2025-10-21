@@ -2,72 +2,9 @@ import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
 import { createNotificationData, sendEmail } from "../utils";
 
-const mockSubscriptions = [
-    // ✅ Sắp hết hạn 3 ngày (2025-09-28)
-    {
-        id: "sub-001",
-        start_date: new Date("2025-09-01"),
-        end_date: new Date("2025-09-29"),
-        amount_paid: BigInt(500000),
-        is_extended: false,
-        status: "on_going",
-        user_id: "user-001",
-        plan_id: 1,
-        payment_id: "pay-001",
-        users: { id: "user-001", email: "exe1@edu.vn", fullname: "Dung" },
-        membershipPlans: { id: 1, plan_name: "Basic Plan" }
-    },
-
-    // ✅ Sắp hết hạn 1 ngày (2025-09-26)
-    {
-        id: "sub-002",
-        start_date: new Date("2025-09-10"),
-        end_date: new Date("2025-09-27"),
-        amount_paid: BigInt(800000),
-        is_extended: false,
-        status: "on_going",
-        user_id: "user-002",
-        plan_id: 2,
-        payment_id: "pay-002",
-        users: { id: "user-002", email: "exe2@gmail.com", fullname: "Khang" },
-        membershipPlans: { id: 2, plan_name: "Pro Plan" }
-    },
-
-    // ❌ Đã hết hạn (2025-09-20)
-    {
-        id: "sub-003",
-        start_date: new Date("2025-08-20"),
-        end_date: new Date("2025-09-20"),
-        amount_paid: BigInt(300000),
-        is_extended: false,
-        status: "expired",
-        user_id: "user-003",
-        plan_id: 1,
-        payment_id: "pay-003",
-        users: { id: "user-003", email: "user3@example.com", fullname: "Le Van C" },
-        membershipPlans: { id: 1, plan_name: "Basic Plan" }
-    },
-
-    // ✅ Còn hạn dài (2025-10-30)
-    {
-        id: "sub-004",
-        start_date: new Date("2025-09-15"),
-        end_date: new Date("2025-10-30"),
-        amount_paid: BigInt(1200000),
-        is_extended: true,
-        status: "on_going",
-        user_id: "user-004",
-        plan_id: 3,
-        payment_id: "pay-004",
-        users: { id: "user-004", email: "user4@example.com", fullname: "Pham Thi D" },
-        membershipPlans: { id: 3, plan_name: "Premium Plan" }
-    }
-];
-
 const checkSubscriptionRemainDate = async () => {
     const prisma = new PrismaClient();
     const today = new Date();
-    // const today = new Date("2025-09-26");
 
     const threeDaysLater = new Date(today);
     threeDaysLater.setDate(today.getDate() + 3);
@@ -75,67 +12,93 @@ const checkSubscriptionRemainDate = async () => {
     const oneDayLater = new Date(today);
     oneDayLater.setDate(today.getDate() + 1);
 
-    // const expireIn3Days = filterExpiring(mockSubscriptions, 3, today)
-
-    // const expireIn1Day = filterExpiring(mockSubscriptions, 1, today)
 
     const expireIn3Days = await getExpireIn(threeDaysLater);
 
     const expireIn1Day = await getExpireIn(oneDayLater);
 
-    // console.log("Sắp hết hạn 3 ngày:", filterExpiring(mockSubscriptions, 3, today));
-    // console.log("Sắp hết hạn 1 ngày:", filterExpiring(mockSubscriptions, 1, today));
 
-    for (const sub of expireIn3Days) {
-        // console.log("3 days: ", sub);
-
-        const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
-
-        await prisma.userNotifications.create({
-            data: {
+    // Process 3-day expiration notifications
+    if (expireIn3Days.length > 0) {
+        // Prepare notifications data for bulk creation
+        const notifications3Days = expireIn3Days.map(sub => {
+            const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
+            return {
                 user_id: sub.user_id,
                 title: notificationData.title,
                 content: notificationData.content,
                 type: notificationData.type,
-            }
-        }).catch((error) => { console.error("Đã xảy ra lỗi, vui lòng thử lại!", error); });
+            };
+        });
 
-        sendEmail(
-            sub.users.email,
-            `Nhắc nhở: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
-            `Gói của bạn sẽ hết hạn sau 3 ngày (ngày ${sub.end_date.toLocaleDateString('vi-VN')}).`
+        // Bulk create notifications
+        await prisma.userNotifications.createMany({
+            data: notifications3Days,
+            skipDuplicates: true
+        }).catch((error) => { console.error("Đã xảy ra lỗi khi tạo thông báo 3 ngày:", error); });
+
+        // Send bulk emails
+        const emailPromises3Days = expireIn3Days.map(sub =>
+            sendEmail(
+                sub.users.email,
+                `Nhắc nhở: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
+                `Gói của bạn sẽ hết hạn sau 3 ngày (ngày ${sub.end_date.toLocaleDateString('vi-VN')}).`
+            ).catch((error) => {
+                console.error(`Lỗi gửi email đến ${sub.users.email}:`, error);
+                return null; // Continue with other emails even if one fails
+            })
         );
+
+        // Gửi song song tối đa 5 email một lúc (để tránh spam server)
+        const chunkSize = 5;
+        for (let i = 0; i < emailPromises3Days.length; i += chunkSize) {
+            const chunk = emailPromises3Days.slice(i, i + chunkSize);
+            await Promise.allSettled(chunk);
+            console.log(`Đã xử lý ${Math.min(i + chunkSize, emailPromises3Days.length)}/${emailPromises3Days.length} email nhắc nhở 3 ngày`);
+        }
+        console.log(`Hoàn thành gửi ${expireIn3Days.length} email nhắc nhở 3 ngày`);
     }
 
-    for (const sub of expireIn1Day) {
-        // console.log("1 day: ", sub);
-
-        const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
-
-        await prisma.userNotifications.create({
-            data: {
+    // Process 1-day expiration notifications
+    if (expireIn1Day.length > 0) {
+        // Prepare notifications data for bulk creation
+        const notifications1Day = expireIn1Day.map(sub => {
+            const notificationData = createNotificationData(sub.membershipPlans.plan_name, undefined, "pricing_plan", undefined, sub.end_date.toLocaleDateString('vi-VN'));
+            return {
                 user_id: sub.user_id,
                 title: notificationData.title,
                 content: notificationData.content,
                 type: notificationData.type,
-            }
-        }).catch((error) => { console.error("Đã xảy ra lỗi, vui lòng thử lại!", error); });
+            };
+        });
 
-        sendEmail(
-            sub.users.email,
-            `Khẩn cấp: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
-            `Gói của bạn sẽ hết hạn vào ngày mai (${sub.end_date.toLocaleDateString('vi-VN')}).`
+        // Bulk create notifications
+        await prisma.userNotifications.createMany({
+            data: notifications1Day,
+            skipDuplicates: true
+        }).catch((error) => { console.error("Đã xảy ra lỗi khi tạo thông báo 1 ngày:", error); });
+
+        // Send bulk emails
+        const emailPromises1Day = expireIn1Day.map(sub =>
+            sendEmail(
+                sub.users.email,
+                `Khẩn cấp: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
+                `Gói của bạn sẽ hết hạn vào ngày mai (${sub.end_date.toLocaleDateString('vi-VN')}).`
+            ).catch((error) => {
+                console.error(`Lỗi gửi email đến ${sub.users.email}:`, error);
+                return null; // Continue with other emails even if one fails
+            })
         );
+
+        // Gửi song song tối đa 5 email một lúc (để tránh spam server)
+        const chunkSize = 5;
+        for (let i = 0; i < emailPromises1Day.length; i += chunkSize) {
+            const chunk = emailPromises1Day.slice(i, i + chunkSize);
+            await Promise.allSettled(chunk);
+            console.log(`Đã xử lý ${Math.min(i + chunkSize, emailPromises1Day.length)}/${emailPromises1Day.length} email nhắc nhở 1 ngày`);
+        }
+        console.log(`Hoàn thành gửi ${expireIn1Day.length} email nhắc nhở 1 ngày`);
     }
-}
-
-function filterExpiring(subs: any[], daysBefore: number, today: Date) {
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + daysBefore);
-
-    return subs.filter(sub =>
-        sub.end_date.toDateString() === targetDate.toDateString()
-    );
 }
 
 const getExpireIn = async (daysLater: Date) => {

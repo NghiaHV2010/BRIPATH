@@ -340,7 +340,7 @@ export default function ProfilePageWrapper() {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Profile Card */}
         <Card className="overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-gray-50 to-indigo-50 border-b">
+          <CardHeader className="bg-linear-to-r from-gray-50 to-indigo-50 border-b">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base text-gray-900 flex items-center gap-12">
                 <div className="flex flex-col items-center">
@@ -612,7 +612,7 @@ export default function ProfilePageWrapper() {
 
         {/* CV Management Card */}
         <Card>
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b mb-4">
+          <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 border-b mb-4">
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col">
                 <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -681,7 +681,7 @@ export default function ProfilePageWrapper() {
                     }
                   }}
                 >
-                  <DialogContent className="!max-w-5xl w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
+                  <DialogContent className="max-w-5xl! w-[95%] max-h-[95vh] overflow-y-auto [&>button]:hidden [&>#dialog-close-button]:block p-4">
                     <div className="flex w-full sticky top-0 justify-between items-center bg-slate-100 shadow-md z-50 px-4 py-2 rounded-xl">
                       <DialogHeader>
                         <div className="flex items-center gap-8">
