@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES2022",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -11,21 +11,12 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "ES2020",
-      "DOM"
+      "ES2022"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "effect": [
-        "src/types/shims/effect/index"
-      ],
-      "effect/*": [
-        "src/types/shims/effect/*"
-      ]
-    },
     "types": [
       "node"
-    ]
+    ],
+    "baseUrl": "."
   },
   "include": [
     "src/**/*",

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { CreatePaymentRequest, UpdatePaymentRequest, PaymentQueryParams } from '../types/payment.types';
 import { createNotificationData } from '../utils';

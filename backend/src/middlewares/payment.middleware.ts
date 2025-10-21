@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { HTTP_ERROR } from '../constants/httpCode';
-import { PaymentGateway, PaymentMethod, PaymentStatus } from '../generated/prisma';
+import { PaymentGateway, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 export const validateCreatePaymentRequest = (req: Request, res: Response, next: NextFunction) => {
     const { amount, payment_gateway, payment_method, status } = req.body;

@@ -7,13 +7,3 @@ interface Generator<T = unknown, TReturn = any, TNext = unknown> {
   throw?(e: any): IteratorResult<T, TReturn>;
   [Symbol.iterator](): Generator<T, TReturn, TNext>;
 }
-
-// Bypass typing for 'effect' package to avoid TS errors from its TS sources
-declare module 'effect' {
-  const anyEffect: any;
-  export default anyEffect;
-}
-declare module 'effect/*' {
-  const anyEffectSubpath: any;
-  export = anyEffectSubpath;
-}

@@ -9,7 +9,7 @@ const PDF = 'application/pdf';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 const AI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-export const extractTextFromCV = async (file: Buffer<ArrayBufferLike>, mimeType: string): Promise<string> => {
+export const extractTextFromCV = async (file: Buffer, mimeType: string): Promise<string> => {
     if (mimeType === PDF) {
         const rawData = await pdfParse(file);
         return rawData.text;

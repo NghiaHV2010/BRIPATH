@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -106,18 +106,18 @@ async function addSampleFeedbacks() {
         // Tạo feedback cho mỗi công ty
         for (const company of companies) {
             console.log(`\n🏢 Thêm feedback cho công ty: ${company.users?.username}`);
-            
+
             // Tạo 2-4 feedback cho mỗi công ty
             const numFeedbacks = Math.floor(Math.random() * 3) + 2; // 2-4 feedbacks
-            
+
             for (let i = 0; i < numFeedbacks; i++) {
                 const randomUser = users[Math.floor(Math.random() * users.length)];
                 const randomFeedback = sampleFeedbacks[Math.floor(Math.random() * sampleFeedbacks.length)];
-                
+
                 // Tạo ngày ngẫu nhiên trong 6 tháng qua
                 const randomDate = new Date();
                 randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 180));
-                
+
                 try {
                     await prisma.feedbacks.create({
                         data: {
@@ -130,7 +130,7 @@ async function addSampleFeedbacks() {
                             created_at: randomDate
                         }
                     });
-                    
+
                     feedbackCount++;
                     console.log(`  ✅ Đã thêm feedback từ ${randomUser.username} (${randomFeedback.stars}⭐)`);
                 } catch (error) {
@@ -140,7 +140,7 @@ async function addSampleFeedbacks() {
         }
 
         console.log(`\n🎉 Hoàn thành! Đã thêm ${feedbackCount} feedback mẫu cho ${companies.length} công ty`);
-        
+
         // Hiển thị thống kê
         const totalFeedbacks = await prisma.feedbacks.count();
         const avgRating = await prisma.feedbacks.aggregate({
@@ -148,7 +148,7 @@ async function addSampleFeedbacks() {
                 stars: true
             }
         });
-        
+
         console.log(`\n📊 Thống kê:`);
         console.log(`   - Tổng số feedback: ${totalFeedbacks}`);
         console.log(`   - Đánh giá trung bình: ${avgRating._avg.stars?.toFixed(1)}⭐`);

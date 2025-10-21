@@ -1,4 +1,4 @@
-import { $Enums } from '../generated/prisma';
+import { $Enums } from '@prisma/client';
 export type PaymentGateway = $Enums.PaymentGateway;
 export type PaymentMethod = $Enums.PaymentMethod;
 export type PaymentStatus = $Enums.PaymentStatus;

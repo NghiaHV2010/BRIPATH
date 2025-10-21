@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { analystDataStats, embeddingData, extractTextFromCV, formatText } from "../utils/cvHandler";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { convertDate } from "../utils";
 import { errorHandler } from "../utils/error";
 import { CVSTATSPROMPT } from "../constants/prompt";
 
 interface IFILE {
     name: string;
-    data: Buffer<ArrayBufferLike>;
+    data: Buffer;
     size: number;
     mimetype: string;
 }

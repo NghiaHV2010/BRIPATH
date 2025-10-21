@@ -1,9 +1,8 @@
-import { next } from './../../node_modules/effect/src/Cron';
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
 
 const prisma = new PrismaClient();
