@@ -417,6 +417,16 @@ model zalopayOrders {
   users        users    @relation(fields: [user_id], references: [id])
 }
 
+model sepayOrders {
+  order_id String   @id
+  user_id  String
+  amount   BigInt
+  plan_id  Int?
+  company_id String?
+  created_at DateTime @default(now())
+  users      users    @relation(fields: [user_id], references: [id])
+}
+
 model personalityTestResults {
   user_id     String
   question_id Int
@@ -582,6 +592,7 @@ model users {
   roles                  roles                    @relation(fields: [role_id], references: [id])
   vnpayOrders            vnpayOrders[]
   zalopayOrders          zalopayOrders[]
+  sepayOrders            sepayOrders[]
 }
 
 enum ApplicantsStatus {
@@ -634,6 +645,7 @@ enum PaymentGateway {
   Bank
   ZaloPay
   Stripe
+  SePay
 }
 
 enum PaymentMethod {

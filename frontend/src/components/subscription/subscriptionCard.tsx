@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 
 // Icons
@@ -107,8 +108,24 @@ export function SubscriptionCard({
   compact = false,
 }: SubscriptionCardProps) {
   const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
   const config = tierConfig[plan.tier];
   const Icon = config.icon;
+
+  const handlePurchase = () => {
+    // Navigate to payment page with plan data
+    navigate('/payment', {
+      state: {
+        selectedPlan: {
+          id: plan.id,
+          name: plan.name,
+          price: plan.price,
+          duration: plan.durationMonths || 1,
+          features: plan.features
+        }
+      }
+    });
+  };
 
   return (
     <div
@@ -204,7 +221,7 @@ export function SubscriptionCard({
 
         {/* Button */}
         <Button
-          onClick={() => onSelect(plan.id)}
+          onClick={handlePurchase}
           size={compact ? "sm" : "lg"}
           className={`w-full rounded-xl mt-6 ${
             plan.tier === "trial"

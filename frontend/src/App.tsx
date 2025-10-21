@@ -18,6 +18,7 @@ import {
   CompaniesPage,
   AdminPage,
 } from "./pages";
+import { PaymentPage, PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
 import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
@@ -182,6 +183,33 @@ function App() {
         />
 
         <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
+        
+        {/* Payment Routes */}
+        <Route 
+          path="/payment" 
+          element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/payment/process" 
+          element={
+            <ProtectedRoute>
+              <PaymentProcessPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/payment/success" 
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessPage />
+            </ProtectedRoute>
+          } 
+        />
+        
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
 
