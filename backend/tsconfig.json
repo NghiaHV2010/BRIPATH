@@ -10,6 +10,10 @@
     "noEmitOnError": false,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ],
     "lib": [
       "ES2022"
     ],
