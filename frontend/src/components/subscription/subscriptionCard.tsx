@@ -98,13 +98,11 @@ export interface SubscriptionCardProps {
     isRecommended?: boolean;
     isPopular?: boolean;
   };
-  onSelect: (id: string) => void;
   compact?: boolean;
 }
 
 export function SubscriptionCard({
   plan,
-  onSelect,
   compact = false,
 }: SubscriptionCardProps) {
   const [hovered, setHovered] = useState(false);
