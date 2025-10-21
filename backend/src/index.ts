@@ -3,7 +3,7 @@ import cors from 'cors';
 import http from "http";
 import express from 'express';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { authRoute, cvRouter, vnpayRoutes, zalopayRoutes, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter } from './routes';
+import { authRoute, cvRouter, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter } from './routes';
 import passport from './config/passport.config';
 import { FRONTEND_URL, PORT } from './config/env.config';
 import fileUpload from "express-fileupload";
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
     origin: FRONTEND_URL,
-    credentials: true
+    credentials: true,
 }));
 
 app.use(fileUpload());
@@ -38,8 +38,8 @@ app.use(`${middlePath}`, eventRouter);
 app.use(`${middlePath}`, cvRouter);
 app.use(`${middlePath}`, userRouter);
 app.use(`${middlePath}`, questionRouter);
-app.use(`${middlePath}/vnpay`, vnpayRoutes);
-app.use(`${middlePath}/zalopay`, zalopayRoutes);
+// app.use(`${middlePath}/vnpay`, vnpayRoutes);
+// app.use(`${middlePath}/zalopay`, zalopayRoutes);
 app.use(`${middlePath}/payments`, paymentRoutes);
 app.use(`${middlePath}/dashboard`, dashboardRoutes);
 

@@ -20,17 +20,97 @@ export function convertDate(dateStr?: string): Date | undefined {
     return isNaN(d.getTime()) ? undefined : d;
 }
 
-export function sendEmail(email: string, subject: string, content: string) {
-    transporter.sendMail({
-        from: GMAIL_USER,
-        to: email,
-        subject: subject,
-        html: content
-    },
-        (error, info) => {
-            if (error) throw new Error("Send email failed!");
+export function sendEmail(email: string, subject: string, content: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        // Validate inputs
+        if (!email || !validateEmail(email)) {
+            console.error('Invalid email address:', email);
+            return reject(new Error('Invalid email address'));
         }
-    );
+
+        if (!subject || !content) {
+            console.error('Missing subject or content');
+            return reject(new Error('Missing subject or content'));
+        }
+
+        const mailOptions = {
+            from: GMAIL_USER,
+            to: email,
+            subject: subject,
+            html: content
+        };
+
+        // Log email attempt (without sensitive data)
+        console.log(`Attempting to send email to: ${email.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Email sending failed:', {
+                    error: error.message,
+                    code: (error as any).code || 'UNKNOWN',
+                    command: (error as any).command || 'UNKNOWN',
+                    to: email.replace(/(.{2}).*(@.*)/, '$1***$2')
+                });
+
+                // Return a more specific error message based on error type
+                const errorCode = (error as any).code;
+                if (errorCode === 'EAUTH') {
+                    return reject(new Error('Email authentication failed - check credentials'));
+                } else if (errorCode === 'ECONNECTION') {
+                    return reject(new Error('Email connection failed - check network'));
+                } else if (errorCode === 'ETIMEDOUT') {
+                    return reject(new Error('Email sending timed out'));
+                } else {
+                    return reject(new Error(`Email sending failed: ${error.message}`));
+                }
+            }
+
+            console.log('Email sent successfully:', {
+                messageId: info.messageId,
+                to: email.replace(/(.{2}).*(@.*)/, '$1***$2')
+            });
+
+            resolve(true);
+        });
+    });
+}
+
+// Enhanced email sending with retry mechanism for production
+export async function sendEmailWithRetry(
+    email: string,
+    subject: string,
+    content: string,
+    maxRetries: number = 3
+): Promise<boolean> {
+    let lastError: Error;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Email sending attempt ${attempt}/${maxRetries} to: ${email.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
+
+            await sendEmail(email, subject, content);
+            console.log(`Email sent successfully on attempt ${attempt}`);
+            return true;
+
+        } catch (error) {
+            lastError = error as Error;
+            console.error(`Email sending attempt ${attempt} failed:`, lastError.message);
+
+            // Don't retry for authentication errors
+            if (lastError.message.includes('authentication failed')) {
+                throw lastError;
+            }
+
+            // Wait before retrying (exponential backoff)
+            if (attempt < maxRetries) {
+                const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s...
+                console.log(`Waiting ${waitTime}ms before retry...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+        }
+    }
+
+    throw new Error(`Email sending failed after ${maxRetries} attempts: ${lastError!.message}`);
 }
 
 type CareerPathReturnType = {

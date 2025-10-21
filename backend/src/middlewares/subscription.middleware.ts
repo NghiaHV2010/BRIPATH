@@ -1,6 +1,6 @@
 // middlewares/checkCompanyPlan.ts
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
 

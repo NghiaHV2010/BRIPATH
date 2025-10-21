@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
@@ -65,7 +65,7 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
             }
         );
 
-        const faxCodeData = await isFaxCodeExisted.json();
+        const faxCodeData = (await isFaxCodeExisted.json()) as { data?: unknown };
 
 
         if (!faxCodeData.data) {

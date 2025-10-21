@@ -10,7 +10,7 @@ import {
     createQueryData
 } from '../utils/vnpay.utils';
 import { vnpayOrderMapping, saveVnpOrderMapping } from '../utils/payment.utils';
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { VNPAY_API } from '../config/env.config';
 
 class VNPayService {
@@ -35,7 +35,7 @@ class VNPayService {
                     const companyId = (req.body?.company_id as string | undefined) || (req.query?.company_id as string | undefined);
                     await saveVnpOrderMapping(prisma, orderData.vnp_TxnRef, userId, params.amount, planId, companyId);
                 }
-            } catch {}
+            } catch { }
 
             return {
                 vnp_TxnRef: orderData.vnp_TxnRef,

@@ -25,6 +25,9 @@ interface Config {
     GEMINI_API_KEY: string;
     OPENAI_API_KEY: string;
     OPENAI_MODEL: string;
+    COOKIE_CONFIG_SAME_SITE: "none" | "lax" | "strict";
+    COOKIE_CONFIG_SECURE: boolean;
+    NODE_ENV: string;
 }
 
 dotenv.config();
@@ -54,6 +57,9 @@ const config: Config = {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
     OPENAI_MODEL: process.env.OPENAI_MODEL!,
+    COOKIE_CONFIG_SAME_SITE: process.env.COOKIE_CONFIG_SAME_SITE as "none" | "lax" | "strict" || 'none',
+    COOKIE_CONFIG_SECURE: process.env.COOKIE_CONFIG_SECURE === 'true',
+    NODE_ENV: process.env.NODE_ENV || 'development',
 };
 
 export const {
@@ -80,6 +86,9 @@ export const {
     GMAIL_APP_PASSWORD,
     GEMINI_API_KEY,
     OPENAI_API_KEY,
-    OPENAI_MODEL
+    OPENAI_MODEL,
+    COOKIE_CONFIG_SAME_SITE,
+    COOKIE_CONFIG_SECURE,
+    NODE_ENV
 } = config;
 
