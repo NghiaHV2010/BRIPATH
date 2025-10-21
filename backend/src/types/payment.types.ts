@@ -11,6 +11,7 @@ export interface CreatePaymentRequest {
     transaction_id?: string;
     status: PaymentStatus;
     user_id: string;
+    plan_id?: number;
 }
 
 export interface UpdatePaymentRequest {

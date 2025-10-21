@@ -58,4 +58,23 @@ export const deleteZaloOrderMapping = async (prisma: any, appTransId: string) =>
     await prisma.zalopayOrders.delete({ where: { app_trans_id: appTransId } }).catch(() => {});
 };
 
+// SePay mapping helpers (DB)
+export const saveSePayOrderMapping = async (prisma: any, orderId: string, userId: string, amount: number, planId: number, companyId?: string) => {
+    await prisma.sepayOrders.upsert({
+        where: { order_id: orderId },
+        update: { user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId },
+        create: { order_id: orderId, user_id: userId, amount: BigInt(amount), plan_id: planId, company_id: companyId }
+    });
+};
+
+export const getSePayOrderMapping = async (prisma: any, orderId: string): Promise<{ user_id: string; amount: number; plan_id: number; company_id?: string } | null> => {
+    const rec = await prisma.sepayOrders.findUnique({ where: { order_id: orderId } });
+    if (!rec) return null;
+    return { user_id: rec.user_id, amount: Number(rec.amount), plan_id: rec.plan_id, company_id: rec.company_id ?? undefined };
+};
+
+export const deleteSePayOrderMapping = async (prisma: any, orderId: string) => {
+    await prisma.sepayOrders.delete({ where: { order_id: orderId } }).catch(() => {});
+};
+
 

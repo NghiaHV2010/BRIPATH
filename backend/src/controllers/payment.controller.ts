@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 export const createPayment = async (req: Request, res: Response) => {
     //@ts-ignore
     const { id: user_id } = req.user;
-    const { amount, currency, payment_gateway, payment_method, transaction_id, status }: CreatePaymentRequest = req.body;
+    const { amount, currency, payment_gateway, payment_method, transaction_id, status, plan_id }: CreatePaymentRequest = req.body;
 
     try {
         if (!amount || !payment_gateway || !payment_method || !status) {
@@ -32,6 +32,7 @@ export const createPayment = async (req: Request, res: Response) => {
                 }
             });
 
+            // Create activity history
             await tx.userActivitiesHistory.create({
                 data: {
                     user_id,
@@ -39,14 +40,101 @@ export const createPayment = async (req: Request, res: Response) => {
                 }
             });
 
-            // await tx.userNotifications.create({
-            //     data: {
-            //         title: 'Thanh toán thành công!',
-            //         content: ``,
-            //         type: 'pricing_plan',
-            //         user_id: user_id
-            //     }
-            // });
+            // Create notification
+            await tx.userNotifications.create({
+                data: {
+                    title: 'Thanh toán thành công!',
+                    content: `Bạn đã thanh toán đơn hàng ${transaction_id} thành công với số tiền ${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
+                    type: 'pricing_plan',
+                    user_id: user_id
+                }
+            });
+
+            // Create subscription if plan_id is provided and payment is successful
+            if (plan_id && status === 'success') {
+                const plan = await tx.membershipPlans.findUnique({
+                    where: { id: plan_id }
+                });
+
+                if (plan) {
+                    const startDate = new Date();
+                    const endDate = new Date();
+                    endDate.setMonth(endDate.getMonth() + plan.duration_months);
+
+                    await tx.subscriptions.create({
+                        data: {
+                            user_id: user_id,
+                            amount_paid: BigInt(amount),
+                            payment_id: payment.id,
+                            plan_id: plan.id,
+                            start_date: startDate,
+                            end_date: endDate,
+                            status: 'on_going',
+                            remaining_urgent_jobs: plan.urgent_jobs_limit || 0,
+                            remaining_quality_jobs: plan.quality_jobs_limit || 0,
+                            remaining_total_jobs: plan.total_jobs_limit || 0
+                        }
+                    });
+
+                    // Create additional activity history for subscription
+                    await tx.userActivitiesHistory.create({
+                        data: {
+                            user_id,
+                            activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
+                        }
+                    });
+
+                    // Create additional notification for subscription activation
+                    await tx.userNotifications.create({
+                        data: {
+                            title: 'Gói dịch vụ đã được kích hoạt!',
+                            content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+                            type: 'pricing_plan',
+                            user_id: user_id
+                        }
+                    });
+                }
+            }
+
+            if (status === 'success') {
+                // Get user's company
+                const userCompany = await tx.users.findUnique({
+                    where: { id: user_id },
+                    select: { 
+                        companies: {
+                            select: { id: true }
+                        }
+                    }
+                });
+
+                if (userCompany?.companies?.id) {
+                    const tag = await tx.tags.findFirst({
+                        where: { label_name: "Đề xuất" }
+                    });
+
+                    if (tag) {
+                        await tx.companies.update({
+                            where: { id: userCompany.companies.id },
+                            data: {
+                                is_verified: true,
+                                companyTags: {
+                                    connectOrCreate: {
+                                        where: {
+                                            company_id_tag_id: {
+                                                company_id: userCompany.companies.id,
+                                                tag_id: tag.id
+                                            }
+                                        },
+                                        create: {
+                                            tag_id: tag.id
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
 
             return payment;
         });

@@ -14,7 +14,7 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
     try {
         // Bypass auth for payment gateways (server-to-server callbacks/returns)
         const url = (req.originalUrl || req.url || '').toLowerCase();
-        if (url.startsWith('/api/vnpay') || url.startsWith('/api/zalopay')) {
+        if (url.startsWith('/api/sepay/webhook')) {
             return next();
         }
 
