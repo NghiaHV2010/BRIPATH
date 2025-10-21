@@ -76,7 +76,7 @@ export default function JobDetailsPage() {
           await axiosConfig.post(`/job-view/${jobId}`);
           setHasViewedJob(true);
         } catch (error) {
-          console.error('Failed to track job view:', error);
+          console.error("Failed to track job view:", error);
         }
       }, 10000); // 10 seconds
 
@@ -157,18 +157,18 @@ export default function JobDetailsPage() {
 
   const company = companies
     ? {
-      id: companies.id,
-      name: companies.users?.username || "Công ty",
-      avatar_url: companies.users?.avatar_url || "",
-      field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
-      address: [
-        companies.users?.address_street,
-        companies.users?.address_ward,
-        companies.users?.address_city,
-      ]
-        .filter(Boolean)
-        .join(", "),
-    }
+        id: companies.id,
+        name: companies.users?.username || "Công ty",
+        avatar_url: companies.users?.avatar_url || "",
+        field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
+        address: [
+          companies.users?.address_street,
+          companies.users?.address_ward,
+          companies.users?.address_city,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      }
     : null;
 
   const formatDeadline = () => {
@@ -323,7 +323,7 @@ export default function JobDetailsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {selectedJob.applicants &&
-                    selectedJob.applicants.length > 0 ? (
+                  selectedJob.applicants.length > 0 ? (
                     <div className="relative group flex-1">
                       <Button
                         disabled
@@ -620,7 +620,7 @@ export default function JobDetailsPage() {
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="p-6 text-orange-700 text-sm space-y-2">
                 <h3 className="font-semibold text-orange-800 flex items-center gap-2">
-                  <Shield className="w-5 h-5" /> Bi kíp tìm việc an toàn
+                  <Shield className="w-5 h-5" /> Bí kíp tìm việc an toàn
                 </h3>
                 <p>
                   • Tuyệt đối không đưa tiền hoặc tài sản cho bất kỳ ai khi ứng
@@ -629,6 +629,14 @@ export default function JobDetailsPage() {
                 <p>• Kiểm tra kỹ thông tin công ty trước khi nộp hồ sơ</p>
                 <p>• Chỉ nộp CV qua hệ thống chính thức của platform</p>
               </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
+              <img
+                src="/src/assets/banner/9.jpg"
+                alt="Company banner"
+                className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
+              />
             </Card>
 
             {/* Add company*/}

@@ -12,7 +12,7 @@ import { followCompanyApi, unfollowCompanyApi } from "@/api";
 interface CompanyStore {
   companies: (CompanySummary & { isFollowed?: boolean })[];
   filteredCompanies: (CompanySummary & { isFollowed?: boolean })[];
-  companyDetail: (CompanyDetail['data'] & { isFollowed?: boolean }) | null;
+  companyDetail: (CompanyDetail & { isFollowed?: boolean }) | null;
   totalPages: number;
   isLoading: boolean;
 

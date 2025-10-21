@@ -29,7 +29,7 @@ export default function QuizLandingPage() {
   const { companies, fetchCompanies } = useCompanyStore();
 
   useEffect(() => {
-    fetchCompanies(1).catch(() => { });
+    fetchCompanies(1).catch(() => {});
   }, [fetchCompanies]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function QuizLandingPage() {
 
   const handleConfirmRepeat = () => {
     setShowRepeatDialog(false);
-    resetAnswer().catch(() => { });
+    resetAnswer().catch(() => {});
     navigate("/quiz/test");
   };
 
@@ -207,12 +207,12 @@ export default function QuizLandingPage() {
 
             <div className="min-h-screen bg-transparent flex flex-col items-center p-0 w-full max-w-none">
               {/* Section 1 */}
-              <div className="w-full py-5 px-40 bg-gradient-to-b from-white via-emerald-100 to-white">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
-                  16 nhóm tính cách bạn nên biết
+              <div className="w-full py-10 px-4 md:px-12 lg:px-24 xl:px-40 bg-gradient-to-b from-white via-emerald-100 to-white">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">
+                  Các nhóm tính cách bạn nên biết
                 </h2>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 md:px-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                   {[
                     {
                       type: "ISTJ",
@@ -260,20 +260,25 @@ export default function QuizLandingPage() {
                       className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-transform hover:scale-[1.02]"
                     >
                       <div
-                        className={`bg-gradient-to-br ${item.color} h-32 rounded-lg mb-3 flex items-center justify-center`}
+                        className={`bg-gradient-to-br ${item.color} h-24 sm:h-28 md:h-32 rounded-lg mb-3 flex items-center justify-center`}
                       >
                         <div className="text-white text-center">
-                          <div className="text-2xl font-bold">{item.type}</div>
+                          <div className="text-xl sm:text-2xl font-bold">
+                            {item.type}
+                          </div>
                         </div>
                       </div>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm md:text-base font-semibold text-gray-900">
                         {item.type}
                       </p>
-                      <p className="text-sm text-gray-600">{item.desc}</p>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {item.desc}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
+
               <div>
                 <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
                   {companies && companies.length > 0 && (
