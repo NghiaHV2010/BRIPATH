@@ -195,6 +195,24 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
                       remaining_total_jobs: plan.total_jobs_limit || 0
                     }
                   });
+
+                  // Create additional activity history for subscription
+                  await tx.userActivitiesHistory.create({
+                    data: {
+                      user_id: mapping.user_id,
+                      activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
+                    }
+                  });
+
+                  // Create additional notification for subscription activation
+                  await tx.userNotifications.create({
+                    data: {
+                      title: 'Gói dịch vụ đã được kích hoạt!',
+                      content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+                      type: 'pricing_plan' as NotificationsType,
+                      user_id: mapping.user_id
+                    } as any
+                  });
                 }
 
                 // Update company verification if applicable
