@@ -182,7 +182,7 @@ export const useJobStore = create<JobState>((set, get) => ({
           isSaved: data.savedJobs && data.savedJobs.length > 0,
           isApplied:
             data.applicants?.some(
-              (app) => app.cv_id === authUser?.cv_id // hoặc userId nếu bạn lưu theo user
+              (app) => app.cv_id === authUser?.id // hoặc userId nếu bạn lưu theo user
             ) || false,
         };
         set({ selectedJob: processedJob });

@@ -34,6 +34,23 @@ export const getUserProfile = async (): Promise<UserProfileResponse | null> => {
   }
 };
 
+export const updateUserAvatar = async (avatarUrl: string): Promise<UserProfileResponse | null> => {
+  try {
+    const response = await axiosConfig.put("/user/profile", {
+      avatar_url: avatarUrl
+    });
+
+    if (response.status === 200 && response.data.success) {
+      return response.data as UserProfileResponse;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error updating user avatar:", error);
+    return null;
+  }
+};
+
 export const updateUserProfile = async (profileData: UpdateUserProfileRequest): Promise<UserProfileResponse | null> => {
   try {
     const response = await axiosConfig.put("/user/profile", profileData);

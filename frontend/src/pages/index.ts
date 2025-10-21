@@ -8,7 +8,6 @@ export { default as ResetPasswordPage } from "./login/resetPasswordPage";
 
 // Subscription pages
 export { default as SubscriptionPlansPage } from "./subscription/subscriptionPlansPage";
-export { default as SubscriptionDetailPage } from "./subscription/subscriptionDetailPage";
 
 // Static pages
 export { default as AboutPage } from "./about/aboutPage";

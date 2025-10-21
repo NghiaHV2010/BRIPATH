@@ -8,7 +8,6 @@ import {
   ResetPasswordPage,
   EmailVerificationPage,
   SubscriptionPlansPage,
-  SubscriptionDetailPage,
   AboutPage,
   ContactPage,
   QuizLandingPage,
@@ -39,6 +38,7 @@ import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
 import { BlogPage } from "./pages/blog/BlogPage";
+import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -180,19 +180,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-        path="/companies-create"
-        element={
-          <ProtectedRoute>
-            <CompanyRegistrationPage />
-          </ProtectedRoute>
-        }
-      /> */}
+
         <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
-        <Route
-          path="/subscriptions/:planId"
-          element={<SubscriptionDetailPage />}
-        />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
 
@@ -224,6 +213,18 @@ function App() {
             <Layout showFooter={false}>
               <HomePage />
             </Layout>
+          }
+        />
+
+        {/* Company Profile */}
+        <Route
+          path="/profile/company/jobs"
+          element={
+            <ProtectedRoute>
+              <ProfileLayout>
+                <CompanyProfile />
+              </ProfileLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>

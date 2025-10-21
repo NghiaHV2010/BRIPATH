@@ -16,6 +16,13 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
         logout?.();
     };
 
+    const handleAvatarUpdate = (newAvatarUrl: string) => {
+        // The avatar update is already handled in the ProfileSidebar component
+        // through the auth store, so this callback can be used for additional
+        // logic if needed (e.g., analytics, notifications, etc.)
+        console.log('Avatar updated:', newAvatarUrl);
+    };
+
     if (!authUser) {
         return <div className="h-screen w-full relative bg-white">{children}</div>;
     }
@@ -34,6 +41,7 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
                                     UserMenuItems : []
                         }
                         onLogout={handleLogout}
+                        onAvatarUpdate={handleAvatarUpdate}
                     />
                 )}
 

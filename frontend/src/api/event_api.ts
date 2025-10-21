@@ -1,17 +1,17 @@
 import axiosConfig from "@/config/axios.config";
 
 export interface Event {
-    id: number;
-    title: string;
-    description: string;
-    start_date: string;
-    end_date?: string;
-    working_time?: string;
-    banner_url?: string;
-    quantity?: number;
-    status: ApplicantStatus;
-    approved_at?: Date;
-    user_id: string;
+  id: number;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date?: string;
+  working_time?: string;
+  banner_url?: string;
+  quantity?: number;
+  status: ApplicantStatus;
+  approved_at?: Date;
+  user_id: string;
 }
 
 export interface EventResponse {
@@ -52,54 +52,54 @@ export const applyEvent = async (eventId: number, description: string) => {
 
 
 export const createEvent = async (
-    title: string,
-    description: string,
-    start_date: string,
-    end_date?: string,
-    quantity?: number,
-    working_time?: string,
-    banner_url?: string
+  title: string,
+  description: string,
+  start_date: string,
+  end_date?: string,
+  quantity?: number,
+  working_time?: string,
+  banner_url?: string
 ) => {
-    const response = await axiosConfig.post(`/events`, {
-        title,
-        description,
-        start_date,
-        end_date,
-        quantity,
-        working_time,
-        banner_url
-    });
-    return response.data;
+  const response = await axiosConfig.post(`/events`, {
+    title,
+    description,
+    start_date,
+    end_date,
+    quantity,
+    working_time,
+    banner_url
+  });
+  return response.data;
 };
 
 
 export const updateEvent = async (
-    eventId: number,
-    title: string,
-    description: string,
-    start_date: string,
-    end_date?: string,
-    quantity?: number,
-    working_time?: string,
-    banner_url?: string
+  eventId: number,
+  title: string,
+  description: string,
+  start_date: string,
+  end_date?: string,
+  quantity?: number,
+  working_time?: string,
+  banner_url?: string
 ) => {
-    const response = await axiosConfig.put(`/events/${eventId}`, {
-        title,  
-        description,
-        start_date,
-        end_date,
-        quantity,
-        working_time,
-        banner_url
-    });
-    return response.data;
+  const response = await axiosConfig.put(`/events/${eventId}`, {
+    title,
+    description,
+    start_date,
+    end_date,
+    quantity,
+    working_time,
+    banner_url
+  });
+  return response.data;
 };
 
 
 export const deleteEvent = async (eventId: number) => {
-    const response = await axiosConfig.delete(`/events/${eventId}`);
-    return response.data;
-};  
+  const response = await axiosConfig.delete(`/events/${eventId}`);
+  return response.data;
+};
 
 
 

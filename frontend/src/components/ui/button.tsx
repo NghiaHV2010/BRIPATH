@@ -23,6 +23,7 @@ const buttonVariants = cva(
           "border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 focus-visible:ring-blue-500 gap-3",
         custom:
           "bg-transparent text-inherit shadow-none hover:shadow-none focus-visible:ring-transparent",
+        ghost: "hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-400",
       },
       size: {
         default: "py-3 px-4 text-base",

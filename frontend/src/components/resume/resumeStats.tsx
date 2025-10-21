@@ -26,7 +26,7 @@ interface CVStatsRadarChartProps {
 
 const chartConfig = {
     score: {
-        label: "Score",
+        label: "Điểm",
         color: "hsl(217, 91%, 60%)", // Blue color
     },
 } satisfies ChartConfig

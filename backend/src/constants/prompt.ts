@@ -252,6 +252,6 @@ Return only one JSON object, with the following structure:
   "problem_solving": number,
   "creativity": number,
   "leadership": number,
-  "summary": "A 2–3 sentence summary written in **Vietnamese**, highlighting the core skills required for this job."
+  "summary": "A 2–3 sentence summary written in **Vietnamese language**, highlighting the core skills required for this job."
 }
 `;

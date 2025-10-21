@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  db:
+    image: pgvector/pgvector:0.8.1-pg17-trixie
+    container_name: bripath
+    environment:
+      POSTGRES_USER: bripathadmin
+      POSTGRES_PASSWORD: bripathadmin123
+      POSTGRES_DB: bripath
+    ports:
+      - "5431:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

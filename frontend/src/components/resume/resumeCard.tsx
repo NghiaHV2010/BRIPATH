@@ -1,4 +1,4 @@
-import type { ResumeListItem } from '@/types/resume';
+import type { ResumeListItem } from '../../types/resume';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -20,7 +20,7 @@ interface ResumeCardSummaryProps {
     isSelected?: boolean;
 }
 
-export function ResumeCard({ resume, onViewDetails, onClick, isSelected }: ResumeCardSummaryProps) {
+export function ResumeCard({ resume, onClick, isSelected }: ResumeCardSummaryProps) {
     const filterUndefined = (value: string | null | undefined) => {
         if (!value || value === 'undefined' || value === 'null') return null;
         return value;
@@ -31,7 +31,7 @@ export function ResumeCard({ resume, onViewDetails, onClick, isSelected }: Resum
 
     return (
         <Card
-            className={`w-110 h-80 shadow-md hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden border bg-gradient-to-br from-white via-gray-50 to-blue-50 cursor-pointer ${isSelected
+            className={`min-w-50 flex-1 h-80 shadow-md hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden border bg-gradient-to-br from-white via-gray-50 to-blue-50 cursor-pointer flex flex-col ${isSelected
                 ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
                 : 'border-gray-200 hover:border-blue-300'
                 }`}
@@ -39,45 +39,57 @@ export function ResumeCard({ resume, onViewDetails, onClick, isSelected }: Resum
         >
             {/* Header - Giống phần tiêu đề thư xin việc */}
             <CardHeader className="bg-blue-600 text-white px-6 py-4">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="text-xl font-bold mb-1">{resume.fullname}</h3>
-                        {applyJob && (
-                            <p className="text-sm italic opacity-90">
-                                Ứng tuyển vị trí: <span className="font-semibold">{applyJob}</span>
-                            </p>
-                        )}
+                <div className="flex flex-col">
+                    <div className='flex justify-between gap-2 items-start'>
+                        <h3 className="flex-1 text-xl font-bold mb-1 line-clamp-1">{resume.fullname}</h3>
+                        <div className="items-center gap-2 text-xs opacity-80 flex">
+                            <Calendar className="w-3 h-3" />
+                            <span>{new Date(resume.created_at).toLocaleDateString('vi-VN')}</span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs opacity-80">
-                        <Calendar className="w-3 h-3" />
-                        <span>{new Date(resume.created_at).toLocaleDateString('vi-VN')}</span>
-                    </div>
+                    {applyJob && (
+                        <p className="text-sm italic opacity-90">
+                            <span className="">{applyJob}</span>
+                        </p>
+                    )}
                 </div>
             </CardHeader>
 
             {/* Nội dung chính - Tóm tắt kinh nghiệm và kỹ năng */}
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="py-4 px-6 space-y-4 flex-1 flex flex-col">
                 {/* Tổng quan */}
-                <div className="text-gray-800 leading-relaxed">
-                    <p className="text-base">
-                        Ứng viên có tổng cộng{' '}
-                        <span className="font-semibold">{resume._count.experiences}</span> kinh nghiệm, tham gia{' '}
-                        <span className="font-semibold">{resume._count.projects}</span> dự án, với{' '}
-                        <span className="font-semibold">{resume._count.educations}</span> bằng cấp và{' '}
-                        <span className="font-semibold">{resume._count.awards}</span> giải thưởng.
-                    </p>
+                <div className="text-gray-800 gap-2 flex flex-wrap">
+                    {resume._count.experiences > 0 && (
+                        <div className='flex items-center'>
+                            <Briefcase className="w-4 h-4 inline-block mr-1 text-blue-500" />
+                            <span>{resume._count.experiences} kinh nghiệm</span>
+                        </div>
+                    )}
+                    {resume._count.awards > 0 && (
+                        <div className='flex items-center'>
+                            <Award className="w-4 h-4 inline-block mr-1 text-blue-500" />
+                            <span>{resume._count.awards} giải thưởng</span>
+                        </div>
+                    )}
+                    {resume._count.educations > 0 && (
+                        <div className='flex items-center'>
+                            <GraduationCap className="w-4 h-4 inline-block mr-1 text-blue-500" />
+                            <span>{resume._count.educations} bằng cấp</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Kỹ năng chính */}
                 {topSkills.length > 0 && (
-                    <div>
+                    <div className="flex-1">
                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Kỹ năng nổi bật:</h4>
-                        <div className="flex gap-2 overflow-hidden">
+                        <div className="flex gap-1 flex-wrap max-h-[50px] overflow-y-hidden">
                             {topSkills.map((skill, index) => (
                                 <Badge
                                     key={index}
                                     variant="secondary"
-                                    className="text-xs line-clamp-1 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
+                                    className="text-xs truncate max-w-[120px] line-clamp-1 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
+                                    title={skill}
                                 >
                                     {skill}
                                 </Badge>
@@ -91,10 +103,10 @@ export function ResumeCard({ resume, onViewDetails, onClick, isSelected }: Resum
                     </div>
                 )}
 
-                <Separator className="my-2" />
+                <Separator className="" />
 
                 {/* Chứng chỉ / Ngôn ngữ / Người tham chiếu */}
-                <div className="flex flex-wrap gap-3 text-sm">
+                <div className="flex flex-wrap gap-2 text-sm mt-auto">
                     {resume._count.certificates > 0 && (
                         <Tooltip>
                             <TooltipTrigger className="flex items-center gap-1 bg-blue-50 border border-blue-200 px-3 py-1 rounded-md text-blue-700 font-medium">

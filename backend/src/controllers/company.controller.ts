@@ -198,7 +198,7 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 
 export const getCompanyByID = async (req: Request, res: Response, next: NextFunction) => {
     const companyId = req.query.companyId as string;
-    const userId = req.query.userId as string | undefined;
+    const user_id = req.query.userId as string | undefined;
     let page = parseInt(req.query.page as string);
 
     if (page < 1 || isNaN(page)) {
@@ -267,29 +267,55 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                 },
                 jobs: {
                     select: {
-                        _count: true,
                         id: true,
                         job_title: true,
-                        status: true,
-                        location: true,
                         salary: true,
                         currency: true,
+                        location: true,
+                        status: true,
+                        companies: {
+                            select: {
+                                users: {
+                                    select: {
+                                        avatar_url: true,
+                                        username: true,
+                                    }
+                                }
+                            }
+                        },
                         jobCategories: {
                             select: {
                                 job_category: true
                             }
-                        }
+                        },
+                        jobLabels: {
+                            select: {
+                                label_name: true
+                            }
+                        },
+                        savedJobs: user_id ? {
+                            where: {
+                                user_id: user_id
+                            }
+                        } : false,
+                        applicants: user_id ? {
+                            where: {
+                                cvs: {
+                                    users_id: user_id
+                                }
+                            },
+                        } : false
                     },
                     take: numberOfCompanies,
                     skip: page * numberOfCompanies,
                 },
-                followedCompanies: userId ? {
+                followedCompanies: user_id ? {
                     select: {
                         is_notified: true,
                         followed_at: true,
                     },
                     where: {
-                        user_id: userId
+                        user_id: user_id
                     }
                 } : false
             }
@@ -300,6 +326,69 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
             data: company,
             totalPages: company ? Math.ceil(company?._count.jobs / numberOfCompanies) : 0
         })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getRecommendedCompanies = async (req: Request, res: Response, next: NextFunction) => {
+    const user_id = req.query?.userId as string;
+
+    try {
+        // Raw query to get recommended companies
+        const companies = await prisma.$queryRawUnsafe(`
+    SELECT 
+        c.id,
+        c.company_type,
+        c.is_verified,
+        u.username,
+        u.avatar_url,
+        u.address_street,
+        u.address_ward,
+        u.address_city,
+        u.address_country,
+        f.field_name,
+        (
+            SELECT COUNT(*)::int 
+            FROM jobs j 
+            WHERE j.company_id = c.id
+        ) AS jobs_count,
+        (
+            SELECT json_agg(
+                json_build_object('label_name', t.label_name)
+            )
+            FROM "companyTags" ct
+            INNER JOIN tags t ON ct.tag_id = t.id
+            WHERE ct.company_id = c.id
+        ) AS "companyTags",
+        ${user_id
+                ? `(SELECT json_agg(
+                        json_build_object(
+                            'user_id', fc.user_id,
+                            'followed_at', fc.followed_at,
+                            'is_notified', fc.is_notified
+                        )
+                    )
+                    FROM followed_companies fc
+                    WHERE fc.company_id = c.id AND fc.user_id = '${user_id}'
+                ) AS followed_companies`
+                : `NULL AS followed_companies`
+            }
+    FROM companies c
+    INNER JOIN users u ON c.id = u.company_id
+    LEFT JOIN fields f ON c.field_id = f.id
+    LEFT JOIN "companyTags" ct ON c.id = ct.company_id
+    LEFT JOIN tags t ON ct.tag_id = t.id
+    WHERE c.status = 'Chấp nhận'
+      AND t.label_name = 'Đề xuất'
+    ORDER BY RANDOM()
+    LIMIT 3;
+`);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: companies,
+        });
     } catch (error) {
         next(error);
     }

@@ -90,6 +90,20 @@ export interface JobDetail extends Job {
   }>;
 }
 
+export interface JobsCountDetails {
+  _count?: {
+    applicants: number;
+    job_views: number;
+    savedJobs: number;
+  };
+}
+
+export interface JobsResponse {
+  success: boolean;
+  data?: (Job & JobsCountDetails)[];
+  totalPages?: number | null;
+}
+
 export interface FetchJobParams {
   page: number;      // bắt buộc
   userId?: string;   // tuỳ chọn — có thể bỏ qua

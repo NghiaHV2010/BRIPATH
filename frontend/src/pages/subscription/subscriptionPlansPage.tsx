@@ -37,16 +37,16 @@ export default function SubscriptionPlansPage() {
             if (lower.includes("vip")) return "silver";
             if (lower.includes("premium")) return "gold";
             return "bronze";
-          })(),
+          })() as SubscriptionPlan['tier'],
           price: Number(p.price) || 0,
           durationMonths: p.duration_months || 1,
           description: p.description || "",
           features: Array.isArray(p.features)
             ? p.features
-                .map((f: { feature_name?: string } | string) =>
-                  typeof f === "string" ? f : f.feature_name || ""
-                )
-                .filter(Boolean)
+              .map((f: { feature_name?: string } | string) =>
+                typeof f === "string" ? f : f.feature_name || ""
+              )
+              .filter(Boolean)
             : [],
           isRecommended: Boolean(p.recommended_labels),
           isPopular: Boolean(p.verified_badge),

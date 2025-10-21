@@ -1,5 +1,8 @@
 // ========================
 // USER TYPE
+
+import type { Job } from "./job";
+
 // ========================
 export interface CompInfor {
   username: string;
@@ -27,6 +30,22 @@ export interface JobSummary {
   currency: string;
   jobCategories?: {
     job_category: string;
+  };
+}
+
+// ========================
+// FEEDBACK TYPE
+// ========================
+export interface CompanyFeedback {
+  stars: number;
+  description: string;
+  work_environment?: string | null;
+  benefit?: string | null;
+  created_at: string;
+  users: {
+    avatar_url?: string | null;
+    gender?: string | null;
+    username: string;
   };
 }
 
@@ -68,31 +87,31 @@ export interface CompanySummary {
 // COMPANY DETAIL TYPE
 // ========================
 export interface CompanyDetail {
-  success: boolean;
-  data: {
-    id: string;
-    background_url?: string | null;
-    description?: string | null;
-    employees?: number | null;
-    users?: CompInfor | null;
-    _count?: {
-      followedCompanies?: number;
-      jobs?: number;
-    };
-    companyTags?: any[] | null;
-    feedbacks?: any[] | null;
-    is_verified?: boolean;
-    company_type?: string;
-    fields?: any | null;
-    jobs?: JobSummary[];
-
-    // raw followed info from API (detail endpoint often returns shorter objects)
-    followedCompanies?: FollowRecord[];
-
-    // convenient flag for UI/store (computed from followedCompanies)
-    isFollowed?: boolean;
+  id: string;
+  background_url?: string | null;
+  description?: string | null;
+  employees?: number | null;
+  users?: CompInfor | null;
+  _count?: {
+    followedCompanies?: number;
+    jobs?: number;
   };
-  totalPages: number;
+  companyTags?: any[] | null;
+  feedbacks?: CompanyFeedback[] | null;
+  is_verified?: boolean;
+  company_type?: string;
+  fields?: any | null;
+  jobs?: Job[];
+
+  followedCompanies?: FollowRecord[];
+
+  isFollowed?: boolean;
+}
+
+export interface CompanyDetailResponse {
+  success: boolean;
+  data?: CompanyDetail;
+  totalPages?: number;
 }
 
 export interface CompanyField {

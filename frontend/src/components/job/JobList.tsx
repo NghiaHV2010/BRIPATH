@@ -2,7 +2,6 @@ import { useJobStore } from "../../store/job.store";
 import JobCard from "./JobCard";
 import { Briefcase } from "lucide-react";
 import { JobDetailSkeleton } from "./JobDetailSkeleton";
-import { toast } from "sonner";
 
 interface JobListProps {
   onJobClick?: (jobId: string) => void;

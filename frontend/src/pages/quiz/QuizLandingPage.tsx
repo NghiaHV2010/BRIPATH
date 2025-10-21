@@ -29,7 +29,7 @@ export default function QuizLandingPage() {
   const { companies, fetchCompanies } = useCompanyStore();
 
   useEffect(() => {
-    fetchCompanies(1).catch(() => {});
+    fetchCompanies(1).catch(() => { });
   }, [fetchCompanies]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function QuizLandingPage() {
 
   const handleConfirmRepeat = () => {
     setShowRepeatDialog(false);
-    resetAnswer().catch(() => {});
+    resetAnswer().catch(() => { });
     navigate("/quiz/test");
   };
 

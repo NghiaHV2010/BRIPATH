@@ -5,37 +5,46 @@ import {
   Users,
   Briefcase,
   Building2,
-  Clock,
-  Plus,
   Copy,
   ArrowLeft,
   CircleChevronDown,
   UserRoundCheck,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
+  AlertCircle,
 } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
-// import { Badge } from "../../components/ui/badge";
-// import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
-import { CompanyDetailSkeleton } from "../../components/company";
+import { CompanyDetailSkeleton, CompanyFeedback } from "../../components/company";
 import CompanyMap from "@/components/utils/CompanyMap";
-import { getCompanyDetails } from "@/api/company_api";
+import { getCompanyDetails, feedbackCompany } from "@/api/company_api";
+import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
+import type { CompanyDetail } from "@/types/company";
+import { JobCard } from "@/components/job";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
-  const [companyDetail, setCompanyDetail] = useState<any>(null);
+  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isFollowed, setIsFollowed] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  // Feedback form state
+  const [stars, setStars] = useState<number>(5);
+  const [description, setDescription] = useState<string>("");
+  const [benefit, setBenefit] = useState<string>("");
+  const [workEnvironment, setWorkEnvironment] = useState<string>("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [descriptionError, setDescriptionError] = useState<string>("");
+  const [starsError, setStarsError] = useState<string>("");
+  const [benefitError, setBenefitError] = useState<string>("");
+  const [workEnvError, setWorkEnvError] = useState<string>("");
   const {
     followCompany: followCompanyStore,
     unfollowCompany: unfollowCompanyStore,
@@ -61,12 +70,13 @@ export default function CompanyDetailsPage() {
           companyId,
           currentPage
         );
-        setCompanyDetail(res.data);
-        setTotalPages(res.totalPages);
+
+        setCompanyDetail(res.data || null);
+        setTotalPages(res.totalPages || 1);
         // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
-            res.data.followedCompanies.length > 0
+          res.data.followedCompanies.length > 0
         );
       } catch (err) {
         console.error("Error fetching company details:", err);
@@ -74,6 +84,7 @@ export default function CompanyDetailsPage() {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, [companyId, currentPage, userId]);
 
@@ -119,16 +130,6 @@ export default function CompanyDetailsPage() {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  const handleJobClick = (jobId: string) => {
-    const currentState = {
-      fromCompanyDetail: true,
-      companyId,
-      previousRoute: `/companies/${companyId}`,
-      scrollPosition: window.scrollY,
-    };
-    navigate(`/jobs/${jobId}`, { state: currentState });
-  };
-
   const handleCopyLink = () => {
     const url = `${window.location.origin}/companies/${companyId}`;
     navigator.clipboard.writeText(url);
@@ -141,9 +142,6 @@ export default function CompanyDetailsPage() {
       </Layout>
     );
   }
-
-  const { users, description, employees, jobs, _count, is_verified } =
-    companyDetail || {};
 
   return (
     <Layout>
@@ -167,7 +165,7 @@ export default function CompanyDetailsPage() {
               </Link>
               <span className="text-slate-400">›</span>
               <span className="text-slate-900 font-medium">
-                {users?.username || "Company"}
+                {companyDetail.users?.username || "Company"}
               </span>
             </div>
           </div>
@@ -183,14 +181,14 @@ export default function CompanyDetailsPage() {
           <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col lg:flex-row gap-8">
             {/* Logo */}
             <div className="relative">
-              {is_verified && (
+              {companyDetail.is_verified && (
                 <CircleChevronDown className="size-8 absolute -top-1 -right-2 text-white bg-cyan-400 rounded-full" />
               )}
               <div className="w-36 h-36 bg-white rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl">
-                {users?.avatar_url ? (
+                {companyDetail.users?.avatar_url ? (
                   <img
-                    src={users.avatar_url}
-                    alt={users.username}
+                    src={companyDetail.users.avatar_url}
+                    alt={companyDetail.users.username}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -204,7 +202,7 @@ export default function CompanyDetailsPage() {
             {/* Info */}
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <h1 className="text-5xl font-bold">{users?.username}</h1>
+                <h1 className="text-5xl font-bold">{companyDetail.users?.username}</h1>
                 <div className="flex gap-4 items-center">
                   <Button
                     onClick={handleFollow}
@@ -216,16 +214,16 @@ export default function CompanyDetailsPage() {
                   </Button>
                   <span className="flex items-center gap-2 text-sm text-blue-100">
                     <UserRoundCheck className="size-4" />
-                    <p>{_count?.followedCompanies || 0} Người theo dõi</p>
+                    <p>{companyDetail._count?.followedCompanies || 0} Người theo dõi</p>
                   </span>
                 </div>
               </div>
 
-              {description && (
+              {companyDetail.description && (
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
-                  {description.split("\n")[0]?.trim() ||
-                    description.substring(0, 200) +
-                      (description.length > 200 ? "..." : "")}
+                  {companyDetail.description.split("\n")[0]?.trim() ||
+                    companyDetail.description.substring(0, 200) +
+                    (companyDetail.description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -235,7 +233,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-blue-200">Địa điểm</div>
                     <div className="font-semibold">
-                      {users?.address_city || "Chưa cập nhật"}
+                      {companyDetail.users?.address_city || "Chưa cập nhật"}
                     </div>
                   </div>
                 </div>
@@ -244,7 +242,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-blue-200">Quy mô</div>
                     <div className="font-semibold">
-                      {employees || "N/A"} nhân viên
+                      {companyDetail.employees || "N/A"} nhân viên
                     </div>
                   </div>
                 </div>
@@ -253,7 +251,7 @@ export default function CompanyDetailsPage() {
                   <div>
                     <div className="text-sm text-green-200">Tuyển dụng</div>
                     <div className="font-semibold">
-                      {_count?.jobs || 0} vị trí
+                      {companyDetail._count?.jobs || 0} vị trí
                     </div>
                   </div>
                 </div>
@@ -274,10 +272,10 @@ export default function CompanyDetailsPage() {
                   </h2>
                 </CardHeader>
                 <CardContent className="p-8 space-y-4">
-                  {description
+                  {companyDetail.description
                     ?.split("\n")
-                    .filter((p) => p.trim())
-                    .map((p, index) => (
+                    .filter((p: string) => p.trim())
+                    .map((p: string, index: number) => (
                       <p
                         key={index}
                         className="text-slate-700 text-lg leading-relaxed"
@@ -293,59 +291,21 @@ export default function CompanyDetailsPage() {
                 <h2 className="text-3xl font-bold text-slate-900">
                   Vị trí tuyển dụng
                   <span className="ml-3 text-lg font-normal text-slate-500">
-                    ({_count?.jobs || 0} vị trí)
+                    ({companyDetail._count?.jobs || 0} vị trí)
                   </span>
                 </h2>
 
-                {jobs && jobs.length > 0 ? (
+                {companyDetail.jobs && companyDetail.jobs.length > 0 ? (
                   <div className="space-y-6">
-                    {jobs.map((job: any) => (
-                      <Card
+                    {companyDetail.jobs.map((job) => (
+                      <JobCard
                         key={job.id}
-                        onClick={() => handleJobClick(job.id)}
-                        className="cursor-pointer hover:shadow-xl transition"
-                      >
-                        <CardContent className="p-8 flex justify-between items-start">
-                          <div className="flex gap-6 flex-1">
-                            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center">
-                              <Briefcase className="w-8 h-8 text-green-600" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold mb-3">
-                                {job.job_title}
-                              </h3>
-                              <div className="grid grid-cols-3 gap-4 mb-4 text-sm text-slate-600">
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="w-4 h-4" />
-                                  {job.location || "Remote"}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4" />
-                                  {job.jobCategories?.job_category ||
-                                    "Full-time"}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <DollarSign className="w-4 h-4" />
-                                  {job.salary?.[0]
-                                    ? `${job.salary[0]} ${
-                                        job.currency || "VND"
-                                      }`
-                                    : "Thỏa thuận"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJobClick(job.id);
-                            }}
-                          >
-                            Ứng tuyển ngay
-                          </Button>
-                        </CardContent>
-                      </Card>
+                        job={job}
+                        onClick={() => navigate(`/jobs/${job.id}`)}
+                        // onSave={() => handleSaveJob(job.id)}
+                        compact={false}
+                        isSaved={job.isSaved || false}
+                      />
                     ))}
 
                     {totalPages > 1 && (
@@ -356,7 +316,7 @@ export default function CompanyDetailsPage() {
                           onClick={handlePreviousPage}
                           disabled={currentPage === 1 || isLoading}
                         >
-                          <ChevronLeft className="w-4 h-4 mr-1" /> Trước
+                          <ChevronLeft className="w-4 h-4 mr-1" />
                         </Button>
                         <span>
                           Trang {currentPage} / {totalPages}
@@ -367,7 +327,7 @@ export default function CompanyDetailsPage() {
                           onClick={handleNextPage}
                           disabled={currentPage === totalPages || isLoading}
                         >
-                          Tiếp <ChevronRight className="w-4 h-4 ml-1" />
+                          <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                       </div>
                     )}
@@ -378,13 +338,176 @@ export default function CompanyDetailsPage() {
                   </Card>
                 )}
               </div>
+
+              {/* Company Feedback */}
+              <div className="space-y-8">
+                {/* Feedback form */}
+                <Card className="bg-white shadow-lg rounded-2xl">
+                  <CardHeader className="bg-blue-50 pb-6">
+                    <h2 className="text-2xl font-bold text-slate-900">Gửi đánh giá công ty</h2>
+                  </CardHeader>
+                  <CardContent className="p-8 space-y-4">
+                    {!authUser ? (
+                      <div className="text-slate-700">Vui lòng đăng nhập để gửi đánh giá.</div>
+                    ) : (
+                      <form
+                        className="space-y-4"
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          if (!companyId) return;
+                          // reset errors
+                          setDescriptionError("");
+                          setStarsError("");
+                          setBenefitError("");
+                          setWorkEnvError("");
+
+                          let hasError = false;
+                          if (description.trim().length < 10) {
+                            setDescriptionError("Mô tả phải có ít nhất 10 ký tự");
+                            hasError = true;
+                          }
+                          if (stars < 1 || stars > 5) {
+                            setStarsError("Số sao đánh giá phải từ 1 đến 5");
+                            hasError = true;
+                          }
+                          if (benefit.trim().length > 0 && benefit.trim().length < 10) {
+                            setBenefitError("Lợi ích phải có ít nhất 10 ký tự khi nhập");
+                            hasError = true;
+                          }
+                          if (workEnvironment.trim().length > 0 && workEnvironment.trim().length < 10) {
+                            setWorkEnvError("Môi trường làm việc phải có ít nhất 10 ký tự khi nhập");
+                            hasError = true;
+                          }
+                          if (hasError) {
+                            toast({
+                              title: "Vui lòng kiểm tra lại thông tin",
+                              description: "Một số trường chưa hợp lệ",
+                            });
+                            return;
+                          }
+                          try {
+                            setIsSubmittingFeedback(true);
+                            await feedbackCompany(companyId, {
+                              description: description.trim(),
+                              stars,
+                              benefit: benefit.trim() || undefined,
+                              work_environment: workEnvironment.trim() || undefined,
+                            });
+                            // reset form
+                            setDescription("");
+                            setBenefit("");
+                            setWorkEnvironment("");
+                            setStars(5);
+                            // refresh details to show latest feedbacks
+                            const res = await getCompanyDetails(
+                              userId ?? "",
+                              companyId,
+                              currentPage
+                            );
+                            setCompanyDetail(res.data || null);
+                            toast({
+                              title: "Đã gửi đánh giá",
+                              description: "Cảm ơn bạn đã chia sẻ trải nghiệm",
+                            });
+                          } catch (err: any) {
+                            console.error("Submit feedback error:", err);
+                            toast({
+                              title: "Không thể gửi đánh giá",
+                              description: err?.response?.data?.message || "Vui lòng thử lại",
+                            });
+                          } finally {
+                            setIsSubmittingFeedback(false);
+                          }
+                        }}
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Số sao</label>
+                            <select
+                              className="w-full border rounded-lg p-2"
+                              value={stars}
+                              onChange={(e) => setStars(parseInt(e.target.value))}
+                            >
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
+                            {starsError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {starsError}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
+                          <textarea
+                            className="w-full border rounded-lg p-3 min-h-[100px]"
+                            placeholder="Chia sẻ trải nghiệm của bạn..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                          />
+                          {descriptionError && (
+                            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-4 h-4" />
+                              {descriptionError}
+                            </p>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Lợi ích (tuỳ chọn)</label>
+                            <input
+                              className="w-full border rounded-lg p-2"
+                              value={benefit}
+                              onChange={(e) => setBenefit(e.target.value)}
+                              placeholder="Ví dụ: Bảo hiểm, thưởng..."
+                            />
+                            {benefitError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {benefitError}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-sm text-slate-600 mb-1">Môi trường làm việc (tuỳ chọn)</label>
+                            <input
+                              className="w-full border rounded-lg p-2"
+                              value={workEnvironment}
+                              onChange={(e) => setWorkEnvironment(e.target.value)}
+                              placeholder="Ví dụ: Thân thiện, chuyên nghiệp..."
+                            />
+                            {workEnvError && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {workEnvError}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button type="submit" disabled={isSubmittingFeedback}>
+                            {isSubmittingFeedback ? "Đang gửi..." : "Gửi đánh giá"}
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </CardContent>
+                </Card>
+                <CompanyFeedback
+                  feedbacks={companyDetail?.feedbacks || []}
+                  companyName={companyDetail.users?.username || "Company"}
+                />
+              </div>
             </div>
 
             {/* Right: Sidebar */}
             <div className="space-y-8">
               <Card className="bg-white shadow-lg rounded-2xl">
                 <CompanyMap
-                  companyName={users?.username || "Company"}
+                  companyName={companyDetail.users?.username || "Company"}
                   lat={10.77611}
                   lng={106.69583}
                 />
