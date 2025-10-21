@@ -17,7 +17,10 @@ import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
-import { CompanyDetailSkeleton, CompanyFeedback } from "../../components/company";
+import {
+  CompanyDetailSkeleton,
+  CompanyFeedback,
+} from "../../components/company";
 import CompanyMap from "@/components/utils/CompanyMap";
 import { getCompanyDetails, feedbackCompany } from "@/api/company_api";
 import { toast } from "@/components/ui/use-toast";
@@ -29,7 +32,9 @@ import { JobCard } from "@/components/job";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
-  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
+  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -40,7 +45,8 @@ export default function CompanyDetailsPage() {
   const [description, setDescription] = useState<string>("");
   const [benefit, setBenefit] = useState<string>("");
   const [workEnvironment, setWorkEnvironment] = useState<string>("");
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] =
+    useState<boolean>(false);
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [starsError, setStarsError] = useState<string>("");
   const [benefitError, setBenefitError] = useState<string>("");
@@ -76,7 +82,7 @@ export default function CompanyDetailsPage() {
         // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
-          res.data.followedCompanies.length > 0
+            res.data.followedCompanies.length > 0
         );
       } catch (err) {
         console.error("Error fetching company details:", err);
@@ -202,7 +208,9 @@ export default function CompanyDetailsPage() {
             {/* Info */}
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <h1 className="text-5xl font-bold">{companyDetail.users?.username}</h1>
+                <h1 className="text-5xl font-bold">
+                  {companyDetail.users?.username}
+                </h1>
                 <div className="flex gap-4 items-center">
                   <Button
                     onClick={handleFollow}
@@ -214,7 +222,10 @@ export default function CompanyDetailsPage() {
                   </Button>
                   <span className="flex items-center gap-2 text-sm text-blue-100">
                     <UserRoundCheck className="size-4" />
-                    <p>{companyDetail._count?.followedCompanies || 0} Người theo dõi</p>
+                    <p>
+                      {companyDetail._count?.followedCompanies || 0} Người theo
+                      dõi
+                    </p>
                   </span>
                 </div>
               </div>
@@ -223,7 +234,7 @@ export default function CompanyDetailsPage() {
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
                   {companyDetail.description.split("\n")[0]?.trim() ||
                     companyDetail.description.substring(0, 200) +
-                    (companyDetail.description.length > 200 ? "..." : "")}
+                      (companyDetail.description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -344,11 +355,15 @@ export default function CompanyDetailsPage() {
                 {/* Feedback form */}
                 <Card className="bg-white shadow-lg rounded-2xl">
                   <CardHeader className="bg-blue-50 pb-6">
-                    <h2 className="text-2xl font-bold text-slate-900">Gửi đánh giá công ty</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      Gửi đánh giá công ty
+                    </h2>
                   </CardHeader>
                   <CardContent className="p-8 space-y-4">
                     {!authUser ? (
-                      <div className="text-slate-700">Vui lòng đăng nhập để gửi đánh giá.</div>
+                      <div className="text-slate-700">
+                        Vui lòng đăng nhập để gửi đánh giá.
+                      </div>
                     ) : (
                       <form
                         className="space-y-4"
@@ -363,19 +378,31 @@ export default function CompanyDetailsPage() {
 
                           let hasError = false;
                           if (description.trim().length < 10) {
-                            setDescriptionError("Mô tả phải có ít nhất 10 ký tự");
+                            setDescriptionError(
+                              "Mô tả phải có ít nhất 10 ký tự"
+                            );
                             hasError = true;
                           }
                           if (stars < 1 || stars > 5) {
                             setStarsError("Số sao đánh giá phải từ 1 đến 5");
                             hasError = true;
                           }
-                          if (benefit.trim().length > 0 && benefit.trim().length < 10) {
-                            setBenefitError("Lợi ích phải có ít nhất 10 ký tự khi nhập");
+                          if (
+                            benefit.trim().length > 0 &&
+                            benefit.trim().length < 10
+                          ) {
+                            setBenefitError(
+                              "Lợi ích phải có ít nhất 10 ký tự khi nhập"
+                            );
                             hasError = true;
                           }
-                          if (workEnvironment.trim().length > 0 && workEnvironment.trim().length < 10) {
-                            setWorkEnvError("Môi trường làm việc phải có ít nhất 10 ký tự khi nhập");
+                          if (
+                            workEnvironment.trim().length > 0 &&
+                            workEnvironment.trim().length < 10
+                          ) {
+                            setWorkEnvError(
+                              "Môi trường làm việc phải có ít nhất 10 ký tự khi nhập"
+                            );
                             hasError = true;
                           }
                           if (hasError) {
@@ -391,7 +418,8 @@ export default function CompanyDetailsPage() {
                               description: description.trim(),
                               stars,
                               benefit: benefit.trim() || undefined,
-                              work_environment: workEnvironment.trim() || undefined,
+                              work_environment:
+                                workEnvironment.trim() || undefined,
                             });
                             // reset form
                             setDescription("");
@@ -413,7 +441,9 @@ export default function CompanyDetailsPage() {
                             console.error("Submit feedback error:", err);
                             toast({
                               title: "Không thể gửi đánh giá",
-                              description: err?.response?.data?.message || "Vui lòng thử lại",
+                              description:
+                                err?.response?.data?.message ||
+                                "Vui lòng thử lại",
                             });
                           } finally {
                             setIsSubmittingFeedback(false);
@@ -422,14 +452,20 @@ export default function CompanyDetailsPage() {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm text-slate-600 mb-1">Số sao</label>
+                            <label className="block text-sm text-slate-600 mb-1">
+                              Số sao
+                            </label>
                             <select
                               className="w-full border rounded-lg p-2"
                               value={stars}
-                              onChange={(e) => setStars(parseInt(e.target.value))}
+                              onChange={(e) =>
+                                setStars(parseInt(e.target.value))
+                              }
                             >
                               {[1, 2, 3, 4, 5].map((s) => (
-                                <option key={s} value={s}>{s}</option>
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
                               ))}
                             </select>
                             {starsError && (
@@ -441,7 +477,9 @@ export default function CompanyDetailsPage() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">Mô tả</label>
+                          <label className="block text-sm text-slate-600 mb-1">
+                            Mô tả
+                          </label>
                           <textarea
                             className="w-full border rounded-lg p-3 min-h-[100px]"
                             placeholder="Chia sẻ trải nghiệm của bạn..."
@@ -457,7 +495,9 @@ export default function CompanyDetailsPage() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm text-slate-600 mb-1">Lợi ích (tuỳ chọn)</label>
+                            <label className="block text-sm text-slate-600 mb-1">
+                              Lợi ích (tuỳ chọn)
+                            </label>
                             <input
                               className="w-full border rounded-lg p-2"
                               value={benefit}
@@ -472,11 +512,15 @@ export default function CompanyDetailsPage() {
                             )}
                           </div>
                           <div>
-                            <label className="block text-sm text-slate-600 mb-1">Môi trường làm việc (tuỳ chọn)</label>
+                            <label className="block text-sm text-slate-600 mb-1">
+                              Môi trường làm việc (tuỳ chọn)
+                            </label>
                             <input
                               className="w-full border rounded-lg p-2"
                               value={workEnvironment}
-                              onChange={(e) => setWorkEnvironment(e.target.value)}
+                              onChange={(e) =>
+                                setWorkEnvironment(e.target.value)
+                              }
                               placeholder="Ví dụ: Thân thiện, chuyên nghiệp..."
                             />
                             {workEnvError && (
@@ -489,7 +533,9 @@ export default function CompanyDetailsPage() {
                         </div>
                         <div className="flex justify-end">
                           <Button type="submit" disabled={isSubmittingFeedback}>
-                            {isSubmittingFeedback ? "Đang gửi..." : "Gửi đánh giá"}
+                            {isSubmittingFeedback
+                              ? "Đang gửi..."
+                              : "Gửi đánh giá"}
                           </Button>
                         </div>
                       </form>
@@ -538,6 +584,14 @@ export default function CompanyDetailsPage() {
                     </Button>
                   </div>
                 </CardContent>
+              </Card>
+
+              <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
+                <img
+                  src="/src/assets/banner/7.jpg"
+                  alt="Company banner"
+                  className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
+                />
               </Card>
             </div>
           </div>

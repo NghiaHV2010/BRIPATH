@@ -127,8 +127,9 @@ export default function JobCard({
     >
       {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
-          }`}
+        className={`relative flex flex-col justify-between ${
+          compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
+        }`}
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">

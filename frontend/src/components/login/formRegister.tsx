@@ -23,9 +23,9 @@ export default function FormRegister() {
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
-  // Cooldown config (3 minutes)
-  const VERIFY_COOLDOWN_MS = 3 * 60 * 1000; // 180000 ms
-  const VERIFY_COOLDOWN_SECONDS = 180; // 3 * 60
+  // Cooldown config (1 minutes)
+  const VERIFY_COOLDOWN_MS = 60 * 1000; // 60000 ms
+  const VERIFY_COOLDOWN_SECONDS = 60; // 1 * 60
   const ACTIVE_VERIFY_KEY = "verifyEmailActive";
 
   const {
@@ -58,7 +58,7 @@ export default function FormRegister() {
       await doSendRegisterEmail();
 
       // Set initial cooldown when email is sent
-      const cooldownEnd = Date.now() + VERIFY_COOLDOWN_MS; // 3 minutes
+      const cooldownEnd = Date.now() + VERIFY_COOLDOWN_MS; // 1 minutes
       localStorage.setItem(
         `verifyEmailCooldown_${email}`,
         cooldownEnd.toString()
@@ -305,7 +305,7 @@ export default function FormRegister() {
                       <span>Đang gửi...</span>
                     </div>
                   ) : canResend ? (
-                    "Gửi lại email"
+                    "Gửi lại mail"
                   ) : (
                     `Gửi lại sau ${formatTime(remainingSeconds)}`
                   )}
