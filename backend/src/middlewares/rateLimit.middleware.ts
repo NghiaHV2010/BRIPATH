@@ -5,6 +5,7 @@ import {
     RATE_LIMIT_AUTH_MAX,
     RATE_LIMIT_API_MAX
 } from '../config/env.config';
+import { Request, Response } from "express";
 
 /**
  * General rate limiting for all requests
@@ -23,7 +24,7 @@ export const generalLimiter = rateLimit({
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     skipSuccessfulRequests: false,
     skipFailedRequests: false,
-    handler: (req, res) => {
+    handler: (req: Request, res: Response) => {
         console.warn(`Rate limit exceeded for IP: ${req.ip} on ${req.method} ${req.path}`);
         res.status(429).json({
             success: false,
@@ -51,7 +52,7 @@ export const authLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (req: Request, res: Response) => {
         console.warn(`Auth rate limit exceeded for IP: ${req.ip} on ${req.method} ${req.path}`);
         res.status(429).json({
             success: false,
@@ -79,7 +80,7 @@ export const apiLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (req: Request, res: Response) => {
         console.warn(`API rate limit exceeded for IP: ${req.ip} on ${req.method} ${req.path}`);
         res.status(429).json({
             success: false,
@@ -107,7 +108,7 @@ export const strictLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (req: Request, res: Response) => {
         console.warn(`Strict rate limit exceeded for IP: ${req.ip} on ${req.method} ${req.path}`);
         res.status(429).json({
             success: false,
@@ -148,7 +149,7 @@ export const createRateLimiter = (options: {
         },
         standardHeaders: true,
         legacyHeaders: false,
-        handler: (req, res) => {
+        handler: (req: Request, res: Response) => {
             console.warn(`Custom rate limit (${errorCode}) exceeded for IP: ${req.ip} on ${req.method} ${req.path}`);
             res.status(429).json({
                 success: false,
