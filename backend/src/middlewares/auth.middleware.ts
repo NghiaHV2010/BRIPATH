@@ -3,7 +3,7 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
+import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, REFRESH_SECRET } from "../config/env.config";
 
 const prisma = new PrismaClient();
 
@@ -43,8 +43,8 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             res.cookie("accessToken", newAccessToken, {
                 maxAge: 45 * 60 * 1000,
                 httpOnly: true,
-                sameSite: "strict",
-                secure: false //true when https - false when http
+                sameSite: COOKIE_CONFIG_SAME_SITE,
+                secure: COOKIE_CONFIG_SECURE
             });
         } else {
             const accessTokenDecoded = jwt.verify(accessToken, ACCESS_SECRET);

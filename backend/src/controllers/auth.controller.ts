@@ -5,7 +5,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET } from "../config/env.config";
+import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE } from "../config/env.config";
 import crypto from "crypto";
 import emailTemplate from "../constants/emailTemplate";
 import { sendEmail, validateEmail } from "../utils";
@@ -52,8 +52,8 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
         res.cookie("data", data, {
             maxAge: 30 * 60 * 1000,
             httpOnly: true,
-            sameSite: "strict",
-            secure: false
+            sameSite: COOKIE_CONFIG_SAME_SITE,
+            secure: COOKIE_CONFIG_SECURE
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -86,8 +86,8 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
         res.cookie("otp", otp, {
             maxAge: 10 * 60 * 1000,
             httpOnly: true,
-            sameSite: "strict",
-            secure: false
+            sameSite: COOKIE_CONFIG_SAME_SITE,
+            secure: COOKIE_CONFIG_SECURE
         });
 
         res.status(HTTP_SUCCESS.OK).json({
@@ -441,8 +441,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         res.cookie("data", data, {
             maxAge: 30 * 60 * 1000,
             httpOnly: true,
-            sameSite: "strict",
-            secure: false
+            sameSite: COOKIE_CONFIG_SAME_SITE,
+            secure: COOKIE_CONFIG_SECURE
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
