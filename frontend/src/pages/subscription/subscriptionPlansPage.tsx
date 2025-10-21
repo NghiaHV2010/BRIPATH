@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components";
 import { SubscriptionCard } from "../../components/subscription/subscriptionCard";
 import { getAllPricingPlans } from "../../api/user_api";
@@ -19,7 +18,6 @@ type SubscriptionPlan = {
 export default function SubscriptionPlansPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -63,10 +61,6 @@ export default function SubscriptionPlansPage() {
     fetchPlans();
   }, []);
 
-  const handleSelect = (id: string) => {
-    window.scrollTo(0, 0);
-    navigate(`/subscriptions/${id}`);
-  };
 
   return (
     <Layout>
@@ -99,7 +93,6 @@ export default function SubscriptionPlansPage() {
                 <SubscriptionCard
                   key={plan.id}
                   plan={plan}
-                  onSelect={handleSelect}
                 />
               ))}
             </div>
