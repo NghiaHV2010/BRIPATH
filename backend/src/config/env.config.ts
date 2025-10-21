@@ -21,6 +21,8 @@ interface Config {
     SEPAY_API_KEY: string;
     SEPAY_WEBHOOK_URL: string;
     SEPAY_RETURN_URL: string;
+    SEPAY_VA_NUMBER: string;
+    SEPAY_BANK_CODE: string;
     // Rate limiting configuration
     RATE_LIMIT_WINDOW_MS: number;
     RATE_LIMIT_MAX_REQUESTS: number;
@@ -54,6 +56,8 @@ const config: Config = {
     SEPAY_API_KEY: process.env.SEPAY_API_KEY!,
     SEPAY_WEBHOOK_URL: process.env.SEPAY_WEBHOOK_URL!,
     SEPAY_RETURN_URL: process.env.SEPAY_RETURN_URL!,
+    SEPAY_VA_NUMBER: process.env.SEPAY_VA_NUMBER!,
+    SEPAY_BANK_CODE: process.env.SEPAY_BANK_CODE!,
     // Rate limiting configuration with defaults
     RATE_LIMIT_WINDOW_MS: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
     RATE_LIMIT_MAX_REQUESTS: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // 1000 requests per window
@@ -83,6 +87,8 @@ export const {
     SEPAY_API_KEY,
     SEPAY_WEBHOOK_URL,
     SEPAY_RETURN_URL,
+    SEPAY_VA_NUMBER,
+    SEPAY_BANK_CODE,
     RATE_LIMIT_WINDOW_MS,
     RATE_LIMIT_MAX_REQUESTS,
     RATE_LIMIT_AUTH_MAX,
