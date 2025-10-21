@@ -7,8 +7,3 @@ export { generalLimiter, authLimiter, apiLimiter, strictLimiter, createRateLimit
 
 // Authentication middleware
 export { authenticationMiddleware } from './auth.middleware';
-
-// Payment middlewares
-// export { vnpayReturnMiddleware, vnpayCallbackMiddleware } from './vnpay.middleware';
-// export { zalopayCallbackMiddleware } from './zalopay.middleware';
-// export { paymentActionMiddleware } from './payment.middleware';

@@ -1,6 +1,5 @@
 declare module "cors";
 declare module 'cookie-parser';
-declare module "express-rate-limit";
 
 // Relax Generator interface to avoid [Symbol.dispose] requirement from ESNext.Disposable
 interface Generator<T = unknown, TReturn = any, TNext = unknown> {
