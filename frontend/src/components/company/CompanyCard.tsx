@@ -7,7 +7,6 @@ import type { CompanySummary } from "../../types/company";
 import { useCompanyStore } from "../../store/company.store";
 import { useAuthStore } from "../../store/auth";
 import { LoginDialog } from "../login/LoginDialog";
-import { toast } from "sonner";
 
 interface CompanyCardProps {
   company: CompanySummary;

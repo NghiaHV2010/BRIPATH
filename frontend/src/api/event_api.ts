@@ -1,5 +1,4 @@
 import axiosConfig from "@/config/axios.config";
-import { title } from "process";
 
 export interface Event {
     id: number;

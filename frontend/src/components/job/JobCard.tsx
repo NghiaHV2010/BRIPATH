@@ -20,7 +20,6 @@ export default function JobCard({
   job,
   onClick,
   onSave,
-  onApply,
   isSaved = false,
   compact = false,
 }: JobCardProps) {
@@ -126,8 +125,9 @@ export default function JobCard({
     >
       {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
-          }`}
+        className={`relative flex flex-col justify-between ${
+          compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
+        }`}
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
@@ -170,10 +170,11 @@ export default function JobCard({
               className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
             >
               <Heart
-                className={`w-4 h-4 transition-colors ${isSaved
+                className={`w-4 h-4 transition-colors ${
+                  isSaved
                     ? "fill-red-500 text-red-500"
                     : "text-gray-400 hover:text-red-400"
-                  }`}
+                }`}
               />
             </Button>
           </div>
@@ -212,10 +213,11 @@ export default function JobCard({
                 e.stopPropagation();
                 onClick?.(); // navigate sang job detail
               }}
-              className={`shadow-sm rounded-md w-full sm:w-auto ${hasApplied
+              className={`shadow-sm rounded-md w-full sm:w-auto ${
+                hasApplied
                   ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
                   : "bg-emerald-400 text-white hover:bg-emerald-500"
-                }`}
+              }`}
               disabled={hasApplied}
             >
               {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}

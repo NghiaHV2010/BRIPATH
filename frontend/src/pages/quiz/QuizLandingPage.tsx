@@ -7,7 +7,6 @@ import {
   resetAnswer,
   getUserCareerPath,
 } from "../../api/quiz_api";
-import type { QuizQuestion } from "../../api/quiz_api";
 import { Layout } from "../../components/layout";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
@@ -24,46 +23,34 @@ import { useCompanyStore } from "../../store/company.store";
 
 export default function QuizLandingPage() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [starting, setStarting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [hasCareerPath, setHasCareerPath] = useState(false);
-  // company carousel data
   const { companies, fetchCompanies } = useCompanyStore();
 
   useEffect(() => {
-    // load companies for carousel (page 1)
     fetchCompanies(1).catch(() => {});
   }, [fetchCompanies]);
 
-  // 🔹 Load câu hỏi và career path song song
   useEffect(() => {
     let mounted = true;
 
     const loadData = async () => {
       setLoading(true);
       try {
-        const [questionData, careerResp] = await Promise.all([
+        const [careerResp] = await Promise.all([
           fetchQuestions(),
           getUserCareerPath(),
         ]);
 
         if (mounted) {
-          setQuestions(questionData);
           const careerPaths = careerResp?.data ?? careerResp ?? [];
           setHasCareerPath(
             Array.isArray(careerPaths) && careerPaths.length > 0
           );
         }
       } catch (e: unknown) {
-        let message = "Không tải được dữ liệu.";
-        if (typeof e === "object" && e && "response" in e) {
-          type ErrResp = { data?: { message?: string } };
-          const resp = (e as { response?: ErrResp }).response;
-          if (resp?.data?.message) message = resp.data.message;
-        }
-        if (mounted) setError(message);
+        console.error("Failed to load quiz data", e);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -79,25 +66,21 @@ export default function QuizLandingPage() {
     setStarting(true);
     const authUser = useAuthStore.getState().authUser;
     if (!authUser) {
-      // open login dialog and redirect to quiz/test after login
       setLoginOpen(true);
       return;
     }
 
     if (hasCareerPath) {
-      // open confirm dialog for repeat flow
       setShowRepeatDialog(true);
       return;
     }
 
-    // no existing career path, proceed directly
     navigate("/quiz/test");
   };
 
   const [showRepeatDialog, setShowRepeatDialog] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
 
-  // Reset starting if login dialog closes (user cancelled or clicked outside)
   useEffect(() => {
     if (!loginOpen) setStarting(false);
   }, [loginOpen]);
@@ -105,20 +88,16 @@ export default function QuizLandingPage() {
   const handleDialogOpenChange = (open: boolean) => {
     setShowRepeatDialog(open);
     if (!open) {
-      // if the dialog is closed (cancelled or clicked outside), reset starting
       setStarting(false);
     }
   };
 
   const handleConfirmRepeat = () => {
     setShowRepeatDialog(false);
-    // fire-and-forget: we don't want to block navigation on resetAnswer
-    // run in background and ignore errors
     resetAnswer().catch(() => {});
     navigate("/quiz/test");
   };
 
-  // Ensure starting flag is reset whenever the dialog is closed
   useEffect(() => {
     if (!showRepeatDialog) setStarting(false);
   }, [showRepeatDialog]);
@@ -126,7 +105,7 @@ export default function QuizLandingPage() {
   return (
     <>
       <Layout>
-        <div className="min-h-screen bg-transparent  flex items-center justify-center  ">
+        <div className="min-h-screen bg-transparent flex items-center justify-center">
           <div className="max-w-full w-full text-center">
             {/* Hero */}
             {!hasCareerPath && (
@@ -174,19 +153,15 @@ export default function QuizLandingPage() {
               </>
             )}
 
-            {/* UserCareerPath chỉ hiện nếu có */}
-
             {hasCareerPath && (
               <>
-                <div className="mb-12 relative min-h-[200px] overflow-hidden ">
-                  {/* Ảnh nền phía sau */}
+                <div className="mb-12 relative min-h-[200px] overflow-hidden">
                   <img
                     src="/animations/wave-haikei.svg"
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover z-0 opacity-90"
                   />
-                  {/* Nội dung phía trên */}
-                  <div className="relative z-10 text-center mt-15 ">
+                  <div className="relative z-10 text-center mt-15">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                       Danh sách lộ trình nghề nghiệp bạn đã tạo
                     </h1>
@@ -237,7 +212,7 @@ export default function QuizLandingPage() {
                   16 nhóm tính cách bạn nên biết
                 </h2>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 md:px-8 ">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 md:px-8">
                   {[
                     {
                       type: "ISTJ",
@@ -305,7 +280,6 @@ export default function QuizLandingPage() {
                     <CompanyCarousel
                       companies={companies.slice(0, 6)}
                       onCompanyClick={(companyId: string) => {
-                        // mirror CompaniesPage behavior: save scroll/page then navigate
                         sessionStorage.setItem(
                           "companyScrollPosition",
                           window.scrollY.toString()
@@ -321,7 +295,6 @@ export default function QuizLandingPage() {
               {/* Section 2 */}
               <div className="w-full py-20 bg-gradient-to-b from-white via-emerald-50 to-white">
                 <div className="max-w-5xl mx-auto px-6 text-center">
-                  {/* Tiêu đề */}
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                     Hướng dẫn khám phá lộ trình nghề nghiệp
                   </h2>
@@ -329,7 +302,6 @@ export default function QuizLandingPage() {
                     để có kết quả chính xác nhất 💡
                   </h4>
 
-                  {/* Danh sách hướng dẫn */}
                   <div className="grid gap-10 md:gap-14">
                     {[
                       {
@@ -398,12 +370,6 @@ export default function QuizLandingPage() {
                 )}
               </Button>
             </div>
-            {/* <div className="mt-12 text-center">
-              <p className="text-gray-500 text-sm">
-                💡 Gợi ý: Hãy trả lời một cách chân thật để có kết quả chính xác
-                nhất.
-              </p>
-            </div> */}
           </div>
         </div>
         {/* Repeat dialog using shadcn Dialog */}

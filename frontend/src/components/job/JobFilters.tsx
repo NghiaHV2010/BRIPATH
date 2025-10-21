@@ -16,13 +16,12 @@ interface JobFiltersProps {
   onJobClick?: (job: Job) => void;
 }
 
-export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
+export default function JobFilters({ onJobClick }: JobFiltersProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedField, setSelectedField] = useState("");
   const [selectedSalary, setSalaryRange] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [page, setPage] = useState(1);
 
   const {
     filterJobs,
@@ -31,7 +30,6 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
     jobLabels,
     isLoading,
     clearFilteredJobs,
-    filteredJobs,
   } = useJobStore();
 
   useEffect(() => {
@@ -49,7 +47,6 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
       return;
 
     setIsSearching(true);
-    setPage(1);
 
     await filterJobs({
       page: 1,
@@ -66,10 +63,12 @@ export default function JobFilters({ onJobClick }: JobFiltersProps = {}) {
     setSelectedField("");
     setSalaryRange("");
     setIsSearching(false);
-    setPage(1);
     clearFilteredJobs();
     await getAllJobs({ page: 1 });
   };
+
+  // Suppress unused variable warning - onJobClick is part of interface for future use
+  void onJobClick;
 
   return (
     <div className="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8">
