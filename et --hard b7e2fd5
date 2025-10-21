@@ -1,0 +1,163 @@
+[33m36f3a9f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mMinhKhang[m[33m)[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33mb7e2fd5[m before pull
+[33m690f8d2[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix tsconfigs
+[33ma415746[m fix tsconfig
+[33m51d2601[m change es2017
+[33m1e7da7d[m change typescript version
+[33m6904197[m add effect package
+[33mef77ecf[m fix npx prisma genrate path
+[33m676e119[m fix npx prisma genrates
+[33m64dd73f[m fix npx prisma genrate
+[33m4d20a99[m Add npx prisma genrate
+[33md92eccc[m fix code
+[33m3c81267[m Fix start command
+[33m9f6bd9b[m Fix packagejs
+[33m2a06a1b[m Fix package jsons
+[33m7d07045[m Fix package json
+[33m1340855[m add render build file
+[33m4566b04[m change node version 20
+[33mc2ff196[m add render yaml
+[33m93ace0f[m fix package json
+[33m3b327df[m Update package.json
+[33m0d37dcb[m [Fix]Update swc
+[33med89d33[m [Update]Update package.json
+[33m2885ca2[m [Fix]Fix error backend
+[33m2f18ee1[m [Fix]Fix error
+[33m55c3aa7[m fix code for deployment node 20
+[33mda8b6a5[m fix code for deployment postcss
+[33ma7b6c1d[m fix code for deployment"
+[33m90ff821[m fix code for deployment"
+[33m6b71797[m Fix before deploment
+[33me98362d[m Fix for deploment
+[33m70abb76[m delete vercel json
+[33m0af6756[m Add  rollup
+[33m2643869[m Fix package json
+[33mf20552c[m[33m ([m[1;31morigin/development[m[33m)[m Merge remote-tracking branch 'origin/HungDung' into development
+[33m1f855f7[m Fix code before deploy
+[33ma1faf8e[m[33m ([m[1;31morigin/HungDung[m[33m)[m [FeedBack]Add API Feedback UI/UX and delete mock data
+[33m750c2bb[m[33m ([m[1;31morigin/NghiaHV[m[33m)[m Fix code
+[33m4964dc8[m Merge from HungDung
+[33m457bcab[m Merge remote-tracking branch 'origin/HungDung' into development
+[33md6a754d[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33m731e5e9[m Add Edit user profile UI and create Job
+[33mb7e6734[m[33m ([m[1;31morigin/MinhKhang[m[33m)[m merge
+[33m44821da[m timeline UI
+[33m4fc4dfb[m blog and quiz page
+[33m1a24d1a[m careerPath
+[33m81bcf6e[m UI edit
+[33m31983d3[m subscriptions
+[33m6b00610[m [FollowCompany]Add UI
+[33m07bc50b[m [Feedback]Add feedback UI and sampleData
+[33m126e11a[m forgot password done
+[33m45700f7[m Merge remote-tracking branch 'origin/HungDung' into development
+[33m0ba3c1a[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33m06dc8dd[m Modify database tables
+[33m44c179d[m Add CV stats and Job stats
+[33m75bb25e[m prepare to merge
+[33md8ec9af[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into HungDung
+[33m9125885[m [BlogPage]Add Blog Page for Admin and Update real data
+[33m88f7dd0[m edit UI
+[33m4d57105[m check
+[33m402a47b[m followCompany
+[33m32d3fdf[m Modify UI
+[33mba5ebac[m Merge remote-tracking branch 'origin/HungDung' into development
+[33med79555[m Merge with Khang HM
+[33mc80f8db[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33mf50575a[m Add profile sidebar UI
+[33m5689fa8[m apply added
+[33m8eaefb9[m [FollowCompanyPage]Call API follow Company, unfollow and Design Page
+[33m48d9923[m Add career path crud
+[33mb7c2f5f[m dump
+[33m23cadc1[m Merge pull request #8 from NghiaHV2010/HungDung
+[33m8d551ee[m Add Urgent Jobs Section
+[33m42f7f39[m [Payment]Add plantID and companyId when mapping
+[33m2416399[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33maa1fa7c[m career path edit
+[33m036b71f[m Add create Subsciption and Profile layout
+[33m36efa09[m Merge pull request #7 from NghiaHV2010/HungDung
+[33m6aa50a2[m Modify Company page
+[33mb276955[m Add subscription handler API
+[33maeff515[m [Payment]Add API Saving Infor Payment to Database
+[33mb4077b4[m [SavedJobPage]Design Page w exist function
+[33mdd8a786[m [SavedJob]Add GetSaveJob
+[33mb8054f3[m[33m ([m[1;32mHungDung[m[33m)[m Add job logo
+[33m47735ae[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33mca45caf[m Fix authorization
+[33m84c5be0[m Add Get all save job and get all follow companies for user
+[33m4c84db4[m Prepare deploy
+[33m53990ec[m Modify company Detail Page and Add API suitable CV for jobs
+[33m1b2a723[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33m928a355[m pull development
+[33m805a4a2[m pull development
+[33m2c64c16[m Fix authroization
+[33m3f2647c[m Merge remote-tracking branch 'origin/HungDung' into development
+[33md1a581a[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33m9239791[m before demo
+[33m5d628c0[m Add frontend AI chatbot
+[33m7316e1a[m [Admin Page_HomePage]Add HomePage and Add Label Company and Job
+[33m0d6d3af[m Add Unsave Job and Unfollow Company API
+[33m07a5118[m Add CRUD Blogs for Admin API
+[33m6d146b3[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33mfadb23c[m Merge remote-tracking branch 'origin/HungDung' into development
+[33med77c6b[m Delete .history/frontend/src directory
+[33md802026[m Merge code from MinhKhang
+[33me6f9fb9[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33mf633964[m Add userNotification and userActivityHistory
+[33m86b5785[m job component and page
+[33mb80ff62[m fix api job
+[33m42cf42a[m save 2
+[33m4e0a52f[m save
+[33ma76eb5e[m [DataChart]Fix error
+[33m00067c1[m [AdminPage]Admin Management Page
+[33me46dc3e[m filter div done
+[33mc06e600[m filter shit
+[33ma168633[m edit filter
+[33m2b92ff1[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33ma626210[m merge code
+[33m0e6e0a6[m Add get and update user/company
+[33m40fb3f9[m merge code 9/10
+[33mc2de09c[m Complete Job CRUD
+[33m234b1e1[m Add RAG suitable scores
+[33m913b2c6[m error create companies
+[33m4f1e8b7[m Merge Code 07/10
+[33m1a068ad[m Merge remote-tracking branch 'origin/HungDung' into development
+[33m49b0998[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33md3c44f8[m Delete training (1).jsonl
+[33me0efecb[m Add Admin api and Event api
+[33m9576a6a[m before merge
+[33m83bd9b0[m [Label]Add labels for company and job
+[33m70dab78[m add company register and fix UI profile
+[33m3fe8422[m 04/10/2025
+[33m1a75fac[m update UI login
+[33mf6666e5[m Add search and filter jobs and companies
+[33m8d7f47a[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33mbed15c2[m add api/
+[33md190183[m Merge from Minh Khang
+[33mcbda867[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33mf4058af[m add RAG for userpersonality test result
+[33m40558f1[m config login google
+[33m6163f42[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33md54b26f[m merge code
+[33m90147a1[m Merge remote-tracking branch 'origin/MinhKhang' into development
+[33md756806[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into development
+[33mb6dcefa[m Merge from NghiaHV
+[33mc9f8818[m add migrations
+[33m3f31a72[m Init fine-tuning
+[33m2105dde[m 28/9
+[33mc9d53cc[m Merge pull request #3 from NghiaHV2010/HungDung
+[33m7f113ad[m [Dashboard]Add API User access
+[33m99895ec[m Add get and get by ID API for companies and jobs
+[33m2ef441c[m Companies, jobs, upload-cv, navbar, footer UI create and fix
+[33m9fc17c4[m Add authorization and user actions API
+[33m1f742d1[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into MinhKhang
+[33m2acbea0[m Fixed UI
+[33m6bc1f69[m Merge pull request #2 from NghiaHV2010/HungDung
+[33m5f84cea[m Merge branch 'development' into HungDung
+[33m074b104[m Add auto send subscription remaining date mail
+[33m0938f6e[m add cv api
+[33m11a946b[m [Dashboard]Add API Dashboard
+[33md188cb5[m [Payment]Payment Saving method
+[33md690a26[m Update index
+[33madac7e0[m Merge branch 'development' of https://github.com/NghiaHV2010/BRIPATH into HungDung
+[33m000f192[m [Update]Add controller
+[33mc971800[m Edit login page with api bef
