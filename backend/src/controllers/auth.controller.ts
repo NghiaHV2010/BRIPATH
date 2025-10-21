@@ -5,10 +5,10 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE } from "../config/env.config";
+import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, FRONTEND_URL } from "../config/env.config";
 import crypto from "crypto";
 import emailTemplate from "../constants/emailTemplate";
-import { sendEmail, validateEmail } from "../utils";
+import { sendEmail, sendEmailWithRetry, validateEmail } from "../utils";
 import admin, { ServiceAccount } from "firebase-admin";
 import serviceAccount from "../../serviceAccountKey.json";
 
@@ -75,13 +75,13 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
     let url;
 
     if (id) {
-        url = `http://localhost:5173/forgot/password/${otp}`;
+        url = `${FRONTEND_URL}/forgot/password/${otp}`;
     } else {
-        url = `http://localhost:5173/register/email/${otp}`;
+        url = `${FRONTEND_URL}/register/email/${otp}`;
     }
 
     try {
-        sendEmail(email, "BRIPATH - Verify Email", emailTemplate(url));
+        await sendEmailWithRetry(email, "BRIPATH - Verify Email", emailTemplate(url));
 
         res.cookie("otp", otp, {
             maxAge: 10 * 60 * 1000,
@@ -95,7 +95,8 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
             message: "Email đã được gửi đến hộp thư của bạn"
         })
     } catch (error) {
-        next(error);
+        console.error('Failed to send OTP email:', error);
+        next(errorHandler(HTTP_ERROR.INTERNAL_SERVER_ERROR, "Không thể gửi email. Vui lòng thử lại sau."));
     }
 
 }
@@ -224,19 +225,26 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 }
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Clear cookies regardless of authentication status
-        res.cookie("accessToken", '', { maxAge: 0 });
-        res.cookie("refreshToken", '', { maxAge: 0 });
+        // Cookie options for production
+        const cookieOptions = {
+            maxAge: 0,
+            httpOnly: true,
+            sameSite: COOKIE_CONFIG_SAME_SITE,
+            secure: COOKIE_CONFIG_SECURE,
+            path: '/'
+        };
 
-        // Try to get user from token if available
+        // Clear cookies with proper production settings
+        res.cookie("accessToken", '', cookieOptions);
+        res.cookie("refreshToken", '', cookieOptions);
+
+        // Try to get user from token if available and log activity
         const accessToken = req.cookies?.accessToken;
         if (accessToken) {
             try {
-                const jwt = require('jsonwebtoken');
-                const { ACCESS_SECRET } = require('../config/env.config');
-                const decoded = jwt.verify(accessToken, ACCESS_SECRET);
+                const decoded = jwt.verify(accessToken, ACCESS_SECRET) as { userId: string };
 
                 if (decoded && decoded.userId) {
                     await prisma.userActivitiesHistory.create({
@@ -258,8 +266,16 @@ export const logout = async (req: Request, res: Response) => {
         });
     } catch (error) {
         // Even if there's an error, we should still clear cookies
-        res.cookie("accessToken", '', { maxAge: 0 });
-        res.cookie("refreshToken", '', { maxAge: 0 });
+        const errorCookieOptions = {
+            maxAge: 0,
+            httpOnly: true,
+            sameSite: COOKIE_CONFIG_SAME_SITE,
+            secure: COOKIE_CONFIG_SECURE,
+            path: '/'
+        };
+
+        res.cookie("accessToken", '', errorCookieOptions);
+        res.cookie("refreshToken", '', errorCookieOptions);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,

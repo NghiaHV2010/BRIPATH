@@ -50,7 +50,7 @@ export function openGooglePopup(url: string, opts: WatchGooglePopupOptions = {})
     }
     try {
       const res = await axiosConfig.get(`/check`, { withCredentials: true });
-  const user: GoogleUser | undefined = res?.data?.data;
+      const user: GoogleUser | undefined = res?.data?.data;
       if (user?.id) {
         if (!popup.closed) popup.close();
         clearInterval(timer);
