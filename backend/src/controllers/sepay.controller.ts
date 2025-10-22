@@ -32,7 +32,7 @@ export const createSePayOrder = async (req: Request, res: Response, next: NextFu
     }
 
     const orderId = generateSePayOrderId();
-    
+
     // Save order mapping FIRST before creating order
     try {
       await saveSePayOrderMapping(prisma, orderId, userId, Number(amount), Number(planId) || 0, companyId);
@@ -123,26 +123,26 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
       try {
         // Extract order ID from transaction content
         // SePay users put order ID in the transfer content/description
-        const orderId = extractOrderIdFromContent(webhookData.content) || 
-                       extractOrderIdFromContent(webhookData.description);
-        
+        const orderId = extractOrderIdFromContent(webhookData.content) ||
+          extractOrderIdFromContent(webhookData.description);
+
         // Extract plan code for logging
-        const planCode = extractPlanCodeFromContent(webhookData.content) || 
-                        extractPlanCodeFromContent(webhookData.description);
-        
+        const planCode = extractPlanCodeFromContent(webhookData.content) ||
+          extractPlanCodeFromContent(webhookData.description);
+
         console.log('Extracted order ID:', orderId);
         console.log('Extracted plan code:', planCode);
-        
+
         if (orderId) {
           const exists = await hasPaymentByTransactionId(prisma, orderId);
-          
+
           if (!exists) {
             // Get order mapping
             const mapping = await getSePayOrderMapping(prisma, orderId);
-            
+
             if (mapping) {
               console.log('Processing payment for mapping:', mapping);
-              
+
               await prisma.$transaction(async (tx: any) => {
                 // Create payment record
                 const payment = await tx.payments.create({
@@ -197,22 +197,22 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
                   });
 
                   // Create additional activity history for subscription
-                  await tx.userActivitiesHistory.create({
-                    data: {
-                      user_id: mapping.user_id,
-                      activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
-                    }
-                  });
+                  // await tx.userActivitiesHistory.create({
+                  //   data: {
+                  //     user_id: mapping.user_id,
+                  //     activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
+                  //   }
+                  // });
 
-                  // Create additional notification for subscription activation
-                  await tx.userNotifications.create({
-                    data: {
-                      title: 'Gói dịch vụ đã được kích hoạt!',
-                      content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-                      type: 'pricing_plan' as NotificationsType,
-                      user_id: mapping.user_id
-                    } as any
-                  });
+                  // // Create additional notification for subscription activation
+                  // await tx.userNotifications.create({
+                  //   data: {
+                  //     title: 'Gói dịch vụ đã được kích hoạt!',
+                  //     content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+                  //     type: 'pricing_plan' as NotificationsType,
+                  //     user_id: mapping.user_id
+                  //   } as any
+                  // });
                 }
 
                 // Update company verification if applicable
@@ -281,7 +281,7 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
  */
 const extractOrderIdFromContent = (content: string): string | null => {
   if (!content) return null;
-  
+
   // Look for order ID pattern in transaction content
   // Format: TKP69880428888 SEPAY_1234567890_abc123 PLANCODE
   // or: TKP69880428888 SEPAY_1234567890_abc123
@@ -294,7 +294,7 @@ const extractOrderIdFromContent = (content: string): string | null => {
  */
 const extractPlanCodeFromContent = (content: string): string | null => {
   if (!content) return null;
-  
+
   // Look for plan code after order ID
   // Format: TKP69880428888 SEPAY_1234567890_abc123 PLANCODE
   const parts = content.split(' ');
@@ -359,7 +359,7 @@ export const cancelSePayOrder = async (req: Request, res: Response, next: NextFu
 
     // Check if order mapping exists and belongs to user
     const mapping = await getSePayOrderMapping(prisma, orderId);
-    
+
     if (!mapping) {
       return res.status(HTTP_ERROR.NOT_FOUND).json({
         success: false,
@@ -476,7 +476,7 @@ export const checkPaymentStatus = async (req: Request, res: Response, next: Next
         payment_gateway: 'SePay' as PaymentGateway
       },
       include: {
-        subscriptions: true 
+        subscriptions: true
       }
     });
 

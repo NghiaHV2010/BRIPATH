@@ -76,23 +76,23 @@ export const createPayment = async (req: Request, res: Response) => {
                         }
                     });
 
-                    // Create additional activity history for subscription
-                    await tx.userActivitiesHistory.create({
-                        data: {
-                            user_id,
-                            activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
-                        }
-                    });
+                    // // Create additional activity history for subscription
+                    // await tx.userActivitiesHistory.create({
+                    //     data: {
+                    //         user_id,
+                    //         activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
+                    //     }
+                    // });
 
-                    // Create additional notification for subscription activation
-                    await tx.userNotifications.create({
-                        data: {
-                            title: 'Gói dịch vụ đã được kích hoạt!',
-                            content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-                            type: 'pricing_plan',
-                            user_id: user_id
-                        }
-                    });
+                    // // Create additional notification for subscription activation
+                    // await tx.userNotifications.create({
+                    //     data: {
+                    //         title: 'Gói dịch vụ đã được kích hoạt!',
+                    //         content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+                    //         type: 'pricing_plan',
+                    //         user_id: user_id
+                    //     }
+                    // });
                 }
             }
 
@@ -100,28 +100,26 @@ export const createPayment = async (req: Request, res: Response) => {
                 // Get user's company
                 const userCompany = await tx.users.findUnique({
                     where: { id: user_id },
-                    select: { 
-                        companies: {
-                            select: { id: true }
-                        }
+                    select: {
+                        company_id: true,
                     }
                 });
 
-                if (userCompany?.companies?.id) {
+                if (userCompany?.company_id) {
                     const tag = await tx.tags.findFirst({
                         where: { label_name: "Đề xuất" }
                     });
 
                     if (tag) {
                         await tx.companies.update({
-                            where: { id: userCompany.companies.id },
+                            where: { id: userCompany.company_id },
                             data: {
                                 is_verified: true,
                                 companyTags: {
                                     connectOrCreate: {
                                         where: {
                                             company_id_tag_id: {
-                                                company_id: userCompany.companies.id,
+                                                company_id: userCompany.company_id,
                                                 tag_id: tag.id
                                             }
                                         },
