@@ -14,13 +14,18 @@
       "ES2022"
     ],
     "types": [
-      "node",
+      "node"
     ],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
   },
   "include": [
     "src/**/*",
-    "global.d.ts"
+    "global.d.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
