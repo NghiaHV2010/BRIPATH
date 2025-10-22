@@ -36,8 +36,8 @@ dotenv.config();
 const config: Config = {
     PORT: Number(process.env.PORT) || 3000,
     FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
-    FRONTEND_URLS: process.env.FRONTEND_URL
-        ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+    FRONTEND_URLS: process.env.FRONTEND_URLS
+        ? process.env.FRONTEND_URLS.split(',').map(url => url.trim())
         : ['http://localhost:5173'],
     DATABASE_URL: process.env.DATABASE_URL!,
     ACCESS_SECRET: process.env.ACCESS_SECRET!,

@@ -13,6 +13,10 @@ import { setupWebSocket } from './libs/wsServer';
 
 const app = express();
 
+// Trust proxy for production environments (Render, Heroku, etc.)
+// This allows express-rate-limit to correctly identify client IPs
+app.set('trust proxy', true);
+
 // Apply timeout middleware
 app.use(timeoutMiddleware);
 
