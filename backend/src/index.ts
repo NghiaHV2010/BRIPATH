@@ -5,7 +5,7 @@ import express from 'express';
 import { errorMiddleware, timeoutMiddleware, generalLimiter, apiLimiter } from './middlewares';
 import { authRoute, cvRouter, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter, sepayRoutes, subscriptionsRouter } from './routes';
 import passport from './config/passport.config';
-import { FRONTEND_URLS, PORT } from './config/env.config';
+import { FRONTEND_URLS, PORT, NODE_ENV } from './config/env.config';
 import fileUpload from "express-fileupload";
 import "./jobs/subscriptionReminder";
 import './jobs/subscriptionJob';
@@ -13,9 +13,14 @@ import { setupWebSocket } from './libs/wsServer';
 
 const app = express();
 
-// Trust proxy for production environments (Render, Heroku, etc.)
-// This allows express-rate-limit to correctly identify client IPs
-app.set('trust proxy', true);
+// Configure trust proxy securely based on environment
+if (NODE_ENV === 'production') {
+    // In production, trust only the first proxy (Render's load balancer)
+    app.set('trust proxy', 1);
+} else {
+    // In development, no proxy needed
+    app.set('trust proxy', false);
+}
 
 // Apply timeout middleware
 app.use(timeoutMiddleware);
