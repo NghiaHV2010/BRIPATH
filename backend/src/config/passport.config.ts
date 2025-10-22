@@ -31,11 +31,12 @@ passport.use(
 
                     user = await prisma.users.create({
                         data: {
+                            // @ts-ignore
                             username: profile.displayName,
                             // @ts-ignore
                             email: profile.emails?.[0].value,
                             password: buf.toString('hex'),
-                            avatar_url: profile.photos?.[0].value,
+                            avatar_url: (profile as any).photos?.[0]?.value,
                             last_loggedIn: new Date(),
                             role_id: 1
                         },
