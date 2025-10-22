@@ -52,4 +52,4 @@ userRouter.get('/user/history', getUserActivityHistory);
 //     console.log(fineTune);
 // })
 
-// export default userRouter;
+export default userRouter;
