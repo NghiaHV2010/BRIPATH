@@ -33,23 +33,23 @@ userRouter.put('/user/notification', updateUserNotification);
 
 userRouter.get('/user/history', getUserActivityHistory);
 
-userRouter.get('/test', async (req, res) => {
-    const openai = new OpenAI({
-        apiKey: OPENAI_API_KEY
-    });
+// userRouter.get('/test', async (req, res) => {
+//     const openai = new OpenAI({
+//         apiKey: OPENAI_API_KEY
+//     });
 
-    const file = await openai.files.create({
-        file: fs.createReadStream('training.jsonl'),
-        purpose: 'fine-tune'
-    })
+//     const file = await openai.files.create({
+//         file: fs.createReadStream('training.jsonl'),
+//         purpose: 'fine-tune'
+//     })
 
-    // @ts-ignore
-    const fineTune = await openai.fineTuning.jobs.create({
-        training_file: file.id,
-        model: "gpt-4.1-mini-2025-04-14"
-    });
+//     // @ts-ignore
+//     const fineTune = await openai.fineTuning.jobs.create({
+//         training_file: file.id,
+//         model: "gpt-4.1-mini-2025-04-14"
+//     });
 
-    console.log(fineTune);
-})
+//     console.log(fineTune);
+// })
 
-export default userRouter;
+// export default userRouter;
