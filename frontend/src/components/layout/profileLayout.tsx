@@ -1,14 +1,10 @@
 import { useAuthStore } from '@/store';
-import { type ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import Layout from './layout';
 import { CompanyMenuItems, UserMenuItems } from '@/constants/profileSidebarItems';
 
-interface ProfileLayoutProps {
-    children: ReactNode;
-}
-
-const ProfileLayout = ({ children }: ProfileLayoutProps) => {
+const ProfileLayout = () => {
     const authUser = useAuthStore((s) => s.authUser);
     const logout = useAuthStore((s) => s.logout);
 
@@ -24,11 +20,11 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
     };
 
     if (!authUser) {
-        return <div className="h-screen w-full relative bg-white">{children}</div>;
+        return <div className="h-screen w-full relative bg-white"><Outlet /></div>;
     }
 
     return (
-        <Layout className="!min-h-0">
+        <Layout className="min-h-0!">
             <div className="w-full relative flex justify-center bg-gray-50">
                 {authUser && (
                     <ProfileSidebar
@@ -45,7 +41,7 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
                     />
                 )}
 
-                {children}
+                <Outlet />
             </div>
         </Layout>
     );

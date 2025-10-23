@@ -1,5 +1,3 @@
-"use client";
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
@@ -77,9 +75,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="text-3xl sm:text-4xl font-bold">
-              BRIPATH
+          <div className="shrink-0">
+            <Link to="/" className="text-xl font-bold">
+              <img src="/assets/images/app_logo.png" alt="BRIPATH Logo" className="h-12" />
             </Link>
           </div>
 
@@ -150,7 +148,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
             {authUser && (
               <div
                 className="rounded-full relative p-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
-                onClick={() => navigate("/notifications")}
+                onClick={() => navigate("/profile/notifications")}
               >
                 {authUser?._count &&
                   authUser?._count?.userNotifications > 0 && (
@@ -174,7 +172,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                      <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
+                      <AvatarFallback className="bg-linear-to-br from-emerald-500 to-teal-600 text-white text-md">
                         {authUser?.username.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </div>
@@ -265,8 +263,8 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   navigateToJobs(navigate);
                 }}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/jobs")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
                   }`}
               >
                 Việc Làm
@@ -277,8 +275,8 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   navigateToCompanies(navigate);
                 }}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/companies")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
                   }`}
               >
                 Công Ty
@@ -289,8 +287,8 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   navigateToCareerPath(navigate);
                 }}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/quiz")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
                   }`}
               >
                 Lộ trình nghề nghiệp!
@@ -301,8 +299,8 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   navigateToBlog(navigate);
                 }}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/blog")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
                   }`}
               >
                 Blog
@@ -314,8 +312,8 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     navigateToSubscription(navigate);
                   }}
                   className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/subscription")
-                      ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                      : "text-gray-600"
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
                     }`}
                 >
                   Gói dịch vụ
@@ -339,7 +337,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       />
                     ) : (
                       <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
+                        <AvatarFallback className="bg-linear-to-br from-emerald-500 to-teal-600 text-white text-md">
                           {authUser?.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </div>

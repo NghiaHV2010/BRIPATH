@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import e, { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
@@ -773,6 +773,34 @@ export const updateCompanyProfile = async (req: Request, res: Response, next: Ne
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getFeedbackByCompanyID = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { companyId } = req.params as { companyId: string };
+
+        const feedbacks = await prisma.feedbacks.findMany({
+            where: {
+                company_id: companyId
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true,
+                        avatar_url: true,
+                        gender: true
+                    }
+                }
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: feedbacks
         });
     } catch (error) {
         next(error);

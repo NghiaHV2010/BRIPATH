@@ -6,7 +6,7 @@ const subscriptionsRouter = Router();
 
 subscriptionsRouter.use(authenticationMiddleware);
 
-subscriptionsRouter.get('/user/:userId', getUserSubscription);
+subscriptionsRouter.get('/user', getUserSubscription);
 
 export default subscriptionsRouter;
 

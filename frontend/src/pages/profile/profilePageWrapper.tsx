@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import AccountLayout from "../../components/layout/accountLayout";
 import { Button } from "../../components/ui/button";
@@ -12,13 +12,16 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { ImageCropModal } from "../../components/ui/ImageCropModal";
 import { useAuthStore } from "../../store/auth";
-import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2 } from "lucide-react";
+import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2, Edit } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import axiosConfig from "../../config/axios.config";
-import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
+import { getUserProfile, updateUserProfile, changePassword, updateUserAvatar, type ChangePasswordRequest } from "../../api/user_api";
+import { handleAvatarUpload } from "@/utils/firebase-upload";
 import { Resume } from "../../components/resume/resume";
 import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
 import type { ResumeListItem } from "@/types/resume";
@@ -28,12 +31,19 @@ import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
 
 export default function ProfilePageWrapper() {
-
   const user = useAuthStore((state) => state.authUser);
+  const updateUser = useAuthStore((state) => state.updateUser);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userProfileData, setUserProfileData] = useState<UserProfile | null>(null);
+
+  // Avatar upload states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+
   const [formData, setFormData] = useState({
     username: user?.username || "",
     avatar_url: user?.avatar_url || "",
@@ -334,6 +344,82 @@ export default function ProfilePageWrapper() {
     }
   };
 
+  // Avatar upload functions
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Chỉ hỗ trợ các định dạng: JPG, JPEG, PNG, WEBP');
+      return;
+    }
+
+    // Validate file size (max 10MB before cropping)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('Kích thước file không được vượt quá 10MB');
+      return;
+    }
+
+    // Set selected file and show crop modal
+    setSelectedImageFile(file);
+    setShowCropModal(true);
+
+    // Clear the input value to allow selecting the same file again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    if (!user) return;
+
+    setIsUploading(true);
+    setShowCropModal(false);
+
+    try {
+      // Upload the cropped image
+      await handleAvatarUpload(
+        croppedFile,
+        user.id,
+        async (firebaseUrl) => {
+          // Update avatar in database
+          const result = await updateUserAvatar(firebaseUrl);
+          if (result?.success) {
+            // Update local auth state
+            updateUser({ avatar_url: firebaseUrl });
+            // Update form data
+            setFormData(prev => ({ ...prev, avatar_url: firebaseUrl }));
+            // Update userProfileData if it exists
+            if (userProfileData) {
+              setUserProfileData(prev => prev ? { ...prev, avatar_url: firebaseUrl } : null);
+            }
+            toast.success('Cập nhật ảnh đại diện thành công!');
+          } else {
+            toast.error('Có lỗi xảy ra khi cập nhật ảnh đại diện');
+          }
+        },
+        (error) => {
+          toast.error(error);
+        }
+      );
+    } finally {
+      setIsUploading(false);
+      setSelectedImageFile(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setSelectedImageFile(null);
+  };
+
   return (
     <AccountLayout>
       {/* Container thu hẹp cho trang profile */}
@@ -343,6 +429,42 @@ export default function ProfilePageWrapper() {
           <CardHeader className="bg-linear-to-r from-gray-50 to-indigo-50 border-b">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base text-gray-900 flex items-center gap-12">
+
+                <div className="xl:hidden">
+                  <div className="relative">
+                    <Avatar className="size-24 border-4 shadow-md rounded-full flex items-center justify-center">
+                      {userProfileData?.avatar_url || user?.avatar_url ? (
+                        <AvatarImage
+                          src={userProfileData?.avatar_url || user?.avatar_url || undefined}
+                          alt={user?.username}
+                          className='object-cover object-center'
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-xl">
+                          {user?.username?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <Button
+                      size="icon"
+                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700 shadow-md text-white"
+                      onClick={handleAvatarClick}
+                      disabled={isUploading}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
                 <div className="flex flex-col items-center">
                   <span className="text-blue-600 text-4xl font-bold">
                     {(() => {
@@ -800,6 +922,14 @@ export default function ProfilePageWrapper() {
             },
           },
         }}
+      />
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={handleCropCancel}
+        imageFile={selectedImageFile}
+        onCropComplete={handleCropComplete}
       />
     </AccountLayout>
   );

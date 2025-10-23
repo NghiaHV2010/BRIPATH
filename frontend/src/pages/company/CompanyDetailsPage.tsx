@@ -82,7 +82,7 @@ export default function CompanyDetailsPage() {
         // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
-            res.data.followedCompanies.length > 0
+          res.data.followedCompanies.length > 0
         );
       } catch (err) {
         console.error("Error fetching company details:", err);
@@ -178,11 +178,30 @@ export default function CompanyDetailsPage() {
         </div>
 
         {/* Banner */}
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white relative">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
-          </div>
+        <div className="text-white relative">
+          {/* Background Image or Default Blue Gradient */}
+          {companyDetail.background_url ? (
+            <>
+              {/* Company Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${companyDetail.background_url})` }}
+              />
+              {/* Black Gradient Overlay - Bottom to Top and Sides */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-black/50 via-black/10 to-black/50" />
+            </>
+          ) : (
+            <>
+              {/* Default Blue Gradient */}
+              <div className="absolute inset-0 bg-linear-to-br from-blue-600 via-blue-700 to-blue-800" />
+              {/* Blue Accent Elements */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+                <div className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300 rounded-full blur-3xl"></div>
+              </div>
+            </>
+          )}
 
           <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col lg:flex-row gap-8">
             {/* Logo */}
@@ -215,7 +234,7 @@ export default function CompanyDetailsPage() {
                   <Button
                     onClick={handleFollow}
                     className={
-                      isFollowed ? "!bg-blue-400" : "!bg-white !text-blue-600"
+                      isFollowed ? "bg-blue-400!" : "bg-white! text-blue-600!"
                     }
                   >
                     {isFollowed ? "Đã theo dõi" : "Theo dõi công ty"}
@@ -234,7 +253,7 @@ export default function CompanyDetailsPage() {
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
                   {companyDetail.description.split("\n")[0]?.trim() ||
                     companyDetail.description.substring(0, 200) +
-                      (companyDetail.description.length > 200 ? "..." : "")}
+                    (companyDetail.description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -551,7 +570,7 @@ export default function CompanyDetailsPage() {
 
             {/* Right: Sidebar */}
             <div className="space-y-8">
-              <Card className="bg-white shadow-lg rounded-2xl">
+              <Card className="bg-white shadow-lg rounded-2xl z-0">
                 <CompanyMap
                   companyName={companyDetail.users?.username || "Company"}
                   lat={10.77611}

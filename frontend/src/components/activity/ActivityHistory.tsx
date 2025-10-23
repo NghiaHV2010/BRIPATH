@@ -81,7 +81,7 @@ export function ActivityHistory() {
 
     if (error) {
         return (
-            <div className="w-full max-w-4xl mx-auto p-6">
+            <div className="w-full max-w-5xl min-h-screen p-6">
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
@@ -92,7 +92,7 @@ export function ActivityHistory() {
     const groupedActivities = groupActivitiesByDate();
 
     return (
-        <div className="w-full max-w-4xl mx-auto mt-6 space-y-6">
+        <div className="w-full max-w-5xl min-h-screen space-y-6">
             <div className="flex items-center gap-3">
                 <History className="w-6 h-6 text-gray-700" />
                 <h3 className="text-xl font-bold text-gray-900">Lịch sử hoạt động</h3>
