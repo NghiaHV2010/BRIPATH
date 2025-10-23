@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { QrCode, Copy, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRScannerButton, QRCodeDisplay } from '@/components/QR';
+import PaymentCountdown from '@/components/PaymentCountdown';
+import axiosConfig from '@/config/axios.config';
 
 interface PaymentPlan {
   id: number;
-  name: string;
+  plan_name: string;
   price: number;
-  duration: number;
-  features: string[];
+  duration_months: number;
+  features: any[];
 }
 
 interface PaymentProcessPageProps {}
@@ -23,6 +26,8 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
   const [copied, setCopied] = useState(false);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const plan = location.state?.plan as PaymentPlan;
   const paymentMethod = location.state?.paymentMethod as string;
@@ -46,58 +51,55 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     }
   }, [plan, paymentMethod]);
 
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, []);
+
   const handleSePayPayment = async () => {
     setIsLoading(true);
     try {
-      // Create custom transfer content based on plan
-      const getTransferContent = (plan: any) => {
-        const planCode = plan.name.toUpperCase().replace(/\s+/g, '');
-        return `TKP${SEPAY_VA} SEPAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)} ${planCode}`;
+      // Create custom transfer content
+      const getTransferContent = () => {
+        return `TKP${SEPAY_VA} SEPAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       };
       
-      const transferContent = getTransferContent(plan);
+      const transferContent = getTransferContent();
       
       // Call backend to create order and save mapping
-      const response = await fetch('/api/sepay/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({
-          amount: plan.price,
-          description: transferContent,
-          planId: plan.id,
-          companyId: null
-        })
+      const response = await axiosConfig.post('/sepay/create-order', {
+        amount: plan.price,
+        description: transferContent,
+        planId: plan.id,
+        companyId: null
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create order');
-      }
-
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to create order');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to create order');
       }
 
       // Use the order data from backend
       const paymentInfo = {
-        orderId: result.data.orderId,
-        amount: result.data.amount,
-        description: result.data.description,
-        transferContent: result.data.description,
-        vaNumber: result.data.vaNumber,
-        bank: result.data.bankCode,
-        qrCodeUrl: result.data.qrCodeUrl,
-        paymentUrl: result.data.paymentUrl
+        orderId: response.data.data.orderId,
+        amount: response.data.data.amount,
+        description: response.data.data.description,
+        transferContent: response.data.data.description,
+        vaNumber: response.data.data.vaNumber,
+        bank: response.data.data.bankCode,
+        qrCodeUrl: response.data.data.qrCodeUrl,
+        paymentUrl: response.data.data.paymentUrl
       };
 
       setPaymentData(paymentInfo);
+      setIsCountdownActive(true);
       
       // Start polling for payment status
-      startPaymentPolling(result.data.orderId);
+      startPaymentPolling(response.data.data.orderId);
       
     } catch (error) {
       console.error('SePay payment error:', error);
@@ -110,36 +112,28 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
   const cancelAllPendingOrders = async () => {
     try {
-      const response = await fetch('/api/sepay/cancel-all', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log(`Cancelled ${result.cancelledCount} pending orders`);
-      }
+      const response = await axiosConfig.delete('/sepay/cancel-all');
+      console.log(`Cancelled ${response.data.cancelledCount} pending orders`);
     } catch (error) {
       console.error('Error cancelling orders:', error);
     }
   };
 
   const startPaymentPolling = (orderId: string) => {
-    const pollInterval = setInterval(async () => {
+    // Clear any existing polling
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    pollingIntervalRef.current = setInterval(async () => {
       try {
-        const response = await fetch(`/api/sepay/status/${orderId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        });
+        const response = await axiosConfig.get(`/sepay/status/${orderId}`);
         
-        const data = await response.json();
-        
-        if (data.success && data.data.status === 'success') {
+        if (response.data.success && response.data.data.status === 'success') {
           setPaymentStatus('success');
-          clearInterval(pollInterval);
+          setIsCountdownActive(false);
+          clearInterval(pollingIntervalRef.current!);
+          pollingIntervalRef.current = null;
           toast.success('Thanh toán thành công!');
           
           // Redirect to success page after 3 seconds
@@ -156,7 +150,10 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
     // Stop polling after 15 minutes
     setTimeout(() => {
-      clearInterval(pollInterval);
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }, 15 * 60 * 1000);
   };
 
@@ -166,6 +163,35 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     toast.success('Đã sao chép!');
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleQRScan = (result: string) => {
+    console.log('QR Code scanned:', result);
+    toast.success('Đã quét mã QR thành công!');
+    // Here you can process the QR code result
+    // For example, extract payment information from the QR code
+  };
+
+  const handleCountdownTimeUp = async () => {
+    if (!paymentData?.orderId) return;
+    
+    try {
+      // Clear polling interval
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      
+      // Auto cancel order when time is up
+      await axiosConfig.delete(`/sepay/cancel/${paymentData.orderId}`);
+      toast.error('Hết thời gian thanh toán. Đơn hàng đã được hủy tự động.');
+      setPaymentStatus('failed');
+      setIsCountdownActive(false);
+    } catch (error) {
+      console.error('Error auto-cancelling order:', error);
+      toast.error('Có lỗi khi hủy đơn hàng tự động');
+    }
+  };
+
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -241,6 +267,16 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
         {paymentData && (
           <div className="grid md:grid-cols-2 gap-8">
+            {/* Payment Countdown */}
+            {isCountdownActive && paymentStatus === 'pending' && (
+              <div className="md:col-span-2">
+                <PaymentCountdown
+                  onTimeUp={handleCountdownTimeUp}
+                  duration={10}
+                />
+              </div>
+            )}
+
             {/* Payment Instructions */}
             <Card>
               <CardHeader>
@@ -309,24 +345,21 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
               </CardContent>
             </Card>
 
-            {/* QR Code */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Mã QR thanh toán</CardTitle>
-                <CardDescription>
-                  Quét mã QR để chuyển khoản nhanh chóng
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300">
-                  <img 
-                    src={paymentData.qrCodeUrl} 
-                    alt="QR Code" 
-                    className="mx-auto max-w-full h-auto"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* QR Code with scanner layout */}
+            <div className="space-y-4">
+              <QRCodeDisplay
+                qrCodeUrl={paymentData.qrCodeUrl}
+                title="Mã QR thanh toán"
+                description="Quét mã QR để chuyển khoản nhanh chóng"
+              />
+              <QRScannerButton
+                onScan={handleQRScan}
+                variant="outline"
+                className="w-full"
+              >
+                Mở camera quét QR
+              </QRScannerButton>
+            </div>
           </div>
         )}
 
@@ -339,11 +372,11 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Gói dịch vụ:</span>
-                <span className="font-semibold">{plan.name}</span>
+                <span className="font-semibold">{plan?.plan_name || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
                 <span>Thời gian:</span>
-                <span>{plan.duration} tháng</span>
+                <span>{plan?.duration_months || 0} tháng</span>
               </div>
               <div className="flex justify-between">
                 <span>Phương thức:</span>
@@ -388,15 +421,10 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
           <Button 
             onClick={async () => {
               try {
-                const response = await fetch(`/api/sepay/status/${paymentData?.orderId}`, {
-                  headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                  }
-                });
-                const data = await response.json();
+                const response = await axiosConfig.get(`/sepay/status/${paymentData?.orderId}`);
                 
-                if (data.success) {
-                  if (data.data.status === 'success') {
+                if (response.data.success) {
+                  if (response.data.data.status === 'success') {
                     toast.success('Thanh toán đã được xác nhận!');
                     setPaymentStatus('success');
                   } else {

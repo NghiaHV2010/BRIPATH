@@ -495,3 +495,21 @@ input[type="range"].slider::-moz-range-thumb {
   cursor: pointer;
   border: none;
 }
+
+@keyframes scan-line {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    top: calc(100% - 4px);
+    opacity: 1;
+  }
+}
+
+.animate-scan-line {
+  animation: scan-line 2s ease-in-out infinite;
+}
