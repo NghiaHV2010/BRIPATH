@@ -7,14 +7,18 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
+import axiosConfig from '@/config/axios.config';
 
 interface PaymentPlan {
   id: number;
-  name: string;
+  plan_name: string;
   price: number;
-  duration: number;
-  features: string[];
+  duration_months: number;
+  features: any[];
   popular?: boolean;
+  urgent_jobs_limit?: number;
+  quality_jobs_limit?: number;
+  total_jobs_limit?: number;
 }
 
 const PaymentPage: React.FC = () => {
@@ -27,6 +31,25 @@ const PaymentPage: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [userSubscription, setUserSubscription] = useState<any>(null);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+  const [allPlans, setAllPlans] = useState<PaymentPlan[]>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+  // Fetch pricing plans data
+  useEffect(() => {
+    const fetchPricingPlans = async () => {
+      try {
+        const response = await axiosConfig.get('/pricings');
+        setAllPlans(response.data.data);
+      } catch (error) {
+        console.error('Error fetching pricing plans:', error);
+        toast.error('Không thể tải danh sách gói dịch vụ');
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+
+    fetchPricingPlans();
+  }, []);
 
   // Fetch user subscription data
   useEffect(() => {
@@ -37,16 +60,8 @@ const PaymentPage: React.FC = () => {
       }
 
       try {
-        const response = await fetch(`/api/subscriptions/user/${authUser.id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUserSubscription(data.data);
-        }
+        const response = await axiosConfig.get(`/subscriptions/user/${authUser.id}`);
+        setUserSubscription(response.data.data);
       } catch (error) {
         console.error('Error fetching subscription:', error);
       } finally {
@@ -57,60 +72,6 @@ const PaymentPage: React.FC = () => {
     fetchUserSubscription();
   }, [authUser?.id]);
 
-  // Mock data - replace with actual plan data from API
-  const allPlans: PaymentPlan[] = [
-    {
-      id: 0,
-      name: 'Gói Trial',
-      price: 0,
-      duration: 1,
-      features: [
-        'Đăng tối đa 2 việc làm',
-        'Hỗ trợ email',
-        'Báo cáo cơ bản',
-        'Thời gian sử dụng: 7 ngày'
-      ]
-    },
-    {
-      id: 1,
-      name: 'Gói Cơ Bản',
-      price: 99000,
-      duration: 1,
-      features: [
-        'Đăng tối đa 5 việc làm',
-        'Hỗ trợ email',
-        'Báo cáo cơ bản'
-      ]
-    },
-    {
-      id: 2,
-      name: 'Gói Nâng Cao',
-      price: 199000,
-      duration: 1,
-      features: [
-        'Đăng tối đa 20 việc làm',
-        'Ưu tiên hiển thị',
-        'Hỗ trợ 24/7',
-        'Báo cáo chi tiết',
-        'AI matching'
-      ],
-      popular: true
-    },
-    {
-      id: 3,
-      name: 'Gói Doanh Nghiệp',
-      price: 399000,
-      duration: 1,
-      features: [
-        'Đăng không giới hạn việc làm',
-        'Tính năng nâng cao',
-        'Hỗ trợ ưu tiên',
-        'Báo cáo toàn diện',
-        'AI matching nâng cao',
-        'Tích hợp API'
-      ]
-    }
-  ];
 
   // Filter plans based on user subscription
   const plans = allPlans.filter(plan => {
@@ -152,23 +113,12 @@ const PaymentPage: React.FC = () => {
     if (selectedPlan.price === 0) {
       try {
         // Activate trial plan directly
-        const response = await fetch('/api/subscriptions/activate-trial', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          },
-          body: JSON.stringify({
-            planId: selectedPlan.id
-          })
+        await axiosConfig.post('/subscriptions/activate-trial', {
+          planId: selectedPlan.id
         });
 
-        if (response.ok) {
-          toast.success('Kích hoạt gói trial thành công!');
-          navigate('/dashboard');
-        } else {
-          throw new Error('Failed to activate trial');
-        }
+        toast.success('Kích hoạt gói trial thành công!');
+        navigate('/dashboard');
       } catch (error) {
         toast.error('Có lỗi xảy ra khi kích hoạt gói trial');
       }
@@ -206,25 +156,56 @@ const PaymentPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center"
+            >
+              ← Về trang chủ
+            </Button>
+            
+            {/* User subscription status */}
+            {!isLoadingSubscription && userSubscription && (
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Gói hiện tại:</p>
+                <p className="font-semibold text-green-600">
+                  {userSubscription.plan?.plan_name || userSubscription.plan_name || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Hết hạn: {userSubscription.end_date ? 
+                    new Date(userSubscription.end_date).toLocaleDateString('vi-VN') : 
+                    'N/A'
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+          
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Chọn Gói Dịch Vụ
           </h1>
           <p className="text-gray-600">
             Nâng cao hiệu quả tuyển dụng với các gói dịch vụ của chúng tôi
           </p>
-          {userSubscription && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg inline-block">
-              <p className="text-sm text-blue-700">
-                Bạn đang sử dụng: <span className="font-semibold">{userSubscription.plan_name || 'Gói hiện tại'}</span>
-                {userSubscription.end_date && (
-                  <span className="ml-2">
-                    (Hết hạn: {new Date(userSubscription.end_date).toLocaleDateString('vi-VN')})
-                  </span>
-                )}
-              </p>
-            </div>
-          )}
         </div>
+
+        {/* Warning if user already has subscription */}
+        {!isLoadingSubscription && userSubscription && (
+          <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 text-orange-600">⚠️</div>
+              <div>
+                <p className="font-semibold text-orange-800">
+                  Bạn đang sử dụng gói {userSubscription.plan?.plan_name || userSubscription.plan_name || 'N/A'}
+                </p>
+                <p className="text-sm text-orange-700">
+                  Gói mới sẽ được kích hoạt sau khi gói hiện tại hết hạn
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoadingSubscription ? (
           <div className="text-center py-8">
@@ -233,12 +214,18 @@ const PaymentPage: React.FC = () => {
         ) : (
           <>
             {/* Plans Selection */}
-            <div className={`mb-8 ${
-              plans.length === 4 
-                ? 'flex flex-wrap justify-center gap-4' 
-                : 'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            }`}>
-              {plans.map((plan) => (
+            {isLoadingPlans ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <span className="ml-2 text-gray-600">Đang tải gói dịch vụ...</span>
+              </div>
+            ) : (
+              <div className={`mb-8 ${
+                plans.length === 4 
+                  ? 'flex flex-wrap justify-center gap-4' 
+                  : 'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              }`}>
+                {plans.map((plan) => (
                 <Card 
                   key={plan.id} 
                   className={`relative cursor-pointer transition-all hover:shadow-lg ${
@@ -256,27 +243,28 @@ const PaymentPage: React.FC = () => {
                     </Badge>
                   )}
                   <CardHeader className="text-center">
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
+                    <CardTitle className="text-xl">{plan.plan_name}</CardTitle>
                     <div className="text-3xl font-bold text-blue-600">
                       {plan.price === 0 ? 'Miễn phí' : formatPrice(plan.price)}
                     </div>
                     <CardDescription>
-                      / {plan.duration} tháng
+                      / {plan.duration_months} tháng
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {plan.features.map((feature, index) => (
+                      {plan.features && plan.features.map((feature: any, index: number) => (
                         <li key={index} className="flex items-center">
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
+                          <span className="text-sm">{feature.feature_name || feature}</span>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {selectedPlan && (
               <>
@@ -323,11 +311,11 @@ const PaymentPage: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Gói dịch vụ:</span>
-                        <span className="font-semibold">{selectedPlan.name}</span>
+                        <span className="font-semibold">{selectedPlan.plan_name}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Thời gian:</span>
-                        <span>{selectedPlan.duration} tháng</span>
+                        <span>{selectedPlan.duration_months} tháng</span>
                       </div>
                       {selectedPlan.price > 0 && (
                         <div className="flex justify-between">
