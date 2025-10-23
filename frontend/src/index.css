@@ -496,6 +496,7 @@ input[type="range"].slider::-moz-range-thumb {
   border: none;
 }
 
+/* QR Scanner animations */
 @keyframes scan-line {
   0% {
     top: 0;
