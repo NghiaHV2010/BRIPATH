@@ -44,7 +44,8 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
                 maxAge: 45 * 60 * 1000,
                 httpOnly: true,
                 sameSite: COOKIE_CONFIG_SAME_SITE,
-                secure: COOKIE_CONFIG_SECURE
+                secure: COOKIE_CONFIG_SECURE,
+                path: '/'
             });
         } else {
             const accessTokenDecoded = jwt.verify(accessToken, ACCESS_SECRET);
