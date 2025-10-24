@@ -15,7 +15,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { ImageCropModal } from "../../components/ui/ImageCropModal";
 import { useAuthStore } from "../../store/auth";
-import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2, Edit } from "lucide-react";
+import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2, Edit, Bookmark, Building2 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
@@ -427,8 +427,8 @@ export default function ProfilePageWrapper() {
         {/* Profile Card */}
         <Card className="overflow-hidden">
           <CardHeader className="bg-linear-to-r from-gray-50 to-indigo-50 border-b">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-base text-gray-900 flex items-center gap-12">
+            <div className="flex justify-between items-center flex-wrap gap-y-4">
+              <CardTitle className="text-base text-gray-900 flex items-center gap-8 md:gap-12">
 
                 <div className="xl:hidden">
                   <div className="relative">
@@ -465,24 +465,32 @@ export default function ProfilePageWrapper() {
                   </div>
                 </div>
 
+                {/* implement */}
                 <div className="flex flex-col items-center">
-                  <span className="text-blue-600 text-4xl font-bold">
+                  <span className="text-blue-600 text-4xl font-bold text-center">
+                    <Bookmark className="size-8 text-blue-500 block sm:hidden" />
                     {(() => {
                       const count = userProfileData?._count.savedJobs ?? 0;
                       return count < 10 ? `0${count}` : String(count);
                     })()}
                   </span>
-                  Đã lưu
+                  <p className="hidden sm:block">
+                    Đã lưu
+                  </p>
                 </div>
 
+                {/* implement */}
                 <div className="flex flex-col items-center">
                   <span className="text-blue-600 text-4xl font-bold">
+                    <Building2 className="size-8 text-center text-blue-500 block sm:hidden" />
                     {(() => {
                       const count = userProfileData?._count.followedCompanies ?? 0;
                       return count < 10 ? `0${count}` : String(count);
                     })()}
                   </span>
-                  Đang theo dõi
+                  <p className="hidden sm:block">
+                    Đang theo dõi
+                  </p>
                 </div>
               </CardTitle>
 
@@ -658,7 +666,7 @@ export default function ProfilePageWrapper() {
             {/* Phần đổi mật khẩu - ở cuối */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div>
+                <div className="hidden sm:block">
                   <h3 className="font-medium text-gray-900">Bảo mật</h3>
                   <p className="text-sm text-gray-500">
                     Quản lý mật khẩu của bạn
@@ -667,7 +675,7 @@ export default function ProfilePageWrapper() {
                 {!showPasswordForm && (
                   <button
                     onClick={() => setShowPasswordForm(true)}
-                    className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="text-sm bg-blue-600 text-white px-4 py-4 rounded-md hover:bg-blue-700 flex-1 sm:flex-initial"
                   >
                     Đổi mật khẩu
                   </button>
@@ -737,11 +745,11 @@ export default function ProfilePageWrapper() {
           <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 border-b mb-4">
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col">
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                  CV & Hồ sơ ứng tuyển
+                <CardTitle className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-blue-600 hidden sm:block" />
+                  Hồ sơ ứng tuyển
                 </CardTitle>
-                <CardDescription className="text-gray-600 mt-1">
+                <CardDescription className="text-gray-600 mt-1 hidden sm:block">
                   Quản lý thông tin CV và hồ sơ cá nhân của bạn
                 </CardDescription>
               </div>

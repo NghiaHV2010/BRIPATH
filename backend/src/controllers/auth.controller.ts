@@ -291,18 +291,73 @@ export const checkAuth = (req: Request, res: Response) => {
     });
 }
 
-export const googleLogin = (req: Request, res: Response) => {
-    type userDTO = {
-        id: string;
-        username: string;
-        email: string;
-        avatar_url: string;
+export const googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        type userDTO = {
+            id: string;
+            username: string;
+            email: string;
+            avatar_url: string;
+        }
+
+        const user: userDTO = req.user as userDTO;
+
+        if (!user || !user.id) {
+            return res.redirect(`${FRONTEND_URL}/login?error=authentication_failed`);
+        }
+
+        // Get complete user data and update last login
+        const result = await prisma.$transaction(async (tx) => {
+            const updatedUser = await tx.users.update({
+                where: {
+                    id: user.id
+                },
+                data: {
+                    last_loggedIn: new Date()
+                },
+                include: {
+                    roles: {
+                        select: {
+                            role_name: true
+                        }
+                    },
+                    _count: {
+                        select: {
+                            userNotifications: {
+                                where: {
+                                    is_read: false
+                                }
+                            }
+                        }
+                    }
+                },
+                omit: {
+                    firebase_uid: true,
+                    password: true,
+                    is_deleted: true,
+                }
+            });
+
+            // Create activity history
+            await tx.userActivitiesHistory.create({
+                data: {
+                    user_id: user.id,
+                    activity_name: "Bạn đã đăng nhập vào hệ thống bằng Google."
+                }
+            });
+
+            return updatedUser;
+        });
+
+        // Generate tokens
+        generateToken(result.id, res);
+
+        // Redirect with success
+        res.redirect(`${FRONTEND_URL}/?login=success`);
+    } catch (error) {
+        console.error('Google login error:', error);
+        res.redirect(`${FRONTEND_URL}/login?error=server_error`);
     }
-
-    const user: userDTO = req.user as userDTO;
-
-    generateToken(user.id, res);
-    res.redirect(FRONTEND_URL || "/");
 }
 
 export const verifySMS = async (req: Request, res: Response, next: NextFunction) => {

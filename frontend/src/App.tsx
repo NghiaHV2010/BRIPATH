@@ -66,6 +66,19 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
+  // Handle Google OAuth callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const loginStatus = urlParams.get('login');
+
+    if (loginStatus === 'success') {
+      // Clear the URL parameter and check auth status
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Re-check auth to get updated user data
+      checkAuth();
+    }
+  }, [location.search, checkAuth]);
+
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">

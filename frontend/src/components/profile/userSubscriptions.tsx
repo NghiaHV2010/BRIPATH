@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import axiosConfig from "@/config/axios.config"
+import { Link } from "react-router"
 
 export function UserSubscription() {
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
@@ -108,7 +109,7 @@ export function UserSubscription() {
 
     if (loading) {
         return (
-            <div className="max-w-5xl w-full min-h-screen px-4 py-8">
+            <div className="max-w-5xl w-full min-h-screen p-6">
                 <div className="flex items-center justify-center h-64">
                     <p className="text-lg text-muted-foreground">Đang tải thông tin gói đăng ký...</p>
                 </div>
@@ -118,7 +119,7 @@ export function UserSubscription() {
 
     if (error) {
         return (
-            <div className="max-w-5xl w-full min-h-screen px-4 py-8">
+            <div className="max-w-5xl w-full min-h-screen p-6">
                 <Card>
                     <CardContent className="flex items-center justify-center h-64">
                         <div className="text-center">
@@ -133,10 +134,11 @@ export function UserSubscription() {
 
     if (!subscriptions || subscriptions.length === 0) {
         return (
-            <div className="max-w-5xl w-full min-h-screen px-4 py-8">
+            <div className="max-w-5xl w-full min-h-screen p-6">
                 <Card>
-                    <CardContent className="flex items-center justify-center h-64">
+                    <CardContent className="flex flex-col flex-1 gap-2 items-center justify-center h-64">
                         <p className="text-lg text-muted-foreground">Không tìm thấy gói đăng ký</p>
+                        <Link to="/subscriptions" className="text-blue-600 underline ml-2">Khám phá gói đăng ký</Link>
                     </CardContent>
                 </Card>
             </div>
@@ -144,7 +146,7 @@ export function UserSubscription() {
     }
 
     return (
-        <div className="max-w-5xl min-h-screen container px-6 py-8">
+        <div className="max-w-5xl min-h-screen container p-6">
             <div className="mb-8">
                 <h2 className="text-3xl font-bold mb-2">Gói Đăng Ký Của Tôi</h2>
                 <p className="text-muted-foreground">Quản lý gói đăng ký của bạn và xem chi tiết sử dụng</p>
