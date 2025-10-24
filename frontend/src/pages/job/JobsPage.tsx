@@ -66,7 +66,9 @@ export default function JobsPage() {
   }, [currentPage, getAllJobs]);
 
   useEffect(() => {
-    const ws = new WebSocket(import.meta.env.VITE_WS_URL || "ws://localhost:3000");
+    const ws = new WebSocket(
+      import.meta.env.VITE_WS_URL || "ws://localhost:3000"
+    );
 
     ws.onopen = () => {
       console.log("✅ Connected to WebSocket server");
@@ -218,7 +220,7 @@ export default function JobsPage() {
         <div className="flex items-center justify-center py-16 mb-8">
           <div className="flex flex-col items-center gap-4">
             <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-slate-600 font-medium">Loading jobs...</p>
+            <p className="text-slate-600 font-medium">Đang tải việc làm...</p>
           </div>
         </div>
       ) : (

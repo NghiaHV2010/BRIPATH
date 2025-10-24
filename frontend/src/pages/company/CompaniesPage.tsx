@@ -184,10 +184,10 @@ export default function CompaniesPage() {
       {/* Khối này giữ lại cho Company List bên dưới */}
       <div className="w-full mx-auto px-4 py-12 bg-gradient-to-b from-blue-100  to-white ">
         {isLoading ? (
-          <div className="flex items-center justify-center py-16 ">
+          <div className="flex items-center justify-center py-16 mb-8">
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-slate-600 font-medium">Loading companies...</p>
+              <p className="text-slate-600 font-medium">Đang tải công ty...</p>
             </div>
           </div>
         ) : (

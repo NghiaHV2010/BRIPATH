@@ -4,7 +4,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen max-w-4xl w-[100%] bg-gray-50 py-6">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
             Cài đặt tài khoản
           </h3>
@@ -23,7 +23,7 @@ export default function SettingsPage() {
               <li>Quản lý phiên đăng nhập</li>
             </ul>
           </div>
-        </div>
+        </div> */}
         <ActivityHistory />
       </div>
     </div>

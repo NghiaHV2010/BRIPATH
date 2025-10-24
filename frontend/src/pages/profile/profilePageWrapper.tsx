@@ -11,14 +11,39 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { useAuthStore } from "../../store/auth";
-import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2 } from "lucide-react";
+import {
+  Edit2,
+  Save,
+  X,
+  User,
+  Calendar,
+  MapPin,
+  Mail,
+  Phone,
+  FileText,
+  Loader,
+  BarChart3,
+  Trash2,
+} from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import axiosConfig from "../../config/axios.config";
-import { getUserProfile, updateUserProfile, changePassword, type ChangePasswordRequest } from "../../api/user_api";
+import {
+  getUserProfile,
+  updateUserProfile,
+  changePassword,
+  type ChangePasswordRequest,
+} from "../../api/user_api";
 import { Resume } from "../../components/resume/resume";
 import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
 import type { ResumeListItem } from "@/types/resume";
@@ -26,14 +51,23 @@ import { ResumeCard } from "@/components/resume/resumeCard";
 import { CVStatsRadarChart } from "@/components/resume/resumeStats";
 import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
+import { Building2 } from "lucide-react";
+import CompanyRegistrationDialog from "@/components/company/CompanyRegistrationDialog";
+import type { CompanyRegisterResponse } from "@/types/company";
+// import RegistrationInforDialog from "@/components/company/RegistrationInforDialog";
 
 export default function ProfilePageWrapper() {
-
   const user = useAuthStore((state) => state.authUser);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [userProfileData, setUserProfileData] = useState<UserProfile | null>(null);
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [userProfileData, setUserProfileData] = useState<UserProfile | null>(
+    null
+  );
+  const [hasRegisteredCompany, setHasRegisteredCompany] = useState(false);
+  // const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+  //isInfoDialogOpen,
   const [formData, setFormData] = useState({
     username: user?.username || "",
     avatar_url: user?.avatar_url || "",
@@ -41,7 +75,7 @@ export default function ProfilePageWrapper() {
     address_ward: user?.address_ward || "",
     address_city: user?.address_city || "",
     address_country: user?.address_country || "",
-    gender: user?.gender || "others",  //'male' | 'female' | 'others'
+    gender: user?.gender || "others", //'male' | 'female' | 'others'
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -65,8 +99,8 @@ export default function ProfilePageWrapper() {
 
   // Set default editing state based on URL parameter
   useEffect(() => {
-    const editParam = searchParams.get('edit');
-    if (editParam === 'true') {
+    const editParam = searchParams.get("edit");
+    if (editParam === "true") {
       setIsEditing(true);
     }
   }, [searchParams]);
@@ -87,6 +121,8 @@ export default function ProfilePageWrapper() {
       if (profileResponse?.success) {
         const userData = profileResponse.data;
         setUserProfileData(userData);
+        // Kiểm tra đăng ký doanh nghiệp chưa trên company_id
+        setHasRegisteredCompany(!!userData.company_id);
 
         // Update form data with fetched user data
         setFormData({
@@ -142,6 +178,21 @@ export default function ProfilePageWrapper() {
     );
   }
 
+  const handleCompanyRegistrationSuccess = (
+    response: CompanyRegisterResponse
+  ) => {
+    toast.success(response.message || "Đăng ký doanh nghiệp thành công!", {
+      duration: 3000,
+      position: "top-right",
+    });
+
+    //  Update UI
+    setHasRegisteredCompany(true);
+
+    loadUserProfileData();
+    setIsCompanyDialogOpen(false);
+  };
+
   const address = [
     user.address_street,
     user.address_ward,
@@ -162,10 +213,12 @@ export default function ProfilePageWrapper() {
     setFormData({
       username: userProfileData?.username || user?.username || "",
       avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street: userProfileData?.address_street || user?.address_street || "",
+      address_street:
+        userProfileData?.address_street || user?.address_street || "",
       address_ward: userProfileData?.address_ward || user?.address_ward || "",
       address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country: userProfileData?.address_country || user?.address_country || "",
+      address_country:
+        userProfileData?.address_country || user?.address_country || "",
       gender: userProfileData?.gender || user?.gender || "others",
     });
   };
@@ -175,10 +228,12 @@ export default function ProfilePageWrapper() {
     setFormData({
       username: userProfileData?.username || user?.username || "",
       avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street: userProfileData?.address_street || user?.address_street || "",
+      address_street:
+        userProfileData?.address_street || user?.address_street || "",
       address_ward: userProfileData?.address_ward || user?.address_ward || "",
       address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country: userProfileData?.address_country || user?.address_country || "",
+      address_country:
+        userProfileData?.address_country || user?.address_country || "",
       gender: userProfileData?.gender || user?.gender || "others",
     });
 
@@ -202,7 +257,7 @@ export default function ProfilePageWrapper() {
         address_ward: formData.address_ward,
         address_city: formData.address_city,
         address_country: formData.address_country,
-        gender: formData.gender as 'male' | 'female' | 'others'
+        gender: formData.gender as "male" | "female" | "others",
       };
 
       console.log("Updating profile:", updateRequest);
@@ -266,7 +321,7 @@ export default function ProfilePageWrapper() {
 
       const changePasswordRequest: ChangePasswordRequest = {
         oldPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
+        newPassword: passwordData.newPassword,
       };
 
       const response = await changePassword(changePasswordRequest);
@@ -310,14 +365,15 @@ export default function ProfilePageWrapper() {
       // Check for 204 No Content status
       if (response.status === 204) {
         // Remove CV from local state
-        setCvCard(prev => prev.filter(cv => cv.id !== parseInt(cvToDelete)));
+        setCvCard((prev) =>
+          prev.filter((cv) => cv.id !== parseInt(cvToDelete))
+        );
 
         // Close dialog if deleted CV was being viewed
         if (selectedCvId === parseInt(cvToDelete)) {
           setSelectedCvId(null);
           setShowStats(false);
         }
-
       } else {
         throw new Error(`Unexpected response status: ${response.status}`);
       }
@@ -356,7 +412,8 @@ export default function ProfilePageWrapper() {
                 <div className="flex flex-col items-center">
                   <span className="text-blue-600 text-4xl font-bold">
                     {(() => {
-                      const count = userProfileData?._count.followedCompanies ?? 0;
+                      const count =
+                        userProfileData?._count.followedCompanies ?? 0;
                       return count < 10 ? `0${count}` : String(count);
                     })()}
                   </span>
@@ -365,13 +422,29 @@ export default function ProfilePageWrapper() {
               </CardTitle>
 
               {!isEditing ? (
-                <Button
-                  onClick={handleEdit}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Chỉnh sửa
-                </Button>
+                <div className="flex gap-2">
+                  {hasRegisteredCompany ? (
+                    <Button
+                      variant="outline"
+                      // onClick={() => setIsInfoDialogOpen(true)}
+                    >
+                      <Building2 className="w-4 h-4 mr-2" /> Xem thông tin đơn
+                      đăng ký
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setIsCompanyDialogOpen(true)}>
+                      <Building2 className="w-4 h-4 mr-2" /> Đăng ký doanh
+                      nghiệp
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleEdit}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Chỉnh sửa
+                  </Button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <Button
@@ -382,7 +455,11 @@ export default function ProfilePageWrapper() {
                     <Save className="w-4 h-4 mr-2" />
                     {isLoading ? "Đang lưu..." : "Lưu"}
                   </Button>
-                  <Button onClick={handleCancel} variant="outline" disabled={isLoading}>
+                  <Button
+                    onClick={handleCancel}
+                    variant="outline"
+                    disabled={isLoading}
+                  >
                     <X className="w-4 h-4 mr-2" />
                     Hủy
                   </Button>
@@ -392,7 +469,6 @@ export default function ProfilePageWrapper() {
           </CardHeader>
 
           <CardContent className="p-6">
-
             {/* Form Fields */}
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Add code for user's profile data here */}
@@ -523,12 +599,11 @@ export default function ProfilePageWrapper() {
                         />
                       </div>
                     </div>
-                  )
-                    : (
-                      <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                        {address || "Chưa cập nhật"}
-                      </p>
-                    )}
+                  ) : (
+                    <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
+                      {address || "Chưa cập nhật"}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -666,7 +741,10 @@ export default function ProfilePageWrapper() {
                         onClick={handleResumeCardClick}
                         isSelected={selectedCvId === cv.id}
                       />
-                      <Trash2 className="absolute p-2 right-3 bottom-2 size-10 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 cursor-pointer" onClick={() => handleDeleteCV(cv.id)} />
+                      <Trash2
+                        className="absolute p-2 right-3 bottom-2 size-10 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 cursor-pointer"
+                        onClick={() => handleDeleteCV(cv.id)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -690,7 +768,9 @@ export default function ProfilePageWrapper() {
                               {showStats ? "Thống kê CV" : "Xem trước CV"}
                             </DialogTitle>
                             <DialogDescription>
-                              {showStats ? "Xem chi tiết thống kê kỹ năng của CV" : "Xem trước nội dung CV đã tải lên"}
+                              {showStats
+                                ? "Xem chi tiết thống kê kỹ năng của CV"
+                                : "Xem trước nội dung CV đã tải lên"}
                             </DialogDescription>
                           </div>
                           <Button
@@ -705,7 +785,11 @@ export default function ProfilePageWrapper() {
                         </div>
                       </DialogHeader>
 
-                      <DialogClose id="dialog-close-button" asChild className="bg-red-100 text-center flex justify-center items-center size-10">
+                      <DialogClose
+                        id="dialog-close-button"
+                        asChild
+                        className="bg-red-100 text-center flex justify-center items-center size-10"
+                      >
                         <button
                           className="text-red-500 hover:text-red-700 hover:bg-red-200 rounded-full p-2 transition-colors"
                           aria-label="Đóng"
@@ -715,13 +799,15 @@ export default function ProfilePageWrapper() {
                       </DialogClose>
                     </div>
 
-                    {selectedCvId && (
-                      showStats ? (
+                    {selectedCvId &&
+                      (showStats ? (
                         <CVStatsRadarChart cvId={selectedCvId} />
                       ) : (
-                        <Resume cvId={selectedCvId} avatar_url={formData?.avatar_url} />
-                      )
-                    )}
+                        <Resume
+                          cvId={selectedCvId}
+                          avatar_url={formData?.avatar_url}
+                        />
+                      ))}
                   </DialogContent>
                 </Dialog>
               </div>
@@ -731,13 +817,30 @@ export default function ProfilePageWrapper() {
         <FollowedCompanies />
       </div>
 
+      {/* Dialog đăng kí doanh nghiệp */}
+      <CompanyRegistrationDialog
+        open={isCompanyDialogOpen}
+        onOpenChange={setIsCompanyDialogOpen}
+        onSuccess={handleCompanyRegistrationSuccess}
+      />
+      {/* Dialog thông tin đăng kí  */}
+      {/* <RegistrationInforDialog
+        open={isInfoDialogOpen}
+        onOpenChange={setIsInfoDialogOpen}
+        data={userProfileData?.companies || null}
+      /> */}
+
       {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+      <Dialog
+        open={showDeleteConfirmation}
+        onOpenChange={setShowDeleteConfirmation}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Xác nhận xóa CV</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa CV này không? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa CV này không? Hành động này không thể
+              hoàn tác.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 mt-6">

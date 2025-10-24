@@ -18,7 +18,11 @@ import {
   CompaniesPage,
   AdminPage,
 } from "./pages";
-import { PaymentPage, PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
+import {
+  PaymentPage,
+  PaymentProcessPage,
+  PaymentSuccessPage,
+} from "./pages/payment";
 import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
@@ -31,7 +35,6 @@ import SavedJobsPageProfile from "./pages/profile/savedJobsPage";
 import FollowedCompaniesPage from "./pages/profile/followedCompaniesPage";
 import CVSuitableJobsPage from "./pages/jobs/cvSuitableJobsPage";
 import { useAuthStore } from "./store/auth";
-import { Loader } from "lucide-react";
 import { CompanyDetailsPage } from "./pages/company";
 import { NotificationList } from "./components/notification/NotificationList";
 import Layout from "./components/layout/layout";
@@ -63,11 +66,7 @@ function App() {
   }, [checkAuth]);
 
   if (isCheckingAuth && !authUser) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
-      </div>
-    );
+    return <div />; // khong can loader
   }
 
   return (
@@ -183,33 +182,33 @@ function App() {
         />
 
         <Route path="/subscriptions" element={<SubscriptionPlansPage />} />
-        
+
         {/* Payment Routes */}
-        <Route 
-          path="/payment" 
+        <Route
+          path="/payment"
           element={
             <ProtectedRoute>
               <PaymentPage />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/payment/process" 
+        <Route
+          path="/payment/process"
           element={
             <ProtectedRoute>
               <PaymentProcessPage />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/payment/success" 
+        <Route
+          path="/payment/success"
           element={
             <ProtectedRoute>
               <PaymentSuccessPage />
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
 
