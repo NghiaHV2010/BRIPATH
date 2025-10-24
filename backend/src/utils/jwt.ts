@@ -6,7 +6,8 @@ type cookieConfigResponse = {
     maxAge: number;
     httpOnly: boolean;
     sameSite: "lax" | "none" | "strict";
-    secure: boolean
+    secure: boolean,
+    path?: string
 }
 
 const accessTokenExpiryTimeInMiliSecond: number = 45 * 60 * 1000;
@@ -30,11 +31,12 @@ export const generateToken = (userId: string, res: Response) => {
     res.cookie("refreshToken", refreshToken, cookieConfig(refreshTokenExpiryTimeInMiliSecond))
 }
 
-export const cookieConfig = (maxAge: number, secure: boolean = COOKIE_CONFIG_SECURE): cookieConfigResponse => {
+export const cookieConfig = (maxAge: number, secure: boolean = COOKIE_CONFIG_SECURE, path?: string): cookieConfigResponse => {
     return {
         maxAge,
         httpOnly: true,
         sameSite: COOKIE_CONFIG_SAME_SITE,
-        secure
+        secure,
+        path: path ? path : '/'
     }
 }

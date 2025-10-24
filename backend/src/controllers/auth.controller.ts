@@ -53,7 +53,8 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
             maxAge: 30 * 60 * 1000,
             httpOnly: true,
             sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE
+            secure: COOKIE_CONFIG_SECURE,
+            path: '/'
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -87,7 +88,8 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
             maxAge: 10 * 60 * 1000,
             httpOnly: true,
             sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE
+            secure: COOKIE_CONFIG_SECURE,
+            path: '/'
         });
 
         res.status(HTTP_SUCCESS.OK).json({
@@ -498,7 +500,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
             maxAge: 30 * 60 * 1000,
             httpOnly: true,
             sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE
+            secure: COOKIE_CONFIG_SECURE,
+            path: '/'
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
