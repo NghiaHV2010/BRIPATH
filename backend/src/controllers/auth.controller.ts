@@ -14,6 +14,15 @@ import serviceAccount from "../../serviceAccountKey.json";
 
 const prisma = new PrismaClient();
 
+const cookieOptions = {
+    maxAge: 0,
+    httpOnly: true,
+    sameSite: COOKIE_CONFIG_SAME_SITE,
+    secure: COOKIE_CONFIG_SECURE,
+    path: '/',
+    domain: DOMAIN
+};
+
 export const validateRegisterInput = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { username, email, password } = req.body;
@@ -142,9 +151,9 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
             });
         });
 
-        res.cookie("data", '', { maxAge: 0 });
+        res.cookie("data", '', cookieOptions);
 
-        res.cookie("otp", '', { maxAge: 0 });
+        res.cookie("otp", '', cookieOptions);
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
@@ -231,15 +240,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Cookie options for production
-        const cookieOptions = {
-            maxAge: 0,
-            httpOnly: true,
-            sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE,
-            path: '/'
-        };
-
         // Clear cookies with proper production settings
         res.cookie("accessToken", '', cookieOptions);
         res.cookie("refreshToken", '', cookieOptions);
@@ -269,17 +269,8 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
             message: "Đăng xuất thành công!"
         });
     } catch (error) {
-        // Even if there's an error, we should still clear cookies
-        const errorCookieOptions = {
-            maxAge: 0,
-            httpOnly: true,
-            sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE,
-            path: '/'
-        };
-
-        res.cookie("accessToken", '', errorCookieOptions);
-        res.cookie("refreshToken", '', errorCookieOptions);
+        res.cookie("accessToken", '', cookieOptions);
+        res.cookie("refreshToken", '', cookieOptions);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -576,9 +567,9 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
             });
         });
 
-        res.cookie("data", '', { maxAge: 0 });
+        res.cookie("data", '', cookieOptions);
 
-        res.cookie("otp", '', { maxAge: 0 });
+        res.cookie("otp", '', cookieOptions);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
