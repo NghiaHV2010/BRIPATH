@@ -31,6 +31,24 @@ app.use(generalLimiter);
 app.use(express.json({ limit: '10mb' })); // Add size limit for JSON payloads
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Add size limit for URL encoded data
 app.use(cookieParser());
+
+// Debug middleware for cookie issues in production
+if (NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        console.log('Request cookies:', req.cookies);
+        console.log('Request headers origin:', req.headers.origin);
+        console.log('Request headers referer:', req.headers.referer);
+
+        // Override res.cookie to log cookie setting
+        const originalCookie = res.cookie;
+        res.cookie = function (name: string, value: any, options?: any) {
+            console.log(`Setting cookie ${name} with options:`, options);
+            return originalCookie.call(this, name, value, options);
+        };
+
+        next();
+    });
+}
 interface CorsOriginCallback {
     (err: Error | null, allow?: boolean): void;
 }

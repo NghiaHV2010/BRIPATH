@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../utils/jwt";
+import { generateToken, cookieConfig } from "../utils/jwt";
 import jwt from "jsonwebtoken";
 import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, FRONTEND_URL } from "../config/env.config";
 import crypto from "crypto";
@@ -49,13 +49,7 @@ export const validateRegisterInput = async (req: Request, res: Response, next: N
 
         const data = jwt.sign({ username, email, password }, ACCESS_SECRET, { expiresIn: "30m" });
 
-        res.cookie("data", data, {
-            maxAge: 30 * 60 * 1000,
-            httpOnly: true,
-            sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE,
-            path: '/'
-        });
+        res.cookie("data", data, cookieConfig(30 * 60 * 1000));
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -84,13 +78,7 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
     try {
         await sendEmailWithRetry(email, "BRIPATH - Xác thực email", emailTemplate(url));
 
-        res.cookie("otp", otp, {
-            maxAge: 10 * 60 * 1000,
-            httpOnly: true,
-            sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE,
-            path: '/'
-        });
+        res.cookie("otp", otp, cookieConfig(10 * 60 * 1000));
 
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -140,9 +128,9 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
             });
         });
 
-        res.cookie("data", '', { maxAge: 0 });
+        res.cookie("data", '', { maxAge: 0, path: '/' });
 
-        res.cookie("otp", '', { maxAge: 0 });
+        res.cookie("otp", '', { maxAge: 0, path: '/' });
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
@@ -230,7 +218,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Cookie options for production
-        const cookieOptions = {
+        const clearCookieOptions = {
             maxAge: 0,
             httpOnly: true,
             sameSite: COOKIE_CONFIG_SAME_SITE,
@@ -239,8 +227,8 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
         };
 
         // Clear cookies with proper production settings
-        res.cookie("accessToken", '', cookieOptions);
-        res.cookie("refreshToken", '', cookieOptions);
+        res.cookie("accessToken", '', clearCookieOptions);
+        res.cookie("refreshToken", '', clearCookieOptions);
 
         // Try to get user from token if available and log activity
         const accessToken = req.cookies?.accessToken;
@@ -268,7 +256,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
         });
     } catch (error) {
         // Even if there's an error, we should still clear cookies
-        const errorCookieOptions = {
+        const errorClearCookieOptions = {
             maxAge: 0,
             httpOnly: true,
             sameSite: COOKIE_CONFIG_SAME_SITE,
@@ -276,8 +264,8 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
             path: '/'
         };
 
-        res.cookie("accessToken", '', errorCookieOptions);
-        res.cookie("refreshToken", '', errorCookieOptions);
+        res.cookie("accessToken", '', errorClearCookieOptions);
+        res.cookie("refreshToken", '', errorClearCookieOptions);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -496,13 +484,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
         const data = jwt.sign({ id: user.id, email: user.email }, ACCESS_SECRET, { expiresIn: "30m" });
 
-        res.cookie("data", data, {
-            maxAge: 30 * 60 * 1000,
-            httpOnly: true,
-            sameSite: COOKIE_CONFIG_SAME_SITE,
-            secure: COOKIE_CONFIG_SECURE,
-            path: '/'
-        });
+        res.cookie("data", data, cookieConfig(30 * 60 * 1000));
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -573,9 +555,9 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
             });
         });
 
-        res.cookie("data", '', { maxAge: 0 });
+        res.cookie("data", '', { maxAge: 0, path: '/' });
 
-        res.cookie("otp", '', { maxAge: 0 });
+        res.cookie("otp", '', { maxAge: 0, path: '/' });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
