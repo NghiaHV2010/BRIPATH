@@ -18,7 +18,7 @@ import {
   CompaniesPage,
   AdminPage,
 } from "./pages";
-import { PaymentPage, PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
+import { PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
 import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
@@ -165,14 +165,6 @@ function App() {
         {/* Payment Routes */}
         <Route
           path="/payment"
-          element={
-            <ProtectedRoute>
-              <PaymentPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/payment/process"
           element={
             <ProtectedRoute>
               <PaymentProcessPage />

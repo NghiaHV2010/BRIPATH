@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import axiosConfig from "@/config/axios.config";
+
+// Global request tracking to prevent duplicates
+const globalRequestTracker = new Set<string>();
 
 // Icons
 const SparklesIcon = () => (
@@ -106,23 +110,39 @@ export function SubscriptionCard({
   compact = false,
 }: SubscriptionCardProps) {
   const [hovered, setHovered] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const config = tierConfig[plan.tier];
   const Icon = config.icon;
 
-  const handlePurchase = () => {
-    // Navigate to payment page with plan data
-    navigate('/payment', {
-      state: {
-        selectedPlan: {
-          id: plan.id,
-          name: plan.name,
-          price: plan.price,
-          duration: plan.durationMonths || 1,
-          features: plan.features
-        }
+  const handlePurchase = async () => {
+    // Simple duplicate prevention
+    if (isProcessing || globalRequestTracker.has(`purchase-${plan.id}`)) {
+      return;
+    }
+    
+    globalRequestTracker.add(`purchase-${plan.id}`);
+    setIsProcessing(true);
+    
+    try {
+      const response = await axiosConfig.get('/pricings');
+      const plans = response.data.data;
+      const selectedPlan = plans.find((p: any) => p.id === parseInt(plan.id));
+      
+      if (selectedPlan) {
+        navigate('/payment', {
+          state: {
+            plan: selectedPlan,
+            paymentMethod: 'sepay'
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('Error fetching plan:', error);
+    } finally {
+      globalRequestTracker.delete(`purchase-${plan.id}`);
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -220,14 +240,15 @@ export function SubscriptionCard({
         {/* Button */}
         <Button
           onClick={handlePurchase}
+          disabled={isProcessing}
           size={compact ? "sm" : "lg"}
           className={`w-full rounded-xl mt-6 ${
             plan.tier === "trial"
               ? "bg-blue-700 text-white hover:bg-blue-800"
               : "bg-gradient-to-r " + config.gradient + " text-white"
-          }`}
+          } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
         >
-          Mua ngay
+          {isProcessing ? "Đang xử lý..." : "Mua ngay"}
         </Button>
       </div>
     </div>
