@@ -3,8 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { QrCode, Copy, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { QrCode, Copy, CheckCircle, Clock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { QRScannerButton, QRCodeDisplay } from '@/components/QR';
 import PaymentCountdown from '@/components/PaymentCountdown';
 import axiosConfig from '@/config/axios.config';
@@ -27,6 +28,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
   const [copied, setCopied] = useState(false);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const plan = location.state?.plan as PaymentPlan;
@@ -38,7 +40,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
   useEffect(() => {
     if (!plan || !paymentMethod) {
-      navigate('/payment');
+      navigate('/subscriptions');
       return;
     }
 
@@ -46,8 +48,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     if (paymentMethod === 'sepay') {
       handleSePayPayment();
     } else {
-      // Redirect back to payment page if invalid method
-      navigate('/payment');
+      navigate('/subscriptions');
     }
   }, [plan, paymentMethod]);
 
@@ -117,6 +118,20 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     } catch (error) {
       console.error('Error cancelling orders:', error);
     }
+  };
+
+  const handleBackClick = () => {
+    setShowCancelDialog(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    await cancelAllPendingOrders();
+    setShowCancelDialog(false);
+    navigate('/subscriptions');
+  };
+
+  const handleCancelDialog = () => {
+    setShowCancelDialog(false);
   };
 
   const startPaymentPolling = (orderId: string) => {
@@ -202,10 +217,45 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tạo thanh toán...</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation Header */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/subscriptions')}
+                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Quay lại</span>
+                </Button>
+              </div>
+              
+              <div className="text-right">
+                <h1 className="text-lg font-semibold text-blue-600">
+                  Đang tạo thanh toán
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Vui lòng chờ...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Đang tạo thanh toán...
+            </h2>
+            <p className="text-gray-600">
+              Vui lòng chờ trong giây lát
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -213,57 +263,170 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
   if (paymentStatus === 'success') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full">
-          <CardContent className="text-center p-8">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Thanh toán thành công!
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Gói dịch vụ của bạn đã được kích hoạt
-            </p>
-            <Button onClick={() => navigate('/profile')}>
-              Về trang cá nhân
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation Header */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/subscriptions')}
+                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Quay lại</span>
+                </Button>
+              </div>
+              
+              <div className="text-right">
+                <h1 className="text-lg font-semibold text-green-600">
+                  Thanh toán thành công
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Gói dịch vụ đã được kích hoạt
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center py-16">
+          <Card className="max-w-md w-full">
+            <CardContent className="text-center p-8">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Thanh toán thành công!
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Gói dịch vụ của bạn đã được kích hoạt
+              </p>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => navigate('/subscriptions')}
+                  className="w-full"
+                >
+                  Về trang gói dịch vụ
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/profile')}
+                  className="w-full"
+                >
+                  Về trang cá nhân
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   if (paymentStatus === 'failed') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full">
-          <CardContent className="text-center p-8">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Thanh toán thất bại
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Có lỗi xảy ra trong quá trình thanh toán
-            </p>
-            <Button onClick={() => navigate('/payment')}>
-              Thử lại
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation Header */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/subscriptions')}
+                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Quay lại</span>
+                </Button>
+              </div>
+              
+              <div className="text-right">
+                <h1 className="text-lg font-semibold text-red-600">
+                  Thanh toán thất bại
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Có lỗi xảy ra
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center py-16">
+          <Card className="max-w-md w-full">
+            <CardContent className="text-center p-8">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Thanh toán thất bại
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Có lỗi xảy ra trong quá trình thanh toán
+              </p>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => navigate('/subscriptions')}
+                  className="w-full"
+                >
+                  Về trang gói dịch vụ
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/profile')}
+                  className="w-full"
+                >
+                  Về trang cá nhân
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Thanh toán qua SePay
-          </h1>
-          <p className="text-gray-600">
-            Vui lòng chuyển khoản theo thông tin bên dưới
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                onClick={handleBackClick}
+                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Quay lại</span>
+              </Button>
+            </div>
+            
+            <div className="text-right">
+              <h1 className="text-lg font-semibold text-gray-900">
+                Thanh toán SePay
+              </h1>
+              <p className="text-sm text-gray-500">
+                Chuyển khoản an toàn
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="py-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Thông tin thanh toán
+            </h2>
+            <p className="text-gray-600">
+              Vui lòng chuyển khoản theo thông tin bên dưới
+            </p>
+          </div>
 
         {paymentData && (
           <div className="grid md:grid-cols-2 gap-8">
@@ -407,18 +570,9 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
         </Card>
 
         {/* Action Buttons */}
-        <div className="text-center mt-8 space-x-4">
+        <div className="flex justify-center mt-8 space-x-4">
           <Button 
             variant="outline" 
-            onClick={() => {
-              // Cancel all pending orders for this user
-              cancelAllPendingOrders();
-              navigate('/payment');
-            }}
-          >
-            Quay lại
-          </Button>
-          <Button 
             onClick={async () => {
               try {
                 const response = await axiosConfig.get(`/sepay/status/${paymentData?.orderId}`);
@@ -437,11 +591,42 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                 toast.error('Lỗi khi kiểm tra trạng thái');
               }
             }}
+            className="px-6 py-2"
           >
+            <Clock className="h-4 w-4 mr-2" />
             Kiểm tra trạng thái
           </Button>
         </div>
+        </div>
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-lg font-semibold">
+              Xác nhận hủy thanh toán
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-gray-600">
+              Quay lại sẽ hủy thanh toán này. Bạn có chắc chắn không?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-3">
+            <AlertDialogCancel 
+              onClick={handleCancelDialog}
+              className="flex-1"
+            >
+              Không
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmCancel}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              Có, hủy thanh toán
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

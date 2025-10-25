@@ -1,28 +1,8 @@
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
-import {
-  ForgotPasswordPage,
-  LoginPage,
-  RegisterPage,
-  ResetPasswordPage,
-  EmailVerificationPage,
-  SubscriptionPlansPage,
-  AboutPage,
-  ContactPage,
-  QuizLandingPage,
-  QuizPage,
-  QuizResultsPage,
-  ProfilePageWrapper,
-  HomePage,
-  CompaniesPage,
-  AdminPage,
-} from "./pages";
-import {
-  PaymentPage,
-  PaymentProcessPage,
-  PaymentSuccessPage,
-} from "./pages/payment";
+import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage, EmailVerificationPage, SubscriptionPlansPage, AboutPage, ContactPage, QuizLandingPage, QuizPage, QuizResultsPage, ProfilePageWrapper, HomePage, CompaniesPage, AdminPage } from "./pages";
+import { PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
 import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
 import JobDetailsPage from "./pages/job/JobDetailsPage";
@@ -164,14 +144,6 @@ function App() {
         {/* Payment Routes */}
         <Route
           path="/payment"
-          element={
-            <ProtectedRoute>
-              <PaymentPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/payment/process"
           element={
             <ProtectedRoute>
               <PaymentProcessPage />

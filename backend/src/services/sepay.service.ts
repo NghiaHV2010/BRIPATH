@@ -40,6 +40,25 @@ class SePayService {
    */
   async createOrder(params: SePayCreateOrderParams): Promise<SePayCreateOrderResponse> {
     try {
+      // Check for existing pending order for this user and plan
+      if (params.userId && params.planId) {
+        const existingOrder = await this.findPendingOrder(params.userId, params.planId);
+        if (existingOrder) {
+          console.log('Found existing pending order, returning it:', existingOrder.orderId);
+          return {
+            orderId: existingOrder.orderId,
+            vaNumber: this.config.vaNumber,
+            bankCode: this.config.bankCode,
+            qrCodeUrl: existingOrder.qrCode,
+            paymentUrl: generateSePayPaymentUrl(this.config.vaNumber, this.config.bankCode, existingOrder.amount, existingOrder.orderId),
+            amount: existingOrder.amount,
+            description: params.description,
+            success: true,
+            message: 'Existing pending order found'
+          };
+        }
+      }
+      
       const orderId = params.orderId || generateSePayOrderId();
       const amount = formatSePayAmount(params.amount);
       
@@ -226,6 +245,25 @@ class SePayService {
       qrCodeUrl: data.qrCodeUrl,
       paymentUrl: data.paymentUrl
     };
+  }
+
+  /**
+   * Find existing pending order for user and plan
+   */
+  private async findPendingOrder(userId: string, planId: number): Promise<{
+    orderId: string;
+    qrCode: string;
+    amount: number;
+  } | null> {
+    try {
+      // Check if there's an existing pending order in the database
+      // This would need to be implemented based on your database schema
+      // For now, we'll return null to indicate no existing order
+      return null;
+    } catch (error) {
+      console.error('Error finding pending order:', error);
+      return null;
+    }
   }
 }
 
