@@ -43,7 +43,7 @@ import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
 import { BlogPage } from "./pages/blog/BlogPage";
 import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
-// import PhoneVerification from "./components/auth/verifyPhone";
+import PhoneVerification from "./components/auth/verifyPhone";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();

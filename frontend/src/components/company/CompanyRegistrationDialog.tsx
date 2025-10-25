@@ -15,7 +15,6 @@ import type {
   CompanyRegistrationPayload,
 } from "@/types/company";
 import { storage } from "@/config/firebase.config";
-import "react-photo-view/dist/react-photo-view.css";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
