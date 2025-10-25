@@ -22,6 +22,7 @@ export default function SubscriptionPlansPage() {
   useEffect(() => {
     const fetchPlans = async () => {
       setLoading(true);
+
       try {
         const data = await getAllPricingPlans();
 
@@ -30,21 +31,22 @@ export default function SubscriptionPlansPage() {
           name: p.plan_name || p.name || "Gói dịch vụ",
           tier: (() => {
             const lower = (p.plan_name || "").toLowerCase();
-            if (lower.includes("trial")) return "trial";
-            if (lower.includes("basic")) return "bronze";
+
             if (lower.includes("vip")) return "silver";
             if (lower.includes("premium")) return "gold";
+            if (lower.includes("trial")) return "trial";
+            if (lower.includes("basic")) return "bronze";
             return "bronze";
-          })() as SubscriptionPlan['tier'],
+          })() as SubscriptionPlan["tier"],
           price: Number(p.price) || 0,
           durationMonths: p.duration_months || 1,
           description: p.description || "",
           features: Array.isArray(p.features)
             ? p.features
-              .map((f: { feature_name?: string } | string) =>
-                typeof f === "string" ? f : f.feature_name || ""
-              )
-              .filter(Boolean)
+                .map((f: { feature_name?: string } | string) =>
+                  typeof f === "string" ? f : f.feature_name || ""
+                )
+                .filter(Boolean)
             : [],
           isRecommended: Boolean(p.recommended_labels),
           isPopular: Boolean(p.verified_badge),
@@ -60,7 +62,6 @@ export default function SubscriptionPlansPage() {
 
     fetchPlans();
   }, []);
-
 
   return (
     <Layout>
@@ -84,16 +85,18 @@ export default function SubscriptionPlansPage() {
 
           {/* Plan cards */}
           {loading ? (
-            <div className="text-center text-gray-500 py-20">
-              Đang tải gói...
+            <div className="flex items-center justify-center py-16 mb-8">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-600 font-medium">
+                  Đang tải gói dịch vụ...
+                </p>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[2000px] mx-auto px-4 mb-20 items-stretch">
               {plans.map((plan) => (
-                <SubscriptionCard
-                  key={plan.id}
-                  plan={plan}
-                />
+                <SubscriptionCard key={plan.id} plan={plan} />
               ))}
             </div>
           )}

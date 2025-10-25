@@ -135,58 +135,68 @@ const UserCareerPath = () => {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-          {paginatedPaths.map((p, index) => {
-            const colorVariant = COLOR_VARIANTS[index % COLOR_VARIANTS.length];
-            const tags = parseResourceTags(p.resources);
-            const descriptionPreview = truncateText(p.description || "", 80);
+        <div className="flex justify-center mb-8">
+          <div
+            className={`flex flex-wrap justify-center gap-5 w-full max-w-[1300px]`}
+          >
+            {paginatedPaths.map((p, index) => {
+              const colorVariant =
+                COLOR_VARIANTS[index % COLOR_VARIANTS.length];
+              const tags = parseResourceTags(p.resources);
+              const descriptionPreview = truncateText(p.description || "", 80);
 
-            return (
-              <div
-                key={p.id}
-                className="bg-white rounded-lg overflow-hidden border transition-transform  hover:scale-[1.02] border-gray-200 hover:shadow-lg  duration-300 flex flex-col h-full"
-              >
+              return (
                 <div
-                  className={`${colorVariant.bg} px-6 py-4 flex-grow min-h-[180px] flex flex-col relative overflow-hidden`}
+                  key={p.id}
+                  className="bg-white rounded-lg overflow-hidden border transition-transform hover:scale-[1.02] border-gray-200 hover:shadow-lg duration-300 flex flex-col"
+                  style={{
+                    width: "380px",
+                    minWidth: "320px",
+                    maxWidth: "380px",
+                  }}
                 >
-                  <div className="px-2 pt-6 pb-4 z-10 relative h-25">
-                    <h4 className="font-bold text-gray-900 text-lg line-clamp-2">
-                      {p.title}
-                    </h4>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                    {descriptionPreview}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap justify-center gap-2 relative">
-                    {tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className={`${colorVariant.text} bg-white bg-opacity-60 text-xs font-medium px-3 py-1 rounded-full`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                  <Button
-                    onClick={() => handleOpen(p.id)}
-                    disabled={fetchingId === p.id}
-                    variant={"custom"}
-                    className="hover:scale-115"
+                  <div
+                    className={`${colorVariant.bg} px-6 py-4 flex-grow min-h-[180px] flex flex-col relative overflow-hidden`}
                   >
-                    Chi tiết
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                  <span className="text-sm font-medium text-gray-600">
-                    {p._count?.careerPathSteps || 0} bước
-                  </span>
+                    <div className="px-2 pt-6 pb-4 z-10 relative h-25">
+                      <h4 className="font-bold text-gray-900 text-lg line-clamp-2">
+                        {p.title}
+                      </h4>
+                    </div>
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                      {descriptionPreview}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap justify-center gap-2 relative">
+                      {tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className={`${colorVariant.text} bg-white bg-opacity-60 text-xs font-medium px-3 py-1 rounded-full`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                    <Button
+                      onClick={() => handleOpen(p.id)}
+                      disabled={fetchingId === p.id}
+                      variant={"custom"}
+                      className="hover:scale-115"
+                    >
+                      Xem chi tiết
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                    <span className="text-sm font-medium text-gray-600">
+                      {p._count?.careerPathSteps || 0} bước
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {totalPages > 1 && (

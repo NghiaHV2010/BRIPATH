@@ -128,7 +128,6 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <button
@@ -291,7 +290,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   : "text-gray-600"
                   }`}
               >
-                Lộ trình nghề nghiệp!
+                Lộ trình nghề nghiệp
               </button>
               <button
                 onClick={() => {

@@ -118,3 +118,35 @@ export interface CompanyField {
   id: number;
   field_name: string;
 }
+
+
+
+
+export interface CompanyRegisterResponse {
+  message: string;
+  data: {
+    id: string; 
+    company_website?: string | null;
+    business_certificate?: string | null;
+    company_type: string;
+    description?: string | null;
+    background_url?: string | null;
+    employees?: number | null;
+    is_verified: boolean;
+    fax_code: string | null;
+    status: string;
+    longitude?: number | null;
+    latitude?: number | null;
+    approved_at?: string | null;
+    field_id?: number | null;
+  }
+}
+
+
+export interface CompanyRegistrationPayload {
+  fax_code: string | null;
+  business_certificate: string | null;
+  company_type: string | null;
+  field: string | null;
+}
+

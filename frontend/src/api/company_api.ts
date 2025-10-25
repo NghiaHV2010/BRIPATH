@@ -1,6 +1,6 @@
 
 import axiosConfig from "@/config/axios.config";
-import type { CompanySummary, CompanyField, CompanyDetailResponse } from "@/types/company";
+import type { CompanySummary, CompanyField, CompanyDetailResponse, CompanyRegistrationPayload, CompanyRegisterResponse } from "@/types/company";
 // ========================
 // Get all companies
 // ========================
@@ -156,6 +156,32 @@ export const unfollowCompany = async (
     return response.data;
   } catch (error: any) {
     console.error("Error unfollowing company:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+export const getCompanyFields = async (): Promise<CompanyField[]> => {
+  try {
+    const response = await axiosConfig.get('/company/fields');
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error fetching company fields:', error);
+    throw error;
+  }
+};
+
+export const registerCompany = async (
+  payload: CompanyRegistrationPayload
+): Promise<CompanyRegisterResponse> => {
+  try {
+    const res = await axiosConfig.post<
+      CompanyRegisterResponse
+    >("/company", payload);
+    return res.data;
+  } catch (error) {
+    console.error("Error registering company:", error);
     throw error;
   }
 };

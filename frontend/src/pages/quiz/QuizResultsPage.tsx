@@ -1,48 +1,86 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { resetAnswer } from "../../api/quiz_api";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/ui/button";
 import { useQuizStore } from "../../store/quiz.store";
+import { Briefcase, AlertTriangle, Lightbulb, Heart, Zap } from "lucide-react";
+import { Layout } from "../../components/layout";
 import { createCPAPI } from "../../api/quiz_api";
 import type { JobType } from "../../api/quiz_api";
-import { Layout } from "../../components/layout";
-import { Button } from "../../components/ui/button";
-import { Trophy, Briefcase } from "lucide-react";
-
-import { useState } from "react";
 
 export default function QuizResultsPage() {
   const navigate = useNavigate();
   const { results, isLoading, error, resetQuiz } = useQuizStore();
   const [cpLoading, setCPLoading] = useState(false);
+  const [showConfirmExit, setShowConfirmExit] = useState(false);
+  const [pendingAction, setPendingAction] = useState<null | (() => void)>(null);
+  const [animatedCards, setAnimatedCards] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+    results.forEach((result, index) => {
+      setTimeout(() => {
+        setAnimatedCards((prev) => new Set([...prev, result.id]));
+      }, index * 100);
+    });
+  }, [results]);
+
+  const confirmAndReset = async () => {
+    await resetAnswer();
+    resetQuiz();
+    setShowConfirmExit(false);
+    if (pendingAction) pendingAction();
+  };
+
+  const handleRetakeQuiz = () => {
+    setPendingAction(() => () => navigate("/quiz"));
+    setShowConfirmExit(true);
+  };
+
+  const handleExploreJobs = () => {
+    setPendingAction(() => () => navigate("/jobs"));
+    setShowConfirmExit(true);
+  };
 
   const handleJobTypeClick = async (jobType: JobType) => {
     setCPLoading(true);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       const careerPathData = await createCPAPI(jobType.id, jobType.job_type);
       navigate("/quiz/career-path", {
-        state: {
-          careerPath: careerPathData,
-          isLoading: false,
-        },
+        state: { careerPath: careerPathData, isLoading: false },
       });
     } catch (err) {
-      setCPLoading(false);
       console.error("Error creating career path:", err);
+      setCPLoading(false);
     }
   };
 
-  const handleRetakeQuiz = () => {
-    resetQuiz();
-    navigate("/quiz");
-  };
-
-  const handleExploreJobs = () => {
-    navigate("/jobs");
-  };
-
-  if (isLoading || cpLoading) {
+  if (isLoading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-emerald-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Đang tải kết quả...</p>
+          </div>
         </div>
       </Layout>
     );
@@ -51,7 +89,7 @@ export default function QuizResultsPage() {
   if (error) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-emerald-50">
           <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center max-w-md">
             <p className="text-red-700 mb-4">{error}</p>
             <Button onClick={() => navigate("/quiz")} variant="outline">
@@ -66,82 +104,281 @@ export default function QuizResultsPage() {
   if (results.length === 0) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-emerald-50">
           <Button onClick={() => navigate("/quiz")}>Làm lại quiz</Button>
         </div>
       </Layout>
     );
   }
 
+  const gradientColors = [
+    "bg-blue-100",
+    "bg-emerald-100",
+    "bg-purple-100",
+    "bg-orange-100",
+    "bg-red-100",
+    "bg-amber-100",
+  ];
+
   return (
     <Layout>
-      <div className="min-h-screen py-8 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-6xl mx-auto px-4">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-6">
-              <Trophy className="w-8 h-8 text-white" />
+      {/* Full Page Loading Overlay */}
+      {cpLoading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Briefcase className="w-8 h-8 text-blue-600 animate-pulse" />
+              </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Đang tạo lộ trình nghề nghiệp
+            </h3>
+            <p className="text-gray-600 mb-4">Vui lòng đợi trong giây lát...</p>
+            <div className="flex items-center justify-center gap-1">
+              <div
+                className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+                style={{ animationDelay: "150ms" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+                style={{ animationDelay: "300ms" }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Quá trình này có thể mất 20-60 giây
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`min-h-screen py-12 bg-white ${
+          cpLoading ? "pointer-events-none select-none" : ""
+        }`}
+      >
+        <div className="text-center max-w-8xl mb-12">
+          <div className="flex flex-col items-center justify-center gap-3 py-4 px-4">
+            <h1 className="text-3xl pb-2 sm:text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
               Kết Quả Định Hướng Nghề Nghiệp
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 text-center max-w-3xl">
               Dựa trên câu trả lời của bạn, đây là những lĩnh vực nghề nghiệp
-              phù hợp nhất
+              phù hợp nhất với bạn
             </p>
           </div>
 
-          {/* All Results */}
-          <div className="grid gap-6 mb-8">
-            {results.map((result) => (
+          <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4 max-w-6xl mx-auto mb-8">
+            <p className="text-gray-800 text-sm sm:text-base">
+              <span className="font-semibold text-blue-600">💡 Hướng dẫn:</span>{" "}
+              Dưới đây là các kết quả định hướng với những chuyên ngành rõ ràng.
+              Khi bạn click vào một chuyên ngành, hệ thống sẽ tạo lộ trình nghề
+              nghiệp chi tiết cho bạn. Quá trình này sẽ mất khoảng{" "}
+              <span className="font-semibold">20</span> -{" "}
+              <span className="font-semibold">60</span> giây để xử lý.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-8 mb-12">
+            {results.map((result, resultIndex) => (
               <div
                 key={result.id}
-                className="bg-white rounded-2xl shadow-sm p-6"
+                className={`transform transition-all duration-700 mb-30 ${
+                  animatedCards.has(result.id)
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                } ${cpLoading ? "opacity-50" : ""}`}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {result.job_category}
-                </h2>
-                <p className="text-gray-600 mb-4">{result.description}</p>
+                {/* Category Header */}
+                <div className="mb-6">
+                  <h2 className="text-2xl sm:text-3xl text-center font-bold text-gray-900 mb-2">
+                    {result.job_category}
+                  </h2>
+                  <p className="text-gray-600 text-center sm:text-lg">
+                    {result.description}
+                  </p>
+                </div>
 
-                {/* Job Types */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  {result.job_types.map((jobType: JobType) => (
-                    <div
-                      key={jobType.id}
-                      onClick={() => handleJobTypeClick(jobType)}
-                      className="cursor-pointer bg-gray-100 rounded-lg p-4 hover:bg-blue-50 transition"
-                    >
-                      <h3 className="font-semibold text-gray-900">
-                        {jobType.job_type}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        {jobType.description}
-                      </p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 text-center sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  {result.job_types.map(
+                    (jobType: JobType, jobIndex: number) => {
+                      const bgColor =
+                        gradientColors[
+                          (resultIndex * 3 + jobIndex) % gradientColors.length
+                        ];
+
+                      return (
+                        <div
+                          key={jobType.id}
+                          onClick={() =>
+                            !cpLoading && handleJobTypeClick(jobType)
+                          }
+                          className={`group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform ${
+                            cpLoading
+                              ? "cursor-not-allowed"
+                              : "cursor-pointer hover:scale-105 hover:shadow-lg"
+                          } ${bgColor} flex flex-col`}
+                          style={{ minHeight: "14rem" }}
+                        >
+                          {/* Overlay hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                          {/* Nội dung card - cấu trúc cố định */}
+                          <div className="relative z-10 flex flex-col h-full">
+                            {/* Title - cố định ở trên */}
+                            <h3 className="font-bold text-lg text-gray-900 mb-3 min-h-[3.5rem] flex items-center justify-center">
+                              {jobType.job_type}
+                            </h3>
+
+                            {/* Description - chiếm không gian giữa */}
+                            <p className="text-gray-700 text-sm leading-relaxed mb-4 flex-grow line-clamp-4">
+                              {jobType.description}
+                            </p>
+
+                            {/* Button - cố định ở dưới */}
+                            <div className="mt-auto pt-4 border-t border-gray-300/50">
+                              <div className="flex items-center justify-center gap-2 text-gray-700 font-semibold group-hover:gap-3 transition-all">
+                                <span>Tạo lộ trình ngay</span>
+                                <span className="inline-block group-hover:translate-x-1 transition-transform">
+                                  →
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={handleExploreJobs} size="lg" variant={"emerald"}>
-              <Briefcase className="w-5 h-5" />
-              Khám Phá Việc Làm
-            </Button>
+        <div className="w-7xl mx-auto my-6 border-t-3 border-gray-300"></div>
 
-            <Button
-              onClick={handleRetakeQuiz}
-              size="lg"
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              Làm Lại Bài Quiz
-            </Button>
+        <div className="max-w-5xl mx-auto pt-10 pb-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Tips học tập */}
+            <div className="bg-white rounded-xl border-2 shadow-sm p-6 border-l-10 border-emerald-500">
+              <div className="flex items-center gap-3 mb-4">
+                <Lightbulb className="w-6 h-6 text-emerald-600" />
+                <h3 className="text-xl font-bold text-gray-900">
+                  Tips Học Tập
+                </h3>
+              </div>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">•</span>
+                  <span>
+                    Bắt đầu với các khóa học cơ bản để xây dựng nền tảng vững
+                    chắc
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">•</span>
+                  <span>Thực hành thường xuyên qua các dự án thực tế</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">•</span>
+                  <span>Tham gia cộng đồng để học hỏi từ những người khác</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">•</span>
+                  <span>Đặt mục tiêu rõ ràng và theo dõi tiến độ của bạn</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Tính cách nói lên điều gì */}
+            <div className="bg-white rounded-xl border-2 shadow-sm p-6 border-l-10 border-blue-500">
+              <div className="flex items-center gap-3 mb-4">
+                <Heart className="w-6 h-6 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-900">
+                  Tính Cách Bạn Nói Lên Điều Gì
+                </h3>
+              </div>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex gap-3">
+                  <span className="text-blue-600 font-bold">•</span>
+                  <span>
+                    Bạn có khả năng phân tích và giải quyết vấn đề tốt
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-600 font-bold">•</span>
+                  <span>Bạn có sự kiên trì và quyết tâm trong công việc</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-600 font-bold">•</span>
+                  <span>Bạn có khả năng học hỏi nhanh chóng</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-600 font-bold">•</span>
+                  <span>Bạn có tư duy sáng tạo và linh hoạt</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
+
+        {/* BUTTON */}
+        <div className="flex flex-col sm:flex-row gap-4 py-10 justify-center">
+          <Button
+            onClick={handleExploreJobs}
+            size="lg"
+            variant={"emerald"}
+            className="rounded-2xl"
+            disabled={cpLoading}
+          >
+            <Briefcase className="w-5 h-5 mr-2" />
+            Khám Phá Việc Làm
+          </Button>
+
+          <Button
+            onClick={handleRetakeQuiz}
+            size="lg"
+            variant="default"
+            className="rounded-2xl"
+            disabled={cpLoading}
+          >
+            <Zap className="w-5 h-5 mr-2" />
+            Làm Lại Bài Quiz
+          </Button>
+        </div>
       </div>
+
+      <Dialog open={showConfirmExit} onOpenChange={setShowConfirmExit}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" /> Rời khỏi trang?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-700">
+            Bạn chưa chọn lộ trình nghề nghiệp. Nếu thoát, dữ liệu câu trả lời
+            sẽ bị <b>xóa toàn bộ</b>. Bạn có chắc chắn muốn thoát không?
+          </p>
+          <DialogFooter className="mt-4 flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowConfirmExit(false)}>
+              Ở lại
+            </Button>
+            <Button
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={confirmAndReset}
+            >
+              Thoát & Xóa dữ liệu
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

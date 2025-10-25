@@ -23,7 +23,6 @@ import { useCompanyStore } from "../../store/company.store";
 
 export default function QuizLandingPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [starting, setStarting] = useState(false);
   const [hasCareerPath, setHasCareerPath] = useState(false);
   const { companies, fetchCompanies } = useCompanyStore();
@@ -36,12 +35,8 @@ export default function QuizLandingPage() {
     let mounted = true;
 
     const loadData = async () => {
-      setLoading(true);
       try {
-        const [careerResp] = await Promise.all([
-          fetchQuestions(),
-          getUserCareerPath(),
-        ]);
+        const careerResp = await getUserCareerPath();
 
         if (mounted) {
           const careerPaths = careerResp?.data ?? careerResp ?? [];
@@ -51,8 +46,6 @@ export default function QuizLandingPage() {
         }
       } catch (e: unknown) {
         console.error("Failed to load quiz data", e);
-      } finally {
-        if (mounted) setLoading(false);
       }
     };
 
@@ -62,20 +55,17 @@ export default function QuizLandingPage() {
     };
   }, []);
 
-  const handleStartQuiz = () => {
+  const handleStartQuiz = async () => {
+    const delay = new Promise((resolve) => setTimeout(resolve, 500));
     setStarting(true);
     const authUser = useAuthStore.getState().authUser;
+    await delay;
     if (!authUser) {
       setLoginOpen(true);
+      setStarting(false);
       return;
     }
-
-    if (hasCareerPath) {
-      setShowRepeatDialog(true);
-      return;
-    }
-
-    navigate("/quiz/test");
+    setShowRepeatDialog(true);
   };
 
   const [showRepeatDialog, setShowRepeatDialog] = useState(false);
@@ -91,11 +81,20 @@ export default function QuizLandingPage() {
       setStarting(false);
     }
   };
-
-  const handleConfirmRepeat = () => {
+  const handleConfirmRepeat = async () => {
     setShowRepeatDialog(false);
-    resetAnswer().catch(() => {});
-    navigate("/quiz/test");
+    setStarting(true);
+    const delay = new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      await Promise.all([
+        resetAnswer().catch(() => {}),
+        fetchQuestions(),
+        delay, // đảm bảo tối thiểu 500ms loading
+      ]);
+      navigate("/quiz/test");
+    } finally {
+      setStarting(false);
+    }
   };
 
   useEffect(() => {
@@ -178,13 +177,6 @@ export default function QuizLandingPage() {
 
             {/* Button */}
             <div className="space-y-4 mb-20">
-              {loading && (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-3 text-gray-600">Đang tải...</span>
-                </div>
-              )}
-
               <Button
                 onClick={handleStartQuiz}
                 disabled={starting}
@@ -349,13 +341,6 @@ export default function QuizLandingPage() {
 
             {/* Button */}
             <div className="space-y-4 mb-20">
-              {loading && (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-3 text-gray-600">Đang tải...</span>
-                </div>
-              )}
-
               <Button
                 onClick={handleStartQuiz}
                 disabled={starting}
@@ -391,7 +376,7 @@ export default function QuizLandingPage() {
             <div className="text-sm text-gray-700 my-4">
               <p className="font-medium">Hướng dẫn:</p>
               <ul className="list-disc ml-5 mt-2 space-y-1">
-                <li>Chọn nhanh các đáp án phù hợp nhất với bạn.</li>
+                <li>Chọn các đáp án phù hợp nhất với bạn.</li>
                 <li>Bộ câu hỏi gồm 10 câu, không giới hạn thời gian.</li>
               </ul>
             </div>

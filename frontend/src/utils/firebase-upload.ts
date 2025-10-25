@@ -98,3 +98,4 @@ export const handleAvatarUpload = async (
         onError('Upload failed');
     }
 };
+
