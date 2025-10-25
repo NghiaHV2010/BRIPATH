@@ -15,7 +15,6 @@ import type {
   CompanyRegistrationPayload,
 } from "@/types/company";
 import { storage } from "@/config/firebase.config";
-import "react-photo-view/dist/react-photo-view.css";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
@@ -102,8 +101,7 @@ export default function CompanyRegistrationDialog({
       // Luu theo ma fax
       const storageRef = ref(
         storage,
-        `business_certificate/${formData.fax_code || "temp"}/${Date.now()}_${
-          file.name
+        `business_certificate/${formData.fax_code || "temp"}/${Date.now()}_${file.name
         }`
       );
 
@@ -281,11 +279,10 @@ export default function CompanyRegistrationDialog({
             </label>
             {!formData.business_certificate ? (
               <label
-                className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-6 cursor-pointer ${
-                  isUploading
+                className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-6 cursor-pointer ${isUploading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 <Upload className="w-8 h-8 text-gray-400" />
                 <span className="text-gray-600 text-sm mt-2">
@@ -351,9 +348,8 @@ export default function CompanyRegistrationDialog({
             <Button
               type="submit"
               disabled={isLoading || isUploading}
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-medium ${
-                isLoading || isUploading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`bg-blue-600 hover:bg-blue-700 text-white font-medium ${isLoading || isUploading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isLoading ? "Đang đăng ký..." : "Đăng ký"}
             </Button>

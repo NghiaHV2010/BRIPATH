@@ -29,6 +29,8 @@ import { ResumeCard } from "@/components/resume/resumeCard";
 import { CVStatsRadarChart } from "@/components/resume/resumeStats";
 import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
+import CompanyRegistrationDialog from "@/components/company/CompanyRegistrationDialog";
+import type { CompanyRegisterResponse } from "@/types/company";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
@@ -43,6 +45,10 @@ export default function ProfilePageWrapper() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
+
+  // Company registration dialog
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [hasRegisteredCompany, setHasRegisteredCompany] = useState(false);
 
   const [formData, setFormData] = useState({
     username: user?.username || "",
@@ -97,6 +103,7 @@ export default function ProfilePageWrapper() {
       if (profileResponse?.success) {
         const userData = profileResponse.data;
         setUserProfileData(userData);
+        setHasRegisteredCompany(!!userData.company_id);
 
         // Update form data with fetched user data
         setFormData({
@@ -115,6 +122,21 @@ export default function ProfilePageWrapper() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCompanyRegistrationSuccess = (
+    response: CompanyRegisterResponse
+  ) => {
+    toast.success(response.message || "Đăng ký doanh nghiệp thành công!", {
+      duration: 3000,
+      position: "top-right",
+    });
+
+    //  Update UI
+    setHasRegisteredCompany(true);
+
+    loadUserProfileData();
+    setIsCompanyDialogOpen(false);
   };
 
   const loadCVData = async () => {
@@ -495,13 +517,29 @@ export default function ProfilePageWrapper() {
               </CardTitle>
 
               {!isEditing ? (
-                <Button
-                  onClick={handleEdit}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Chỉnh sửa
-                </Button>
+                <div className="flex gap-2">
+                  {hasRegisteredCompany ? (
+                    <Button
+                      variant="outline"
+                    // onClick={() => setIsInfoDialogOpen(true)}
+                    >
+                      <Building2 className="w-4 h-4 mr-2" /> Xem thông tin đơn
+                      đăng ký
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setIsCompanyDialogOpen(true)}>
+                      <Building2 className="w-4 h-4 mr-2" /> Đăng ký doanh
+                      nghiệp
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleEdit}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Chỉnh sửa
+                  </Button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <Button
@@ -860,6 +898,13 @@ export default function ProfilePageWrapper() {
         </Card>
         <FollowedCompanies />
       </div>
+
+      {/* Dialog đăng kí doanh nghiệp */}
+      <CompanyRegistrationDialog
+        open={isCompanyDialogOpen}
+        onOpenChange={setIsCompanyDialogOpen}
+        onSuccess={handleCompanyRegistrationSuccess}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
