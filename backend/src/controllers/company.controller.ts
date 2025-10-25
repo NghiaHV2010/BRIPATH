@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
@@ -562,7 +562,15 @@ export const feedbackCV = async (req: Request, res: Response, next: NextFunction
 export const getApplicantsByStatus = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const { company_id } = req.user;
-    const { jobId, status } = req.query as { jobId: string, status: string };
+    const { jobId } = req.params;
+    const { page, status } = req.query as { page: string, status: string };
+    const numberOfApplicantsToShow = 10;
+
+    let pageNumber = parseInt(page);
+    if (isNaN(pageNumber) || pageNumber < 1) {
+        pageNumber = 1;
+    }
+    pageNumber -= 1;
 
     if (!status || (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'pending', 'approved', 'rejected'"));
@@ -573,27 +581,86 @@ export const getApplicantsByStatus = async (req: Request, res: Response, next: N
             where: {
                 id: jobId,
                 company_id
-            }
+            },
         });
 
         if (!isJobExisted) {
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
         }
 
+        const applicantCounts = await prisma.applicants.groupBy({
+            by: ['status'],
+            where: {
+                job_id: jobId
+            },
+            _count: {
+                status: true
+            }
+        });
+
+        const counts = {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0
+        };
+
+        applicantCounts.forEach(item => {
+            counts.total += item._count.status;
+            if (item.status === 'pending') counts.pending = item._count.status;
+            if (item.status === 'approved') counts.approved = item._count.status;
+            if (item.status === 'rejected') counts.rejected = item._count.status;
+        });
+
+
         const applicants = await prisma.applicants.findMany({
             where: {
                 status,
-                job_id: jobId
+                job_id: isJobExisted.id
             },
             include: {
-                cvs: true
-            }
+                cvs: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                        apply_job: true,
+                        created_at: true,
+                        primary_skills: true,
+                        users: {
+                            select: {
+                                id: true,
+                                avatar_url: true,
+                            }
+                        },
+                        _count: {
+                            select: {
+                                projects: true,
+                                experiences: true,
+                                educations: true,
+                                certificates: true,
+                                languages: true,
+                                references: true,
+                                awards: true,
+                            }
+                        }
+                    }
+                }
+            },
+            take: numberOfApplicantsToShow,
+            skip: pageNumber * numberOfApplicantsToShow
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
-            data: applicants
+            data: {
+                applicants,
+                total_pending: counts.pending,
+                total_approved: counts.approved,
+                total_rejected: counts.rejected
+            },
+            totalPages: Math.ceil(counts.total / numberOfApplicantsToShow)
         });
+
     } catch (error) {
         next(error);
     }
@@ -801,6 +868,91 @@ export const getFeedbackByCompanyID = async (req: Request, res: Response, next: 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: feedbacks
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const compareCvandJob = async (req: Request, res: Response, next: NextFunction) => {
+    const { cvId, jobId } = req.query as { cvId: string, jobId: string };
+
+    try {
+        const [cv, job] = await Promise.all([
+            prisma.cv_stats.findUnique({
+                where: {
+                    cv_id: parseInt(cvId)
+                },
+            }),
+            prisma.job_stats.findFirst({
+                where: {
+                    job_id: jobId,
+                }
+            })
+        ]);
+        if (!cv) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));
+        }
+        if (!job) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: {
+                cv,
+                job
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const getApplicantByID = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { company_id } = req.user;
+    const applicantId: number = parseInt(req.params.applicantId);
+
+    if (!applicantId || isNaN(applicantId)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ứng viên không hợp lệ!"));
+    }
+
+    try {
+        const isApplicantExisted = await prisma.applicants.findUnique({
+            where: {
+                cv_id_job_id: {
+                    job_id: req.query.jobId as string,
+                    cv_id: applicantId
+                }
+            },
+            include: {
+                cvs: {
+                    include: {
+                        awards: true,
+                        certificates: true,
+                        projects: true,
+                        educations: true,
+                        experiences: true,
+                        languages: true,
+                        references: true,
+                        users: {
+                            select: {
+                                avatar_url: true,
+                            }
+                        },
+                    },
+                }
+            }
+        });
+
+        if (!isApplicantExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Ứng viên không tồn tại!"));
+        }
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: isApplicantExisted
         });
     } catch (error) {
         next(error);

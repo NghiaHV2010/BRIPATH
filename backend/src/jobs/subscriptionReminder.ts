@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
 import { createNotificationData, sendEmail } from "../utils";
+import { emailPricingNotificationTemplate } from "../constants/emailTemplate";
 
 const checkSubscriptionRemainDate = async () => {
     const prisma = new PrismaClient();
@@ -41,8 +42,8 @@ const checkSubscriptionRemainDate = async () => {
         const emailPromises3Days = expireIn3Days.map(sub =>
             sendEmail(
                 sub.users.email,
-                `Nhắc nhở: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
-                `Gói của bạn sẽ hết hạn sau 3 ngày (ngày ${sub.end_date.toLocaleDateString('vi-VN')}).`
+                `BRIPATH: Gói ${sub.membershipPlans.plan_name} còn 3 ngày hiệu lực`,
+                emailPricingNotificationTemplate(sub.membershipPlans.plan_name, sub.end_date.toLocaleDateString('vi-VN'))
             ).catch((error) => {
                 console.error(`Lỗi gửi email đến ${sub.users.email}:`, error);
                 return null; // Continue with other emails even if one fails
@@ -82,8 +83,8 @@ const checkSubscriptionRemainDate = async () => {
         const emailPromises1Day = expireIn1Day.map(sub =>
             sendEmail(
                 sub.users.email,
-                `Khẩn cấp: Gói ${sub.membershipPlans.plan_name} sắp hết hạn`,
-                `Gói của bạn sẽ hết hạn vào ngày mai (${sub.end_date.toLocaleDateString('vi-VN')}).`
+                `BRIPATH: Gói ${sub.membershipPlans.plan_name} chỉ còn 1 ngày hiệu lực`,
+                emailPricingNotificationTemplate(sub.membershipPlans.plan_name, sub.end_date.toLocaleDateString('vi-VN'))
             ).catch((error) => {
                 console.error(`Lỗi gửi email đến ${sub.users.email}:`, error);
                 return null; // Continue with other emails even if one fails

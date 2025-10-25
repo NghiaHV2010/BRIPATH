@@ -1,9 +1,10 @@
-import { MapPin, Briefcase, DollarSign, Building2, Heart, Eye, Users, Bookmark } from "lucide-react";
+import { MapPin, Briefcase, DollarSign, Building2, Heart, Eye, Users, Bookmark, BarChart3 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import type { Job, JobsCountDetails } from "../../types/job";
 import { LoginDialog } from "../login/LoginDialog";
+import { JobStatsModal } from "./JobStatsModal";
 import { useAuthStore } from "../../store/auth";
 import { useState, useRef, useEffect } from "react";
 
@@ -27,6 +28,7 @@ export default function JobCard({
 }: JobCardProps) {
   const authUser = useAuthStore((s) => s.authUser);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   // Ref used to temporarily ignore card clicks (covers dialog overlay clicks)
   const ignoreClicksRef = useRef(false);
   const closeTimerRef = useRef<number | null>(null);
@@ -127,9 +129,8 @@ export default function JobCard({
     >
       {getJobLabelBadge(job.jobLabels?.label_name || job?.label_name)}
       <CardContent
-        className={`relative flex flex-col justify-between ${
-          compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
-        }`}
+        className={`relative flex flex-col justify-between ${compact ? "p-3" : "px-4 py-5 sm:px-6 h-full"
+          }`}
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
@@ -139,10 +140,10 @@ export default function JobCard({
               <img
                 src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-contain border border-gray-200 shadow-sm flex-shrink-0"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-contain border border-gray-200 shadow-sm shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-100 border border-gray-200 flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-100 border border-gray-200 shrink-0">
                 <Building2 className="w-4 h-4 text-gray-400" />
               </div>
             )}
@@ -169,7 +170,7 @@ export default function JobCard({
                 }
                 onSave?.();
               }}
-              className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors flex-shrink-0"
+              className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors shrink-0"
             >
               <Heart
                 className={`w-4 h-4 transition-colors ${isSaved
@@ -178,18 +179,33 @@ export default function JobCard({
                   }`}
               />
             </Button>
+
+            {/* Stats button for company role users */}
+            {role === 'Company' && (
+              <Button
+                variant='custom'
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setStatsOpen(true)
+                }}
+                className="p-1 h-8 w-8 border-0 hover:bg-blue-50 transition-colors shrink-0"
+              >
+                <BarChart3 className="w-4 h-4 text-gray-400 hover:text-blue-600" />
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Job Details */}
         <div className="flex flex-col gap-2 mb-4 text-sm mt-auto text-gray-600">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
             <span className="truncate">{job.location || "Remote"}</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <DollarSign className="w-4 h-4 text-gray-400 shrink-0" />
             <span className="font-medium text-green-600 truncate">
               {formatSalary(job.salary, job.currency)}
             </span>
@@ -197,7 +213,7 @@ export default function JobCard({
 
           {job.jobCategories && (
             <div className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
               <span className="truncate">{job.jobCategories.job_category}</span>
             </div>
           )}
@@ -260,6 +276,14 @@ export default function JobCard({
         open={loginOpen}
         onOpenChange={handleLoginOpenChange}
         redirectTo={window.location.pathname}
+      />
+
+      {/* Job Stats Modal */}
+      <JobStatsModal
+        open={statsOpen}
+        onOpenChange={setStatsOpen}
+        jobId={job.id}
+        jobTitle={job.job_title}
       />
     </Card>
   );

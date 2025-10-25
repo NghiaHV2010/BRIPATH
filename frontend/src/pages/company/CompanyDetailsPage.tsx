@@ -214,7 +214,7 @@ export default function CompanyDetailsPage() {
                   <img
                     src={companyDetail.users.avatar_url}
                     alt={companyDetail.users.username}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 ) : (
                   <div className="flex items-center justify-center bg-slate-200 h-full">

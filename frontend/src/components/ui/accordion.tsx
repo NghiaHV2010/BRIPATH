@@ -63,7 +63,7 @@ const AccordionContent = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            "overflow-hidden transition-all duration-200",
+            "overflow-y-scroll transition-all duration-200",
             isOpen ? "max-h-screen" : "max-h-0"
         )}
         {...props}

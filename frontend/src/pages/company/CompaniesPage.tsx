@@ -114,8 +114,8 @@ export default function CompaniesPage() {
   };
 
   return (
-    <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-4">
+    <Layout className="bg-linear-to-br from-slate-50 to-slate-100">
+      <div className="bg-linear-to-br from-blue-600 to-blue-700 text-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Filters (moved into hero, centered like JobsPage) */}
           <div className="mt-8 max-w-[1500px] mx-auto">
@@ -160,7 +160,7 @@ export default function CompaniesPage() {
       )}
 
       {featuredCompanies.length > 0 && (
-        <div className="relative !bg-white w-full py-10 ">
+        <div className="relative bg-white! w-full py-10 ">
           <div className="w-[1700px] mx-auto px-4 sm:px-6 md:px-10 ">
             <CompanyCarousel
               companies={featuredCompanies}
@@ -172,7 +172,7 @@ export default function CompaniesPage() {
       )}
       {/* END THAY ĐỔI */}
 
-      <div className="max-w-full mx-auto px-4 py-18 bg-gradient-to-b from-white via-blue-100 to-blue-200 transform transition-transform duration-500  ">
+      <div className="max-w-full mx-auto px-4 py-18 bg-linear-to-b from-white via-blue-100 to-blue-200 transform transition-transform duration-500  ">
         <div className="grid grid-cols-1 justify-items-center">
           <img
             src="/src/assets/banner/4.jpg"
@@ -182,7 +182,7 @@ export default function CompaniesPage() {
         </div>
       </div>
       {/* Khối này giữ lại cho Company List bên dưới */}
-      <div className="w-full mx-auto px-4 py-12 bg-gradient-to-b from-blue-100  to-white ">
+      <div className="w-full mx-auto px-4 py-12 bg-linear-to-b from-blue-100  to-white ">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 ">
             <div className="flex flex-col items-center gap-4">

@@ -244,30 +244,22 @@ export const createNotificationData = (
                 switch (status) {
                     case 'approved':
                         notification.title = 'Xin chúc mừng! Hồ sơ của bạn đã được phê duyệt!';
-                        notification.content = `Nhà tuyển dụng đã chấp nhận hồ sơ ứng tuyển cho sự kiện "${title}". \n ${feedback}`;
+                        notification.content = `Nhà tuyển dụng đã chấp nhận hồ sơ ứng tuyển cho "${title}". \n ${feedback}`;
                         break;
                     case 'rejected':
                         notification.title = 'Hồ sơ của bạn đã bị từ chối!';
-                        notification.content = `Nhà tuyển dụng đã từ chối hồ sơ ứng tuyển cho sự kiện "${title}". \n ${feedback}`;
+                        notification.content = `Nhà tuyển dụng đã từ chối hồ sơ ứng tuyển cho "${title}". \n ${feedback}`;
                         break;
                     case 'pending':
-                        notification.title = 'Hồ sơ của bạn đang chờ phê duyệt';
+                        notification.title = `Hồ sơ của bạn đang chờ phê duyệt cho ${title.toUpperCase()}`;
                         notification.content = 'Vui lòng chờ nhà tuyển dụng xem xét hồ sơ ứng tuyển của bạn.';
                         break;
                 }
             } else if (role === 'company') {
                 switch (status) {
-                    case 'approved':
-                        notification.title = 'Hồ sơ ứng tuyển của bạn đã được phê duyệt!';
-                        notification.content = `Nhà tuyển dụng đã chấp nhận hồ sơ ứng tuyển cho công việc "${title}". \n ${feedback}`;
-                        break;
-                    case 'rejected':
-                        notification.title = 'Hồ sơ ứng tuyển của bạn đã bị từ chối!';
-                        notification.content = `Nhà tuyển dụng đã từ chối hồ sơ ứng tuyển cho công việc "${title}". \n ${feedback}`;
-                        break;
                     case 'pending':
-                        notification.title = 'Hồ sơ ứng tuyển của bạn đang chờ phê duyệt';
-                        notification.content = 'Vui lòng chờ nhà tuyển dụng xem xét hồ sơ ứng tuyển của bạn.';
+                        notification.title = `Có hồ sơ ứng tuyển mới cần phê duyệt cho ${title.toUpperCase()}`;
+                        notification.content = `${feedback}`;
                         break;
                 }
             }

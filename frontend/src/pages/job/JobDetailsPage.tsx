@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -8,13 +8,12 @@ import {
   Clock,
   Heart,
   Share2,
-  ExternalLink,
-  Building2,
   Calendar,
   DollarSign,
   BookOpen,
   Trophy,
   Shield,
+  Tag,
 } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
@@ -22,7 +21,7 @@ import { Badge } from "../../components/ui/badge";
 import { Card, CardContent } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
 import { useJobStore } from "../../store/job.store";
-import { JobDetailSkeleton } from "../../components/job";
+import { JobDetailSkeleton, CompanyCard } from "../../components/job";
 import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
@@ -146,8 +145,13 @@ export default function JobDetailsPage() {
     quantity = 1,
     skill_tags = [],
     education = "",
+    start_date,
     end_date,
+    created_at,
+    updated_at,
     companies,
+    jobCategories,
+    jobLabels,
   } = selectedJob;
 
   const salary =
@@ -157,23 +161,76 @@ export default function JobDetailsPage() {
 
   const company = companies
     ? {
-        id: companies.id,
-        name: companies.users?.username || "Công ty",
-        avatar_url: companies.users?.avatar_url || "",
-        field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
-        address: [
-          companies.users?.address_street,
-          companies.users?.address_ward,
-          companies.users?.address_city,
-        ]
-          .filter(Boolean)
-          .join(", "),
-      }
+      id: companies.id,
+      name: companies.users?.username || "Công ty",
+      avatar_url: companies.users?.avatar_url || "",
+      field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
+      address: [
+        companies.users?.address_street,
+        companies.users?.address_ward,
+        companies.users?.address_city,
+        companies.users?.address_country,
+      ]
+        .filter(Boolean)
+        .join(", ") || location,
+      company_type: (companies as any).company_type,
+      is_verified: (companies as any).is_verified,
+    }
     : null;
+
+  const formatJobType = (type: string) => {
+    switch (type) {
+      case "remote":
+        return "Làm việc từ xa";
+      case "part_time":
+        return "Bán thời gian";
+      case "full_time":
+        return "Toàn thời gian";
+      case "others":
+        return "Khác";
+      default:
+        return type;
+    }
+  };
+
+  const formatEducation = (edu: string) => {
+    switch (edu) {
+      case "bachelor":
+        return "Cử nhân";
+      case "master":
+        return "Thạc sĩ";
+      case "phd":
+        return "Tiến sĩ";
+      case "highschool_graduate":
+        return "Tốt nghiệp THPT";
+      case "others":
+        return "Khác";
+      default:
+        return edu || "Không yêu cầu";
+    }
+  };
 
   const formatDeadline = () => {
     if (!end_date) return "Không giới hạn";
     return new Date(end_date).toLocaleDateString("vi-VN");
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const handleApply = () => {
@@ -274,9 +331,35 @@ export default function JobDetailsPage() {
             {/* Job Hero */}
             <Card>
               <CardContent className="p-6 space-y-4">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                  {job_title}
-                </h2>
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {job_title}
+                  </h2>
+
+                  {/* Job Category and Label */}
+                  <div className="flex flex-wrap gap-2">
+                    {jobCategories && (
+                      <Badge variant="outline" className="text-blue-600 border-blue-600">
+                        <Tag className="w-3 h-3 mr-1" />
+                        {jobCategories.job_category}
+                      </Badge>
+                    )}
+                    {jobLabels && (
+                      <Badge
+                        variant="secondary"
+                        className={
+                          jobLabels.label_name === "Việc gấp"
+                            ? "bg-red-100 text-red-700 border-red-200"
+                            : jobLabels.label_name === "Việc Hot"
+                              ? "bg-orange-100 text-orange-700 border-orange-200"
+                              : "bg-green-100 text-green-700 border-green-200"
+                        }
+                      >
+                        {jobLabels.label_name}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-4">
@@ -323,7 +406,7 @@ export default function JobDetailsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {selectedJob.applicants &&
-                  selectedJob.applicants.length > 0 ? (
+                    selectedJob.applicants.length > 0 ? (
                     <div className="relative group flex-1">
                       <Button
                         disabled
@@ -451,7 +534,7 @@ export default function JobDetailsPage() {
                         <span className="font-medium text-gray-600">
                           Học vấn:{" "}
                         </span>
-                        <span>{education}</span>
+                        <span>{formatEducation(education)}</span>
                       </div>
                     )}
                     {experience && (
@@ -493,7 +576,7 @@ export default function JobDetailsPage() {
                 )}
 
                 {/* Benefits */}
-                {benefit && (
+                {benefit && benefit !== "Không xác định" && (
                   <>
                     <Separator />
                     <div>
@@ -518,7 +601,7 @@ export default function JobDetailsPage() {
                         <Clock className="w-4 h-4" /> Thời gian làm việc
                       </h3>
                       <div className="space-y-2">
-                        {working_time && (
+                        {working_time && working_time !== "Không xác định" && (
                           <div>
                             <span className="font-medium text-gray-600">
                               Giờ làm việc:{" "}
@@ -531,7 +614,53 @@ export default function JobDetailsPage() {
                             <span className="font-medium text-gray-600">
                               Hình thức:{" "}
                             </span>
-                            <span>{job_type}</span>
+                            <span>{formatJobType(job_type)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Job Timeline */}
+                {(start_date || end_date || created_at || updated_at) && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" /> Thông tin tuyển dụng
+                      </h3>
+                      <div className="space-y-2">
+                        {start_date && (
+                          <div>
+                            <span className="font-medium text-gray-600">
+                              Ngày bắt đầu:{" "}
+                            </span>
+                            <span>{formatDate(start_date)}</span>
+                          </div>
+                        )}
+                        {end_date && (
+                          <div>
+                            <span className="font-medium text-gray-600">
+                              Hạn nộp hồ sơ:{" "}
+                            </span>
+                            <span>{formatDate(end_date)}</span>
+                          </div>
+                        )}
+                        {created_at && (
+                          <div>
+                            <span className="font-medium text-gray-600">
+                              Ngày đăng tin:{" "}
+                            </span>
+                            <span>{formatDateTime(created_at)}</span>
+                          </div>
+                        )}
+                        {updated_at && created_at !== updated_at && (
+                          <div>
+                            <span className="font-medium text-gray-600">
+                              Cập nhật cuối:{" "}
+                            </span>
+                            <span>{formatDateTime(updated_at)}</span>
                           </div>
                         )}
                       </div>
@@ -567,54 +696,7 @@ export default function JobDetailsPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {company && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">
-                      Thông tin chung
-                    </h3>
-                    <Link
-                      to={`/companies/${company.id}`}
-                      className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
-                    >
-                      Xem trang công ty <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        {company.avatar_url ? (
-                          <img
-                            src={company.avatar_url}
-                            alt={company.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Building2 className="w-6 h-6 text-gray-400" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">
-                          {company.name}
-                        </h4>
-                        <p className="text-sm text-gray-500">{company.field}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 text-sm text-gray-600">
-                      {company.address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          <span>{company.address}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {company && <CompanyCard company={company} />}
 
             {/* Safety Tips */}
             <Card className="border-orange-200 bg-orange-50">

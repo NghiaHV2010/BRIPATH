@@ -7,8 +7,8 @@ import { generateToken, cookieConfig } from "../utils/jwt";
 import jwt from "jsonwebtoken";
 import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, DOMAIN, FRONTEND_URL } from "../config/env.config";
 import crypto from "crypto";
-import emailTemplate from "../constants/emailTemplate";
-import { sendEmail, sendEmailWithRetry, validateEmail } from "../utils";
+import { emailForgotPasswordTemplate, emailVerifyTemplate } from "../constants/emailTemplate";
+import { sendEmailWithRetry, validateEmail } from "../utils";
 import admin, { ServiceAccount } from "firebase-admin";
 import serviceAccount from "../../serviceAccountKey.json";
 
@@ -92,7 +92,7 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
     }
 
     try {
-        await sendEmailWithRetry(email, "BRIPATH - Xác thực email", emailTemplate(url));
+        await sendEmailWithRetry(email, "BRIPATH - Xác thực email", id ? emailForgotPasswordTemplate(url) : emailVerifyTemplate(url));
 
         res.cookie("otp", otp, {
             maxAge: 10 * 60 * 1000,
