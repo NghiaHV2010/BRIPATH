@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchUserCVs, fetchSuitableJobs, feedbackJobForCV } from "../../api/cv_api";
+import { fetchUserCVs, fetchSuitableJobs, feedbackJobForCV, fetchUserCVById } from "../../api/cv_api";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import {
   Card,
@@ -22,7 +22,7 @@ import { ResumeCard } from "../../components/resume/resumeCard";
 import { Resume } from "../../components/resume/resume";
 import toast, { Toaster } from "react-hot-toast";
 import type { Job } from "../../types/job";
-import type { ResumeListItem } from "../../types/resume";
+import type { Resume as ResumeType, ResumeListItem } from "../../types/resume";
 
 // Extended Job type with feedback information
 type JobWithFeedback = Job & {
@@ -38,7 +38,10 @@ export default function CVSuitableJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
-  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
+
+  const [selectedResumeData, setSelectedResumeData] = useState<ResumeType | null>(null);
+  const [isLoadingResumeDetail, setIsLoadingResumeDetail] = useState(false);
+  const [resumeDetailError, setResumeDetailError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Fetch user CVs on component mount
@@ -92,9 +95,18 @@ export default function CVSuitableJobsPage() {
     navigate("/profile");
   };
 
-  const handleViewResumeDetails = (cvId: number) => {
-    setSelectedResumeId(cvId);
-    setShowResumeDialog(true);
+  const handleViewResumeDetails = async (cvId: number) => {
+    try {
+      setIsLoadingResumeDetail(true);
+      const resume = await fetchUserCVById(cvId);
+      setSelectedResumeData(resume);
+      setShowResumeDialog(true);
+
+    } catch (error) {
+      setResumeDetailError(typeof error === "string" ? error : (error instanceof Error ? error.message : "Đã xảy ra lỗi khi tải chi tiết CV."));
+    } finally {
+      setIsLoadingResumeDetail(false);
+    }
   };
 
   const handleResumeCardClick = (cvId: number) => {
@@ -388,8 +400,12 @@ export default function CVSuitableJobsPage() {
               </DialogClose>
             </div>
 
-            {selectedResumeId && (
-              <Resume cvId={selectedResumeId} />
+            {selectedCvId && selectedResumeData && (
+              <Resume
+                resume={selectedResumeData}
+                isLoading={isLoadingResumeDetail}
+                error={resumeDetailError}
+              />
             )}
           </DialogContent>
         </Dialog>

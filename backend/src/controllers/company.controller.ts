@@ -913,18 +913,18 @@ export const getApplicantByID = async (req: Request, res: Response, next: NextFu
     // @ts-ignore
     const { company_id } = req.user;
     const applicantId: number = parseInt(req.params.applicantId);
+    const { jobId, status } = req.query as { jobId: string, status: 'pending' | 'approved' | 'rejected' };
 
     if (!applicantId || isNaN(applicantId)) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ứng viên không hợp lệ!"));
     }
 
     try {
-        const isApplicantExisted = await prisma.applicants.findUnique({
+        const isApplicantExisted = await prisma.applicants.findFirst({
             where: {
-                cv_id_job_id: {
-                    job_id: req.query.jobId as string,
-                    cv_id: applicantId
-                }
+                job_id: jobId,
+                cv_id: applicantId,
+                status
             },
             include: {
                 cvs: {

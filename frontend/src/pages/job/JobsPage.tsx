@@ -122,9 +122,9 @@ export default function JobsPage() {
   };
 
   return (
-    <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
+    <Layout className="bg-linear-to-br from-slate-50 to-slate-100">
       {/* Filters */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16 px-4 mb-8">
+      <div className="bg-linear-to-r from-green-600 to-green-700 text-white py-16 px-4 mb-8">
         <div className="max-w-[1500px] mx-auto flex justify-center">
           <JobFilters onJobClick={() => handleJobClickFromFilters} />
         </div>

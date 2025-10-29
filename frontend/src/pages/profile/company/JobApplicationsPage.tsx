@@ -6,18 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axiosConfig from "@/config/axios.config";
-import {
-    Users,
-    Eye,
-    CheckCircle,
-    XCircle,
-    Clock,
-    Calendar,
-    FileText,
-    Download,
-    Briefcase,
-    Loader2
-} from "lucide-react";
+import { Users, Eye, CheckCircle, XCircle, Clock, Calendar, FileText, Download, Briefcase, Loader2, GalleryHorizontalEnd, List } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import ResumeSwipeCard from "@/components/company/ResumeWipeCard";
+import { getApplicantsByJobId } from "@/api/company_api";
+import type { Applicant, ApplicantSummary } from "@/types/applicant";
 
 interface Job {
     id: string;
@@ -45,41 +38,11 @@ interface Job {
     };
 }
 
-interface Applicant {
-    cv_id: number;
-    job_id: string;
-    description: string;
-    apply_date: string;
-    verified_date: string | null;
-    status: 'pending' | 'approved' | 'rejected';
-    feedback: string | null;
-    cvs: {
-        id: number;
-        fullname: string;
-        apply_job: string;
-        created_at: string;
-        primary_skills: string[];
-        users: {
-            id: string;
-            avatar_url: string;
-        };
-        _count: {
-            projects: number;
-            experiences: number;
-            educations: number;
-            certificates: number;
-            languages: number;
-            references: number;
-            awards: number;
-        };
-    };
-}
-
 export function JobApplicationsPage() {
     const [activeTab, setActiveTab] = useState("pending");
     const [selectedJobId, setSelectedJobId] = useState<string>("");
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [applicants, setApplicants] = useState<Applicant<ApplicantSummary>[]>([]);
     const [counts, setCounts] = useState({
         pending: 0,
         approved: 0,
@@ -87,6 +50,7 @@ export function JobApplicationsPage() {
     });
     const [loading, setLoading] = useState(true);
     const [applicantsLoading, setApplicantsLoading] = useState(false);
+    const [viewMode, setViewMode] = useState<"show" | "hide">("hide");
 
     // Fetch company jobs
     useEffect(() => {
@@ -118,15 +82,19 @@ export function JobApplicationsPage() {
 
             try {
                 setApplicantsLoading(true);
-                const response = await axiosConfig.get(`/applicants/${selectedJobId}?status=${activeTab}`);
-                if (response.data.success) {
-                    setApplicants(response.data.data.applicants);
-                    setCounts({
-                        pending: response.data.data.total_pending,
-                        approved: response.data.data.total_approved,
-                        rejected: response.data.data.total_rejected,
-                    });
+                const response = await getApplicantsByJobId(selectedJobId, activeTab as 'pending' | 'approved' | 'rejected');
+
+                if (!response.success) {
+                    setApplicants([]);
+                    setCounts({ pending: 0, approved: 0, rejected: 0 });
+                    return;
                 }
+                setApplicants(response.data.applicants);
+                setCounts({
+                    pending: response.data.total_pending,
+                    approved: response.data.total_approved,
+                    rejected: response.data.total_rejected,
+                });
             } catch (error) {
                 console.error('Error fetching applicants:', error);
                 setApplicants([]);
@@ -185,11 +153,28 @@ export function JobApplicationsPage() {
         );
     }
 
+
     return (
         <div className="max-w-5xl w-full min-h-screen p-6 space-y-6">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Đơn ứng tuyển</h1>
-                <p className="text-muted-foreground">Quản lý và xem xét các đơn ứng tuyển cho vị trí công việc</p>
+            <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                    <h3 className="text-xl font-semibold mb-2">Đơn ứng tuyển</h3>
+                    <p className="text-muted-foreground">Quản lý và xem xét các đơn ứng tuyển cho vị trí công việc</p>
+                </div>
+
+                {/* Applications Tabs */}
+                <div className="">
+                    <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "show" | "hide")}>
+                        <TabsList className="gap-2">
+                            <TabsTrigger value="show">
+                                <GalleryHorizontalEnd className="size-6" />
+                            </TabsTrigger>
+                            <TabsTrigger value="hide">
+                                <List className="size-6" />
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
             </div>
 
             {/* Job Selection */}
@@ -280,7 +265,15 @@ export function JobApplicationsPage() {
                         </Card>
                     </div>
 
-                    {/* Applications Tabs */}
+                    <Dialog open={viewMode === "show"} onOpenChange={(open) => setViewMode(open ? "show" : "hide")}>
+                        <DialogTitle className="text-base font-medium border-b text-black">
+                            Hồ sơ ứng viên
+                        </DialogTitle>
+                        <DialogContent className="min-w-6xl">
+                            <ResumeSwipeCard jobId={selectedJobId} applicantsData={applicants} />
+                        </DialogContent>
+                    </Dialog>
+
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="pending">Chờ xử lý ({counts.pending})</TabsTrigger>

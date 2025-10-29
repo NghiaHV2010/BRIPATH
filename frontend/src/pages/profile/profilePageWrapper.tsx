@@ -18,7 +18,7 @@ import { useAuthStore } from "../../store/auth";
 import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2, Edit, Bookmark, Building2 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
-import { fetchUserCVs } from "../../api";
+import { fetchUserCVById, fetchUserCVs } from "../../api";
 import axiosConfig from "../../config/axios.config";
 import { getUserProfile, updateUserProfile, changePassword, updateUserAvatar, type ChangePasswordRequest } from "../../api/user_api";
 import { handleAvatarUpload } from "@/utils/firebase-upload";
@@ -31,6 +31,7 @@ import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
 import CompanyRegistrationDialog from "@/components/company/CompanyRegistrationDialog";
 import type { CompanyRegisterResponse } from "@/types/company";
+import type { Resume as ResumeType } from "@/types/resume";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
@@ -75,6 +76,10 @@ export default function ProfilePageWrapper() {
   const [showStats, setShowStats] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [cvToDelete, setCvToDelete] = useState<string | null>(null);
+
+  const [selectedResumeData, setSelectedResumeData] = useState<ResumeType | null>(null);
+  const [isLoadingResumeDetail, setIsLoadingResumeDetail] = useState(false);
+  const [resumeDetailError, setResumeDetailError] = useState<string | null>(null);
 
   // Check URL parameters for edit mode
   const [searchParams] = useSearchParams();
@@ -154,9 +159,18 @@ export default function ProfilePageWrapper() {
     }
   };
 
-  const handleResumeCardClick = (cvId: number) => {
-    setSelectedCvId(cvId);
-    setShowStats(false); // Reset to show CV by default when switching
+  const handleResumeCardClick = async (cvId: number) => {
+    try {
+      setIsLoadingResumeDetail(true);
+      const resume = await fetchUserCVById(cvId);
+      setSelectedResumeData(resume);
+      setSelectedCvId(cvId);
+      setShowStats(false); // Reset to show CV by default when switching
+    } catch (error) {
+      setResumeDetailError(typeof error === "string" ? error : (error instanceof Error ? error.message : "Đã xảy ra lỗi khi tải chi tiết CV."));
+    } finally {
+      setIsLoadingResumeDetail(false);
+    }
   };
 
   if (!user) {
@@ -883,11 +897,16 @@ export default function ProfilePageWrapper() {
                       </DialogClose>
                     </div>
 
-                    {selectedCvId && (
+                    {selectedCvId && selectedResumeData && (
                       showStats ? (
                         <CVStatsRadarChart cvId={selectedCvId} />
                       ) : (
-                        <Resume cvId={selectedCvId} avatar_url={formData?.avatar_url} />
+                        <Resume
+                          resume={selectedResumeData}
+                          isLoading={isLoadingResumeDetail}
+                          error={resumeDetailError}
+                          avatar_url={formData?.avatar_url}
+                        />
                       )
                     )}
                   </DialogContent>

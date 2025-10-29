@@ -2,27 +2,52 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
-import { 
-  ArrowRight, 
-  Briefcase, 
-  Building2, 
-  Target, 
-  Users, 
-  TrendingUp, 
+import {
+  ArrowRight,
+  Briefcase,
+  Building2,
+  Target,
+  Users,
+  TrendingUp,
   Star,
   CheckCircle,
   Zap,
   Heart,
-  Globe
+  Globe,
+  Loader
 } from "lucide-react";
+import InfiniteScroll from "@/components/animations/InfiniteScrollProps";
+import { useEffect } from "react";
+import { useJobStore } from "@/store/job.store";
+import { JobCard } from "@/components/job";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const {
+    jobs,
+    isLoading,
+    getAllJobs,
+    checkIfSaved,
+    saveJob,
+    unsaveJob,
+  } = useJobStore();
+
+  useEffect(() => {
+    if (!isLoading)
+      getAllJobs({ page: 1 });
+  }, []);
+
+
+  if (isLoading) {
+    return (
+      <Loader className="h-10 w-10 text-blue-600 animate-spin absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="bg-linear-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
+      <section className="relative overflow-hidden bg-linear-to-r from-blue-600 via-purple-600 to-indigo-700 text-white max-h-screen">
         <div className="absolute inset-0 bg-black/10"></div>
         {/* Animated background elements */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
@@ -35,23 +60,23 @@ export default function HomePage() {
                 <Star className="h-4 w-4 text-yellow-400" />
                 Nền tảng định hướng nghề nghiệp hàng đầu
               </div>
-              
+
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                Khám phá con đường sự nghiệp 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+                Khám phá con đường sự nghiệp
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-400">
                   {" "}phù hợp
                 </span>
               </h1>
-              
+
               <p className="text-xl text-blue-100 leading-relaxed">
-                Trắc nghiệm nghề nghiệp thông minh, tìm kiếm việc làm phù hợp và kết nối với 
+                Trắc nghiệm nghề nghiệp thông minh, tìm kiếm việc làm phù hợp và kết nối với
                 các công ty hàng đầu. Bắt đầu hành trình sự nghiệp của bạn ngay hôm nay.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
+                <Button
                   asChild
-                  size="lg" 
+                  size="lg"
                   className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <Link to="/quiz" className="flex items-center gap-2">
@@ -60,10 +85,10 @@ export default function HomePage() {
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>
-                
-                <Button 
+
+                <Button
                   asChild
-                  variant="outline" 
+                  variant="outline"
                   size="lg"
                   className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-xl font-semibold backdrop-blur-sm hover:scale-105 transition-all duration-300"
                 >
@@ -73,7 +98,7 @@ export default function HomePage() {
                   </Link>
                 </Button>
               </div>
-              
+
               <div className="flex items-center gap-8 pt-4">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-green-400" />
@@ -89,20 +114,20 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="relative z-10 bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-linear-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
                       <Target className="h-6 w-6 text-white" />
                     </div>
-    <div>
+                    <div>
                       <h3 className="font-semibold text-lg">Trắc nghiệm nghề nghiệp</h3>
                       <p className="text-blue-100 text-sm">Khám phá nghề phù hợp</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-400" />
@@ -117,8 +142,8 @@ export default function HomePage() {
                       <span className="text-sm">Lộ trình phát triển sự nghiệp</span>
                     </div>
                   </div>
-                  
-                  <Button 
+
+                  <Button
                     onClick={() => navigate('/quiz')}
                     className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30"
                   >
@@ -126,12 +151,38 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
-              
+
               {/* Floating elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl"></div>
               <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
             </div>
           </div>
+        </div>
+        <div className="absolute top-0 right-0 w-full z-0">
+          <InfiniteScroll
+            items={
+              jobs.length > 0
+                ? jobs.map((job) => ({
+                  content: (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      onClick={() => navigate(`/jobs/${job.id}`)}
+                      // onSave={() => handleSaveJob(job.id)}
+                      compact={false}
+                      isSaved={job.isSaved || false}
+                    />
+                  ),
+                }))
+                : []
+            }
+            isTilted={true}
+            tiltDirection='right'
+            autoplay={true}
+            autoplaySpeed={0.5}
+            autoplayDirection="up"
+            pauseOnHover={true}
+          />
         </div>
       </section>
 
@@ -149,14 +200,14 @@ export default function HomePage() {
               Chỉ với 3 bước đơn giản, bạn có thể tìm ra con đường sự nghiệp phù hợp nhất
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connection lines for desktop */}
             <div className="hidden md:block absolute top-1/2 left-1/3 right-1/3 h-0.5 -translate-y-1/2"></div>
-            
+
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <div className="w-20 h-20 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
                   <span className="text-2xl font-bold text-white">1</span>
                 </div>
               </div>
@@ -165,10 +216,10 @@ export default function HomePage() {
                 Trả lời 10 câu hỏi về sở thích, tính cách và mục tiêu của bạn. Trắc nghiệm được thiết kế đơn giản và thú vị.
               </p>
             </div>
-            
+
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <div className="w-20 h-20 bg-linear-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
                   <span className="text-2xl font-bold text-white">2</span>
                 </div>
               </div>
@@ -177,10 +228,10 @@ export default function HomePage() {
                 Hệ thống AI của chúng tôi phân tích câu trả lời và so khớp với cơ sở dữ liệu nghề nghiệp chuyên sâu.
               </p>
             </div>
-            
+
             <div className="text-center group">
               <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <div className="w-20 h-20 bg-linear-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg">
                   <span className="text-2xl font-bold text-white">3</span>
                 </div>
               </div>
@@ -207,11 +258,11 @@ export default function HomePage() {
               Chúng tôi cung cấp giải pháp toàn diện để giúp bạn tìm ra con đường sự nghiệp phù hợp nhất
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Target className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Trắc nghiệm AI</h3>
@@ -220,10 +271,10 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Briefcase className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Việc làm phù hợp</h3>
@@ -232,10 +283,10 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Building2 className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Kết nối công ty</h3>
@@ -244,10 +295,10 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Lộ trình phát triển</h3>
@@ -256,10 +307,10 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Users className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Cộng đồng</h3>
@@ -268,10 +319,10 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-linear-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Zap className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Nhanh chóng</h3>
@@ -285,7 +336,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
@@ -309,7 +360,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+      <section className="py-20 bg-linear-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-purple-600 border-purple-200">
@@ -322,7 +373,7 @@ export default function HomePage() {
               Hàng nghìn người dùng đã tìm thấy con đường sự nghiệp phù hợp với họ
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8">
@@ -335,7 +386,7 @@ export default function HomePage() {
                   "BRIPATH đã giúp tôi khám phá ra đam mê thực sự của mình. Trắc nghiệm rất chính xác và gợi ý nghề nghiệp phù hợp hoàn toàn với tính cách của tôi."
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">A</span>
                   </div>
                   <div>
@@ -345,7 +396,7 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8">
                 <div className="flex items-center gap-1 mb-4">
@@ -357,7 +408,7 @@ export default function HomePage() {
                   "Tôi đã tìm được công việc mơ ước thông qua BRIPATH. Nền tảng này không chỉ giúp tôi hiểu bản thân mà còn kết nối với những cơ hội việc làm tuyệt vời."
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">L</span>
                   </div>
                   <div>
@@ -367,7 +418,7 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
               <CardContent className="p-8">
                 <div className="flex items-center gap-1 mb-4">
@@ -379,7 +430,7 @@ export default function HomePage() {
                   "Giao diện đẹp, dễ sử dụng và kết quả trắc nghiệm rất hữu ích. Tôi đã giới thiệu cho nhiều bạn bè và họ đều rất hài lòng với dịch vụ này."
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">H</span>
                   </div>
                   <div>
@@ -407,7 +458,7 @@ export default function HomePage() {
               Tìm hiểu thêm về cách BRIPATH hoạt động
             </p>
           </div>
-          
+
           <div className="space-y-6">
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
@@ -419,7 +470,7 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -430,7 +481,7 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -441,7 +492,7 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -457,28 +508,28 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+      <section className="py-20 bg-linear-to-br from-blue-50 to-purple-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
               <Heart className="h-4 w-4" />
               Bắt đầu hành trình của bạn
             </div>
-            
+
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
               Sẵn sàng tìm ra con đường sự nghiệp phù hợp?
             </h2>
-            
+
             <p className="text-xl text-gray-600 leading-relaxed">
-              Tham gia hàng nghìn người dùng đã tìm thấy công việc mơ ước thông qua BRIPATH. 
+              Tham gia hàng nghìn người dùng đã tìm thấy công việc mơ ước thông qua BRIPATH.
               Bắt đầu ngay hôm nay!
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              <Button
                 asChild
-                size="lg" 
-                className="bg-gradient-to-r from-blue-700 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                size="lg"
+                className="bg-linear-to-r from-blue-700 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <Link to="/quiz" className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
@@ -486,10 +537,10 @@ export default function HomePage() {
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
-              
-              <Button 
+
+              <Button
                 asChild
-                variant="outline" 
+                variant="outline"
                 size="lg"
                 className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl font-semibold hover:scale-105 transition-all duration-300"
               >
@@ -502,14 +553,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
+
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Target className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-xl font-bold">BRIPATH</span>
@@ -518,7 +569,7 @@ export default function HomePage() {
                 Nền tảng định hướng nghề nghiệp hàng đầu, giúp bạn tìm ra con đường sự nghiệp phù hợp nhất.
               </p>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Dịch vụ</h3>
               <ul className="space-y-2 text-gray-400">
@@ -528,7 +579,7 @@ export default function HomePage() {
                 <li><Link to="/about" className="hover:text-white transition-colors">Về chúng tôi</Link></li>
               </ul>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Hỗ trợ</h3>
               <ul className="space-y-2 text-gray-400">
@@ -538,7 +589,7 @@ export default function HomePage() {
                 <li><Link to="/privacy" className="hover:text-white transition-colors">Chính sách</Link></li>
               </ul>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Kết nối</h3>
               <div className="flex items-center gap-4">
@@ -554,7 +605,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2024 BRIPATH. Tất cả quyền được bảo lưu.</p>
           </div>
