@@ -1,12 +1,14 @@
 import jwt from 'jsonwebtoken';
 import { Response } from "express";
-import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, REFRESH_SECRET } from '../config/env.config';
+import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, DOMAIN, REFRESH_SECRET } from '../config/env.config';
 
 type cookieConfigResponse = {
     maxAge: number;
     httpOnly: boolean;
     sameSite: "lax" | "none" | "strict";
-    secure: boolean
+    secure: boolean,
+    path?: string,
+    domain?: string,
 }
 
 const accessTokenExpiryTimeInMiliSecond: number = 45 * 60 * 1000;
@@ -30,11 +32,13 @@ export const generateToken = (userId: string, res: Response) => {
     res.cookie("refreshToken", refreshToken, cookieConfig(refreshTokenExpiryTimeInMiliSecond))
 }
 
-export const cookieConfig = (maxAge: number, secure: boolean = COOKIE_CONFIG_SECURE): cookieConfigResponse => {
+export const cookieConfig = (maxAge: number, secure: boolean = COOKIE_CONFIG_SECURE, path?: string, domain = DOMAIN): cookieConfigResponse => {
     return {
         maxAge,
         httpOnly: true,
         sameSite: COOKIE_CONFIG_SAME_SITE,
-        secure
+        secure,
+        path: path ? path : '/',
+        domain,
     }
 }

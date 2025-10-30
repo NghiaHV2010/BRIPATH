@@ -128,7 +128,7 @@ export function ProfileSidebar({
                         {avatar ? (
                             <AvatarImage src={avatar} alt={username} className='object-contain object-center' />
                         ) : (
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl">
+                            <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-2xl">
                                 {username.charAt(0).toUpperCase()}
                             </AvatarFallback>
                         )}

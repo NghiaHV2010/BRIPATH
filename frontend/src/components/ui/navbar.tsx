@@ -1,5 +1,3 @@
-"use client";
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { Button } from "./button";
@@ -54,11 +52,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
     return `
     group inline-flex h-10 w-max items-center justify-center rounded-md px-3 lg:px-4 py-2 text-sm font-medium 
     transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 active:scale-105
-    ${
-      isActive
+    ${isActive
         ? "text-blue-700  scale-120 cursor-default hover:!text-blue-700 hover:!scale-115"
         : "text-gray-700 hover:text-blue-700 hover:scale-100"
-    }
+      }
   `;
   };
 
@@ -78,9 +75,9 @@ export default function Navbar({ className = "" }: NavbarProps) {
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="text-3xl sm:text-4xl font-bold">
-              BRIPATH
+          <div className="shrink-0">
+            <Link to="/" className="text-xl font-bold">
+              <img src="/assets/images/app_logo.png" alt="BRIPATH Logo" className="h-12" />
             </Link>
           </div>
 
@@ -150,7 +147,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
             {authUser && (
               <div
                 className="rounded-full relative p-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
-                onClick={() => navigate("/notifications")}
+                onClick={() => navigate("/profile/notifications")}
               >
                 {authUser?._count &&
                   authUser?._count?.userNotifications > 0 && (
@@ -174,7 +171,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                      <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
+                      <AvatarFallback className="bg-linear-to-br from-emerald-500 to-teal-600 text-white text-md">
                         {authUser?.username.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </div>
@@ -190,16 +187,16 @@ export default function Navbar({ className = "" }: NavbarProps) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   {authUser?.roles.role_name === "User"
                     ? UserMenuItems.map((item) => (
-                        <DropdownMenuItem
-                          key={item.label}
-                          onClick={() => navigate(item.href)}
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </DropdownMenuItem>
-                      ))
+                      <DropdownMenuItem
+                        key={item.label}
+                        onClick={() => navigate(item.href)}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </DropdownMenuItem>
+                    ))
                     : authUser?.roles.role_name === "Company"
-                    ? CompanyMenuItems.map((item) => (
+                      ? CompanyMenuItems.map((item) => (
                         <DropdownMenuItem
                           key={item.label}
                           onClick={() => navigate(item.href)}
@@ -208,7 +205,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                           <span>{item.label}</span>
                         </DropdownMenuItem>
                       ))
-                    : null}
+                      : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -264,11 +261,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToJobs(navigate);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                  isRouteActive("/jobs")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/jobs")
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
+                  }`}
               >
                 Việc Làm
               </button>
@@ -277,11 +273,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToCompanies(navigate);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                  isRouteActive("/companies")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/companies")
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
+                  }`}
               >
                 Công Ty
               </button>
@@ -290,11 +285,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToCareerPath(navigate);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                  isRouteActive("/quiz")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/quiz")
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
+                  }`}
               >
                 Lộ trình nghề nghiệp
               </button>
@@ -303,11 +297,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   setMobileMenuOpen(false);
                   navigateToBlog(navigate);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                  isRouteActive("/blog")
-                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                    : "text-gray-600"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/blog")
+                  ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                  : "text-gray-600"
+                  }`}
               >
                 Blog
               </button>
@@ -317,11 +310,10 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     setMobileMenuOpen(false);
                     navigateToSubscription(navigate);
                   }}
-                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                    isRouteActive("/subscription")
-                      ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
-                      : "text-gray-600"
-                  }`}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isRouteActive("/subscription")
+                    ? "bg-emerald-100 text-emerald-700 font-semibold scale-105"
+                    : "text-gray-600"
+                    }`}
                 >
                   Gói dịch vụ
                 </button>
@@ -344,7 +336,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                       />
                     ) : (
                       <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-md">
+                        <AvatarFallback className="bg-linear-to-br from-emerald-500 to-teal-600 text-white text-md">
                           {authUser?.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </div>

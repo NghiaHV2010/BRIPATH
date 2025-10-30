@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
-import { MessageCircle, X, Send, MoreVertical, BotMessageSquare } from 'lucide-react';
+import { MessageCircle, X, Send, MoreVertical } from 'lucide-react';
 import type { ChatMessage } from '../../types/chatbot';
 import { ChatBubble } from './ChatBubble';
 import { getAllChatMessages, sendMessageToChatbot } from '@/api';
@@ -95,11 +95,11 @@ export function ChatPopup() {
                 <Card className="fixed bottom-24 right-6 w-96 h-[600px] max-h-[80vh] shadow-2xl border-gray-200 flex flex-col z-50">
                     <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                AI
+                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                <img src='/assets/icons/icon_chatbot1.png' className='size-full' />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900">BRIPATH Assistant</h3>
+                                <h3 className="font-semibold text-gray-900">Trợ lý BRIPATH</h3>
                                 <p className="text-xs text-green-600">Online</p>
                             </div>
                         </div>
@@ -117,13 +117,13 @@ export function ChatPopup() {
                         <div ref={scrollRef} className='overflow-y-auto'>
                             {loading ? (
                                 <div className="flex items-center justify-center h-full">
-                                    <p className="text-gray-500 text-sm">Loading messages...</p>
+                                    <p className="text-gray-500 text-sm">Tải hội thoại...</p>
                                 </div>
                             ) : messages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-center px-4">
                                     <MessageCircle className="w-12 h-12 text-gray-300 mb-3" />
-                                    <p className="text-gray-500 text-sm">No messages yet</p>
-                                    <p className="text-gray-400 text-xs mt-1">Start a conversation with BRIPATH Assistant</p>
+                                    <p className="text-gray-500 text-sm">Chưa có hội thoại nào</p>
+                                    <p className="text-gray-400 text-xs mt-1">Bắt đầu trò chuyện với trợ lý ảo BRIPATH</p>
                                 </div>
                             ) : (
                                 <div className="space-y-1">
@@ -187,17 +187,28 @@ export function ChatPopup() {
                 </Card>
             )}
 
-            <Button
-                size="icon"
+            <div
                 onClick={toggleChat}
-                className={`fixed bottom-4 right-4 z-50 size-16 p-2 rounded-full bg-blue-600 text-white shadow-lg cursor-pointer ${isOpen ? '' : 'animate-bounce'}`}
+                className={`fixed flex justify-center items-center bottom-4 right-4 z-70 rounded-full cursor-pointer group ${isOpen ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg size-16 p-2' : 'bg-none size-24 md:size-28'}`}
             >
                 {isOpen ? (
                     <X className="w-6 h-6" />
                 ) : (
-                    <BotMessageSquare className="w-6 h-6" />
+                    <>
+                        <div className="w-full h-full flex items-center justify-center">
+                            <img src='/assets/icons/icon_chatbot.png' className='w-full h-full' />
+                        </div>
+                        {/* Hover bubble */}
+                        <div className="absolute -top-7 right-7 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            <div className="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg relative">
+                                Bạn cần tớ hỗ trợ gì?
+                                {/* Arrow pointing down */}
+                                <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-800"></div>
+                            </div>
+                        </div>
+                    </>
                 )}
-            </Button>
+            </div>
         </>
     );
 }

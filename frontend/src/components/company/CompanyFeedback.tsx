@@ -16,11 +16,10 @@ const StarRating = ({ rating }: { rating: number }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating
+          className={`w-4 h-4 ${star <= rating
               ? "text-yellow-400 fill-yellow-400"
               : "text-gray-300"
-          }`}
+            }`}
         />
       ))}
       <span className="ml-2 text-sm font-medium text-slate-600">
@@ -55,7 +54,7 @@ const FeedbackCard = ({ feedback }: { feedback: CompanyFeedbackType }) => {
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {feedback.users.avatar_url ? (
               <img
                 src={feedback.users.avatar_url}
@@ -104,7 +103,7 @@ const FeedbackCard = ({ feedback }: { feedback: CompanyFeedbackType }) => {
               <div className="space-y-3 pt-4 border-t border-slate-100">
                 {feedback.work_environment && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div className="shrink-0 w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                       <ThumbsUp className="w-4 h-4 text-green-600" />
                     </div>
                     <div>
@@ -120,7 +119,7 @@ const FeedbackCard = ({ feedback }: { feedback: CompanyFeedbackType }) => {
 
                 {feedback.benefit && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                       <MessageSquare className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
@@ -152,7 +151,7 @@ const FeedbackStats = ({ feedbacks }: { feedbacks: CompanyFeedbackType[] }) => {
   }));
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+    <Card className="bg-linear-to-br from-blue-50 to-indigo-50 border-blue-200">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>

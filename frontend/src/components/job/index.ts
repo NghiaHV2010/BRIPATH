@@ -5,3 +5,5 @@ export { default as JobFilters } from '@/components/job/JobFilters';
 export { default as JobList } from '@/components/job/JobList';
 export { default as JobPagination } from '@/components/job/JobPagination';
 export { JobDetailSkeleton } from '@/components/job/JobDetailSkeleton';
+export { CompanyCard } from '@/components/job/CompanyCard';
+export { JobStatsModal } from '@/components/job/JobStatsModal';

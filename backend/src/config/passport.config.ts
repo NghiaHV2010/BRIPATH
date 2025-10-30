@@ -21,6 +21,13 @@ passport.use(
                     where: {
                         email: profile.emails?.[0].value
                     },
+                    include: {
+                        roles: {
+                            select: {
+                                role_name: true
+                            }
+                        }
+                    },
                     omit: {
                         password: true
                     }
@@ -39,6 +46,13 @@ passport.use(
                             avatar_url: (profile as any).photos?.[0]?.value,
                             last_loggedIn: new Date(),
                             role_id: 1
+                        },
+                        include: {
+                            roles: {
+                                select: {
+                                    role_name: true
+                                }
+                            }
                         },
                         omit: {
                             password: true

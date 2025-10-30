@@ -30,9 +30,9 @@ export function LoginDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const login = useAuthStore((s) => s.login);
-  const storeError = useAuthStore((s) => s.error);
-  const isProcessing = useAuthStore((s) => s.isProcessing);
+  const login = useAuthStore(s => s.login);
+  const storeError = useAuthStore(s => s.error);
+  const isProcessing = useAuthStore(s => s.isProcessing);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,7 +104,7 @@ export function LoginDialog({
               type="email"
               placeholder="Nhập email của bạn"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="h-11 mt-1.5"
               required
               autoComplete="email"
@@ -131,7 +131,7 @@ export function LoginDialog({
                 type={showPassword ? "text" : "password"}
                 placeholder="Nhập mật khẩu của bạn"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="h-11 pr-10"
                 required
                 autoComplete="current-password"
@@ -139,7 +139,7 @@ export function LoginDialog({
               <button
                 type="button"
                 aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                onClick={() => setShowPassword((p) => !p)}
+                onClick={() => setShowPassword(p => !p)}
                 className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
               >
                 {showPassword ? (

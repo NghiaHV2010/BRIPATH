@@ -13,7 +13,7 @@ import {
   getDefaultSePayConfig,
   formatSePayAmount
 } from '../utils/sepay.utils';
-import { SEPAY_VA_NUMBER, SEPAY_BANK_CODE, SEPAY_API_KEY } from '../config/env.config';
+import { SEPAY_VA_NUMBER, SEPAY_BANK_CODE, SEPAY_API_KEY, SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
 
 class SePayService {
   private config: {
@@ -21,12 +21,16 @@ class SePayService {
     bankCode: string;
     baseUrl: string;
     apiKey: string;
+    webhookUrl: string;
+    returnUrl: string;
   };
 
   constructor() {
     this.config = {
       ...getDefaultSePayConfig(),
-      apiKey: SEPAY_API_KEY
+      apiKey: SEPAY_API_KEY,
+      webhookUrl: SEPAY_WEBHOOK_URL,
+      returnUrl: SEPAY_RETURN_URL
     };
   }
 
@@ -36,14 +40,55 @@ class SePayService {
    */
   async createOrder(params: SePayCreateOrderParams): Promise<SePayCreateOrderResponse> {
     try {
+      // Check for existing pending order for this user and plan
+      if (params.userId && params.planId) {
+        const existingOrder = await this.findPendingOrder(params.userId, params.planId);
+        if (existingOrder) {
+          console.log('Found existing pending order, returning it:', existingOrder.orderId);
+          return {
+            orderId: existingOrder.orderId,
+            vaNumber: this.config.vaNumber,
+            bankCode: this.config.bankCode,
+            qrCodeUrl: existingOrder.qrCode,
+            paymentUrl: generateSePayPaymentUrl(this.config.vaNumber, this.config.bankCode, existingOrder.amount, existingOrder.orderId),
+            amount: existingOrder.amount,
+            description: params.description,
+            success: true,
+            message: 'Existing pending order found'
+          };
+        }
+      }
+      
       const orderId = params.orderId || generateSePayOrderId();
       const amount = formatSePayAmount(params.amount);
       
       // If API key is available, try to use SePay API
-      if (this.config.apiKey) {
+      if (this.config.apiKey && this.config.apiKey !== '') {
         console.log('Using SePay API with key:', this.config.apiKey.substring(0, 10) + '...');
-        // TODO: Implement actual SePay API call here
-        // For now, fall back to local QR generation
+        
+        try {
+          // Call SePay API to create order
+          const sepayResponse = await this.callSePayAPI({
+            orderId,
+            amount: params.amount,
+            description: params.description,
+            webhookUrl: this.config.webhookUrl,
+            returnUrl: this.config.returnUrl
+          });
+          
+          return {
+            orderId,
+            amount: params.amount,
+            description: params.description,
+            vaNumber: sepayResponse.vaNumber || this.config.vaNumber,
+            bankCode: sepayResponse.bankCode || this.config.bankCode,
+            qrCodeUrl: sepayResponse.qrCodeUrl,
+            paymentUrl: sepayResponse.paymentUrl
+          };
+        } catch (apiError) {
+          console.error('SePay API call failed, falling back to local generation:', apiError);
+          // Fall through to local generation
+        }
       }
       
       // Generate QR code locally (current implementation)
@@ -149,6 +194,76 @@ class SePayService {
         `Giao dịch sẽ được xử lý tự động trong vòng 5-10 phút`
       ]
     };
+  }
+
+  /**
+   * Call SePay API to create order
+   */
+  private async callSePayAPI(params: {
+    orderId: string;
+    amount: number;
+    description: string;
+    webhookUrl: string;
+    returnUrl: string;
+  }): Promise<{
+    vaNumber: string;
+    bankCode: string;
+    qrCodeUrl: string;
+    paymentUrl: string;
+  }> {
+    const apiUrl = 'https://api.sepay.vn/v1/orders'; // SePay API endpoint
+    
+    const requestBody = {
+      orderId: params.orderId,
+      amount: params.amount,
+      description: params.description,
+      webhookUrl: params.webhookUrl,
+      returnUrl: params.returnUrl,
+      vaNumber: this.config.vaNumber,
+      bankCode: this.config.bankCode
+    };
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.config.apiKey}`,
+        'X-API-Key': this.config.apiKey
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`SePay API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as any;
+    
+    return {
+      vaNumber: data.vaNumber || this.config.vaNumber,
+      bankCode: data.bankCode || this.config.bankCode,
+      qrCodeUrl: data.qrCodeUrl,
+      paymentUrl: data.paymentUrl
+    };
+  }
+
+  /**
+   * Find existing pending order for user and plan
+   */
+  private async findPendingOrder(userId: string, planId: number): Promise<{
+    orderId: string;
+    qrCode: string;
+    amount: number;
+  } | null> {
+    try {
+      // Check if there's an existing pending order in the database
+      // This would need to be implemented based on your database schema
+      // For now, we'll return null to indicate no existing order
+      return null;
+    } catch (error) {
+      console.error('Error finding pending order:', error);
+      return null;
+    }
   }
 }
 

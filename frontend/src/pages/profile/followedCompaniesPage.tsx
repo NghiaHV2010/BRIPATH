@@ -81,8 +81,8 @@ export default function FollowedCompaniesPage() {
   // const fields = [...new Set(companies.map(company => company.field).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen max-w-5xl w-full bg-gray-50 py-6">
+      <div className=" px-4 sm:px-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -155,8 +155,8 @@ export default function FollowedCompaniesPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="shrink-0">
+                          <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <Building2 className="h-6 w-6 text-white" />
                           </div>
                         </div>

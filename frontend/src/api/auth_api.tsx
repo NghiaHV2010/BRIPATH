@@ -39,8 +39,7 @@ export const verifyRegisterEmail = async (token: string) => {
   return res.data;
 };
 
-// Append redirect param so backend (if implemented) can optionally use it
-// export const getGoogleLoginUrl = () => {
-//   const redirect = encodeURIComponent(window.location.origin + "/");
-//   return `${axiosConfig.defaults.baseURL}/login/google?redirect_uri=${redirect}`;
-// };
+export const verifySMS = async (token: string) => {
+  const res = await axiosConfig.post(`/verify-sms`, { token });
+  return res.data;
+};

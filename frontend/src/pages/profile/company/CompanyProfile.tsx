@@ -71,7 +71,7 @@ export function CompanyProfile() {
 
     if (loading && currentPage === 1) {
         return (
-            <div className="max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
+            <div className="max-w-5xl min-h-screen w-full px-4 sm:px-6 lg:px-8 py-6">
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-gray-200 rounded w-1/4"></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -86,14 +86,14 @@ export function CompanyProfile() {
 
     if (error) {
         return (
-            <div className="max-w-5xl w-[95%] px-4 sm:px-6 lg:px-8 py-6">
+            <div className="max-w-5xl min-h-screen w-full px-4 sm:px-6 lg:px-8 py-6">
                 <div className="text-red-500 text-center">{error}</div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-5xl w-full px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-5xl min-h-screen w-full px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-6 flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Công việc đã đăng tải</h2>
                 {jobs.length > 0 && (

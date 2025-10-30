@@ -103,9 +103,9 @@ export default function CompaniesPage() {
   };
 
   return (
-    <Layout className="bg-gradient-to-br from-slate-50 to-slate-100">
+    <Layout className="bg-linear-to-br from-slate-50 to-slate-100">
       {/* Filters */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-4 mb-8">
+      <div className="bg-linear-to-br from-blue-600 to-blue-700 text-white py-16 px-4 mb-8">
         <div className="max-w-[1500px] mx-auto flex justify-center">
           <CompanyFilters />
         </div>
@@ -151,31 +151,48 @@ export default function CompaniesPage() {
           />
         </div>
       )}
+      {/* END THAY ĐỔI */}
 
-      {/* CompanyList */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-16 mb-8">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-slate-600 font-medium">Đang tải công ty...</p>
-          </div>
+      <div className="max-w-full mx-auto px-4 py-18 bg-linear-to-b from-white via-blue-100 to-blue-200 transform transition-transform duration-500  ">
+        <div className="grid grid-cols-1 justify-items-center">
+          <img
+            src="/src/assets/banner/4.jpg"
+            alt="Company banner"
+            className="max-w-2xl aspect-square rounded-xl object-cover"
+          />
         </div>
-      ) : (
-        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-8">
-          <div className="max-w-[1700px] mx-auto">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">
-              Tất cả công ty trên <span className="text-blue-600">BriPath</span>
-            </h2>
-            <CompanyList onCompanyClick={handleCompanyClick} />
-            <CompanyPagination
-              currentPage={currentPage}
-              totalPages={totalPages || 10}
-              onPageChange={loadCompanies}
-              isLoading={isLoading}
-            />
+      </div>
+      {/* Khối này giữ lại cho Company List bên dưới */}
+      <div className="w-full mx-auto px-4 py-12 bg-linear-to-b from-blue-100  to-white ">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 ">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <p className="text-slate-600 font-medium">Loading companies...</p>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 md:px-10 mb-8">
+              <div className="max-w-[1700px] mx-auto">
+                <h2 className="text-2xl font-bold text-slate-900 mt-6 mb-6">
+                  Các công ty đang liên kết với{" "}
+                  <span className="text-blue-600">BriPath</span>
+                </h2>
+
+                <CompanyList onCompanyClick={handleCompanyClick} />
+
+                <CompanyPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={loadCompanies}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </Layout>
   );
 }

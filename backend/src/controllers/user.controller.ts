@@ -324,18 +324,25 @@ export const applyJob = async (req: Request, res: Response, next: NextFunction) 
                 }
             });
 
-            const notificationData = createNotificationData(undefined, 'pending', "applicant", 'user');
+            const userNotificationData = createNotificationData(isJobExisted.job_title, 'pending', "applicant", 'user', description);
+            const companyNotificationData = createNotificationData(isJobExisted.job_title, 'pending', "applicant", 'company', description);
 
-            if (isJobExisted.companies.users) {
-                await tx.userNotifications.create({
-                    data: {
-                        title: notificationData.title,
-                        content: notificationData.content,
-                        type: notificationData.type,
+            await tx.userNotifications.createMany({
+                data: [
+                    {
+                        title: userNotificationData.title,
+                        content: userNotificationData.content,
+                        type: userNotificationData.type,
+                        user_id: id
+                    },
+                    {
+                        title: companyNotificationData.title,
+                        content: companyNotificationData.content,
+                        type: companyNotificationData.type,
                         user_id: isJobExisted.companies.users.id
                     }
-                });
-            }
+                ]
+            });
 
             return applicant;
         }).catch((e) => (next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi, vui lòng thử lại!"))));
@@ -667,7 +674,12 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
                                     }
                                 }
                             }
-                        }
+                        },
+                        status: true,
+                        background_url: true,
+                        business_certificate: true,
+                        description: true,
+
                     }
                 } : false,
                 roles: {
@@ -1067,6 +1079,29 @@ export const getAllUserFollowedCompanies = async (req: Request, res: Response, n
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: followedCompanies
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const createReport = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const { title, description } = req.body as { title: string, description?: string };
+
+    try {
+        const report = await prisma.reports.create({
+            data: {
+                user_id,
+                title,
+                description,
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.CREATED).json({
+            success: true,
+            data: report
         });
     } catch (error) {
         next(error);

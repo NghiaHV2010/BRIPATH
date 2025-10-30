@@ -483,9 +483,19 @@ model userActivitiesHistory {
   activity_name String   @db.Text
   time          DateTime @default(now())
   user_id       String
-  users         users    @relation(fields: [user_id], references: [id])
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([id, user_id])
+}
+
+model reports {
+  id          Int               @id @default(autoincrement())
+  title       String            @db.VarChar(100)
+  description String?           @db.Text
+  created_at  DateTime          @default(now())
+  status      ApplicantsStatus? @default(pending)
+  user_id     String
+  users       users             @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model userNotifications {
@@ -497,7 +507,7 @@ model userNotifications {
   is_read Boolean           @default(false)
   sent_at DateTime          @default(now())
   read_at DateTime?
-  users   users             @relation(fields: [user_id], references: [id])
+  users   users             @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([id, user_id])
 }
@@ -571,6 +581,7 @@ model users {
   userNotifications      userNotifications[]
   roles                  roles                    @relation(fields: [role_id], references: [id])
   sepayOrders            sepayOrders[]
+  reports                reports[]
 }
 
 enum ApplicantsStatus {

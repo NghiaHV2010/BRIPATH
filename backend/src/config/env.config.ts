@@ -29,6 +29,7 @@ interface Config {
     RATE_LIMIT_AUTH_MAX: number;
     RATE_LIMIT_API_MAX: number;
     REQUEST_TIMEOUT_MS: number;
+    DOMAIN: string;
 }
 
 dotenv.config();
@@ -64,6 +65,7 @@ const config: Config = {
     RATE_LIMIT_AUTH_MAX: Number(process.env.RATE_LIMIT_AUTH_MAX) || 20, // 20 auth attempts per window
     RATE_LIMIT_API_MAX: Number(process.env.RATE_LIMIT_API_MAX) || 100, // 100 API requests per minute
     REQUEST_TIMEOUT_MS: Number(process.env.REQUEST_TIMEOUT_MS) || 30000, // 30 seconds
+    DOMAIN: process.env.DOMAIN || 'localhost',
 };
 
 export const {
@@ -94,5 +96,6 @@ export const {
     RATE_LIMIT_AUTH_MAX,
     RATE_LIMIT_API_MAX,
     REQUEST_TIMEOUT_MS,
+    DOMAIN,
 } = config;
 

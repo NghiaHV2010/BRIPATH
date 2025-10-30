@@ -127,6 +127,8 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
                 companies: {
                     select: {
                         id: true,
+                        company_type: true,
+                        is_verified: true,
                         users: {
                             select: {
                                 username: true,
@@ -153,6 +155,7 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
         });
 
         return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
             data: job
         });
     } catch (error) {
@@ -332,6 +335,215 @@ export const getJobsByCompanyId = async (req: Request, res: Response, next: Next
             success: true,
             data: jobs,
             totalPages: Math.ceil(total_jobs / numberOfJobs)
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getJobDetailsByCompanyId = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const { company_id } = req.user;
+    const { jobId } = req.params;
+
+    try {
+        const job = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            },
+            include: {
+                jobCategories: {
+                    select: {
+                        job_category: true
+                    }
+                },
+                jobLabels: {
+                    select: {
+                        label_name: true
+                    }
+                }
+            }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: job
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getJobStats = async (req: Request, res: Response, next: NextFunction) => {
+    const { jobId } = req.params;
+    const { date, week, month } = req.query;
+    const data: any = {};
+
+    try {
+        const jobStats = await prisma.job_stats.findFirst({
+            where: {
+                job_id: jobId
+            },
+        });
+
+        jobStats && (data.jobStats = jobStats);
+
+        const totalViews = await prisma.job_views.count({
+            where: {
+                job_id: jobId
+            }
+        });
+
+        data.totalViews = totalViews;
+
+        // Helper function to convert BigInt values to numbers
+        const convertBigIntToNumber = (results: any[]) => {
+            return results.map(row => {
+                const convertedRow: any = {};
+                for (const [key, value] of Object.entries(row)) {
+                    convertedRow[key] = typeof value === 'bigint' ? Number(value) : value;
+                }
+                return convertedRow;
+            });
+        };
+
+        // Enhanced view analytics based on query parameters
+        if (date) {
+            // Group views by specific date
+            const viewsByDate = await prisma.$queryRaw`
+                SELECT 
+                    DATE(viewed_at) as view_date,
+                    COUNT(*)::int as view_count
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND DATE(viewed_at) = DATE(${date})
+                GROUP BY DATE(viewed_at)
+                ORDER BY view_date DESC
+            `;
+            data.viewsByDate = convertBigIntToNumber(viewsByDate as any[]);
+        }
+
+        if (week) {
+            // Group views by week
+            const viewsByWeek = await prisma.$queryRaw`
+                SELECT 
+                    DATE_TRUNC('week', viewed_at) as week_start,
+                    DATE_TRUNC('week', viewed_at) + INTERVAL '6 days' as week_end,
+                    EXTRACT(year FROM viewed_at)::int as year,
+                    EXTRACT(week FROM viewed_at)::int as week_number,
+                    COUNT(*)::int as view_count
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND DATE_TRUNC('week', viewed_at) = DATE_TRUNC('week', DATE(${week}))
+                GROUP BY DATE_TRUNC('week', viewed_at), EXTRACT(year FROM viewed_at), EXTRACT(week FROM viewed_at)
+                ORDER BY week_start DESC
+            `;
+            data.viewsByWeek = convertBigIntToNumber(viewsByWeek as any[]);
+        }
+
+        if (month) {
+            // Group views by month
+            const viewsByMonth = await prisma.$queryRaw`
+                SELECT 
+                    DATE_TRUNC('month', viewed_at) as month_start,
+                    EXTRACT(year FROM viewed_at)::int as year,
+                    EXTRACT(month FROM viewed_at)::int as month_number,
+                    TO_CHAR(viewed_at, 'Month YYYY') as month_name,
+                    COUNT(*)::int as view_count
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND DATE_TRUNC('month', viewed_at) = DATE_TRUNC('month', DATE(${month}))
+                GROUP BY DATE_TRUNC('month', viewed_at), EXTRACT(year FROM viewed_at), EXTRACT(month FROM viewed_at), TO_CHAR(viewed_at, 'Month YYYY')
+                ORDER BY month_start DESC
+            `;
+            data.viewsByMonth = convertBigIntToNumber(viewsByMonth as any[]);
+        }
+
+        // If no specific period is requested, provide last 7 days daily breakdown
+        if (!date && !week && !month) {
+            const last7DaysViews = await prisma.$queryRaw`
+                SELECT 
+                    DATE(viewed_at) as view_date,
+                    COUNT(*)::int as view_count,
+                    TO_CHAR(viewed_at, 'Day, DD/MM/YYYY') as formatted_date
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND viewed_at >= CURRENT_DATE - INTERVAL '7 days'
+                GROUP BY DATE(viewed_at), TO_CHAR(viewed_at, 'Day, DD/MM/YYYY')
+                ORDER BY view_date DESC
+            `;
+            data.last7DaysViews = convertBigIntToNumber(last7DaysViews as any[]);
+
+            // Also provide weekly breakdown for last 4 weeks
+            const last4WeeksViews = await prisma.$queryRaw`
+                SELECT 
+                    DATE_TRUNC('week', viewed_at) as week_start,
+                    DATE_TRUNC('week', viewed_at) + INTERVAL '6 days' as week_end,
+                    EXTRACT(week FROM viewed_at)::int as week_number,
+                    COUNT(*)::int as view_count
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND viewed_at >= CURRENT_DATE - INTERVAL '4 weeks'
+                GROUP BY DATE_TRUNC('week', viewed_at), EXTRACT(week FROM viewed_at)
+                ORDER BY week_start DESC
+            `;
+            data.last4WeeksViews = convertBigIntToNumber(last4WeeksViews as any[]);
+
+            // Monthly breakdown for last 6 months
+            const last6MonthsViews = await prisma.$queryRaw`
+                SELECT 
+                    DATE_TRUNC('month', viewed_at) as month_start,
+                    EXTRACT(month FROM viewed_at)::int as month_number,
+                    TO_CHAR(viewed_at, 'Month YYYY') as month_name,
+                    COUNT(*)::int as view_count
+                FROM job_views 
+                WHERE job_id = ${jobId}
+                    AND viewed_at >= CURRENT_DATE - INTERVAL '6 months'
+                GROUP BY DATE_TRUNC('month', viewed_at), EXTRACT(month FROM viewed_at), TO_CHAR(viewed_at, 'Month YYYY')
+                ORDER BY month_start DESC
+            `;
+            data.last6MonthsViews = convertBigIntToNumber(last6MonthsViews as any[]);
+        }
+
+        // Additional analytics: hourly distribution for the current week
+        const hourlyDistribution = await prisma.$queryRaw`
+            SELECT 
+                EXTRACT(hour FROM viewed_at)::int as hour_of_day,
+                COUNT(*)::int as view_count
+            FROM job_views 
+            WHERE job_id = ${jobId}
+                AND viewed_at >= DATE_TRUNC('week', CURRENT_DATE)
+            GROUP BY EXTRACT(hour FROM viewed_at)
+            ORDER BY hour_of_day
+        `;
+        data.hourlyDistribution = convertBigIntToNumber(hourlyDistribution as any[]);
+
+        // Weekly day distribution
+        const weeklyDayDistribution = await prisma.$queryRaw`
+            SELECT 
+                EXTRACT(dow FROM viewed_at)::int as day_of_week,
+                TO_CHAR(viewed_at, 'Day') as day_name,
+                COUNT(*)::int as view_count
+            FROM job_views 
+            WHERE job_id = ${jobId}
+                AND viewed_at >= CURRENT_DATE - INTERVAL '4 weeks'
+            GROUP BY EXTRACT(dow FROM viewed_at), TO_CHAR(viewed_at, 'Day')
+            ORDER BY day_of_week
+        `;
+        data.weeklyDayDistribution = convertBigIntToNumber(weeklyDayDistribution as any[]);
+
+        // const jobView = await prisma.job_views.findMany({
+        //     where: {
+        //         job_id: jobId,
+        //     }
+        // });
+
+        // data.jobView = jobView;
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data
         });
     } catch (error) {
         next(error);

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import axiosConfig from "@/config/axios.config";
+
+// Global request tracking to prevent duplicates
+const globalRequestTracker = new Set<string>();
 import { useAuthStore } from "@/store";
 import {
   Dialog,
@@ -10,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { LoginDialog } from "@/components/login/LoginDialog";
 
 // Icons
 const SparklesIcon = () => (
@@ -106,32 +111,53 @@ export function SubscriptionCard({
   compact = false,
 }: SubscriptionCardProps) {
   const [hovered, setHovered] = useState(false);
-  const [showDialog, setShowDialog] = useState(false); // ✅ popup state
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const navigate = useNavigate();
   const config = tierConfig[plan.tier];
   const Icon = config.icon;
-  const authUser = useAuthStore((s) => s.authUser);
+  const [showDialog, setShowDialog] = useState(false);
+  const authUser = useAuthStore(s => s.authUser);
 
   const role = authUser?.roles?.role_name || "Guest";
 
-  const handlePurchase = () => {
-    // Nếu là User và gói KHÔNG phải trial → hiện popup
-    if (role === "User" && plan.tier !== "trial") {
-      setShowDialog(true);
+  const handlePurchase = async () => {
+    if (!authUser) {
+      setShowLoginDialog(true);
       return;
     }
 
-    navigate("/payment", {
-      state: {
-        selectedPlan: {
-          id: plan.id,
-          name: plan.name,
-          price: plan.price,
-          duration: plan.durationMonths || 1,
-          features: plan.features,
-        },
-      },
-    });
+    // Simple duplicate prevention
+    if (isProcessing || globalRequestTracker.has(`purchase-${plan.id}`)) {
+      return;
+    }
+
+    globalRequestTracker.add(`purchase-${plan.id}`);
+    setIsProcessing(true);
+
+    try {
+      const response = await axiosConfig.get("/pricings");
+      const plans = response.data.data;
+      const selectedPlan = plans.find((p: any) => p.id === parseInt(plan.id));
+
+      if (role === "User" && plan.tier !== "trial") {
+        setShowDialog(true);
+        return;
+      }
+      if (selectedPlan) {
+        navigate("/payment", {
+          state: {
+            plan: selectedPlan,
+            paymentMethod: "sepay",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching plan:", error);
+    } finally {
+      globalRequestTracker.delete(`purchase-${plan.id}`);
+      setIsProcessing(false);
+    }
   };
 
   const handleRegisterCompany = () => {
@@ -147,7 +173,7 @@ export function SubscriptionCard({
       >
         {/* Glow */}
         <div
-          className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${
+          className={`absolute inset-0 rounded-2xl bg-linear-to-r ${
             config.borderGradient
           } opacity-0 transition-opacity duration-500 ${
             hovered ? "opacity-20" : ""
@@ -176,15 +202,13 @@ export function SubscriptionCard({
             <div
               className={`inline-flex items-center justify-center ${
                 compact ? "w-12 h-12" : "w-16 h-16"
-              } rounded-full bg-gradient-to-r ${
-                config.gradient
-              } mb-3 shadow-lg`}
+              } rounded-full bg-linear-to-r ${config.gradient} mb-3 shadow-lg`}
             >
               <Icon />
             </div>
 
             <h3
-              className={`font-bold bg-gradient-to-r ${
+              className={`font-bold bg-linear-to-r ${
                 config.gradient
               } bg-clip-text text-transparent mb-1 ${
                 compact ? "text-lg lg:text-xl" : "text-2xl lg:text-3xl"
@@ -198,7 +222,7 @@ export function SubscriptionCard({
           <div className="text-center mb-6 pt-2 relative">
             <div className="flex items-baseline justify-center mb-2">
               <span
-                className={`font-bold bg-gradient-to-r ${
+                className={`font-bold bg-linear-to-r ${
                   config.gradient
                 } bg-clip-text text-transparent ${
                   compact ? "text-2xl" : "text-4xl"
@@ -224,7 +248,7 @@ export function SubscriptionCard({
             {plan.features.slice(0, 10).map((feature, i) => (
               <li key={i} className="flex items-start space-x-3">
                 <div
-                  className={`flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r ${config.gradient} flex items-center justify-center mt-0.5`}
+                  className={`shrink-0 w-5 h-5 rounded-full bg-linear-to-r ${config.gradient} flex items-center justify-center mt-0.5`}
                 >
                   <svg
                     className="w-3 h-3 text-white"
@@ -248,15 +272,21 @@ export function SubscriptionCard({
           {/* Button */}
           <Button
             onClick={handlePurchase}
+            disabled={isProcessing}
             size={compact ? "sm" : "lg"}
             className={`w-full rounded-xl mt-6 ${
               plan.tier === "trial"
                 ? "bg-blue-700 text-white hover:bg-blue-800"
-                : "bg-gradient-to-r " + config.gradient + " text-white"
-            }`}
+                : "bg-linear-to-r " + config.gradient + " text-white"
+            } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            Mua ngay
+            {isProcessing ? "Đang xử lý..." : "Mua ngay"}
           </Button>
+          {/* Hiển thị LoginDialog nếu chưa đăng nhập */}
+          <LoginDialog
+            open={showLoginDialog}
+            onOpenChange={setShowLoginDialog}
+          />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import AccountLayout from "../../components/layout/accountLayout";
 import { Button } from "../../components/ui/button";
@@ -11,39 +11,17 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../../components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { ImageCropModal } from "../../components/ui/ImageCropModal";
 import { useAuthStore } from "../../store/auth";
-import {
-  Edit2,
-  Save,
-  X,
-  User,
-  Calendar,
-  MapPin,
-  Mail,
-  Phone,
-  FileText,
-  Loader,
-  BarChart3,
-  Trash2,
-} from "lucide-react";
+import { Edit2, Save, X, User, Calendar, MapPin, Mail, Phone, FileText, Loader, BarChart3, Trash2, Edit, Bookmark, Building2 } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchUserCVs } from "../../api";
 import axiosConfig from "../../config/axios.config";
-import {
-  getUserProfile,
-  updateUserProfile,
-  changePassword,
-  type ChangePasswordRequest,
-} from "../../api/user_api";
+import { getUserProfile, updateUserProfile, changePassword, updateUserAvatar, type ChangePasswordRequest } from "../../api/user_api";
+import { handleAvatarUpload } from "@/utils/firebase-upload";
 import { Resume } from "../../components/resume/resume";
 import type { UpdateUserProfileRequest, UserProfile } from "@/types/profile";
 import type { ResumeListItem } from "@/types/resume";
@@ -51,23 +29,27 @@ import { ResumeCard } from "@/components/resume/resumeCard";
 import { CVStatsRadarChart } from "@/components/resume/resumeStats";
 import FollowedCompanies from "@/components/profile/FollowedCompanies";
 import { CVUploadDialog } from "../../components/cv/CVUploadDialog";
-import { Building2 } from "lucide-react";
 import CompanyRegistrationDialog from "@/components/company/CompanyRegistrationDialog";
 import type { CompanyRegisterResponse } from "@/types/company";
-// import RegistrationInforDialog from "@/components/company/RegistrationInforDialog";
 
 export default function ProfilePageWrapper() {
   const user = useAuthStore((state) => state.authUser);
+  const updateUser = useAuthStore((state) => state.updateUser);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfileData, setUserProfileData] = useState<UserProfile | null>(null);
+
+  // Avatar upload states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+
+  // Company registration dialog
   const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
-  const [userProfileData, setUserProfileData] = useState<UserProfile | null>(
-    null
-  );
   const [hasRegisteredCompany, setHasRegisteredCompany] = useState(false);
-  // const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
-  //isInfoDialogOpen,
+
   const [formData, setFormData] = useState({
     username: user?.username || "",
     avatar_url: user?.avatar_url || "",
@@ -75,7 +57,7 @@ export default function ProfilePageWrapper() {
     address_ward: user?.address_ward || "",
     address_city: user?.address_city || "",
     address_country: user?.address_country || "",
-    gender: user?.gender || "others", //'male' | 'female' | 'others'
+    gender: user?.gender || "others",  //'male' | 'female' | 'others'
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -99,8 +81,8 @@ export default function ProfilePageWrapper() {
 
   // Set default editing state based on URL parameter
   useEffect(() => {
-    const editParam = searchParams.get("edit");
-    if (editParam === "true") {
+    const editParam = searchParams.get('edit');
+    if (editParam === 'true') {
       setIsEditing(true);
     }
   }, [searchParams]);
@@ -121,7 +103,6 @@ export default function ProfilePageWrapper() {
       if (profileResponse?.success) {
         const userData = profileResponse.data;
         setUserProfileData(userData);
-        // Kiểm tra đăng ký doanh nghiệp chưa trên company_id
         setHasRegisteredCompany(!!userData.company_id);
 
         // Update form data with fetched user data
@@ -141,6 +122,21 @@ export default function ProfilePageWrapper() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCompanyRegistrationSuccess = (
+    response: CompanyRegisterResponse
+  ) => {
+    toast.success(response.message || "Đăng ký doanh nghiệp thành công!", {
+      duration: 3000,
+      position: "top-right",
+    });
+
+    //  Update UI
+    setHasRegisteredCompany(true);
+
+    loadUserProfileData();
+    setIsCompanyDialogOpen(false);
   };
 
   const loadCVData = async () => {
@@ -178,21 +174,6 @@ export default function ProfilePageWrapper() {
     );
   }
 
-  const handleCompanyRegistrationSuccess = (
-    response: CompanyRegisterResponse
-  ) => {
-    toast.success(response.message || "Đăng ký doanh nghiệp thành công!", {
-      duration: 3000,
-      position: "top-right",
-    });
-
-    //  Update UI
-    setHasRegisteredCompany(true);
-
-    loadUserProfileData();
-    setIsCompanyDialogOpen(false);
-  };
-
   const address = [
     user.address_street,
     user.address_ward,
@@ -213,12 +194,10 @@ export default function ProfilePageWrapper() {
     setFormData({
       username: userProfileData?.username || user?.username || "",
       avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street:
-        userProfileData?.address_street || user?.address_street || "",
+      address_street: userProfileData?.address_street || user?.address_street || "",
       address_ward: userProfileData?.address_ward || user?.address_ward || "",
       address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country:
-        userProfileData?.address_country || user?.address_country || "",
+      address_country: userProfileData?.address_country || user?.address_country || "",
       gender: userProfileData?.gender || user?.gender || "others",
     });
   };
@@ -228,12 +207,10 @@ export default function ProfilePageWrapper() {
     setFormData({
       username: userProfileData?.username || user?.username || "",
       avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street:
-        userProfileData?.address_street || user?.address_street || "",
+      address_street: userProfileData?.address_street || user?.address_street || "",
       address_ward: userProfileData?.address_ward || user?.address_ward || "",
       address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country:
-        userProfileData?.address_country || user?.address_country || "",
+      address_country: userProfileData?.address_country || user?.address_country || "",
       gender: userProfileData?.gender || user?.gender || "others",
     });
 
@@ -257,7 +234,7 @@ export default function ProfilePageWrapper() {
         address_ward: formData.address_ward,
         address_city: formData.address_city,
         address_country: formData.address_country,
-        gender: formData.gender as "male" | "female" | "others",
+        gender: formData.gender as 'male' | 'female' | 'others'
       };
 
       console.log("Updating profile:", updateRequest);
@@ -321,7 +298,7 @@ export default function ProfilePageWrapper() {
 
       const changePasswordRequest: ChangePasswordRequest = {
         oldPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
+        newPassword: passwordData.newPassword
       };
 
       const response = await changePassword(changePasswordRequest);
@@ -365,15 +342,14 @@ export default function ProfilePageWrapper() {
       // Check for 204 No Content status
       if (response.status === 204) {
         // Remove CV from local state
-        setCvCard((prev) =>
-          prev.filter((cv) => cv.id !== parseInt(cvToDelete))
-        );
+        setCvCard(prev => prev.filter(cv => cv.id !== parseInt(cvToDelete)));
 
         // Close dialog if deleted CV was being viewed
         if (selectedCvId === parseInt(cvToDelete)) {
           setSelectedCvId(null);
           setShowStats(false);
         }
+
       } else {
         throw new Error(`Unexpected response status: ${response.status}`);
       }
@@ -390,6 +366,82 @@ export default function ProfilePageWrapper() {
     }
   };
 
+  // Avatar upload functions
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Chỉ hỗ trợ các định dạng: JPG, JPEG, PNG, WEBP');
+      return;
+    }
+
+    // Validate file size (max 10MB before cropping)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('Kích thước file không được vượt quá 10MB');
+      return;
+    }
+
+    // Set selected file and show crop modal
+    setSelectedImageFile(file);
+    setShowCropModal(true);
+
+    // Clear the input value to allow selecting the same file again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    if (!user) return;
+
+    setIsUploading(true);
+    setShowCropModal(false);
+
+    try {
+      // Upload the cropped image
+      await handleAvatarUpload(
+        croppedFile,
+        user.id,
+        async (firebaseUrl) => {
+          // Update avatar in database
+          const result = await updateUserAvatar(firebaseUrl);
+          if (result?.success) {
+            // Update local auth state
+            updateUser({ avatar_url: firebaseUrl });
+            // Update form data
+            setFormData(prev => ({ ...prev, avatar_url: firebaseUrl }));
+            // Update userProfileData if it exists
+            if (userProfileData) {
+              setUserProfileData(prev => prev ? { ...prev, avatar_url: firebaseUrl } : null);
+            }
+            toast.success('Cập nhật ảnh đại diện thành công!');
+          } else {
+            toast.error('Có lỗi xảy ra khi cập nhật ảnh đại diện');
+          }
+        },
+        (error) => {
+          toast.error(error);
+        }
+      );
+    } finally {
+      setIsUploading(false);
+      setSelectedImageFile(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setSelectedImageFile(null);
+  };
+
   return (
     <AccountLayout>
       {/* Container thu hẹp cho trang profile */}
@@ -397,27 +449,70 @@ export default function ProfilePageWrapper() {
         {/* Profile Card */}
         <Card className="overflow-hidden">
           <CardHeader className="bg-linear-to-r from-gray-50 to-indigo-50 border-b">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-base text-gray-900 flex items-center gap-12">
+            <div className="flex justify-between items-center flex-wrap gap-y-4">
+              <CardTitle className="text-base text-gray-900 flex items-center gap-8 md:gap-12">
+
+                <div className="xl:hidden">
+                  <div className="relative">
+                    <Avatar className="size-24 border-4 shadow-md rounded-full flex items-center justify-center">
+                      {userProfileData?.avatar_url || user?.avatar_url ? (
+                        <AvatarImage
+                          src={userProfileData?.avatar_url || user?.avatar_url || undefined}
+                          alt={user?.username}
+                          className='object-cover object-center'
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-xl">
+                          {user?.username?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <Button
+                      size="icon"
+                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700 shadow-md text-white"
+                      onClick={handleAvatarClick}
+                      disabled={isUploading}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
+                {/* implement */}
                 <div className="flex flex-col items-center">
-                  <span className="text-blue-600 text-4xl font-bold">
+                  <span className="text-blue-600 text-4xl font-bold text-center">
+                    <Bookmark className="size-8 text-blue-500 block sm:hidden" />
                     {(() => {
                       const count = userProfileData?._count.savedJobs ?? 0;
                       return count < 10 ? `0${count}` : String(count);
                     })()}
                   </span>
-                  Đã lưu
+                  <p className="hidden sm:block">
+                    Đã lưu
+                  </p>
                 </div>
 
+                {/* implement */}
                 <div className="flex flex-col items-center">
                   <span className="text-blue-600 text-4xl font-bold">
+                    <Building2 className="size-8 text-center text-blue-500 block sm:hidden" />
                     {(() => {
-                      const count =
-                        userProfileData?._count.followedCompanies ?? 0;
+                      const count = userProfileData?._count.followedCompanies ?? 0;
                       return count < 10 ? `0${count}` : String(count);
                     })()}
                   </span>
-                  Đang theo dõi
+                  <p className="hidden sm:block">
+                    Đang theo dõi
+                  </p>
                 </div>
               </CardTitle>
 
@@ -426,7 +521,7 @@ export default function ProfilePageWrapper() {
                   {hasRegisteredCompany ? (
                     <Button
                       variant="outline"
-                      // onClick={() => setIsInfoDialogOpen(true)}
+                    // onClick={() => setIsInfoDialogOpen(true)}
                     >
                       <Building2 className="w-4 h-4 mr-2" /> Xem thông tin đơn
                       đăng ký
@@ -455,11 +550,7 @@ export default function ProfilePageWrapper() {
                     <Save className="w-4 h-4 mr-2" />
                     {isLoading ? "Đang lưu..." : "Lưu"}
                   </Button>
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    disabled={isLoading}
-                  >
+                  <Button onClick={handleCancel} variant="outline" disabled={isLoading}>
                     <X className="w-4 h-4 mr-2" />
                     Hủy
                   </Button>
@@ -469,6 +560,7 @@ export default function ProfilePageWrapper() {
           </CardHeader>
 
           <CardContent className="p-6">
+
             {/* Form Fields */}
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Add code for user's profile data here */}
@@ -599,11 +691,12 @@ export default function ProfilePageWrapper() {
                         />
                       </div>
                     </div>
-                  ) : (
-                    <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                      {address || "Chưa cập nhật"}
-                    </p>
-                  )}
+                  )
+                    : (
+                      <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
+                        {address || "Chưa cập nhật"}
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
@@ -611,7 +704,7 @@ export default function ProfilePageWrapper() {
             {/* Phần đổi mật khẩu - ở cuối */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div>
+                <div className="hidden sm:block">
                   <h3 className="font-medium text-gray-900">Bảo mật</h3>
                   <p className="text-sm text-gray-500">
                     Quản lý mật khẩu của bạn
@@ -620,7 +713,7 @@ export default function ProfilePageWrapper() {
                 {!showPasswordForm && (
                   <button
                     onClick={() => setShowPasswordForm(true)}
-                    className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="text-sm bg-blue-600 text-white px-4 py-4 rounded-md hover:bg-blue-700 flex-1 sm:flex-initial"
                   >
                     Đổi mật khẩu
                   </button>
@@ -690,11 +783,11 @@ export default function ProfilePageWrapper() {
           <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 border-b mb-4">
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col">
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                  CV & Hồ sơ ứng tuyển
+                <CardTitle className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-blue-600 hidden sm:block" />
+                  Hồ sơ ứng tuyển
                 </CardTitle>
-                <CardDescription className="text-gray-600 mt-1">
+                <CardDescription className="text-gray-600 mt-1 hidden sm:block">
                   Quản lý thông tin CV và hồ sơ cá nhân của bạn
                 </CardDescription>
               </div>
@@ -741,10 +834,7 @@ export default function ProfilePageWrapper() {
                         onClick={handleResumeCardClick}
                         isSelected={selectedCvId === cv.id}
                       />
-                      <Trash2
-                        className="absolute p-2 right-3 bottom-2 size-10 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 cursor-pointer"
-                        onClick={() => handleDeleteCV(cv.id)}
-                      />
+                      <Trash2 className="absolute p-2 right-3 bottom-2 size-10 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 cursor-pointer" onClick={() => handleDeleteCV(cv.id)} />
                     </div>
                   ))}
                 </div>
@@ -768,9 +858,7 @@ export default function ProfilePageWrapper() {
                               {showStats ? "Thống kê CV" : "Xem trước CV"}
                             </DialogTitle>
                             <DialogDescription>
-                              {showStats
-                                ? "Xem chi tiết thống kê kỹ năng của CV"
-                                : "Xem trước nội dung CV đã tải lên"}
+                              {showStats ? "Xem chi tiết thống kê kỹ năng của CV" : "Xem trước nội dung CV đã tải lên"}
                             </DialogDescription>
                           </div>
                           <Button
@@ -785,11 +873,7 @@ export default function ProfilePageWrapper() {
                         </div>
                       </DialogHeader>
 
-                      <DialogClose
-                        id="dialog-close-button"
-                        asChild
-                        className="bg-red-100 text-center flex justify-center items-center size-10"
-                      >
+                      <DialogClose id="dialog-close-button" asChild className="bg-red-100 text-center flex justify-center items-center size-10">
                         <button
                           className="text-red-500 hover:text-red-700 hover:bg-red-200 rounded-full p-2 transition-colors"
                           aria-label="Đóng"
@@ -799,15 +883,13 @@ export default function ProfilePageWrapper() {
                       </DialogClose>
                     </div>
 
-                    {selectedCvId &&
-                      (showStats ? (
+                    {selectedCvId && (
+                      showStats ? (
                         <CVStatsRadarChart cvId={selectedCvId} />
                       ) : (
-                        <Resume
-                          cvId={selectedCvId}
-                          avatar_url={formData?.avatar_url}
-                        />
-                      ))}
+                        <Resume cvId={selectedCvId} avatar_url={formData?.avatar_url} />
+                      )
+                    )}
                   </DialogContent>
                 </Dialog>
               </div>
@@ -823,24 +905,14 @@ export default function ProfilePageWrapper() {
         onOpenChange={setIsCompanyDialogOpen}
         onSuccess={handleCompanyRegistrationSuccess}
       />
-      {/* Dialog thông tin đăng kí  */}
-      {/* <RegistrationInforDialog
-        open={isInfoDialogOpen}
-        onOpenChange={setIsInfoDialogOpen}
-        data={userProfileData?.companies || null}
-      /> */}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={showDeleteConfirmation}
-        onOpenChange={setShowDeleteConfirmation}
-      >
+      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Xác nhận xóa CV</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa CV này không? Hành động này không thể
-              hoàn tác.
+              Bạn có chắc chắn muốn xóa CV này không? Hành động này không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 mt-6">
@@ -903,6 +975,14 @@ export default function ProfilePageWrapper() {
             },
           },
         }}
+      />
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={handleCropCancel}
+        imageFile={selectedImageFile}
+        onCropComplete={handleCropComplete}
       />
     </AccountLayout>
   );

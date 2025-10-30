@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticationMiddleware } from "../middlewares/auth.middleware";
-import { applyEvent, applyJob, createMessage, feedbackCompany, feedbackJob, followCompany, getAllUserFollowedCompanies, getAllUserSavedJobs, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
+import { authenticationMiddleware, twoFactorMiddleware } from "../middlewares/auth.middleware";
+import { applyEvent, applyJob, createMessage, createReport, feedbackCompany, feedbackJob, followCompany, getAllUserFollowedCompanies, getAllUserSavedJobs, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
 import OpenAI from "openai";
 import { OPENAI_API_KEY } from "../config/env.config";
 import fs from "fs";
@@ -16,7 +16,7 @@ userRouter.get('/follow-company/:companyId', followCompany);
 userRouter.get('/followed-companies', getAllUserFollowedCompanies);
 userRouter.delete('/follow-company/:companyId', unfollowCompany);
 
-userRouter.post('/feedback/company/:companyId', feedbackCompany);
+userRouter.post('/feedback/company/:companyId', twoFactorMiddleware, feedbackCompany);
 userRouter.post('/apply-job/:jobId', applyJob);
 userRouter.post('/apply-event/:eventId', applyEvent);
 
@@ -32,6 +32,8 @@ userRouter.get('/user/notification', getUserNotification);
 userRouter.put('/user/notification', updateUserNotification);
 
 userRouter.get('/user/history', getUserActivityHistory);
+
+userRouter.post('/report', createReport);
 
 // userRouter.get('/test', async (req, res) => {
 //     const openai = new OpenAI({

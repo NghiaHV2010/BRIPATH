@@ -149,27 +149,25 @@ export default function CVSuitableJobsPage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="text-center py-8">
-              <div className="text-red-600 mb-4">
-                <FileText className="h-12 w-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 mb-2">
-                Có lỗi xảy ra
-              </h3>
-              <p className="text-red-600 mb-4">{error}</p>
-              <Button
-                onClick={() => window.location.reload()}
-                variant="outline"
-                className="border-red-300 text-red-700 hover:bg-red-100"
-              >
-                Thử lại
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen max-w-5xl w-full bg-gray-50 p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="text-center py-8">
+            <div className="text-red-600 mb-4">
+              <FileText className="h-12 w-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">
+              Có lỗi xảy ra
+            </h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="border-red-300 text-red-700 hover:bg-red-100"
+            >
+              Thử lại
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -177,8 +175,8 @@ export default function CVSuitableJobsPage() {
   // No CV state - show Bouncy Fail animation
   if (!cvs || cvs.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen max-w-5xl w-full bg-gray-50 p-6">
+        <div className="">
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center pb-4">
               <h3 className="text-2xl font-bold text-gray-900">
@@ -206,7 +204,7 @@ export default function CVSuitableJobsPage() {
               </p>
               <Button
                 onClick={handleNavigateToProfile}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2"
+                className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 Tải lên CV ngay

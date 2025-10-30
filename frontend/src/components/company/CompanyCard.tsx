@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, MapPin, Briefcase, Bookmark } from "lucide-react";
+import { Building2, MapPin, Briefcase, Bookmark, CircleChevronDown } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { CompanyTypeMap, mapEnumValue } from "../../utils/mapping";
@@ -66,7 +66,7 @@ export default function CompanyCard({
         onClick={onClick}
       >
         {/* Header Background */}
-        <div className="h-24 bg-gradient-to-br from-blue-500 to-blue-600 relative">
+        <div className="h-24 bg-linear-to-r from-blue-500 to-blue-600 relative">
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity" />
 
           {/* Follow Icon */}
@@ -86,7 +86,7 @@ export default function CompanyCard({
           <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 border-4 border-white mx-auto relative">
             {is_verified && (
               <div className="absolute -bottom-1 -right-1 bg-cyan-400 rounded-full p-0.5">
-                <Building2 className="size-3 text-white" />
+                <CircleChevronDown className="size-4 text-white" />
               </div>
             )}
             {users?.avatar_url ? (
@@ -133,7 +133,7 @@ export default function CompanyCard({
           <div className="mt-4 pt-3 border-t border-gray-100">
             <div className="flex items-center justify-between text-xs text-gray-500">
               <span>Xem chi tiết</span>
-              <div className="w-0 group-hover:w-8 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 rounded-full"></div>
+              <div className="w-0 group-hover:w-8 h-0.5 bg-linear-to-r from-blue-500 to-blue-600 transition-all duration-300 rounded-full"></div>
             </div>
           </div>
         </CardContent>

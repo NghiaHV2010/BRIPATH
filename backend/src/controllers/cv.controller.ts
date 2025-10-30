@@ -331,21 +331,6 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Hồ sơ không tồn tại!"));
         }
 
-        // const jobs = await prisma.$queryRaw`
-        //     SELECT  j.id, 
-        //             j.job_title,
-        //             1 - (j.embedding <=> cv.embedding) as score
-        //     FROM jobs j,
-        //     (
-        //         SELECT embedding 
-        //         FROM cvs
-        //         WHERE id=${cv_id} AND users_id=${user_id}
-        //     ) AS cv
-        //     WHERE 1 - (j.embedding <=> cv.embedding) > 0.7
-        //     ORDER BY score DESC
-        //     LIMIT 5
-        // `;
-
         // tính trọng số động
         const savedCount = await prisma.savedJobs.count({ where: { user_id } });
         const feedbackCount = await prisma.aiFeedbacks.count({ where: { cv_id, is_good: true } });
@@ -453,7 +438,7 @@ export const getUserCVById = async (req: Request, res: Response, next: NextFunct
                 languages: true,
                 references: true,
             },
-        })
+        });
 
         if (!cv) {
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));

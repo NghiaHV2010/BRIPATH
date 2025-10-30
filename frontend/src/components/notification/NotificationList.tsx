@@ -74,7 +74,7 @@ export function NotificationList() {
 
     if (error) {
         return (
-            <div className="w-full max-w-5xl mx-auto p-6">
+            <div className="w-full max-w-5xl min-h-screen p-6">
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
@@ -83,7 +83,7 @@ export function NotificationList() {
     }
 
     return (
-        <div className="w-full max-w-4xl h-screen p-6 space-y-6">
+        <div className="w-full max-w-5xl min-h-screen p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="p-1.5 bg-gray-500 rounded-md">

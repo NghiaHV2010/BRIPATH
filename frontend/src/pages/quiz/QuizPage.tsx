@@ -2,14 +2,36 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../store/quiz.store";
 import { answerQuiz } from "../../api/quiz_api";
-import { Layout } from "../../components/layout";
+import { resetAnswer } from "../../api/quiz_api";
 import { Button } from "../../components/ui/button";
 import { ChevronRight, Check, AlertCircle } from "lucide-react";
 
+function TestModeLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="h-screen w-screen overflow-hidden fixed inset-0">
+      <main className="h-full w-full overflow-auto">{children}</main>
+    </div>
+  );
+}
+
 export default function QuizPage() {
+  // Xử lý nút thoát quiz
+  const handleExitQuiz = async () => {
+    if (
+      window.confirm(
+        "Nếu bạn thoát, tiến trình làm bài sẽ bị mất. Bạn có chắc chắn muốn thoát không?"
+      )
+    ) {
+      try {
+        await resetAnswer();
+      } catch (error) {
+        // Có thể log lỗi nếu cần
+      }
+      navigate("/quiz");
+    }
+  };
   const navigate = useNavigate();
   const [isTransitioning, setIsTransitioning] = useState(false);
-  // Removed answeredQuestions state (sidebar deleted)
 
   const {
     questions,
@@ -36,6 +58,7 @@ export default function QuizPage() {
   const selectedAnswers = getSelectedAnswersForCurrent();
   const progress = getProgress();
   const [isGeneratingResult, setIsGeneratingResult] = useState(false);
+
   useEffect(() => {
     if (questions.length === 0) {
       loadQuestions();
@@ -50,8 +73,6 @@ export default function QuizPage() {
       return () => clearTimeout(timer);
     }
   }, [currentQuestion, loadAnswersForQuestion]);
-
-  // Removed useEffect for answeredQuestions (sidebar deleted)
 
   const handleAnswerSelect = (answerId: number) => {
     if (!currentQuestion) return;
@@ -75,11 +96,8 @@ export default function QuizPage() {
       }
     }
 
-    // 👉 Bắt đầu loading 3 giây (hiệu ứng “tạo kết quả định hướng”)
     setIsGeneratingResult(true);
-
-    // Giả lập hệ thống đang xử lý
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     try {
       await submitQuizAndGetResults();
@@ -96,7 +114,7 @@ export default function QuizPage() {
 
   if (isLoading) {
     return (
-      <Layout>
+      <TestModeLayout>
         <div className="min-h-screen bg-linear-to-br from-white via-blue-50 to-blue-200 flex items-center justify-center">
           <div className="text-center">
             <div className="relative w-16 h-16 mx-auto mb-6">
@@ -106,13 +124,13 @@ export default function QuizPage() {
             <p className="text-gray-700 font-medium">Đang tải câu hỏi...</p>
           </div>
         </div>
-      </Layout>
+      </TestModeLayout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
+      <TestModeLayout>
         <div className="min-h-screen bg-linear-to-br from-white via-blue-50 to-blue-200 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-red-100 p-8 text-center max-w-md">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -128,25 +146,25 @@ export default function QuizPage() {
             </Button>
           </div>
         </div>
-      </Layout>
+      </TestModeLayout>
     );
   }
 
   if (!currentQuestion) {
     return (
-      <Layout>
+      <TestModeLayout>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Không tìm thấy câu hỏi</p>
             <Button onClick={() => navigate("/quiz")}>Quay lại</Button>
           </div>
         </div>
-      </Layout>
+      </TestModeLayout>
     );
   }
 
   return (
-    <Layout>
+    <TestModeLayout>
       <div className="min-h-screen bg-linear-to-br from-white via-blue-50 to-blue-200 py-8 md:py-12">
         <div className="max-w-350 mx-auto px-4">
           <div className="mb-8">
@@ -169,7 +187,7 @@ export default function QuizPage() {
               </div>
             </div>
 
-            {/* Progress Bar - just colored bar, no wrapper */}
+            {/* Progress Bar */}
             <div className="relative w-full h-3 bg-blue-100 rounded-full overflow-hidden">
               <div
                 className="absolute inset-y-0 left-0 bg-linear-to-r from-blue-400 via-blue-500 to-blue-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-blue-500/30"
@@ -180,10 +198,10 @@ export default function QuizPage() {
             </div>
           </div>
 
-          {/* Main Content with Sidebar */}
+          {/* Main Content */}
           <div className="flex gap-6">
             <div className="flex-1">
-              {/* Question Card with Animation */}
+              {/* Question Card */}
               <div
                 className={`bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-10 mb-8 transition-all duration-300 ${
                   isTransitioning
@@ -274,12 +292,11 @@ export default function QuizPage() {
 
                 {/* Selection Info */}
                 <div className="pt-6 border-t border-blue-100">
-                  {/* Hàng chính: bên trái là info, bên phải là button */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    {/* Bên trái: selection info */}
+                    {/* Selection info */}
                     <div className="flex items-center gap-3 flex-wrap">
                       <div className="flex items-center gap-2">
-                        {[1, 2, 3].map((num) => (
+                        {[1, 2, 3].map(num => (
                           <div
                             key={num}
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
@@ -315,52 +332,61 @@ export default function QuizPage() {
                     </div>
 
                     <div className="flex justify-end">
-                      {isLastQuestion ? (
+                      <div className="flex gap-2">
                         <Button
-                          onClick={handleSubmit}
-                          disabled={!hasSelectedAnswers || isSubmitting}
-                          className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center gap-2 px-6 h-10 rounded-xl disabled:opacity-50 text-white"
+                          onClick={handleExitQuiz}
+                          variant="outline"
+                          className="bg-linear-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-2 px-6 h-10 rounded-xl text-white border-none"
                         >
-                          {isGeneratingResult ? (
-                            <>
-                              <div className="flex items-center gap-3">
-                                <div className="relative w-5 h-5">
-                                  <div className="absolute w-full h-full rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                                  <div className="absolute inset-1 rounded-full bg-blue-400 opacity-30 animate-ping"></div>
+                          <span>Thoát Quiz</span>
+                        </Button>
+                        {isLastQuestion ? (
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={!hasSelectedAnswers || isSubmitting}
+                            className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center gap-2 px-6 h-10 rounded-xl disabled:opacity-50 text-white"
+                          >
+                            {isGeneratingResult ? (
+                              <>
+                                <div className="flex items-center gap-3">
+                                  <div className="relative w-5 h-5">
+                                    <div className="absolute w-full h-full rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                                    <div className="absolute inset-1 rounded-full bg-blue-400 opacity-30 animate-ping"></div>
+                                  </div>
+                                  <span className="hidden sm:inline animate-pulse">
+                                    Đang tạo kết quả định hướng...
+                                  </span>
                                 </div>
-                                <span className="hidden sm:inline animate-pulse">
-                                  Đang tạo kết quả định hướng...
+                              </>
+                            ) : (
+                              <>
+                                <Check className="w-5 h-5" />
+                                <span>Nộp bài</span>
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={handleNext}
+                            disabled={!hasSelectedAnswers || isSavingAnswer}
+                            className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center gap-2 px-6 h-10 rounded-xl disabled:opacity-50 text-white"
+                          >
+                            {isSavingAnswer ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span className="hidden sm:inline">
+                                  Đang lưu...
                                 </span>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <Check className="w-5 h-5" />
-                              <span>Nộp bài</span>
-                            </>
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={handleNext}
-                          disabled={!hasSelectedAnswers || isSavingAnswer}
-                          className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center gap-2 px-6 h-10 rounded-xl disabled:opacity-50 text-white"
-                        >
-                          {isSavingAnswer ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              <span className="hidden sm:inline">
-                                Đang lưu...
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Tiếp theo</span>
-                              <ChevronRight className="w-5 h-5" />
-                            </>
-                          )}
-                        </Button>
-                      )}
+                              </>
+                            ) : (
+                              <>
+                                <span>Tiếp theo</span>
+                                <ChevronRight className="w-5 h-5" />
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -369,6 +395,6 @@ export default function QuizPage() {
           </div>
         </div>
       </div>
-    </Layout>
+    </TestModeLayout>
   );
 }

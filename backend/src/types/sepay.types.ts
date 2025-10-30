@@ -19,6 +19,7 @@ export interface SePayCreateOrderParams {
   amount: number;
   description: string;
   orderId: string;
+  userId?: string;
   planId?: number;
   companyId?: string;
 }
@@ -31,6 +32,9 @@ export interface SePayCreateOrderResponse {
   paymentUrl: string;
   amount: number;
   description: string;
+  success?: boolean;
+  qrCode?: string;
+  message?: string;
 }
 
 export interface SePayQueryOrderParams {
