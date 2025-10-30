@@ -1,61 +1,23 @@
-import { useEffect, useState } from 'react';
-import type { Resume as ResumeType, ResumeResponse } from '../../types/resume';
+import type { Resume as ResumeType } from '../../types/resume';
 import { Card } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import {
-    Mail,
-    Phone,
-    MapPin,
-    Award,
-    GraduationCap,
-    Briefcase,
-    Trophy,
-    FileText,
-    Globe,
-    Target,
-    Lightbulb,
-    User,
-} from 'lucide-react';
+import { Mail, Phone, MapPin, Award, GraduationCap, Briefcase, Trophy, FileText, Globe, Target, Lightbulb, User } from 'lucide-react';
 import { format } from 'date-fns';
-import axiosConfig from '../../config/axios.config';
 
 interface ResumeProps {
-    cvId: number;
+    resume: ResumeType;
+    isLoading?: boolean;
+    error?: string | null;
     avatar_url?: string | null;
 }
 
-export function Resume({ cvId, avatar_url }: ResumeProps) {
-    const [resume, setResume] = useState<ResumeType | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function Resume({ resume, avatar_url, isLoading, error }: ResumeProps) {
 
-    useEffect(() => {
-        const fetchResume = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await axiosConfig.get<ResumeResponse>(
-                    `/cv/${cvId}`
-                );
-
-                if (response.data.success) {
-                    setResume(response.data.data);
-                }
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch resume');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchResume();
-    }, [cvId]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="w-full max-w-4xl mx-auto p-6 space-y-4">
                 <Skeleton className="h-32 w-full" />

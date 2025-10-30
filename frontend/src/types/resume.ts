@@ -88,6 +88,12 @@ export interface Resume {
     references?: Reference[];
 }
 
+export interface ResumeUserAvatar {
+    users: {
+        avatar_url: string | null;
+    };
+}
+
 export interface ResumeResponse {
     success: boolean;
     data: Resume;

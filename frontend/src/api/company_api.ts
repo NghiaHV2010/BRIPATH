@@ -1,6 +1,8 @@
 
 import axiosConfig from "@/config/axios.config";
+import type { Applicant, ApplicantResponse, ApplicantSummary } from "@/types/applicant";
 import type { CompanySummary, CompanyField, CompanyDetailResponse, CompanyRegistrationPayload, CompanyRegisterResponse } from "@/types/company";
+import type { Resume, ResumeUserAvatar } from "@/types/resume";
 // ========================
 // Get all companies
 // ========================
@@ -160,8 +162,6 @@ export const unfollowCompany = async (
   }
 };
 
-
-
 export const getCompanyFields = async (): Promise<CompanyField[]> => {
   try {
     const response = await axiosConfig.get('/company/fields');
@@ -184,4 +184,54 @@ export const registerCompany = async (
     console.error("Error registering company:", error);
     throw error;
   }
+};
+
+export const getApplicantsByJobId = async (
+  jobId: string,
+  status: 'pending' | 'approved' | 'rejected',
+): Promise<ApplicantResponse<ApplicantSummary>> => {
+  try {
+    const response = await axiosConfig.get(`/applicants/${jobId}?status=${status}`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching applicants by job ID:", error);
+    throw error;
+  }
+};
+
+export const updateApplicantStatus = async (
+  applicantId: number,
+  job_id: string,
+  feedback: string,
+  status: 'pending' | 'approved' | 'rejected'
+): Promise<boolean> => {
+  try {
+    const response = await axiosConfig.put(`/applicant/${applicantId}`, {
+      job_id,
+      feedback,
+      status
+    });
+
+    if (!response.data.success)
+      return false;
+
+    return true;
+  } catch (error) {
+    console.error("Error updating applicant status:", error);
+    throw error;
+  }
+};
+
+export const getApplicantByID = async (
+  applicantId: number,
+  status: 'pending' | 'approved' | 'rejected',
+  jobId: string
+): Promise<Applicant<Resume & ResumeUserAvatar> | null> => {
+  const response = await axiosConfig.get(`/applicant/${applicantId}?status=${status}&jobId=${jobId}`);
+
+  if (!response.data.success)
+    throw new Error("Có lỗi xảy ra khi lấy thông tin ứng viên");
+
+  return response.data.data;
 };

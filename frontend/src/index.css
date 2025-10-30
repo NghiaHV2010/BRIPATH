@@ -502,9 +502,11 @@ input[type="range"].slider::-moz-range-thumb {
     top: 0;
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
+
   100% {
     top: calc(100% - 4px);
     opacity: 1;

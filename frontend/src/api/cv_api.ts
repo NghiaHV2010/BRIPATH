@@ -1,4 +1,4 @@
-import type { CVStatsResponse, ResumeListItem, ResumeListResponse } from "@/types/resume";
+import type { CVStatsResponse, Resume, ResumeListItem, ResumeListResponse, ResumeResponse } from "@/types/resume";
 import axiosConfig from "../config/axios.config";
 
 type UploadCVResponse<T> = {
@@ -41,6 +41,16 @@ export const fetchUserCVs = async (): Promise<ResumeListItem[]> => {
 
   if (!response.data.success) {
     return [];
+  }
+
+  return response.data.data;
+};
+
+export const fetchUserCVById = async (cvId: number): Promise<Resume | null> => {
+  const response = await axiosConfig.get<ResumeResponse>(`/cv/${cvId}`);
+
+  if (!response.data.success) {
+    throw new Error("Có lỗi xảy ra khi lấy thông tin CV");
   }
 
   return response.data.data;
