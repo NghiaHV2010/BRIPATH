@@ -44,6 +44,7 @@ import { JobApplicationsPage } from "./pages/profile/company/JobApplicationsPage
 import { UserSubscription } from "./components/profile/userSubscriptions";
 import { CompanyReviews } from "./pages/profile/company/CompanyReviews";
 import VerifyPhone from "./components/auth/verifyPhone";
+import EventsPage from "./pages/event/EventPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -132,6 +133,7 @@ function App() {
         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
         <Route path="/verify-phone" element={<VerifyPhone />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/event" element={<EventsPage />} />
 
         {/* Profile Routes - Parent with nested children */}
         <Route
