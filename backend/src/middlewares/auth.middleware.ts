@@ -1,11 +1,11 @@
+import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import { ACCESS_SECRET, COOKIE_CONFIG_SAME_SITE, COOKIE_CONFIG_SECURE, REFRESH_SECRET } from "../config/env.config";
-
-const prisma = new PrismaClient();
+import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
+import { setCookie } from "../utils/cookie.util";
+import { AuthUserRequestDto } from "../types/auth.types";
+import { userRepository } from "../repositories/user.repository";
 
 export const authenticationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     let newAccessToken: string;
@@ -36,17 +36,13 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             //@ts-ignore
             userId = refreshTokenDecoded.userId;
 
-            newAccessToken = jwt.sign({ userId }, ACCESS_SECRET, {
-                expiresIn: "45m"
-            });
+            newAccessToken = jwt.sign(
+                { userId },
+                ACCESS_SECRET,
+                { expiresIn: "45m" }
+            );
 
-            res.cookie("accessToken", newAccessToken, {
-                maxAge: 45 * 60 * 1000,
-                httpOnly: true,
-                sameSite: COOKIE_CONFIG_SAME_SITE,
-                secure: COOKIE_CONFIG_SECURE,
-                path: '/'
-            });
+            setCookie(res, "accessToken", newAccessToken, 45 * 60 * 1000);
         } else {
             const accessTokenDecoded = jwt.verify(accessToken, ACCESS_SECRET);
 
@@ -58,40 +54,13 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             userId = accessTokenDecoded.userId;
         }
 
-        const user = await prisma.users.findFirst({
-            where: {
-                id: userId,
-                is_deleted: false
-            },
-            include: {
-                roles: {
-                    select: {
-                        role_name: true
-                    }
-                },
-                _count: {
-                    select: {
-                        userNotifications: {
-                            where: {
-                                is_read: false
-                            }
-                        }
-                    }
-                },
-            },
-            omit: {
-                password: true,
-                is_deleted: true,
-                firebase_uid: true
-            }
-        });
+        const user = await userRepository.checkById(userId);
 
         if (!user) {
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!"));
         }
 
-        //@ts-ignore
-        req.user = user;
+        req.user = user as AuthUserRequestDto;
         next();
     } catch (error) {
         next(error);
@@ -135,18 +104,10 @@ export const emailOTPMiddleware = async (req: Request, res: Response, next: Next
 
 export const authorizationMiddleware = (role: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            // @ts-ignore
-            const user_id = req.user.id;
+        const { id: user_id } = req.user as AuthUserRequestDto;
 
-            const user = await prisma.users.findFirst({
-                where: {
-                    id: user_id
-                },
-                include: {
-                    roles: true
-                }
-            });
+        try {
+            const user = await userRepository.findById(user_id);
 
             if (user?.roles.role_name !== role) {
                 return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền thực hiện yêu cầu này"));
@@ -160,21 +121,10 @@ export const authorizationMiddleware = (role: string) => {
 }
 
 export const twoFactorMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    type UserDTO = {
-        id: string,
-        phone: string,
-        phone_verified: boolean
-    }
+    const { phone_verified } = req.user as AuthUserRequestDto;
 
-    try {
-        const { id, phone, phone_verified }: UserDTO = req.user as UserDTO;
+    if (!phone_verified)
+        return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Vui lòng xác thực số điện thoại"));
 
-        if (!phone || !phone_verified) {
-            return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Vui lòng xác thực số điện thoại"));
-        }
-
-        next();
-    } catch (error) {
-        next(error);
-    }
+    next();
 }

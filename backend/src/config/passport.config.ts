@@ -1,10 +1,9 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "./env.config";
 
-const prisma = new PrismaClient();
+import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "./env.config";
+import { userRepository } from "../repositories/user.repository";
 
 passport.use(
     new GoogleStrategy(
@@ -17,46 +16,18 @@ passport.use(
             let user;
 
             try {
-                user = await prisma.users.findFirst({
-                    where: {
-                        email: profile.emails?.[0].value
-                    },
-                    include: {
-                        roles: {
-                            select: {
-                                role_name: true
-                            }
-                        }
-                    },
-                    omit: {
-                        password: true
-                    }
-                });
+                user = await userRepository.findByEmail(profile.emails?.[0].value);
 
                 if (!user) {
                     const buf = crypto.randomBytes(32);
 
-                    user = await prisma.users.create({
-                        data: {
-                            // @ts-ignore
-                            username: profile.displayName,
-                            // @ts-ignore
-                            email: profile.emails?.[0].value,
-                            password: buf.toString('hex'),
-                            avatar_url: (profile as any).photos?.[0]?.value,
-                            last_loggedIn: new Date(),
-                            role_id: 1
-                        },
-                        include: {
-                            roles: {
-                                select: {
-                                    role_name: true
-                                }
-                            }
-                        },
-                        omit: {
-                            password: true
-                        }
+                    user = await userRepository.create({
+                        // @ts-ignore
+                        username: profile.displayName,
+                        email: profile.emails?.[0].value,
+                        password: buf.toString('hex'),
+                        avatar_url: (profile as any).photos?.[0]?.value,
+                        last_loggedIn: new Date()
                     });
                 }
 

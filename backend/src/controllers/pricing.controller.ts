@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { HTTP_SUCCESS } from "../constants/httpCode";
-
-const prisma = new PrismaClient();
+import { prisma } from "../libs/prisma";
 
 export const getAllPricings = async (req: Request, res: Response, next: NextFunction) => {
     try {

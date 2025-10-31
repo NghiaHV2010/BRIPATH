@@ -1,8 +1,7 @@
 import OpenAI from "openai";
-import { PrismaClient } from "@prisma/client"
 import { OPENAI_API_KEY } from "../config/env.config";
+import { prisma } from "../libs/prisma";
 
-const prisma = new PrismaClient();
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY
 });
@@ -449,163 +448,255 @@ async function main() {
     // console.log("✅ Seeded company fields successfully!");
 
 
-    await prisma.membershipPlans.createMany({
-        data: [
-            {
-                plan_name: 'TRIAL EMPLOYER',
-                description: 'Gói dùng thử – phù hợp người dùng cơ bản có nhu cầu tìm kiếm cộng tác viên / tình nguyện viên cho sự kiện hoặc công việc ngắn hạn.',
-                price: 49000,
-                duration_months: 1,
-                is_active: true,
-                urgent_jobs_limit: 0,
-                quality_jobs_limit: 0,
-                total_jobs_limit: 1,
-                ai_matchings: false,
-                ai_networking_limit: 0,
-                verified_badge: false,
-                recommended_labels: false,
-                highlighted_hot_jobs: false,
+    // await prisma.membershipPlans.createMany({
+    //     data: [
+    //         {
+    //             plan_name: 'TRIAL EMPLOYER',
+    //             description: 'Gói dùng thử – phù hợp người dùng cơ bản có nhu cầu tìm kiếm cộng tác viên / tình nguyện viên cho sự kiện hoặc công việc ngắn hạn.',
+    //             price: 49000,
+    //             duration_months: 1,
+    //             is_active: true,
+    //             urgent_jobs_limit: 0,
+    //             quality_jobs_limit: 0,
+    //             total_jobs_limit: 1,
+    //             ai_matchings: false,
+    //             ai_networking_limit: 0,
+    //             verified_badge: false,
+    //             recommended_labels: false,
+    //             highlighted_hot_jobs: false,
+    //         },
+    //         {
+    //             plan_name: 'BASIC EMPLOYER',
+    //             description: 'Phù hợp với doanh nghiệp nhỏ, cần tuyển dụng thường xuyên với ngân sách hợp lý.',
+    //             price: 990000,
+    //             duration_months: 1,
+    //             is_active: true,
+    //             urgent_jobs_limit: 3,
+    //             quality_jobs_limit: 5,
+    //             total_jobs_limit: 10,
+    //             ai_matchings: true,
+    //             ai_networking_limit: 5,
+    //             verified_badge: true,
+    //             recommended_labels: false,
+    //             highlighted_hot_jobs: false,
+    //         },
+    //         {
+    //             plan_name: 'VIP EMPLOYER',
+    //             description: 'Dành cho doanh nghiệp mở rộng quy mô, cần thu hút ứng viên chất lượng cao.',
+    //             price: 2990000,
+    //             duration_months: 4,
+    //             is_active: true,
+    //             urgent_jobs_limit: 12,
+    //             quality_jobs_limit: 25,
+    //             total_jobs_limit: 50,
+    //             ai_matchings: true,
+    //             ai_networking_limit: 10,
+    //             verified_badge: true,
+    //             recommended_labels: true,
+    //             highlighted_hot_jobs: false,
+    //         },
+    //         {
+    //             plan_name: 'PREMIUM EMPLOYER',
+    //             description: 'Gói toàn diện dành cho doanh nghiệp có nhu cầu tuyển dụng liên tục & xây dựng thương hiệu lâu dài.',
+    //             price: 5990000,
+    //             duration_months: 12,
+    //             is_active: true,
+    //             urgent_jobs_limit: 36,
+    //             quality_jobs_limit: 75,
+    //             total_jobs_limit: 150,
+    //             ai_matchings: true,
+    //             ai_networking_limit: 12,
+    //             verified_badge: true,
+    //             recommended_labels: true,
+    //             highlighted_hot_jobs: false,
+    //         }
+    //     ],
+    // });
+
+    // // Thêm features cho từng gói
+    // const plans = await prisma.membershipPlans.findMany();
+    // for (const plan of plans) {
+    //     const featureList = [];
+    //     if (plan.plan_name === 'TRIAL EMPLOYER') {
+    //         featureList.push(
+    //             { feature_name: 'Đăng tải tin cho sự kiện hoặc công việc lên hệ thống', plan_id: plan.id },
+    //             { feature_name: 'Tối đa 01 tin đăng/tháng', plan_id: plan.id },
+    //             { feature_name: 'Phê duyệt các ứng viên', plan_id: plan.id },
+    //         );
+    //     }
+
+    //     if (plan.plan_name === 'BASIC EMPLOYER') {
+    //         featureList.push(
+    //             { feature_name: 'Tối đa 03 tin Việc gấp/tháng', plan_id: plan.id },
+    //             { feature_name: 'Tối đa 05 tin Việc chất/tháng', plan_id: plan.id },
+    //             { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc', plan_id: plan.id },
+    //             { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 5 hồ sơ/công việc)', plan_id: plan.id },
+    //             { feature_name: 'Dấu tích xanh', plan_id: plan.id },
+    //         );
+    //     }
+
+    //     if (plan.plan_name === 'VIP EMPLOYER') {
+    //         featureList.push(
+    //             { feature_name: 'Đăng 12 tin Việc gấp/4 tháng', plan_id: plan.id },
+    //             { feature_name: 'Đăng 25 tin Việc chất/4 tháng', plan_id: plan.id },
+    //             { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc', plan_id: plan.id },
+    //             { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 10 hồ sơ/công việc)', plan_id: plan.id },
+    //             { feature_name: 'Hồ sơ doanh nghiệp được gắn nhãn đề xuất, tự động đề xuất trên trang chủ và trang chi tiết công việc', plan_id: plan.id },
+    //             { feature_name: 'Dấu tích xanh', plan_id: plan.id },
+    //         );
+    //     }
+
+    //     if (plan.plan_name === 'PREMIUM EMPLOYER') {
+    //         featureList.push(
+    //             { feature_name: '40 tin đặc biệt/tháng', plan_id: plan.id },
+    //             { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc nâng cao', plan_id: plan.id },
+    //             { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 12 hồ sơ/công việc)', plan_id: plan.id },
+    //             { feature_name: 'Hồ sơ doanh nghiệp được gắn nhãn đề xuất, tự động đề xuất trên trang chủ và trang chi tiết công việc', plan_id: plan.id },
+    //             { feature_name: 'Dấu tích xanh', plan_id: plan.id },
+    //         );
+    //     }
+
+    //     await prisma.features.createMany({ data: featureList });
+    // }
+
+    // console.log('✅ Seed pricing plan data inserted successfully!');
+
+    // const tagsData = [
+    //     "Đề xuất",
+    //     "Hàng đầu",
+    //     "Đa quốc gia",
+    //     "Đánh giá cao"
+    // ]
+
+    // for (const tag of tagsData) {
+    //     await prisma.tags.upsert({
+    //         where: { label_name: tag },
+    //         update: {},
+    //         create: { label_name: tag },
+    //     });
+    // }
+
+    // console.log("✅ Seeded tags successfully!");
+
+    // const jobLabelsData = [
+    //     {
+    //         label_name: "Việc chất",
+    //         duration_days: 30,
+    //     },
+    //     {
+    //         label_name: "Việc gấp",
+    //         duration_days: 15,
+    //     },
+    //     {
+    //         label_name: "Việc Hot",
+    //         duration_days: 30,
+    //     },
+    // ]
+
+    // for (const label of jobLabelsData) {
+    //     await prisma.jobLabels.upsert({
+    //         where: { label_name: label.label_name },
+    //         update: {},
+    //         create: {
+    //             label_name: label.label_name,
+    //             duration_days: label.duration_days,
+    //         },
+    //     });
+    // }
+
+    // console.log("✅ Seeded job labels successfully!");
+
+    // --- Setting 1: Giao diện (dùng chung) ---
+    const settingGiaoDien = await prisma.settings.upsert({
+        where: { key: "theme_mode" },
+        update: {},
+        create: {
+            key: "theme_mode",
+            name: "Giao diện",
+            role: null, // dùng chung
+            type: "multi_choice",
+            settingsOptions: {
+                create: [
+                    { option: "Sáng", is_default: true },
+                    { option: "Tối" },
+                ],
             },
-            {
-                plan_name: 'BASIC EMPLOYER',
-                description: 'Phù hợp với doanh nghiệp nhỏ, cần tuyển dụng thường xuyên với ngân sách hợp lý.',
-                price: 990000,
-                duration_months: 1,
-                is_active: true,
-                urgent_jobs_limit: 3,
-                quality_jobs_limit: 5,
-                total_jobs_limit: 10,
-                ai_matchings: true,
-                ai_networking_limit: 5,
-                verified_badge: true,
-                recommended_labels: false,
-                highlighted_hot_jobs: false,
-            },
-            {
-                plan_name: 'VIP EMPLOYER',
-                description: 'Dành cho doanh nghiệp mở rộng quy mô, cần thu hút ứng viên chất lượng cao.',
-                price: 2990000,
-                duration_months: 4,
-                is_active: true,
-                urgent_jobs_limit: 12,
-                quality_jobs_limit: 25,
-                total_jobs_limit: 50,
-                ai_matchings: true,
-                ai_networking_limit: 10,
-                verified_badge: true,
-                recommended_labels: true,
-                highlighted_hot_jobs: false,
-            },
-            {
-                plan_name: 'PREMIUM EMPLOYER',
-                description: 'Gói toàn diện dành cho doanh nghiệp có nhu cầu tuyển dụng liên tục & xây dựng thương hiệu lâu dài.',
-                price: 5990000,
-                duration_months: 12,
-                is_active: true,
-                urgent_jobs_limit: 36,
-                quality_jobs_limit: 75,
-                total_jobs_limit: 150,
-                ai_matchings: true,
-                ai_networking_limit: 12,
-                verified_badge: true,
-                recommended_labels: true,
-                highlighted_hot_jobs: false,
-            }
-        ],
+        },
     });
 
-    // Thêm features cho từng gói
-    const plans = await prisma.membershipPlans.findMany();
-    for (const plan of plans) {
-        const featureList = [];
-        if (plan.plan_name === 'TRIAL EMPLOYER') {
-            featureList.push(
-                { feature_name: 'Đăng tải tin cho sự kiện hoặc công việc lên hệ thống', plan_id: plan.id },
-                { feature_name: 'Tối đa 01 tin đăng/tháng', plan_id: plan.id },
-                { feature_name: 'Phê duyệt các ứng viên', plan_id: plan.id },
-            );
-        }
-
-        if (plan.plan_name === 'BASIC EMPLOYER') {
-            featureList.push(
-                { feature_name: 'Tối đa 03 tin Việc gấp/tháng', plan_id: plan.id },
-                { feature_name: 'Tối đa 05 tin Việc chất/tháng', plan_id: plan.id },
-                { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc', plan_id: plan.id },
-                { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 5 hồ sơ/công việc)', plan_id: plan.id },
-                { feature_name: 'Dấu tích xanh', plan_id: plan.id },
-            );
-        }
-
-        if (plan.plan_name === 'VIP EMPLOYER') {
-            featureList.push(
-                { feature_name: 'Đăng 12 tin Việc gấp/4 tháng', plan_id: plan.id },
-                { feature_name: 'Đăng 25 tin Việc chất/4 tháng', plan_id: plan.id },
-                { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc', plan_id: plan.id },
-                { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 10 hồ sơ/công việc)', plan_id: plan.id },
-                { feature_name: 'Hồ sơ doanh nghiệp được gắn nhãn đề xuất, tự động đề xuất trên trang chủ và trang chi tiết công việc', plan_id: plan.id },
-                { feature_name: 'Dấu tích xanh', plan_id: plan.id },
-            );
-        }
-
-        if (plan.plan_name === 'PREMIUM EMPLOYER') {
-            featureList.push(
-                { feature_name: '40 tin đặc biệt/tháng', plan_id: plan.id },
-                { feature_name: 'AI Auto Matching, lọc các hồ sơ đã ứng tuyển phù hợp với công việc nâng cao', plan_id: plan.id },
-                { feature_name: 'AI Networking, đề xuất các hồ sơ(trong hệ thống) phù hợp với công việc (tối đa 12 hồ sơ/công việc)', plan_id: plan.id },
-                { feature_name: 'Hồ sơ doanh nghiệp được gắn nhãn đề xuất, tự động đề xuất trên trang chủ và trang chi tiết công việc', plan_id: plan.id },
-                { feature_name: 'Dấu tích xanh', plan_id: plan.id },
-            );
-        }
-
-        await prisma.features.createMany({ data: featureList });
-    }
-
-    console.log('✅ Seed pricing plan data inserted successfully!');
-
-    const tagsData = [
-        "Đề xuất",
-        "Hàng đầu",
-        "Đa quốc gia",
-        "Đánh giá cao"
-    ]
-
-    for (const tag of tagsData) {
-        await prisma.tags.upsert({
-            where: { label_name: tag },
-            update: {},
-            create: { label_name: tag },
-        });
-    }
-
-    console.log("✅ Seeded tags successfully!");
-
-    const jobLabelsData = [
-        {
-            label_name: "Việc chất",
-            duration_days: 30,
-        },
-        {
-            label_name: "Việc gấp",
-            duration_days: 15,
-        },
-        {
-            label_name: "Việc Hot",
-            duration_days: 30,
-        },
-    ]
-
-    for (const label of jobLabelsData) {
-        await prisma.jobLabels.upsert({
-            where: { label_name: label.label_name },
-            update: {},
-            create: {
-                label_name: label.label_name,
-                duration_days: label.duration_days,
+    // --- Setting 2: Ngôn ngữ (dùng chung) ---
+    const settingLanguage = await prisma.settings.upsert({
+        where: { key: "language" },
+        update: {},
+        create: {
+            key: "language",
+            name: "Ngôn ngữ",
+            role: null, // dùng chung
+            type: "multi_choice",
+            settingsOptions: {
+                create: [
+                    { option: "Tiếng Việt", is_default: true },
+                    { option: "Tiếng Anh" },
+                ],
             },
-        });
-    }
+        },
+    });
 
-    console.log("✅ Seeded job labels successfully!");
+    // --- Setting 3: Cover Letter (role = user) ---
+    const settingCoverLetter = await prisma.settings.upsert({
+        where: { key: "cover_letter" },
+        update: {},
+        create: {
+            key: "cover_letter",
+            name: "Cover Letter",
+            role: "User",
+            type: "multi_choice",
+            settingsOptions: {
+                create: [
+                    { option: "Không có", is_default: true },
+                    { option: "Tự động" }, // cho phép custom value trong logic API
+                ],
+            },
+        },
+    });
+
+    // --- Setting 4: Phản hồi tự động (Chấp nhận) (role = company) ---
+    const settingAutoAccept = await prisma.settings.upsert({
+        where: { key: "auto_response_accept" },
+        update: {},
+        create: {
+            key: "auto_response_accept",
+            name: "Phản hồi tự động (Chấp nhận)",
+            role: "Company",
+            type: "multi_choice",
+            settingsOptions: {
+                create: [
+                    { option: "Không có", is_default: true },
+                    { option: "Tự động" }, // cho phép custom value
+                ],
+            },
+        },
+    });
+
+    // --- Setting 5: Phản hồi tự động (Từ chối) (role = company) ---
+    const settingAutoReject = await prisma.settings.upsert({
+        where: { key: "auto_response_reject" },
+        update: {},
+        create: {
+            key: "auto_response_reject",
+            name: "Phản hồi tự động (Từ chối)",
+            role: "Company",
+            type: "multi_choice",
+            settingsOptions: {
+                create: [
+                    { option: "Không có", is_default: true },
+                    { option: "Tự động" }, // cho phép custom value
+                ],
+            },
+        },
+    });
+
+    console.log("✅ Seed settings completed successfully!");
 }
 
 main()

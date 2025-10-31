@@ -1,8 +1,7 @@
 import cron from "node-cron";
-import { PrismaClient } from "@prisma/client";
 import { broadcastToClients } from "../libs/wsServer";
+import { prisma } from "../libs/prisma";
 
-const prisma = new PrismaClient();
 
 // Cron mỗi 5 phút kiểm tra "Việc gấp" trong giờ vàng
 cron.schedule("* * * * *", async () => {

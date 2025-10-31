@@ -9,4 +9,5 @@ export { default as companyRouter } from "./company.routes";
 export { default as jobRouter } from "./job.routes";
 export { default as questionRouter } from "./question.routes";
 export { default as eventRouter } from "./event.routes";
+export { default as settingRouter } from "./setting.routes";
 export { default as pricingRouter } from "./pricing.routes";

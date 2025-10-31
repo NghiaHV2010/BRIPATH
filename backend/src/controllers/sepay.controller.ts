@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import SePayService from '../services/sepay.service';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { PrismaClient, PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType } from '@prisma/client';
+import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType } from '@prisma/client';
 import { hasPaymentByTransactionId, saveSePayOrderMapping, getSePayOrderMapping, deleteSePayOrderMapping } from '../utils/payment.utils';
 import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
-
-const prisma = new PrismaClient();
+import { prisma } from '../libs/prisma';
 
 /**
  * Create SePay order

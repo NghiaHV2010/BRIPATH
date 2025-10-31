@@ -1,12 +1,10 @@
 // middlewares/checkCompanyPlan.ts
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
+import { prisma } from "../libs/prisma";
 
 export const subscriptionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const prisma = new PrismaClient();
-
     try {
         // @ts-ignore
         const user_id = req.user.id;
@@ -47,7 +45,6 @@ export const subscriptionMiddleware = async (req: Request, res: Response, next: 
 
 
 export const subscriptionPermissionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const prisma = new PrismaClient();
     try {
         // @ts-ignore
         const user_id = req.user.id;

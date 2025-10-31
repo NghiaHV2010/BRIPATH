@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
+import { prisma } from '../libs/prisma';
 
-const prisma = new PrismaClient();
 
 export const getUserSubscription = async (req: Request, res: Response, next: NextFunction) => {
   try {

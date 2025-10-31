@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
 import { createNotificationData } from '../utils';
 import { errorHandler } from '../utils/error';
-
-const prisma = new PrismaClient();
+import { prisma } from '../libs/prisma';
 
 export const getRevenueStats = async (req: Request, res: Response) => {
     try {
@@ -870,6 +868,80 @@ export const deleteBlogPost = async (req: Request, res: Response, next: NextFunc
         });
 
         return res.status(HTTP_SUCCESS.OK).json({ success: true, message: 'Xóa bài viết thành công' });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllReports = async (req: Request, res: Response, next: NextFunction) => {
+    let page = parseInt(req.query.page as string || '1');
+    const status = req.query.status as 'pending' | 'approved' | 'rejected';
+    const numberOfReports = 20;
+
+    if (status && (status !== 'pending' && status !== 'approved' && status !== 'rejected')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ"));
+    }
+
+    if (isNaN(page) || page < 1) page = 1;
+    page -= 1;
+    try {
+        const totalReports = await prisma.reports.count();
+
+        const reports = await prisma.reports.findMany({
+            where: status ? { status } : {},
+            orderBy: {
+                created_at: 'desc'
+            },
+            include: {
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                        avatar_url: true,
+                    }
+                }
+            },
+            skip: page * numberOfReports,
+            take: numberOfReports
+        });
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: reports,
+            totalPages: Math.ceil(totalReports / numberOfReports),
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateReportStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const reportId = parseInt(req.params.reportId);
+    const { status } = req.body;
+
+    if (!status || (status !== 'approved' && status !== 'rejected')) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ"));
+    }
+
+    try {
+        const isReportExisted = await prisma.reports.findFirst({
+            where: {
+                id: reportId
+            }
+        });
+
+        if (!isReportExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Báo cáo không tồn tại"));
+        }
+
+        const result = await prisma.reports.update({
+            where: { id: reportId },
+            data: { status }
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: result
+        });
     } catch (error) {
         next(error);
     }

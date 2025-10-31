@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import { PrismaClient } from "@prisma/client";
 import { createNotificationData } from "../utils";
-
-const prisma = new PrismaClient();
+import { prisma } from "../libs/prisma";
 
 export const getAllEvents = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string || '1');

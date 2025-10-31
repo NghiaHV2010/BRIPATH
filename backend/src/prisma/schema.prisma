@@ -136,6 +136,7 @@ model companies {
   followedCompanies    followedCompanies[]
   jobs                 jobs[]
   companyTags          companyTags[]
+  companyStaffs        companyStaffs[]
 }
 
 model companyTags {
@@ -181,7 +182,7 @@ model cvs {
   references     references[]
   languages      languages[]
   aiFeedbacks    aiFeedbacks[]
-  users          users                  @relation(fields: [users_id], references: [id])
+  users          users                  @relation(fields: [users_id], references: [id], onDelete: Cascade)
 }
 
 model cv_stats {
@@ -254,7 +255,7 @@ model feedbacks {
   benefit          String?
   created_at       DateTime  @default(now())
   companies        companies @relation(fields: [company_id], references: [id])
-  users            users     @relation(fields: [user_id], references: [id])
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, company_id])
 }
@@ -378,7 +379,7 @@ model messages {
   response_content String?
   created_at       DateTime @default(now())
   user_id          String
-  users            users    @relation(fields: [user_id], references: [id])
+  users            users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([id, user_id])
 }
@@ -411,9 +412,9 @@ model personalityTestResults {
   user_id     String
   question_id Int
   answer_id   Int
-  answers     answers   @relation(fields: [answer_id], references: [id])
-  questions   questions @relation(fields: [question_id], references: [id])
-  users       users     @relation(fields: [user_id], references: [id])
+  answers     answers   @relation(fields: [answer_id], references: [id], onDelete: Cascade)
+  questions   questions @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, question_id, answer_id])
 }
@@ -454,8 +455,8 @@ model savedJobs {
   user_id  String
   job_id   String
   saved_at DateTime @default(now())
-  jobs     jobs     @relation(fields: [job_id], references: [id])
-  users    users    @relation(fields: [user_id], references: [id])
+  jobs     jobs     @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  users    users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, job_id])
 }
@@ -528,6 +529,52 @@ model events {
   volunteers   volunteers[]
 }
 
+model companyStaffs {
+  company_id  String
+  user_id     String           @unique
+  permission  Permission       @default(approval)
+  status      InvitationStatus @default(pending)
+  assigned_at DateTime         @default(now())
+  companies   companies        @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  users       users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([company_id, user_id])
+}
+
+model settings {
+  id              Int               @id @default(autoincrement())
+  key             String            @unique @db.VarChar(100)
+  name            String            @db.VarChar(255)
+  role            String?           @db.VarChar(50)
+  type            SettingType       @default(multi_choice)
+  userSettings    userSettings[]
+  settingsOptions settingsOptions[]
+}
+
+model userSettings {
+  id                Int     @id @default(autoincrement())
+  user_id           String
+  setting_id        Int
+  setting_option_id Int?
+  custom_value      String? @db.VarChar(255)
+
+  users           users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  settings        settings         @relation(fields: [setting_id], references: [id], onDelete: Cascade)
+  settingsOptions settingsOptions? @relation(fields: [setting_option_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, setting_id]) // mỗi user chỉ có 1 record cho mỗi setting
+}
+
+model settingsOptions {
+  id         Int     @id @default(autoincrement())
+  setting_id Int
+  option     String  @db.VarChar(100)
+  is_default Boolean @default(false)
+
+  settings     settings       @relation(fields: [setting_id], references: [id], onDelete: Cascade)
+  userSettings userSettings[]
+}
+
 model volunteers {
   event_id      String
   user_id       String
@@ -582,12 +629,32 @@ model users {
   roles                  roles                    @relation(fields: [role_id], references: [id])
   sepayOrders            sepayOrders[]
   reports                reports[]
+  companyStaffs          companyStaffs[]
+  userSettings           userSettings[]
 }
 
 enum ApplicantsStatus {
   pending  @map("Đang chờ")
   approved @map("Chấp nhận")
   rejected @map("Từ chối")
+}
+
+enum InvitationStatus {
+  pending  @map("Đang chờ")
+  accepted @map("Chấp nhận")
+  declined @map("Từ chối")
+}
+
+enum Permission {
+  approval @map("Phê duyệt")
+  write    @map("Đăng tải")
+  all      @map("Cả hai")
+}
+
+enum SettingType {
+  single_choice
+  multi_choice
+  custom
 }
 
 enum Company_Type {

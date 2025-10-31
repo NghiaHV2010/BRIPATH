@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { analystDataStats, embeddingData, extractTextFromCV, formatText } from "../utils/cvHandler";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import { PrismaClient } from "@prisma/client";
 import { convertDate } from "../utils";
 import { errorHandler } from "../utils/error";
 import { CVSTATSPROMPT } from "../constants/prompt";
+import { prisma } from "../libs/prisma";
 
 interface IFILE {
     name: string;
@@ -92,8 +92,6 @@ interface CVStats {
     leadership: number;
     summary: string
 }
-
-const prisma = new PrismaClient();
 
 export const uploadCV = async (req: Request, res: Response, next: NextFunction) => {
     try {

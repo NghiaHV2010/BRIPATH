@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { generateCareerPath } from "../utils";
-
-const prisma = new PrismaClient();
+import { prisma } from "../libs/prisma";
 
 export const getAnswersByQuestion = async (req: Request, res: Response, next: NextFunction) => {
     const question_id: number = parseInt(req.params.questionId);

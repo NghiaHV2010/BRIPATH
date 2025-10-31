@@ -1,12 +1,11 @@
-import e, { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { createNotificationData } from "../utils";
 import { analystDataStats, embeddingData } from "../utils/cvHandler";
 import { JOBSTATSPROMPT } from '../constants/prompt';
+import { prisma } from "../libs/prisma";
 
-const prisma = new PrismaClient();
 const numberOfJobs = 16;
 
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {

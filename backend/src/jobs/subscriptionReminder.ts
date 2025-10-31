@@ -1,10 +1,11 @@
 import cron from "node-cron";
-import { PrismaClient } from "@prisma/client";
-import { createNotificationData, sendEmail } from "../utils";
+import { createNotificationData } from "../utils";
+import { sendEmail } from "../utils/emailHandler";
 import { emailPricingNotificationTemplate } from "../constants/emailTemplate";
+import { prisma } from "../libs/prisma";
+
 
 const checkSubscriptionRemainDate = async () => {
-    const prisma = new PrismaClient();
     const today = new Date();
 
     const threeDaysLater = new Date(today);
@@ -103,7 +104,6 @@ const checkSubscriptionRemainDate = async () => {
 }
 
 const getExpireIn = async (daysLater: Date) => {
-    const prisma = new PrismaClient();
     try {
         const data = await prisma.subscriptions.findMany({
             where: {

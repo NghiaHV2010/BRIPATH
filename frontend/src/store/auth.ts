@@ -8,26 +8,14 @@ import { registerValidate as apiRegisterValidate, sendRegisterEmail as apiSendRe
 export interface AuthUser {
 	id: string;
 	username: string;
-	email: string;
-	avatar?: string | null;
 	avatar_url?: string | null;
-	phone?: string | null;
-	address_street?: string | null;
-	address_ward?: string | null;
-	address_city?: string | null;
-	address_country?: string | null;
-	gender?: string | null;
-	last_loggedIn?: string;
-	created_at?: string;
-	updated_at?: string;
-	role?: string;
-	role_id?: number;
-	phone_verified?: boolean;
+	email: string;
+	phone_verified: boolean;
 	company_id?: string | null;
 	roles: {
 		role_name: string;
 	};
-	_count?: {
+	_count: {
 		userNotifications: number;
 	};
 }

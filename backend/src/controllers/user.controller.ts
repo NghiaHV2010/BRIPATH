@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import OpenAI from "openai";
 import { OPENAI_API_KEY, OPENAI_MODEL } from "../config/env.config";
 import { createNotificationData } from "../utils";
-
-const prisma = new PrismaClient();
+import { prisma } from "../libs/prisma";
 
 export const followCompany = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
@@ -1102,6 +1100,44 @@ export const createReport = async (req: Request, res: Response, next: NextFuncti
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
             data: report
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllUserReports = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const user_id = req.user.id;
+    const numberOfReports = 20;
+    let page: number = parseInt(req.query.page as string || '1');
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+    page -= 1;
+
+    try {
+        const totalReports = await prisma.reports.count({
+            where: {
+                user_id
+            }
+        });
+        const reports = await prisma.reports.findMany({
+            where: {
+                user_id
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: numberOfReports,
+            skip: page * numberOfReports
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: reports,
+            totalPages: Math.ceil(totalReports / numberOfReports)
         });
     } catch (error) {
         next(error);

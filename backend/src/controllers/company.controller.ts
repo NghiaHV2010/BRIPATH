@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
+import { prisma } from "../libs/prisma";
 
-const prisma = new PrismaClient();
 const numberOfCompanies = 12;
 
 export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
