@@ -1,137 +1,230 @@
-// import { useState } from "react";
-// import {
-//   auth,
-//   RecaptchaVerifier,
-//   signInWithPhoneNumber,
-//   type ConfirmationResult,
-// } from "../../firebase/config";
+import { useEffect, useState } from "react";
+import {
+  auth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
+} from "../../config/firebase.config";
+import axiosConfig from "../../config/axios.config";
 
-// export default function VerifyPhone() {
-//   const [phoneNumber, setPhoneNumber] = useState("");
-//   const [otp, setOtp] = useState("");
-//   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-//   const [loading, setLoading] = useState(false);
-//   const [message, setMessage] = useState("");
+declare global {
+  interface Window {
+    recaptchaVerifier?: RecaptchaVerifier;
+  }
+}
 
-//   // ✅ Khởi tạo Recaptcha chỉ 1 lần
-//   const setUpRecaptcha = () => {
-//     if (!(window as any).recaptchaVerifier) {
-//       (window as any).recaptchaVerifier = new RecaptchaVerifier(
-//         auth,
-//         "recaptcha-container",
-//         {
-//           size: "invisible", // invisible hoặc normal nếu muốn hiển thị captcha
-//           callback: (response: any) => {
-//             console.log("reCAPTCHA solved:", response);
-//           },
-//           "expired-callback": () => {
-//             console.warn("reCAPTCHA expired. Please refresh.");
-//           },
-//         }
-//       );
-//     }
-//   };
+export default function VerifyPhone() {
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isRecaptchaReady, setIsRecaptchaReady] = useState(false);
 
-//   // ✅ Gửi OTP
-//   const handleSendOTP = async () => {
-//     setMessage("");
-//     if (!phoneNumber.startsWith("+")) {
-//       setMessage("⚠️ Số điện thoại phải có mã quốc gia, ví dụ: +84901234567");
-//       return;
-//     }
+  /** 🔹 Initialize reCAPTCHA (runs once) */
+  useEffect(() => {
+    const initRecaptcha = async () => {
+      try {
+        if (window.recaptchaVerifier) return; // already exists
 
-//     try {
-//       setLoading(true);
-//       setUpRecaptcha();
-//       const appVerifier = (window as any).recaptchaVerifier;
-//       const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-//       setConfirmationResult(confirmation);
-//       setMessage("✅ OTP đã được gửi, vui lòng kiểm tra tin nhắn!");
-//     } catch (error: any) {
-//       console.error("❌ Lỗi gửi OTP:", error);
-//       setMessage(`❌ Lỗi gửi OTP: ${error.message}`);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+        const container = document.getElementById("recaptcha-container");
+        if (container) container.innerHTML = "";
 
-//   // ✅ Xác minh OTP
-//   const handleVerifyOTP = async () => {
-//     if (!confirmationResult) {
-//       setMessage("⚠️ Bạn cần gửi OTP trước khi xác minh!");
-//       return;
-//     }
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "normal", // visible but clean
+            callback: () => {
+              setIsRecaptchaReady(true);
+              console.log("✅ reCAPTCHA verified");
+            },
+            "expired-callback": () => {
+              setIsRecaptchaReady(false);
+              setErrorMsg("reCAPTCHA expired, please tick again.");
+            },
+          }
+        );
 
-//     try {
-//       setLoading(true);
-//       await confirmationResult.confirm(otp);
-//       setMessage("🎉 Xác minh thành công!");
-//     } catch (error: any) {
-//       console.error("❌ Sai mã OTP:", error);
-//       setMessage("❌ Sai mã OTP hoặc mã đã hết hạn.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+        await window.recaptchaVerifier.render();
+        console.log("🔧 reCAPTCHA ready");
+      } catch (err) {
+        console.error("reCAPTCHA init error:", err);
+        setErrorMsg("Failed to initialize reCAPTCHA.");
+      }
+    };
 
-//   return (
-//     <div className="flex flex-col gap-3 p-6 max-w-sm mx-auto border rounded-lg shadow-md">
-//       <h2 className="text-lg font-semibold text-center">📱 Verify Phone</h2>
+    initRecaptcha();
 
-//       <input
-//         type="tel"
-//         value={phoneNumber}
-//         onChange={(e) => setPhoneNumber(e.target.value)}
-//         placeholder="+84xxxxxxxxx"
-//         className="border rounded px-3 py-2 w-full"
-//         disabled={loading}
-//       />
+    // Cleanup when unmount
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = undefined;
+        } catch {
+          // ignore cleanup errors
+        }
+      }
+    };
+  }, []);
 
-//       {!confirmationResult ? (
-//         <button
-//           onClick={handleSendOTP}
-//           disabled={loading}
-//           className={`py-2 rounded text-white ${
-//             loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-//           }`}
-//         >
-//           {loading ? "Đang gửi..." : "Gửi OTP"}
-//         </button>
-//       ) : (
-//         <>
-//           <input
-//             type="text"
-//             value={otp}
-//             onChange={(e) => setOtp(e.target.value)}
-//             placeholder="Nhập mã OTP"
-//             className="border rounded px-3 py-2 w-full"
-//             disabled={loading}
-//           />
-//           <button
-//             onClick={handleVerifyOTP}
-//             disabled={loading}
-//             className={`py-2 rounded text-white ${
-//               loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
-//             }`}
-//           >
-//             {loading ? "Đang xác minh..." : "Xác minh OTP"}
-//           </button>
-//         </>
-//       )}
+  /** 🔹 Helper: Format phone */
+  const formatPhone = (phone: string) => {
+    if (!phone) return "";
+    return phone.startsWith("+")
+      ? phone
+      : `+84${phone.startsWith("0") ? phone.slice(1) : phone}`;
+  };
 
-//       <div id="recaptcha-container"></div>
+  /** 🔹 Send OTP */
+  const sendOTP = async () => {
+    if (!phone) return alert("Please enter phone number");
 
-//       {message && (
-//         <p
-//           className={`text-sm text-center ${
-//             message.startsWith("✅") || message.startsWith("🎉")
-//               ? "text-green-600"
-//               : "text-red-600"
-//           }`}
-//         >
-//           {message}
-//         </p>
-//       )}
-//     </div>
-//   );
-// }
+    const appVerifier = window.recaptchaVerifier;
+    if (!appVerifier || !isRecaptchaReady)
+      return alert("Please verify reCAPTCHA first");
+
+    try {
+      setLoading(true);
+      setErrorMsg("");
+
+      const formatted = formatPhone(phone);
+      const result = await signInWithPhoneNumber(auth, formatted, appVerifier);
+      setConfirmationResult(result);
+
+      alert("OTP has been sent to your phone!");
+    } catch (err: any) {
+      console.error(err);
+      handleFirebaseError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** 🔹 Verify OTP */
+  const verifyOTP = async () => {
+    if (!confirmationResult) return alert("Please send OTP first");
+    if (!otp) return alert("Enter OTP");
+
+    try {
+      setLoading(true);
+      setErrorMsg("");
+
+      const result = await confirmationResult.confirm(otp);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      const res = await axiosConfig.post("/verify-sms", { token: idToken });
+      const data = res.data;
+
+      if (data.success) {
+        alert("✅ Phone verified successfully!");
+        resetForm();
+      } else {
+        alert("❌ Verification failed!");
+      }
+    } catch (err: any) {
+      console.error(err);
+      handleFirebaseError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** 🔹 Error handler */
+  const handleFirebaseError = (error: any) => {
+    let msg = "Unexpected error occurred.";
+
+    switch (error.code) {
+      case "auth/invalid-phone-number":
+        msg = "Invalid phone number format.";
+        break;
+      case "auth/too-many-requests":
+        msg = "Too many requests. Please wait a few minutes.";
+        break;
+      case "auth/invalid-verification-code":
+        msg = "Incorrect OTP code.";
+        break;
+      case "auth/code-expired":
+        msg = "OTP has expired. Please resend.";
+        break;
+      case "auth/captcha-check-failed":
+        msg = "reCAPTCHA verification failed. Please retry.";
+        break;
+      default:
+        msg = error.message || msg;
+    }
+
+    setErrorMsg(msg);
+    alert(msg);
+  };
+
+  /** 🔹 Reset form */
+  const resetForm = () => {
+    setPhone("");
+    setOtp("");
+    setConfirmationResult(null);
+  };
+
+  return (
+    <div className="p-4 max-w-sm mx-auto bg-white shadow-xl rounded-xl">
+      <h2 className="text-xl font-bold text-center mb-4 text-gray-800">
+        Phone Verification
+      </h2>
+
+      <div id="recaptcha-container" className="mb-3 flex justify-center"></div>
+
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+          {errorMsg}
+        </div>
+      )}
+
+      <input
+        type="text"
+        placeholder="e.g. 0334327096"
+        value={phone}
+        onChange={e => setPhone(e.target.value)}
+        disabled={loading || !!confirmationResult}
+        className="mb-4 p-3 w-full border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+      />
+      <button
+        onClick={sendOTP}
+        disabled={loading || !!confirmationResult || !isRecaptchaReady}
+        className={`p-3 w-full rounded-lg font-semibold ${
+          loading || !!confirmationResult || !isRecaptchaReady
+            ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        }`}
+      >
+        {loading ? "Sending..." : "Send OTP"}
+      </button>
+
+      {confirmationResult && (
+        <>
+          <input
+            type="text"
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={e => setOtp(e.target.value)}
+            disabled={loading}
+            className="mt-4 p-3 w-full border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+          />
+          <button
+            onClick={verifyOTP}
+            disabled={loading}
+            className={`p-3 w-full rounded-lg font-semibold mt-2 ${
+              loading
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700"
+            }`}
+          >
+            {loading ? "Verifying..." : "Verify OTP"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}

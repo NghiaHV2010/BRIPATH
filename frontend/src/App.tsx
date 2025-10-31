@@ -1,7 +1,23 @@
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
-import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage, EmailVerificationPage, SubscriptionPlansPage, AboutPage, ContactPage, QuizLandingPage, QuizPage, QuizResultsPage, ProfilePageWrapper, HomePage, CompaniesPage, AdminPage } from "./pages";
+import {
+  ForgotPasswordPage,
+  LoginPage,
+  RegisterPage,
+  ResetPasswordPage,
+  EmailVerificationPage,
+  SubscriptionPlansPage,
+  AboutPage,
+  ContactPage,
+  QuizLandingPage,
+  QuizPage,
+  QuizResultsPage,
+  ProfilePageWrapper,
+  HomePage,
+  CompaniesPage,
+  AdminPage,
+} from "./pages";
 import { PaymentProcessPage, PaymentSuccessPage } from "./pages/payment";
 import PostComposerDemo from "./pages/demo/PostComposerDemo";
 import JobsPage from "./pages/job/JobsPage";
@@ -27,6 +43,8 @@ import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
 import { JobApplicationsPage } from "./pages/profile/company/JobApplicationsPage";
 import { UserSubscription } from "./components/profile/userSubscriptions";
 import { CompanyReviews } from "./pages/profile/company/CompanyReviews";
+import VerifyPhone from "./components/auth/verifyPhone";
+import EventsPage from "./pages/event/EventPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -52,9 +70,9 @@ function App() {
   // Handle Google OAuth callback
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const loginStatus = urlParams.get('login');
+    const loginStatus = urlParams.get("login");
 
-    if (loginStatus === 'success') {
+    if (loginStatus === "success") {
       // Clear the URL parameter and check auth status
       window.history.replaceState({}, document.title, window.location.pathname);
       // Re-check auth to get updated user data
@@ -113,8 +131,9 @@ function App() {
         <Route path="/companies/:companyId" element={<CompanyDetailsPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
-
+        <Route path="/verify-phone" element={<VerifyPhone />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/event" element={<EventsPage />} />
 
         {/* Profile Routes - Parent with nested children */}
         <Route
@@ -130,13 +149,37 @@ function App() {
           <Route path="applied/jobs" element={<AppliedJobsPage />} />
           <Route path="saved/jobs" element={<SavedJobsPageProfile />} />
           <Route path="suitable/jobs" element={<CVSuitableJobsPage />} />
-          <Route path="followed/companies" element={<FollowedCompaniesPage />} />
+          <Route
+            path="followed/companies"
+            element={<FollowedCompaniesPage />}
+          />
           <Route path="notifications" element={<NotificationList />} />
           <Route path="subscriptions" element={<UserSubscription />} />
           {/* Company-specific routes */}
-          <Route path="jobs" element={<CompanyRoute><CompanyProfile /></CompanyRoute>} />
-          <Route path="reviews" element={<CompanyRoute><CompanyReviews /></CompanyRoute>} />
-          <Route path="applications" element={<CompanyRoute><JobApplicationsPage /></CompanyRoute>} />
+          <Route
+            path="jobs"
+            element={
+              <CompanyRoute>
+                <CompanyProfile />
+              </CompanyRoute>
+            }
+          />
+          <Route
+            path="reviews"
+            element={
+              <CompanyRoute>
+                <CompanyReviews />
+              </CompanyRoute>
+            }
+          />
+          <Route
+            path="applications"
+            element={
+              <CompanyRoute>
+                <JobApplicationsPage />
+              </CompanyRoute>
+            }
+          />
         </Route>
 
         <Route path="/subscriptions" element={<SubscriptionPlansPage />} />

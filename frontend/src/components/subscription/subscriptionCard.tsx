@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { LoginDialog } from "@/components/login/LoginDialog";
 
 // Icons
 const SparklesIcon = () => (
@@ -111,15 +112,21 @@ export function SubscriptionCard({
 }: SubscriptionCardProps) {
   const [hovered, setHovered] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const navigate = useNavigate();
   const config = tierConfig[plan.tier];
   const Icon = config.icon;
   const [showDialog, setShowDialog] = useState(false);
-  const authUser = useAuthStore((s) => s.authUser);
+  const authUser = useAuthStore(s => s.authUser);
 
   const role = authUser?.roles?.role_name || "Guest";
 
   const handlePurchase = async () => {
+    if (!authUser) {
+      setShowLoginDialog(true);
+      return;
+    }
+
     // Simple duplicate prevention
     if (isProcessing || globalRequestTracker.has(`purchase-${plan.id}`)) {
       return;
@@ -129,7 +136,7 @@ export function SubscriptionCard({
     setIsProcessing(true);
 
     try {
-      const response = await axiosConfig.get('/pricings');
+      const response = await axiosConfig.get("/pricings");
       const plans = response.data.data;
       const selectedPlan = plans.find((p: any) => p.id === parseInt(plan.id));
 
@@ -138,15 +145,15 @@ export function SubscriptionCard({
         return;
       }
       if (selectedPlan) {
-        navigate('/payment', {
+        navigate("/payment", {
           state: {
             plan: selectedPlan,
-            paymentMethod: 'sepay'
-          }
+            paymentMethod: "sepay",
+          },
         });
       }
     } catch (error) {
-      console.error('Error fetching plan:', error);
+      console.error("Error fetching plan:", error);
     } finally {
       globalRequestTracker.delete(`purchase-${plan.id}`);
       setIsProcessing(false);
@@ -166,40 +173,46 @@ export function SubscriptionCard({
       >
         {/* Glow */}
         <div
-          className={`absolute inset-0 rounded-2xl bg-linear-to-r ${config.borderGradient
-            } opacity-0 transition-opacity duration-500 ${hovered ? "opacity-20" : ""
-            } blur-xl`}
+          className={`absolute inset-0 rounded-2xl bg-linear-to-r ${
+            config.borderGradient
+          } opacity-0 transition-opacity duration-500 ${
+            hovered ? "opacity-20" : ""
+          } blur-xl`}
         />
 
         {/* Main Card */}
         <div
-          className={`relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-transparent transition-all duration-300 shadow-lg flex flex-col ${compact ? "p-4 lg:p-6" : "p-6 lg:p-8"
-            } h-full`}
+          className={`relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-transparent transition-all duration-300 shadow-lg flex flex-col ${
+            compact ? "p-4 lg:p-6" : "p-6 lg:p-8"
+          } h-full`}
           style={{
-            background: `linear-gradient(white, white) padding-box, linear-gradient(135deg, ${plan.tier === "gold"
-              ? "#fbbf24, #f59e0b"
-              : plan.tier === "silver"
+            background: `linear-gradient(white, white) padding-box, linear-gradient(135deg, ${
+              plan.tier === "gold"
+                ? "#fbbf24, #f59e0b"
+                : plan.tier === "silver"
                 ? "#94a3b8, #64748b"
                 : plan.tier === "trial"
-                  ? "#60a5fa, #6366f1"
-                  : "#f59e0b, #ea580c"
-              }) border-box`,
+                ? "#60a5fa, #6366f1"
+                : "#f59e0b, #ea580c"
+            }) border-box`,
           }}
         >
           {/* Header */}
           <div className="text-center mb-6 min-h-[50px]">
             <div
-              className={`inline-flex items-center justify-center ${compact ? "w-12 h-12" : "w-16 h-16"
-                } rounded-full bg-linear-to-r ${config.gradient
-                } mb-3 shadow-lg`}
+              className={`inline-flex items-center justify-center ${
+                compact ? "w-12 h-12" : "w-16 h-16"
+              } rounded-full bg-linear-to-r ${config.gradient} mb-3 shadow-lg`}
             >
               <Icon />
             </div>
 
             <h3
-              className={`font-bold bg-linear-to-r ${config.gradient
-                } bg-clip-text text-transparent mb-1 ${compact ? "text-lg lg:text-xl" : "text-2xl lg:text-3xl"
-                }`}
+              className={`font-bold bg-linear-to-r ${
+                config.gradient
+              } bg-clip-text text-transparent mb-1 ${
+                compact ? "text-lg lg:text-xl" : "text-2xl lg:text-3xl"
+              }`}
             >
               {plan.name.split(" ")[0]}
             </h3>
@@ -209,9 +222,11 @@ export function SubscriptionCard({
           <div className="text-center mb-6 pt-2 relative">
             <div className="flex items-baseline justify-center mb-2">
               <span
-                className={`font-bold bg-linear-to-r ${config.gradient
-                  } bg-clip-text text-transparent ${compact ? "text-2xl" : "text-4xl"
-                  }`}
+                className={`font-bold bg-linear-to-r ${
+                  config.gradient
+                } bg-clip-text text-transparent ${
+                  compact ? "text-2xl" : "text-4xl"
+                }`}
               >
                 {plan.price.toLocaleString()}₫
               </span>
@@ -259,14 +274,19 @@ export function SubscriptionCard({
             onClick={handlePurchase}
             disabled={isProcessing}
             size={compact ? "sm" : "lg"}
-            className={`w-full rounded-xl mt-6 ${plan.tier === "trial"
-              ? "bg-blue-700 text-white hover:bg-blue-800"
-              : "bg-linear-to-r " + config.gradient + " text-white"
-              } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`w-full rounded-xl mt-6 ${
+              plan.tier === "trial"
+                ? "bg-blue-700 text-white hover:bg-blue-800"
+                : "bg-linear-to-r " + config.gradient + " text-white"
+            } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {isProcessing ? "Đang xử lý..." : "Mua ngay"}
           </Button>
-
+          {/* Hiển thị LoginDialog nếu chưa đăng nhập */}
+          <LoginDialog
+            open={showLoginDialog}
+            onOpenChange={setShowLoginDialog}
+          />
         </div>
       </div>
 
