@@ -6,6 +6,7 @@ import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
 import { setCookie } from "../utils/cookie.util";
 import { AuthUserRequestDto } from "../types/auth.types";
 import { userRepository } from "../repositories/user.repository";
+import { checkAuthenticationService } from "../services/auth.service";
 
 export const authenticationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     let newAccessToken: string;
@@ -54,11 +55,7 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
             userId = accessTokenDecoded.userId;
         }
 
-        const user = await userRepository.checkById(userId);
-
-        if (!user) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!"));
-        }
+        const user = await checkAuthenticationService(userId);
 
         req.user = user as AuthUserRequestDto;
         next();

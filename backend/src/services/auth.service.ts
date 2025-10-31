@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-import { Request, Response } from "express";
+import { redis } from '../libs/redis';
 import { prisma } from "../libs/prisma";
+import { Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
 import { generateToken } from "../utils/jwt";
@@ -240,7 +241,38 @@ export const verifySMSService = async (user_id: string, phone: string): Promise<
             return user;
         });
 
+        const cacheKey = `check_auth:${result.id}`;
+
+        await redis.del(cacheKey);
+        console.log('CACHE INVALIDATED');
+
         return result;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const checkAuthenticationService = async (user_id: string): Promise<any> => {
+    try {
+        const cacheKey = `check_auth:${user_id}`;
+
+        const cachedUser = await redis.get(cacheKey);
+
+        if (cachedUser) {
+            console.log('CACHE HIT');
+            return JSON.parse(cachedUser);
+        }
+
+        console.log('CACHE MISS');
+        const user = await userRepository.checkById(user_id);
+
+        if (!user) {
+            throw errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!");
+        }
+
+        await redis.set(cacheKey, JSON.stringify(user), 'EX', 3600);
+
+        return user;
     } catch (error) {
         throw error;
     }

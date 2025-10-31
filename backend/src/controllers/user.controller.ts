@@ -5,14 +5,14 @@ import OpenAI from "openai";
 import { OPENAI_API_KEY, OPENAI_MODEL } from "../config/env.config";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
+import { AuthUserRequestDto } from "../types/auth.types";
+import { redis } from "../libs/redis";
 
 export const followCompany = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id as string;
+    const { id: user_id, company_id: myCompanyId } = req.user as AuthUserRequestDto;
     const company_id = req.params.companyId;
 
-    // @ts-ignore
-    if (req.user.company_id === company_id) {
+    if (myCompanyId === company_id) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Bạn không thể theo dõi chính mình!"));
     }
 
@@ -85,8 +85,7 @@ export const followCompany = async (req: Request, res: Response, next: NextFunct
 }
 
 export const saveJob = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const job_id = req.params.jobId;
 
     try {
@@ -144,8 +143,7 @@ export const saveJob = async (req: Request, res: Response, next: NextFunction) =
 }
 
 export const unsaveJob = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const job_id = req.params.jobId;
 
     try {
@@ -191,8 +189,7 @@ export const unsaveJob = async (req: Request, res: Response, next: NextFunction)
 }
 
 export const unfollowCompany = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const company_id = req.params.companyId;
 
     try {
@@ -740,8 +737,7 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
         address_country?: string,
         gender?: 'male' | 'female' | 'others',
     }
-    // @ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const { username, avatar_url, address_street, address_ward, address_city, address_country, gender } = req.body as RequestBody
 
     if (username && username?.length < 10) {
@@ -839,6 +835,11 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
 
             return user;
         });
+
+        const cacheKey = `check_auth:${result.id}`;
+
+        await redis.del(cacheKey);
+        console.log('CACHE INVALIDATED');
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,

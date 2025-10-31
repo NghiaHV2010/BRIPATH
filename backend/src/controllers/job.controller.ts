@@ -5,11 +5,13 @@ import { createNotificationData } from "../utils";
 import { analystDataStats, embeddingData } from "../utils/cvHandler";
 import { JOBSTATSPROMPT } from '../constants/prompt';
 import { prisma } from "../libs/prisma";
+import { redis } from "../libs/redis";
+import { AuthUserRequestDto } from "../types/auth.types";
 
 const numberOfJobs = 16;
 
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
-    let page: number = parseInt(req.query?.page as string);
+    let page: number = parseInt(req.query?.page as string || '1');
     const user_id: string = req.query?.userId as string;
 
     if (page < 1 || isNaN(page)) {
@@ -19,6 +21,16 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
     page -= 1;
 
     try {
+        const cacheKey = `jobs:user:${user_id || 'guest'}:page:${page}`;
+
+        const cachedJobs = await redis.get(cacheKey);
+
+        if (cachedJobs) {
+            console.log('CACHE JOBS HIT');
+            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedJobs));
+        }
+
+        console.log('CACHE JOBS MISS');
         const total_jobs = await prisma.jobs.count();
         const jobs = await prisma.jobs.findMany({
             select: {
@@ -68,6 +80,13 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
             skip: page * numberOfJobs,
         });
 
+        await redis.set(cacheKey, JSON.stringify({
+            success: true,
+            data: jobs,
+            totalPages: Math.ceil(total_jobs / numberOfJobs)
+        }), 'EX', 300);
+
+
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: jobs,
@@ -84,7 +103,7 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
         userId?: string
     };
 
-    const { jobId, userId }: RequestQuery = req.query as RequestQuery;
+    const { jobId, userId } = req.query as RequestQuery;
 
     try {
         const job = await prisma.jobs.findFirst({
@@ -810,6 +829,12 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
             return job;
         }, { timeout: 30000 });
 
+        const cacheKeys = `jobs:user:*`;
+
+        for (const key of cacheKeys) {
+            await redis.del(key);
+        }
+
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
             data: result
@@ -840,8 +865,7 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
         category?: string,
     }
 
-    //@ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const { jobId } = req.params;
 
     const {
@@ -958,6 +982,12 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
             return job;
         });
 
+        const cacheKeys = `jobs:user:*`;
+
+        for (const key of cacheKeys) {
+            await redis.del(key);
+        }
+
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: result
@@ -968,8 +998,7 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
 }
 
 export const deleteJob = async (req: Request, res: Response, next: NextFunction) => {
-    //@ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const { jobId } = req.params;
 
     try {
@@ -999,6 +1028,12 @@ export const deleteJob = async (req: Request, res: Response, next: NextFunction)
             });
 
         });
+
+        const cacheKeys = `jobs:user:*`;
+
+        for (const key of cacheKeys) {
+            await redis.del(key);
+        }
 
         return res.status(HTTP_SUCCESS.NO_CONTENT).send();
     } catch (error) {
@@ -1071,8 +1106,7 @@ export const getRecommendedJobs = async (req: Request, res: Response, next: Next
 }
 
 export const filterSuitableCVforJob = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
+    const { company_id } = req.user as AuthUserRequestDto;
     // @ts-ignore
     const { ai_matchings } = req.plan;
     const jobId = req.params.jobId;
@@ -1121,8 +1155,7 @@ export const filterSuitableCVforJob = async (req: Request, res: Response, next: 
 }
 
 export const getAllSuitableCVs = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
+    const { company_id } = req.user as AuthUserRequestDto;
     // @ts-ignore
     const { ai_matchings, ai_networking_limit } = req.plan;
     const jobId = req.params.jobId;
@@ -1173,8 +1206,7 @@ export const getAllSuitableCVs = async (req: Request, res: Response, next: NextF
 }
 
 export const createJobView = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const { jobId } = req.params;
 
     try {
@@ -1222,8 +1254,7 @@ export const createJobView = async (req: Request, res: Response, next: NextFunct
 }
 
 export const createMockStats = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
+    const { company_id } = req.user as AuthUserRequestDto;
 
     try {
         const jobs = await prisma.jobs.findMany({
@@ -1254,7 +1285,7 @@ export const createMockStats = async (req: Request, res: Response, next: NextFun
             }
 
             // @ts-ignore
-            const jobStats: JobStats = jobStatsResult as JobStats;
+            const jobStats = jobStatsResult as JobStats;
 
             await prisma.job_stats.create({
                 data: {
