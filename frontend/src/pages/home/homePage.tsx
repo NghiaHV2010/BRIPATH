@@ -26,10 +26,7 @@ export default function HomePage() {
   const {
     jobs,
     isLoading,
-    getAllJobs,
-    checkIfSaved,
-    saveJob,
-    unsaveJob,
+    getAllJobs
   } = useJobStore();
 
   useEffect(() => {

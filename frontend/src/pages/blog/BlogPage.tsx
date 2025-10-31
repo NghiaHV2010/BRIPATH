@@ -2,28 +2,27 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, ChevronRight, Loader2 } from "lucide-react";
-import { getBlogPosts, getFeaturedBlogPosts } from "./mockdataBlog";
-import type { BlogPost } from "@/types/blog";
+import { getAllBlogPosts } from "@/api/blog_api";
+import type { BlogPost as ApiBlogPost } from "@/api/blog_api";
 import { Layout } from "@/components";
 import { useNavigate } from "react-router";
 
 export function BlogPage() {
-  const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
-  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
+  const [featuredPosts, setFeaturedPosts] = useState<ApiBlogPost[]>([]);
+  const [allPosts, setAllPosts] = useState<ApiBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [carouselIndex, setCarouselIndex] = useState(0);
-  const carouselItemsPerPage = 4;
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const loadBlogData = async () => {
       try {
-        const [featured, all] = await Promise.all([
-          getFeaturedBlogPosts(),
-          getBlogPosts(),
-        ]);
-        setFeaturedPosts(featured);
-        setAllPosts(all);
+        const resp = await getAllBlogPosts(page, 12);
+        const items = resp.success ? resp.data : [];
+        setFeaturedPosts(items.slice(0, 1));
+        setAllPosts(items);
+        if (resp.totalPages) setTotalPages(resp.totalPages);
       } catch (error) {
         console.error("Error loading blog posts:", error);
       } finally {
@@ -32,7 +31,7 @@ export function BlogPage() {
     };
 
     loadBlogData();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -45,15 +44,13 @@ export function BlogPage() {
   //   const mainFeatured = featuredPosts[0];
   //   const sideFeatured = featuredPosts.slice(1);
 
-  const carouselPosts = allPosts;
-  const totalPages = Math.ceil(carouselPosts.length / carouselItemsPerPage);
 
   const handleCarouselNext = () => {
-    setCarouselIndex((prev) => (prev + 1) % totalPages);
+    setPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   const handleCarouselPrev = () => {
-    setCarouselIndex((prev) => (prev - 1 + totalPages) % totalPages);
+    setPage((prev) => Math.max(prev - 1, 1));
   };
 
   const mbtiTypes = [
@@ -100,22 +97,26 @@ export function BlogPage() {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-0">
                   <div className="relative h-80 w-full overflow-hidden bg-gray-200">
                     <img
-                      src={mainFeatured.image || "/placeholder.svg"}
+                      src={(mainFeatured.cover_image_url && !mainFeatured.cover_image_url.includes('via.placeholder.com')) ? mainFeatured.cover_image_url : "/placeholder.svg"}
                       alt={mainFeatured.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        if (img.src !== window.location.origin + "/placeholder.svg") {
+                          img.src = "/placeholder.svg";
+                        }
+                      }}
                     />
                   </div>
                   <div className="p-6 min-h-[300px] flex flex-col justify-between">
-                    <div className="inline-block bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                      {mainFeatured.category}
-                    </div>
+                    <div className="inline-block bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">Bài viết</div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2">
                       {mainFeatured.title}
                     </h2>
                     <p className="text-gray-600 mb-4 line-clamp-3">
-                      {mainFeatured.description}
+                      &nbsp;
                     </p>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={() => window.open(mainFeatured.description_url, "_blank")}>
                       Xem thêm
                       <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -132,20 +133,27 @@ export function BlogPage() {
                     key={post.id}
                     className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-0 cursor-pointer"
                   >
-                    <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80">
+                  <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80" onClick={() => navigate(`/blog/${post.id}`)}>
                       <img
-                        src={post.image || "/placeholder.svg"}
+                        src={post.cover_image_url || "/placeholder.svg"}
                         alt={post.title}
                         className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
                       />
                     </div>
                     <div className="p-4">
-                      <div className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wide">
-                        {post.category}
-                      </div>
+                      <div className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wide">Bài viết</div>
                       <h3 className="font-bold text-gray-900 line-clamp-2 text-sm">
                         {post.title}
                       </h3>
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 bg-transparent h-8 px-3"
+                          onClick={() => window.open(post.description_url, "_blank")}
+                        >
+                          Đọc bài <ArrowRight className="w-3 h-3 ml-1" />
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))
@@ -207,22 +215,28 @@ export function BlogPage() {
                   key={post.id}
                   className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-0 cursor-pointer group"
                 >
-                  <div className="relative h-48 w-full overflow-hidden bg-gray-200">
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-200" onClick={() => navigate(`/blog/${post.id}`)}>
                     <img
-                      src={post.image || "/placeholder.svg"}
+                      src={(post.cover_image_url && !post.cover_image_url.includes('via.placeholder.com')) ? post.cover_image_url : "/placeholder.svg"}
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        if (img.src !== window.location.origin + "/placeholder.svg") {
+                          img.src = "/placeholder.svg";
+                        }
+                      }}
                     />
                   </div>
                   <div className="p-4">
                     <div className="text-xs font-semibold text-emerald-600 mb-2">
-                      {post.category}
+                      Bài viết
                     </div>
                     <h3 className="font-bold text-gray-900 line-clamp-2 mb-2">
                       {post.title}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2">
-                      {post.description}
+                      &nbsp;
                     </p>
                   </div>
                 </Card>
@@ -243,15 +257,15 @@ export function BlogPage() {
                 {Array.from({ length: totalPages }).map((_, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCarouselIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-colors ${idx === carouselIndex ? "bg-emerald-600" : "bg-gray-300"
+                    onClick={() => setPage(idx + 1)}
+                    className={`w-2 h-2 rounded-full transition-colors ${idx + 1 === page ? "bg-emerald-600" : "bg-gray-300"
                       }`}
                   />
                 ))}
               </div>
 
               <span className="text-sm text-gray-600 mx-2">
-                {carouselIndex + 1} / {totalPages} trang
+                {page} / {totalPages} trang
               </span>
 
               <Button

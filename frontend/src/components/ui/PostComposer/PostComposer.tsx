@@ -26,6 +26,9 @@ export default function PostComposer({
   const [pendingFiles, setPendingFiles] = useState<{ localUrl: string; file: File }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [hasText, setHasText] = useState(false);
+  const [title, setTitle] = useState("");
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   // Function to sync images with editor content
   const syncImagesWithEditor = () => {
@@ -88,6 +91,16 @@ export default function PostComposer({
 
   const handleImageUpload = () => {
     fileInputRef.current?.click();
+  };
+
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const handleCoverUploadClick = () => coverInputRef.current?.click();
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f || !f.type.startsWith('image/')) return;
+    setCoverFile(f);
+    const localUrl = URL.createObjectURL(f);
+    setCoverPreview(localUrl);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,13 +167,23 @@ export default function PostComposer({
         return;
       }
 
-      // Upload pending images and rewrite blob URLs to CDN URLs before save
+      // Prepare attachments: cover first (if provided), then inline images
+      const uploadedImageUrls: string[] = [];
+      if (coverFile) {
+        try {
+          const coverUrl = await uploadImageFileToStorage(coverFile, "posts");
+          uploadedImageUrls.push(coverUrl);
+        } catch (e) {
+          console.error("Failed to upload cover image:", e);
+        }
+      }
       if (pendingFiles.length > 0) {
         console.log(`Uploading ${pendingFiles.length} images...`);
         for (const item of pendingFiles) {
           try {
             const remoteUrl = await uploadImageFileToStorage(item.file);
             html = html.replaceAll(item.localUrl, remoteUrl);
+            uploadedImageUrls.push(remoteUrl);
             console.log("Image uploaded successfully:", remoteUrl);
           } catch (imageError) {
             console.error("Failed to upload image:", imageError);
@@ -176,8 +199,9 @@ export default function PostComposer({
       try {
         postId = await savePostToBackend({
           html,
+          title,
           user: { name: userName, avatar: userAvatar },
-          attachments: [],
+          attachments: uploadedImageUrls,
         });
         console.log("Post saved using backend API");
       } catch (backendError) {
@@ -198,6 +222,10 @@ export default function PostComposer({
       images.forEach(u => URL.revokeObjectURL(u));
       setImages([]);
       setPendingFiles([]);
+      setTitle("");
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+      setCoverPreview(null);
+      setCoverFile(null);
       
       // Show success message (you can replace this with a toast notification)
       alert("Bài viết đã được đăng thành công!");
@@ -224,6 +252,34 @@ export default function PostComposer({
             <p className="text-xs text-gray-500">Đăng công khai</p>
           </div>
         </div>
+      </div>
+
+      {/* Title */}
+      <div className="mb-3">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Tiêu đề bài viết"
+          className="w-full rounded-xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+        />
+        <div className="text-xs text-gray-500 mt-1">Tối thiểu 10 ký tự để phù hợp ràng buộc backend.</div>
+      </div>
+
+      {/* Cover image */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-gray-800">Ảnh bìa</div>
+          <Button type="button" variant="outline" onClick={handleCoverUploadClick}>Chọn ảnh bìa</Button>
+        </div>
+        {coverPreview ? (
+          <div className="rounded-xl overflow-hidden border">
+            <img src={coverPreview} alt="Cover preview" className="w-full h-44 object-cover" />
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500">Chưa chọn ảnh bìa</div>
+        )}
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
       </div>
 
       {/* Editor */}
@@ -275,7 +331,7 @@ export default function PostComposer({
             console.log("PostComposer: click post button", { hasText, imagesCount: images.length });
             handlePost();
           }}
-          disabled={!hasContent}
+          disabled={!hasContent || (title.trim().length < 10)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 shadow-lg disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
