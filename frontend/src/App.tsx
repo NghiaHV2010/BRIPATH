@@ -23,6 +23,7 @@ import { Toaster } from "./components/ui/toaster";
 import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
 import { BlogPage } from "./pages/blog/BlogPage";
+import BlogDetail from "./pages/blog/BlogDetail";
 import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
 import { JobApplicationsPage } from "./pages/profile/company/JobApplicationsPage";
 import { UserSubscription } from "./components/profile/userSubscriptions";
@@ -115,6 +116,7 @@ function App() {
         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
 
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
 
         {/* Profile Routes - Parent with nested children */}
         <Route

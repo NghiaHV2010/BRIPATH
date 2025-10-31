@@ -769,6 +769,50 @@ export const createBlogPost = async (req: Request, res: Response, next: NextFunc
     }
 }
 
+export const getAllBlogs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const page = Math.max(parseInt((req.query.page as string) || '1'), 1);
+        const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '12'), 1), 100);
+        const skip = (page - 1) * limit;
+
+        const [total, blogs] = await Promise.all([
+            prisma.blogs.count(),
+            prisma.blogs.findMany({
+                orderBy: { created_at: 'desc' },
+                skip,
+                take: limit
+            })
+        ]);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: blogs,
+            total,
+            page,
+            pageSize: limit,
+            totalPages: Math.ceil(total / limit)
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getBlogById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const blogId = parseInt(req.params.blogId as string);
+        if (isNaN(blogId)) {
+            return res.status(HTTP_ERROR.BAD_REQUEST).json({ success: false, message: 'blogId không hợp lệ' });
+        }
+        const blog = await prisma.blogs.findFirst({ where: { id: blogId } });
+        if (!blog) {
+            return res.status(HTTP_ERROR.NOT_FOUND).json({ success: false, message: 'Bài viết không tồn tại' });
+        }
+        return res.status(HTTP_SUCCESS.OK).json({ success: true, data: blog });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const updateBlogPost = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const user_id = req.user?.id;

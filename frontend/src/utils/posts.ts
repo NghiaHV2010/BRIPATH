@@ -5,8 +5,9 @@ import axiosConfig from "@/config/axios.config";
 
 export interface SavePostPayload {
   html: string;
+  title?: string;
   user?: { id?: string; name?: string; avatar?: string };
-  attachments?: string[]; // image urls
+  attachments?: string[]; // image urls (first item will be used as cover)
 }
 
 export async function uploadImageFileToStorage(file: File, pathPrefix = "posts") {
@@ -42,7 +43,7 @@ export async function getPostContentFromFirebase(htmlUrl: string): Promise<strin
 }
 
 // Hybrid approach: Save HTML to Firebase Storage, metadata to Backend
-export async function savePostToBackend({ html, user, attachments = [] }: SavePostPayload) {
+export async function savePostToBackend({ html, title, user, attachments = [] }: SavePostPayload) {
   try {
     console.log("Attempting to save post using hybrid approach...");
     
@@ -88,9 +89,12 @@ export async function savePostToBackend({ html, user, attachments = [] }: SavePo
     console.log("HTML content uploaded to Firebase Storage:", htmlUrl);
 
     // Step 2: Save metadata to Backend with Firebase link
+    const derivedTitle = cleanHtml.replace(/<[^>]*>/g, '').substring(0, 100) + (cleanHtml.length > 100 ? '...' : '');
+    const chosenTitle = (title && title.trim().length > 0) ? title.trim() : derivedTitle;
+
     const postData = {
-      title: cleanHtml.replace(/<[^>]*>/g, '').substring(0, 100) + (cleanHtml.length > 100 ? '...' : ''), // Plain text title
-      cover_image_url: attachments.length > 0 ? attachments[0] : 'https://via.placeholder.com/400x200?text=No+Image',
+      title: chosenTitle,
+      cover_image_url: attachments.length > 0 ? attachments[0] : '/placeholder.svg',
       description_url: htmlUrl, // Firebase Storage URL instead of HTML content
     };
 

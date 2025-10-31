@@ -74,13 +74,26 @@ export const deleteBlogPost = async (blogId: number): Promise<DeleteBlogResponse
 // ========================
 // Get All Blog Posts (for future use)
 // ========================
-export const getAllBlogPosts = async (): Promise<{ success: boolean; data: BlogPost[] }> => {
+export const getAllBlogPosts = async (
+  page: number = 1,
+  limit: number = 12
+): Promise<{ success: boolean; data: BlogPost[]; total?: number; page?: number; pageSize?: number; totalPages?: number }> => {
   try {
-    const response = await axiosConfig.get<{ success: boolean; data: BlogPost[] }>('/dashboard/blogs');
+    const response = await axiosConfig.get<{ success: boolean; data: BlogPost[]; total: number; page: number; pageSize: number; totalPages: number }>(`/dashboard/blogs`, { params: { page, limit } });
     console.log("Fetched blog posts:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching blog posts:", error.response?.data || error.message);
     return { success: false, data: [] };
+  }
+};
+
+export const getBlogById = async (id: number): Promise<{ success: boolean; data?: BlogPost }> => {
+  try {
+    const response = await axiosConfig.get<{ success: boolean; data: BlogPost }>(`/dashboard/blogs/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching blog by id:", error.response?.data || error.message);
+    return { success: false };
   }
 };

@@ -45,7 +45,7 @@ interface AuthState {
 	updateUser: (updates: Partial<AuthUser>) => void;
 	// Helper methods for role checking
 	isCompany: () => boolean;
-	isCandidate: () => boolean;
+	isUser: () => boolean;
 	hasCompany: () => boolean;
 }
 
@@ -150,9 +150,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 		return authUser?.roles.role_name === "Company";
 	},
 
-	isCandidate: () => {
+	isUser: () => {
 		const { authUser } = get();
-		return authUser?.roles.role_name === "Candidate";
+		return authUser?.roles.role_name === "User";
 	},
 
 	isAdmin: () => {
