@@ -1,72 +1,48 @@
-// middlewares/checkCompanyPlan.ts
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR } from "../constants/httpCode";
-import { prisma } from "../libs/prisma";
+import { AuthUserRequestDto } from "../types/auth.types";
+import { subscriptionRepository } from "../repositories/subscription.repository";
 
-export const subscriptionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // @ts-ignore
-        const user_id = req.user.id;
-        const { label_type } = req.body; // 'Việc Gấp' hoặc 'Việc Chất'
+interface SubscriptionMiddlewareOptions {
+    checkSlots?: boolean;
+}
 
-        const plan = await prisma.subscriptions.findFirst({
-            where: {
-                user_id,
-                end_date: { gte: new Date() }, // gói còn hạn
-                status: "on_going", // gói đang hoạt động
-            },
-        });
+export const subscriptionMiddleware = (options: SubscriptionMiddlewareOptions = {}) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id: user_id } = req.user as AuthUserRequestDto;
+            const plan = await subscriptionRepository.findByUserId(user_id);
 
-        if (!plan) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa mua gói nào hoặc gói của bạn đã hết hạn."));
-        }
-
-        // Kiểm tra slot
-        if (label_type === "Việc Gấp" && plan.remaining_urgent_jobs <= 0) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng 'Việc Gấp'."));
-        }
-
-        if (label_type === "Việc Chất" && plan.remaining_quality_jobs <= 0) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng 'Việc Chất'."));
-        }
-
-        if (plan.remaining_total_jobs === 0) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng công việc."));
-        }
-
-        // @ts-ignore
-        req.plan = plan;
-        next();
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-export const subscriptionPermissionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // @ts-ignore
-        const user_id = req.user.id;
-        const plan = await prisma.subscriptions.findFirst({
-            where: {
-                user_id,
-                end_date: { gte: new Date() }, // gói còn hạn
-                status: "on_going", // gói đang hoạt động
-            },
-            include: {
-                membershipPlans: true
+            if (!plan) {
+                return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa mua gói nào hoặc gói của bạn đã hết hạn."));
             }
-        });
 
-        if (!plan) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa mua gói nào hoặc gói của bạn đã hết hạn."));
+            // If checkSlots is true, validate job posting limits
+            if (options.checkSlots) {
+                const { label_type } = req.body;
+
+                if (label_type === "Việc Gấp" && plan.remaining_urgent_jobs <= 0) {
+                    return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng 'Việc Gấp'."));
+                }
+
+                if (label_type === "Việc Chất" && plan.remaining_quality_jobs <= 0) {
+                    return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng 'Việc Chất'."));
+                }
+
+                if (plan.remaining_total_jobs === 0) {
+                    return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn đã hết lượt đăng công việc."));
+                }
+            }
+
+            req.plan = plan;
+            next();
+        } catch (error) {
+            next(error);
         }
-
-        // @ts-ignore
-        req.plan = plan.membershipPlans;
-        next();
-    } catch (error) {
-        next(error);
-    }
+    };
 };
+
+// Usage examples:
+// For permission check only: subscriptionMiddleware()
+// For slot validation: subscriptionMiddleware({ checkSlots: true })

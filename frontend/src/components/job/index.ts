@@ -7,3 +7,6 @@ export { default as JobPagination } from '@/components/job/JobPagination';
 export { JobDetailSkeleton } from '@/components/job/JobDetailSkeleton';
 export { CompanyCard } from '@/components/job/CompanyCard';
 export { JobStatsModal } from '@/components/job/JobStatsModal';
+export { JobHeroCard } from "./JobHeroCard";
+export { JobDescriptionCard } from "./JobDescriptionCard";
+export { JobApplicationInstructions } from "./JobApplicationInstructions";

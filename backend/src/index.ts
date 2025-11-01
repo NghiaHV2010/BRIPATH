@@ -3,15 +3,24 @@ import cors from 'cors';
 import http from "http";
 import express from 'express';
 import { errorMiddleware, timeoutMiddleware, generalLimiter, apiLimiter } from './middlewares';
-import { authRoute, cvRouter, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter, sepayRoutes, subscriptionsRouter, settingRouter } from './routes';
+import { authRoute, cvRouter, paymentRoutes, dashboardRoutes, companyRouter, userRouter, jobRouter, questionRouter, eventRouter, pricingRouter, sepayRoutes, subscriptionsRouter, settingRouter, blogRouter } from './routes';
 import passport from './config/passport.config';
 import { FRONTEND_URLS, PORT, NODE_ENV } from './config/env.config';
 import fileUpload from "express-fileupload";
 import "./jobs/subscriptionReminder";
 import './jobs/subscriptionJob';
 import { setupWebSocket } from './libs/wsServer';
+import { SubscriptionDto } from './types/subscription.types';
 
 const app = express();
+
+declare global {
+    namespace Express {
+        interface Request {
+            plan?: SubscriptionDto;
+        }
+    }
+}
 
 // Configure trust proxy securely based on environment
 if (NODE_ENV === 'production') {
@@ -65,6 +74,7 @@ app.use(passport.initialize());
 const middlePath = '/api';
 
 app.use(`${middlePath}`, authRoute);
+app.use(`${middlePath}`, apiLimiter, blogRouter);
 app.use(`${middlePath}`, apiLimiter, pricingRouter); // Apply API rate limiting
 app.use(`${middlePath}`, apiLimiter, companyRouter);
 app.use(`${middlePath}`, apiLimiter, jobRouter);

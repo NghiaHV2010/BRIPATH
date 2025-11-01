@@ -82,7 +82,7 @@ export function BlogPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50">
+      <div className="min-h-screen bg-linear-to-b from-white to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Section Title */}
           <h1 className="text-4xl font-bold text-gray-900 mb-8">
@@ -133,7 +133,7 @@ export function BlogPage() {
                     key={post.id}
                     className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-0 cursor-pointer"
                   >
-                  <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80" onClick={() => navigate(`/blog/${post.id}`)}>
+                    <div className="relative h-32 w-full overflow-hidden bg-emerald-500/80" onClick={() => navigate(`/blog/${post.id}`)}>
                       <img
                         src={post.cover_image_url || "/placeholder.svg"}
                         alt={post.title}
@@ -161,7 +161,7 @@ export function BlogPage() {
                 Array.from({ length: 3 }).map((_, i) => (
                   <Card
                     key={i}
-                    className="overflow-hidden border-0 bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 animate-pulse"
+                    className="overflow-hidden border-0 bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-500 animate-pulse"
                   >
                     <div className="h-32 w-full bg-emerald-300/40"></div>
                     <div className="p-4 space-y-2">

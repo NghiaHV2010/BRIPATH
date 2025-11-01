@@ -3,6 +3,7 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
+import { AuthUserRequestDto } from "../types/auth.types";
 
 export const getAllEvents = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string || '1');
@@ -54,8 +55,8 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
         banner_url?: string,
     }
 
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const { id: subscription_id } = req.plan;
     const { title, description, start_date, end_date, quantity, working_time, banner_url }: RequestBody = req.body;
 
     if (title.length < 10) {
@@ -69,13 +70,11 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const convert_startDate = new Date(start_date);
     const convert_endDate = end_date ? new Date(end_date) : new Date();
 
-    // @ts-ignore
-    if (isNaN(convert_startDate)) {
+    if (isNaN(convert_startDate as unknown as number)) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ngày bắt đầu không hợp lệ!"));
     }
 
-    // @ts-ignore
-    if (end_date && isNaN(convert_endDate)) {
+    if (end_date && isNaN(convert_endDate as unknown as number)) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ngày kết thúc không hợp lệ!"));
     }
 
@@ -110,8 +109,7 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
             });
 
             await tx.subscriptions.update({
-                // @ts-ignore
-                where: { id: req.plan.id },
+                where: { id: subscription_id },
                 data: {
                     remaining_total_jobs: { decrement: 1 },
                 }

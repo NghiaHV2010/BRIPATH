@@ -1,12 +1,8 @@
 import { Router } from 'express';
-import { getRevenueStats, getPaymentStats, getUserAccessStats, getCompaniesByStatus, getEventsByStatus, updateEventStatus, updateCompanyStatus, createJobLabel, createCompanyLabel, createBlogPost, updateBlogPost, deleteBlogPost, getAllBlogs, getBlogById, getAllReports, updateReportStatus } from '../controllers/dashboard.controller';
+import { getRevenueStats, getPaymentStats, getUserAccessStats, getCompaniesByStatus, getEventsByStatus, updateEventStatus, updateCompanyStatus, createJobLabel, createCompanyLabel, createBlogPost, updateBlogPost, deleteBlogPost, getAllReports, updateReportStatus } from '../controllers/dashboard.controller';
 import { authenticationMiddleware, authorizationMiddleware } from '../middlewares/auth.middleware';
 
 const dashboardRouter = Router();
-
-// Public routes (no auth)
-dashboardRouter.get('/blogs', getAllBlogs);
-dashboardRouter.get('/blogs/:blogId', getBlogById);
 
 // Apply auth middleware to all subsequent routes
 dashboardRouter.use(authenticationMiddleware);

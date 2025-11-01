@@ -79,7 +79,7 @@ export const getAllBlogPosts = async (
   limit: number = 12
 ): Promise<{ success: boolean; data: BlogPost[]; total?: number; page?: number; pageSize?: number; totalPages?: number }> => {
   try {
-    const response = await axiosConfig.get<{ success: boolean; data: BlogPost[]; total: number; page: number; pageSize: number; totalPages: number }>(`/dashboard/blogs`, { params: { page, limit } });
+    const response = await axiosConfig.get<{ success: boolean; data: BlogPost[]; total: number; page: number; pageSize: number; totalPages: number }>(`/blogs`, { params: { page, limit } });
     console.log("Fetched blog posts:", response.data);
     return response.data;
   } catch (error: any) {
@@ -90,7 +90,7 @@ export const getAllBlogPosts = async (
 
 export const getBlogById = async (id: number): Promise<{ success: boolean; data?: BlogPost }> => {
   try {
-    const response = await axiosConfig.get<{ success: boolean; data: BlogPost }>(`/dashboard/blogs/${id}`);
+    const response = await axiosConfig.get<{ success: boolean; data: BlogPost }>(`/blogs/${id}`);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching blog by id:", error.response?.data || error.message);

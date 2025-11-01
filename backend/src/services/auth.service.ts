@@ -64,6 +64,9 @@ export const logoutService = async (req: Request, res: Response): Promise<void> 
         try {
             const decoded = jwt.verify(accessToken, ACCESS_SECRET) as { userId: string };
 
+            const cachedKey = `check_auth:${decoded.userId}`;
+            await redis.del(cachedKey);
+
             if (decoded && decoded.userId) {
                 await activityRepository.create(prisma, decoded.userId, "Bạn đã đăng xuất khỏi hệ thống.");
             }
