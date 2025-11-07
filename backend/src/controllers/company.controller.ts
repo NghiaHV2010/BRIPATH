@@ -144,7 +144,7 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 
         if (cachedCompanies) {
             console.log('CACHE COMPANIES HIT');
-            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedCompanies));
+            return res.status(HTTP_SUCCESS.OK).json(cachedCompanies);
         }
 
         const total_companies = await prisma.companies.count();
@@ -197,11 +197,13 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 
         console.log('CACHE COMPANIES MISS');
 
-        await redis.set(cacheKey, JSON.stringify({
+        await redis.set(cacheKey, {
             success: true,
             data: companies,
             totalPages: Math.ceil(total_companies / numberOfCompanies)
-        }), 'EX', 300);
+        }, {
+            ex: 60 * 5 // 5 minutes
+        });
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: companies,

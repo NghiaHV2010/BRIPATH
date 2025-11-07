@@ -263,7 +263,9 @@ export const checkAuthenticationService = async (user_id: string): Promise<any> 
 
         if (cachedUser) {
             console.log('CACHE HIT');
-            return JSON.parse(cachedUser);
+            console.log(cachedUser);
+
+            return cachedUser;
         }
 
         console.log('CACHE MISS');
@@ -273,7 +275,9 @@ export const checkAuthenticationService = async (user_id: string): Promise<any> 
             throw errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!");
         }
 
-        await redis.set(cacheKey, JSON.stringify(user), 'EX', 3600);
+        await redis.set(cacheKey, user, {
+            ex: 60 * 60 // 60 minutes
+        });
 
         return user;
     } catch (error) {

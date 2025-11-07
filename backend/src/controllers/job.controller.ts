@@ -29,17 +29,19 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
 
         if (cachedJobs) {
             console.log('CACHE JOBS HIT');
-            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedJobs));
+            return res.status(HTTP_SUCCESS.OK).json(cachedJobs);
         }
 
         console.log('CACHE JOBS MISS');
         const { jobs, total_jobs } = await getAllJobsService(page, user_id);
 
-        await redis.set(cacheKey, JSON.stringify({
+        await redis.set(cacheKey, {
             success: true,
             data: jobs,
             totalPages: Math.ceil(total_jobs / numberOfJobs)
-        }), 'EX', 300);
+        }, {
+            ex: 60 * 5 // 5 minutes
+        });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
