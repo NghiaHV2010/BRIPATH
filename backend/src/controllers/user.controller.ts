@@ -6,7 +6,7 @@ import { OPENAI_API_KEY, OPENAI_MODEL } from "../config/env.config";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
 import { AuthUserRequestDto } from "../types/auth.types";
-import { redis } from "../redis";
+import { redis } from "../libs/redis";
 
 export const followCompany = async (req: Request, res: Response, next: NextFunction) => {
     const { id: user_id, company_id: myCompanyId } = req.user as AuthUserRequestDto;

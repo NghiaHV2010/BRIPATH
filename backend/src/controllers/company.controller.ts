@@ -3,7 +3,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
-import { redis } from "../redis";
+import { redis } from "../libs/redis";
 
 const numberOfCompanies = 12;
 
@@ -144,7 +144,7 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 
         if (cachedCompanies) {
             console.log('CACHE COMPANIES HIT');
-            return res.status(HTTP_SUCCESS.OK).json(cachedCompanies);
+            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedCompanies));
         }
 
         const total_companies = await prisma.companies.count();
@@ -197,13 +197,11 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
 
         console.log('CACHE COMPANIES MISS');
 
-        await redis.set(cacheKey, {
+        await redis.set(cacheKey, JSON.stringify({
             success: true,
             data: companies,
             totalPages: Math.ceil(total_companies / numberOfCompanies)
-        }, {
-            ex: 60 * 5 // 5 minutes
-        });
+        }), 'EX', 300);
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: companies,

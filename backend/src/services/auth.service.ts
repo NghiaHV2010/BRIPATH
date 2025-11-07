@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-import { redis } from '../redis';
+import { redis } from '../libs/redis';
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 import { errorHandler } from "../utils/error";
@@ -263,9 +263,7 @@ export const checkAuthenticationService = async (user_id: string): Promise<any> 
 
         if (cachedUser) {
             console.log('CACHE HIT');
-            console.log(cachedUser);
-
-            return cachedUser;
+            return JSON.parse(cachedUser);
         }
 
         console.log('CACHE MISS');
@@ -275,9 +273,7 @@ export const checkAuthenticationService = async (user_id: string): Promise<any> 
             throw errorHandler(HTTP_ERROR.NOT_FOUND, "Người dùng không tồn tại!");
         }
 
-        await redis.set(cacheKey, user, {
-            ex: 60 * 60 // 60 minutes
-        });
+        await redis.set(cacheKey, JSON.stringify(user), 'EX', 3600);
 
         return user;
     } catch (error) {

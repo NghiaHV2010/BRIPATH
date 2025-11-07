@@ -5,7 +5,7 @@ import { createNotificationData } from "../utils";
 import { analystDataStats, embeddingData } from "../utils/cvHandler";
 import { JOBSTATSPROMPT } from '../constants/prompt';
 import { prisma } from "../libs/prisma";
-import { redis } from "../redis";
+import { redis } from "../libs/redis";
 import { AuthUserRequestDto } from "../types/auth.types";
 import { createJobService, getAllJobsService, getJobByIDService, getJobDetailsByCompanyIdService, getJobsByCompanyIdService, getJobsByFilterService } from "../services/job.service";
 import { CreateJobRequestDto, FilterJobsRequestDto, GetJobByIDRequestDto } from "../types/job.types";
@@ -29,19 +29,17 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
 
         if (cachedJobs) {
             console.log('CACHE JOBS HIT');
-            return res.status(HTTP_SUCCESS.OK).json(cachedJobs);
+            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedJobs));
         }
 
         console.log('CACHE JOBS MISS');
         const { jobs, total_jobs } = await getAllJobsService(page, user_id);
 
-        await redis.set(cacheKey, {
+        await redis.set(cacheKey, JSON.stringify({
             success: true,
             data: jobs,
             totalPages: Math.ceil(total_jobs / numberOfJobs)
-        }, {
-            ex: 60 * 5 // 5 minutes
-        });
+        }), 'EX', 300);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
