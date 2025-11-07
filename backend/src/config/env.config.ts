@@ -30,6 +30,7 @@ interface Config {
     RATE_LIMIT_API_MAX: number;
     REQUEST_TIMEOUT_MS: number;
     DOMAIN: string;
+    REDIS_URL: string;
 }
 
 dotenv.config();
@@ -66,6 +67,7 @@ const config: Config = {
     RATE_LIMIT_API_MAX: Number(process.env.RATE_LIMIT_API_MAX) || 100, // 100 API requests per minute
     REQUEST_TIMEOUT_MS: Number(process.env.REQUEST_TIMEOUT_MS) || 30000, // 30 seconds
     DOMAIN: process.env.DOMAIN || 'localhost',
+    REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
 };
 
 export const {
@@ -97,5 +99,6 @@ export const {
     RATE_LIMIT_API_MAX,
     REQUEST_TIMEOUT_MS,
     DOMAIN,
+    REDIS_URL,
 } = config;
 

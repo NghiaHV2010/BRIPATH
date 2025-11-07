@@ -1,9 +1,10 @@
 import Redis from 'ioredis';
+import { REDIS_URL } from '../config/env.config';
 
 // URL kết nối sẽ lấy từ biến môi trường
 // Khi deploy, đây sẽ là URL của managed Redis service
 // Khi ở local, nó có thể là 'redis://localhost:6379'
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisUrl = REDIS_URL;
 
 // Tạo một instance duy nhất
 // ioredis sẽ tự động quản lý kết nối và tự động kết nối lại
