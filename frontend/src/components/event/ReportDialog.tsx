@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChevronRight } from "lucide-react";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 
 interface ReportDialogProps {
   open: boolean;
@@ -26,28 +26,28 @@ const reportReasons = [
 ];
 
 const ReportDialog = ({ open, onOpenChange }: ReportDialogProps) => {
-  const [selectedReason, setSelectedReason] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [selectedReason, setSelectedReason] = useState<string | null>(null);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleReport = async (reasonId: string) => {
-    setSelectedReason(reasonId);
-    setIsSubmitting(true);
+  // const handleReport = async (reasonId: string) => {
+  //   // setSelectedReason(reasonId);
+  //   setIsSubmitting(true);
 
-    try {
-      // API call will be added by user
-      // await axios.post(`${API_URL}/events/${eventId}/report`, { reason: reasonId });
+  //   try {
+  //     // API call will be added by user
+  //     // await axios.post(`${API_URL}/events/${eventId}/report`, { reason: reasonId });
 
-      setTimeout(() => {
-        toast.success("Đã gửi báo cáo. Cảm ơn bạn đã phản hồi.");
-        setIsSubmitting(false);
-        onOpenChange(false);
-        setSelectedReason(null);
-      }, 800);
-    } catch (error) {
-      toast.error("Không thể gửi báo cáo");
-      setIsSubmitting(false);
-    }
-  };
+  //     setTimeout(() => {
+  //       toast.success("Đã gửi báo cáo. Cảm ơn bạn đã phản hồi.");
+  //       setIsSubmitting(false);
+  //       onOpenChange(false);
+  //       // setSelectedReason(null);
+  //     }, 800);
+  //   } catch (error) {
+  //     toast.error("Không thể gửi báo cáo");
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,8 +74,8 @@ const ReportDialog = ({ open, onOpenChange }: ReportDialogProps) => {
             {reportReasons.map(reason => (
               <button
                 key={reason.id}
-                onClick={() => handleReport(reason.id)}
-                disabled={isSubmitting}
+                // onClick={() => handleReport(reason.id)}
+                // disabled={isSubmitting}
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors text-left disabled:opacity-50"
                 data-testid={`report-reason-${reason.id}`}
               >
