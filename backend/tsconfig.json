@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
     "lib": [
       "ES2022"
     ],
