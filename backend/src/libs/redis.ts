@@ -1,4 +1,6 @@
-import Redis from 'ioredis';
+const Redis = require("ioredis");
+
+import { createRequire } from 'module';
 import { REDIS_URL } from '../config/env.config';
 
 // URL kết nối sẽ lấy từ biến môi trường
