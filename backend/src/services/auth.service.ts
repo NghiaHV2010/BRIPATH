@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-import { redis } from '../libs/redis';
+import { redis } from '../redis';
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 import { errorHandler } from "../utils/error";

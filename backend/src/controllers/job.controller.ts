@@ -5,7 +5,7 @@ import { createNotificationData } from "../utils";
 import { analystDataStats, embeddingData } from "../utils/cvHandler";
 import { JOBSTATSPROMPT } from '../constants/prompt';
 import { prisma } from "../libs/prisma";
-import { redis } from "../libs/redis";
+import { redis } from "../redis";
 import { AuthUserRequestDto } from "../types/auth.types";
 import { createJobService, getAllJobsService, getJobByIDService, getJobDetailsByCompanyIdService, getJobsByCompanyIdService, getJobsByFilterService } from "../services/job.service";
 import { CreateJobRequestDto, FilterJobsRequestDto, GetJobByIDRequestDto } from "../types/job.types";

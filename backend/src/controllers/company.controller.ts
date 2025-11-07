@@ -3,7 +3,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
-import { redis } from "../libs/redis";
+import { redis } from "../redis";
 
 const numberOfCompanies = 12;
 
