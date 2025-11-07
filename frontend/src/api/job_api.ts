@@ -136,12 +136,17 @@ export const updateJob = async (
 
 export const deleteJob = async (
   jobId: string
-): Promise<{ success: boolean; message: string }> => {
+): Promise<boolean> => {
   try {
-    const response = await axiosConfig.delete<{ success: boolean; message: string }>(
+    const response = await axiosConfig.delete(
       `/job/${jobId}`
     );
-    return response.data;
+
+    if (response.status !== 204) {
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.error("Error deleting job:", error);
     throw error;

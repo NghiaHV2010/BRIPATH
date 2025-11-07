@@ -213,7 +213,7 @@ model job_stats {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  jobs jobs @relation(fields: [job_id], references: [id])
+  jobs jobs @relation(fields: [job_id], references: [id], onDelete: Cascade)
 }
 
 model educations {
@@ -345,8 +345,8 @@ model job_views {
   user_id   String? // Có thể null nếu người dùng chưa đăng nhập
   viewed_at DateTime @default(now()) // Thời gian người dùng xem job
 
-  jobs  jobs   @relation(fields: [job_id], references: [id])
-  users users? @relation(fields: [user_id], references: [id])
+  jobs  jobs   @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  users users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model membershipPlans {

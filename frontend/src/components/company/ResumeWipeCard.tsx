@@ -3,12 +3,14 @@ import { motion, useMotionValue, useTransform, useAnimation, type PanInfo } from
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { X, Check, Mail, Phone, MapPin, Briefcase } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
+import { X, Check, Mail, Phone, MapPin, MessageSquare, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getApplicantByID, updateApplicantStatus } from '@/api/company_api';
+import { getApplicantByID, updateApplicantStatus, compareCvAndJobStats, type ComparisonStats } from '@/api/company_api';
 import type { Resume as ResumeType, ResumeUserAvatar } from '@/types/resume';
 import { Resume } from '../resume/resume';
 import type { Applicant, ApplicantSummary } from '@/types/applicant';
+import { CVJobComparisonChart } from './CVJobComparisonChart';
 
 interface ResumeSwipeCardProps {
     jobId: string;
@@ -20,6 +22,9 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
     const [swipeDirection, setSwipeDirection] = useState<'approve' | 'reject' | null>(null);
     const [overlayOpacity, setOverlayOpacity] = useState(0);
     const [currentApplicant, setCurrentApplicant] = useState<Applicant<ResumeType & ResumeUserAvatar> | null>(null);
+    const [feedback, setFeedback] = useState('');
+    const [comparisonData, setComparisonData] = useState<ComparisonStats | null>(null);
+    const [loadingComparison, setLoadingComparison] = useState(false);
 
     const x = useMotionValue(0);
     const cardRef = useRef(null);
@@ -35,32 +40,15 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                 await getApplicantByID(applicantsData[currentIndex].cv_id, 'pending', jobId).then((data) => {
                     if (data) {
                         setCurrentApplicant(data);
+                        setFeedback('');
                     }
                 });
             } catch (error) {
                 console.error("Error setting current applicant:", error);
             }
-
         })();
-    }, [currentIndex, applicantsData]);
+    }, [currentIndex, applicantsData, jobId]);
 
-    // Handle keyboard controls
-    useEffect(() => {
-        const handleKeyPress = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.key === 'ArrowLeft') {
-                e.preventDefault();
-                handleReject();
-            } else if (e.ctrlKey && e.key === 'ArrowRight') {
-                e.preventDefault();
-                handleApprove();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [currentIndex]);
-
-    // Update overlay based on drag
     useEffect(() => {
         const unsubscribe = x.on('change', (latest) => {
             const absValue = Math.abs(latest);
@@ -85,37 +73,37 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
 
         try {
             if (decision === 'approve') {
-                await updateApplicantStatus(applicant.cv_id, jobId, '', 'approved');
-                toast.success(`${applicant.cvs.fullname} Approved!`, {
-                    description: `Resume has been approved for ${applicant.cvs.apply_job}.`,
+                await updateApplicantStatus(applicant.cv_id, jobId, feedback, 'approved');
+                toast.success(`${applicant.cvs.fullname} đã được chấp nhận!`, {
+                    description: `Hồ sơ đã được chấp nhận cho vị trí ${applicant.cvs.apply_job}.`,
                 });
             } else {
-                await updateApplicantStatus(applicant.cv_id, jobId, '', 'rejected');
-                toast.error(`${applicant.cvs.fullname} Rejected`, {
-                    description: 'Resume has been moved to rejected candidates.',
+                await updateApplicantStatus(applicant.cv_id, jobId, feedback, 'rejected');
+                toast.error(`${applicant.cvs.fullname} đã bị từ chối`, {
+                    description: 'Hồ sơ đã được chuyển vào danh sách từ chối.',
                 });
             }
 
-            // Move to next applicant
             setTimeout(() => {
                 if (currentIndex < applicantsData.length - 1) {
                     setCurrentIndex(currentIndex + 1);
                     controls.set({ x: 0, opacity: 1 });
                     setSwipeDirection(null);
                     setOverlayOpacity(0);
+                    setFeedback('');
                 } else {
-                    toast.info('All resumes reviewed!', {
-                        description: 'You have reviewed all applicants.',
+                    toast.info('Đã xem xét tất cả hồ sơ!', {
+                        description: 'Bạn đã xem xét tất cả ứng viên.',
                     });
                 }
             }, 300);
 
         } catch (error) {
-            toast.error('Error processing decision', {
-                description: 'Please try again.',
+            toast.error('Lỗi khi xử lý quyết định', {
+                description: 'Vui lòng thử lại.',
             });
         }
-    }, [currentApplicant, jobId, currentIndex, applicantsData, controls]);
+    }, [currentApplicant, jobId, feedback, currentIndex, applicantsData, controls]);
 
     const animateSwipe = useCallback(async (direction: 'approve' | 'reject') => {
         const exitX = direction === 'approve' ? 1000 : -1000;
@@ -129,14 +117,13 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
         handleDecision(direction);
     }, [controls, handleDecision]);
 
-    const handleDragEnd = async (event: any, info: PanInfo) => {
+    const handleDragEnd = async (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const threshold = 150;
 
         if (Math.abs(info.offset.x) > threshold) {
             const direction = info.offset.x > 0 ? 'approve' : 'reject';
             await animateSwipe(direction);
         } else {
-            // Snap back to center
             controls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } });
             setSwipeDirection(null);
             setOverlayOpacity(0);
@@ -153,7 +140,24 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
         animateSwipe('reject');
     }, [animateSwipe, currentApplicant]);
 
-    // Handle keyboard controls
+    const handleCompare = async () => {
+        if (!currentApplicant) return;
+
+        setLoadingComparison(true);
+        try {
+            const data = await compareCvAndJobStats(currentApplicant.cv_id, jobId);
+            if (data) {
+                setComparisonData(data);
+            } else {
+                toast.error('Không thể tải dữ liệu so sánh');
+            }
+        } catch (error) {
+            toast.error('Lỗi khi tải dữ liệu so sánh');
+        } finally {
+            setLoadingComparison(false);
+        }
+    };
+
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
             if (e.ctrlKey && e.key === 'ArrowLeft') {
@@ -194,19 +198,18 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                 </div>
             </div>
 
-            {/* Main Scrollable Area */}
-            <div className="flex-1 overflow-y-auto px-4 overflow-x-hidden" >
+            {/* Main Content */}
+            <div className="flex-1 overflow-y-auto px-4 overflow-x-hidden">
                 <div className="max-w-5xl mx-auto">
-                    {/* Swipe Card Container */}
                     <div className="relative flex items-center justify-center mb-4">
-                        {/* Background cards (for stacking effect) */}
+                        {/* Background card */}
                         {currentIndex + 1 < applicantsData.length && (
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <Card className="w-full max-w-3xl h-[550px] transform scale-95 opacity-50" />
                             </div>
                         )}
 
-                        {/* Main Swipe Card */}
+                        {/* Main Card */}
                         <motion.div
                             ref={cardRef}
                             drag="x"
@@ -220,7 +223,7 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                             <Card className="relative h-full shadow-elegant hover:shadow-hover transition-smooth flex flex-col">
                                 {/* Overlays */}
                                 <motion.div
-                                    className="absolute inset-0 bg-destructive/90 z-10 flex items-center justify-center"
+                                    className="absolute inset-0 bg-destructive/90 z-10 flex items-center justify-center pointer-events-none"
                                     style={{ opacity: swipeDirection === 'reject' ? overlayOpacity : 0 }}
                                 >
                                     <div className="transform -rotate-12">
@@ -232,7 +235,7 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                                 </motion.div>
 
                                 <motion.div
-                                    className="absolute inset-0 bg-green-500/90 z-10 flex items-center justify-center"
+                                    className="absolute inset-0 bg-green-500/90 z-10 flex items-center justify-center pointer-events-none"
                                     style={{ opacity: swipeDirection === 'approve' ? overlayOpacity : 0 }}
                                 >
                                     <div className="transform rotate-12">
@@ -243,10 +246,9 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                                     </div>
                                 </motion.div>
 
-                                {/* Card Content */}
                                 <CardContent className="p-0 flex-1">
                                     <div className="grid md:grid-cols-3 h-full">
-                                        {/* Left: Resume */}
+                                        {/* Resume */}
                                         <div className="col-span-2 bg-muted/30 border-r p-0">
                                             <div className="flex items-center justify-center min-h-full">
                                                 <Resume
@@ -256,8 +258,8 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                                             </div>
                                         </div>
 
-                                        {/* Right: Info */}
-                                        <div className="col-span-1 p-6 md:p-8 sticky top-0 self-start bg-background h-fit overflow-y-auto ">
+                                        {/* Info Panel */}
+                                        <div className="col-span-1 p-6 md:p-8 sticky top-0 self-start bg-background h-fit overflow-y-auto">
                                             <div className="flex items-start justify-between mb-6">
                                                 <div>
                                                     <h2 className="text-2xl font-bold mb-1">
@@ -282,22 +284,49 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                                                     <MapPin className="w-5 h-5 text-primary" />
                                                     <span className="text-sm">{currentApplicant.cvs.address}</span>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-muted-foreground">
-                                                    <Briefcase className="w-5 h-5 text-primary" />
-                                                    <span className="text-sm">
-                                                        {currentApplicant.cvs.experiences?.length} experience
-                                                    </span>
-                                                </div>
 
-                                                <div className="pt-4 border-t">
-                                                    <h4 className="font-semibold mb-3 text-foreground">Education</h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {currentApplicant.cvs.educations?.length}
+
+                                                {/* Feedback */}
+                                                <div
+                                                    className="pt-4 border-t"
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onMouseDown={(e) => e.stopPropagation()}
+                                                    onTouchStart={(e) => e.stopPropagation()}
+                                                >
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <MessageSquare className="w-5 h-5 text-primary" />
+                                                        <h4 className="font-semibold text-foreground">Phản hồi</h4>
+                                                    </div>
+                                                    <Textarea
+                                                        placeholder="Nhập phản hồi cho ứng viên (tùy chọn)&#10;Ví dụ: Kỹ năng phù hợp với vị trí, cần cải thiện về..."
+                                                        value={feedback}
+                                                        onChange={(e) => setFeedback(e.target.value)}
+                                                        className="min-h-[120px] resize-none"
+                                                        maxLength={500}
+                                                    />
+                                                    <p className="text-xs text-muted-foreground mt-2">
+                                                        {feedback.length}/500 ký tự
                                                     </p>
                                                 </div>
 
                                                 <div className="pt-4 border-t">
-                                                    <h4 className="font-semibold mb-3 text-foreground">Skills</h4>
+                                                    {/* Compare Button */}
+                                                    <div className="pt-4 border-t">
+                                                        <Button
+                                                            onClick={handleCompare}
+                                                            disabled={loadingComparison}
+                                                            className="w-full text-sm sha hover:scale-none cursor-pointer mb-4"
+                                                        >
+                                                            <BarChart3 className="w-4 h-4 mr-2" />
+                                                            {loadingComparison ? 'Đang tải...' : 'So sánh CV với Công việc'}
+                                                        </Button>
+                                                        {comparisonData && (
+                                                            <CVJobComparisonChart
+                                                                cvStats={comparisonData.cv}
+                                                                jobStats={comparisonData.job}
+                                                            />
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -355,6 +384,8 @@ export const ResumeSwipeCard = ({ jobId, applicantsData }: ResumeSwipeCardProps)
                 </div>
             </div>
         </div>
+
+
     );
 };
 

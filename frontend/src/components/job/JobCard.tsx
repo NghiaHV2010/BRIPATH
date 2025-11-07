@@ -1,4 +1,4 @@
-import { MapPin, Briefcase, DollarSign, Building2, Heart, Eye, Users, Bookmark, BarChart3 } from "lucide-react";
+import { MapPin, Briefcase, DollarSign, Building2, Heart, Eye, Users, Bookmark, BarChart3, Trash2 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -13,6 +13,7 @@ interface JobCardProps {
   onClick?: () => void;
   onSave?: () => void;
   onApply?: () => void;
+  onDelete?: () => void; // Add delete handler
   isSaved?: boolean;
   compact?: boolean;
   role?: "User" | "Company" | undefined;
@@ -22,6 +23,7 @@ export default function JobCard({
   job,
   onClick,
   onSave,
+  onDelete, // Add to props
   isSaved = false,
   compact = false,
   role = "User",
@@ -157,28 +159,39 @@ export default function JobCard({
               </p>
             </div>
 
-            {/* Save button */}
-            <Button
-              variant='custom'
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!authUser) {
-                  // open login dialog via wrapper so we ignore the following click
-                  handleLoginOpenChange(true);
-                  return;
-                }
-                onSave?.();
-              }}
-              className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors shrink-0"
-            >
-              <Heart
-                className={`w-4 h-4 transition-colors ${isSaved
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400 hover:text-red-400"
-                  }`}
-              />
-            </Button>
+            {/* Action button - Save for User, Delete for Company */}
+            {role === "Company" ? (
+              <Button
+                variant='custom'
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.();
+                }}
+                className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors shrink-0"
+              >
+                <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-600" />
+              </Button>
+            ) : (
+              <Button
+                variant='custom'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!authUser) {
+                    handleLoginOpenChange(true);
+                    return;
+                  }
+                  onSave?.();
+                }}
+                className="p-1 h-8 w-8 border-0 hover:bg-red-50 transition-colors shrink-0"
+              >
+                <Heart
+                  className={`w-4 h-4 transition-colors ${isSaved
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-400 hover:text-red-400"
+                    }`} />
+              </Button>
+            )}
 
             {/* Stats button for company role users */}
             {role === 'Company' && (

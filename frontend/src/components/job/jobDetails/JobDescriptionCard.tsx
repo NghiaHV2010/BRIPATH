@@ -1,7 +1,7 @@
 import { Briefcase, BookOpen, Clock, Calendar } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
+import { Card, CardContent } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Separator } from "../../ui/separator";
 
 interface JobDescriptionCardProps {
     description?: string;

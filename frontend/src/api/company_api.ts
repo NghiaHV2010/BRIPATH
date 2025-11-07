@@ -1,4 +1,3 @@
-
 import axiosConfig from "@/config/axios.config";
 import type { Applicant, ApplicantResponse, ApplicantSummary } from "@/types/applicant";
 import type { CompanySummary, CompanyField, CompanyDetailResponse, CompanyRegistrationPayload, CompanyRegisterResponse } from "@/types/company";
@@ -234,4 +233,47 @@ export const getApplicantByID = async (
     throw new Error("Có lỗi xảy ra khi lấy thông tin ứng viên");
 
   return response.data.data;
+};
+
+export interface ComparisonStats {
+  cv: {
+    id: number;
+    cv_id: number;
+    technical: number;
+    communication: number;
+    teamwork: number;
+    problem_solving: number;
+    creativity: number;
+    leadership: number;
+    summary: string;
+    created_at: string;
+    updated_at: string;
+  };
+  job: {
+    id: number;
+    job_id: string;
+    technical: number;
+    communication: number;
+    teamwork: number;
+    problem_solving: number;
+    creativity: number;
+    leadership: number;
+    summary: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+export const compareCvAndJobStats = async (cvId: number, jobId: string): Promise<ComparisonStats | null> => {
+  try {
+    const response = await axiosConfig.get(`/compare-stats/${cvId}/${jobId}`);
+
+    if (response.data.success) {
+      return response.data.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error comparing CV and job stats:", error);
+    throw error;
+  }
 };

@@ -3,6 +3,7 @@ import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
+import { redis } from "../libs/redis";
 
 const numberOfCompanies = 12;
 
@@ -137,6 +138,14 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
     page -= 1;
 
     try {
+        const cacheKey = `companies:user:${user_id || 'guest'}:page:${page}`;
+
+        const cachedCompanies = await redis.get(cacheKey);
+
+        if (cachedCompanies) {
+            console.log('CACHE COMPANIES HIT');
+            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedCompanies));
+        }
 
         const total_companies = await prisma.companies.count();
         const companies = await prisma.companies.findMany({
@@ -185,6 +194,14 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
             take: numberOfCompanies,
             skip: page * numberOfCompanies
         });
+
+        console.log('CACHE COMPANIES MISS');
+
+        await redis.set(cacheKey, JSON.stringify({
+            success: true,
+            data: companies,
+            totalPages: Math.ceil(total_companies / numberOfCompanies)
+        }), 'EX', 300);
 
         return res.status(HTTP_SUCCESS.OK).json({
             data: companies,
@@ -724,7 +741,7 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
                 }
             });
 
-            const notificationData = createNotificationData(isApplicantExisted.jobs.job_title, status, "applicant", 'company', feedback);
+            const notificationData = createNotificationData(isApplicantExisted.jobs.job_title, status, "applicant", "user", feedback);
 
             await tx.userNotifications.create({
                 data: {
@@ -952,6 +969,39 @@ export const getApplicantByID = async (req: Request, res: Response, next: NextFu
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: isApplicantExisted
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const compareCvandJobStats = async (req: Request, res: Response, next: NextFunction) => {
+    const { cvId, jobId } = req.params as { cvId: string, jobId: string };
+    try {
+        const [cv, job] = await Promise.all([
+            prisma.cv_stats.findUnique({
+                where: {
+                    cv_id: parseInt(cvId)
+                },
+            }),
+            prisma.job_stats.findFirst({
+                where: {
+                    job_id: jobId,
+                }
+            })
+        ]);
+        if (!cv) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "CV không tồn tại!"));
+        }
+        if (!job) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: {
+                cv,
+                job
+            }
         });
     } catch (error) {
         next(error);

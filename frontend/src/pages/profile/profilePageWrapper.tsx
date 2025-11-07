@@ -34,7 +34,6 @@ import type { CompanyRegisterResponse } from "@/types/company";
 import type { Resume as ResumeType } from "@/types/resume";
 
 export default function ProfilePageWrapper() {
-  const user = useAuthStore((state) => state.authUser);
   const updateUser = useAuthStore((state) => state.updateUser);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [isEditing, setIsEditing] = useState(false);
@@ -52,13 +51,13 @@ export default function ProfilePageWrapper() {
   const [hasRegisteredCompany, setHasRegisteredCompany] = useState(false);
 
   const [formData, setFormData] = useState({
-    username: user?.username || "",
-    avatar_url: user?.avatar_url || "",
-    address_street: user?.address_street || "",
-    address_ward: user?.address_ward || "",
-    address_city: user?.address_city || "",
-    address_country: user?.address_country || "",
-    gender: user?.gender || "others",  //'male' | 'female' | 'others'
+    username: "",
+    avatar_url: "",
+    address_street: "",
+    address_ward: "",
+    address_city: "",
+    address_country: "",
+    gender: "others",  //'male' | 'female' | 'others'
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -94,11 +93,11 @@ export default function ProfilePageWrapper() {
 
   // Load user profile data
   useEffect(() => {
-    if (user) {
+    if (!userProfileData) {
       loadUserProfileData();
       loadCVData();
     }
-  }, [user]);
+  }, []);
 
   const loadUserProfileData = async () => {
     try {
@@ -173,7 +172,7 @@ export default function ProfilePageWrapper() {
     }
   };
 
-  if (!user) {
+  if (!userProfileData) {
     return (
       <AccountLayout title="Thông tin tài khoản">
         <div className="text-center py-16">
@@ -189,10 +188,10 @@ export default function ProfilePageWrapper() {
   }
 
   const address = [
-    user.address_street,
-    user.address_ward,
-    user.address_city,
-    user.address_country,
+    userProfileData?.address_street,
+    userProfileData?.address_ward,
+    userProfileData?.address_city,
+    userProfileData?.address_country,
   ]
     .filter(Boolean)
     .join(", ");
@@ -206,26 +205,26 @@ export default function ProfilePageWrapper() {
   const handleEdit = () => {
     setIsEditing(true);
     setFormData({
-      username: userProfileData?.username || user?.username || "",
-      avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street: userProfileData?.address_street || user?.address_street || "",
-      address_ward: userProfileData?.address_ward || user?.address_ward || "",
-      address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country: userProfileData?.address_country || user?.address_country || "",
-      gender: userProfileData?.gender || user?.gender || "others",
+      username: userProfileData?.username || "",
+      avatar_url: userProfileData?.avatar_url || "",
+      address_street: userProfileData?.address_street || "",
+      address_ward: userProfileData?.address_ward || "",
+      address_city: userProfileData?.address_city || "",
+      address_country: userProfileData?.address_country || "",
+      gender: userProfileData?.gender || "others",
     });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setFormData({
-      username: userProfileData?.username || user?.username || "",
-      avatar_url: userProfileData?.avatar_url || user?.avatar_url || "",
-      address_street: userProfileData?.address_street || user?.address_street || "",
-      address_ward: userProfileData?.address_ward || user?.address_ward || "",
-      address_city: userProfileData?.address_city || user?.address_city || "",
-      address_country: userProfileData?.address_country || user?.address_country || "",
-      gender: userProfileData?.gender || user?.gender || "others",
+      username: userProfileData?.username || "",
+      avatar_url: userProfileData?.avatar_url || "",
+      address_street: userProfileData?.address_street || "",
+      address_ward: userProfileData?.address_ward || "",
+      address_city: userProfileData?.address_city || "",
+      address_country: userProfileData?.address_country || "",
+      gender: userProfileData?.gender || "others",
     });
 
     setShowPasswordForm(false);
@@ -250,8 +249,6 @@ export default function ProfilePageWrapper() {
         address_country: formData.address_country,
         gender: formData.gender as 'male' | 'female' | 'others'
       };
-
-      console.log("Updating profile:", updateRequest);
 
       // Call the API to update user profile
       const response = await updateUserProfile(updateRequest);
@@ -387,7 +384,7 @@ export default function ProfilePageWrapper() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !userProfileData) return;
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -414,7 +411,7 @@ export default function ProfilePageWrapper() {
   };
 
   const handleCropComplete = async (croppedFile: File) => {
-    if (!user) return;
+    if (!userProfileData) return;
 
     setIsUploading(true);
     setShowCropModal(false);
@@ -423,7 +420,7 @@ export default function ProfilePageWrapper() {
       // Upload the cropped image
       await handleAvatarUpload(
         croppedFile,
-        user.id,
+        userProfileData.id,
         async (firebaseUrl) => {
           // Update avatar in database
           const result = await updateUserAvatar(firebaseUrl);
@@ -469,15 +466,15 @@ export default function ProfilePageWrapper() {
                 <div className="xl:hidden">
                   <div className="relative">
                     <Avatar className="size-24 border-4 shadow-md rounded-full flex items-center justify-center">
-                      {userProfileData?.avatar_url || user?.avatar_url ? (
+                      {userProfileData?.avatar_url ? (
                         <AvatarImage
-                          src={userProfileData?.avatar_url || user?.avatar_url || undefined}
-                          alt={user?.username}
+                          src={userProfileData?.avatar_url || undefined}
+                          alt={userProfileData?.username}
                           className='object-cover object-center'
                         />
                       ) : (
                         <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-xl">
-                          {user?.username?.charAt(0).toUpperCase()}
+                          {userProfileData.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       )}
                     </Avatar>
@@ -600,7 +597,7 @@ export default function ProfilePageWrapper() {
                     />
                   ) : (
                     <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-900">
-                      {user.username}
+                      {userProfileData.username}
                     </p>
                   )}
                 </div>
@@ -610,7 +607,7 @@ export default function ProfilePageWrapper() {
                     Vai trò
                   </label>
                   <p className="py-2 text-gray-500">
-                    {roleMap[user.role_id as keyof typeof roleMap] ||
+                    {roleMap[userProfileData?.role_id as keyof typeof roleMap] ||
                       "Ứng viên"}
                   </p>
                 </div>
@@ -621,8 +618,8 @@ export default function ProfilePageWrapper() {
                     Ngày tham gia
                   </Label>
                   <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                    {user.created_at
-                      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+                    {userProfileData.created_at
+                      ? new Date(userProfileData.created_at).toLocaleDateString("vi-VN")
                       : "Chưa rõ"}
                   </p>
                 </div>
@@ -636,7 +633,7 @@ export default function ProfilePageWrapper() {
                     Email
                   </Label>
                   <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                    {user.email}
+                    {userProfileData.email}
                   </p>
                   <p className="text-xs text-gray-400 flex items-center gap-1">
                     <X className="w-3 h-3" /> Không thể chỉnh sửa
@@ -648,7 +645,7 @@ export default function ProfilePageWrapper() {
                     Số điện thoại
                   </Label>
                   <p className="px-3 py-2 bg-gray-50 rounded-md border text-gray-600">
-                    {user.phone || "Chưa cập nhật"}
+                    {userProfileData.phone || "Chưa cập nhật"}
                   </p>
                   <p className="text-xs text-blue-500">Cập nhật từ CV</p>
                 </div>

@@ -15,6 +15,7 @@ export interface UserProfile {
     updated_at: string;
     phone_verified: boolean;
     company_id: string | null;
+    role_id: number;
     companies: {
         jobs: any[];
     };

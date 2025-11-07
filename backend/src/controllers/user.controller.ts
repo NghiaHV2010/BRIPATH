@@ -824,8 +824,6 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
                 }
             });
 
-
-
             await tx.userActivitiesHistory.create({
                 data: {
                     activity_name: `Bạn đã cập nhật hồ sơ cá nhân`,
