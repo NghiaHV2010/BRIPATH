@@ -122,7 +122,7 @@ export default function LabelManagement() {
               </TableHeader>
               <TableBody>
                 {jobLabels.length === 0 ? (
-                  <TableRow>
+                  <TableRow key="job-labels-empty">
                     <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                       Chưa có nhãn công việc nào
                     </TableCell>
@@ -177,7 +177,7 @@ export default function LabelManagement() {
               </TableHeader>
               <TableBody>
                 {companyLabels.length === 0 ? (
-                  <TableRow>
+                  <TableRow key="company-labels-empty">
                     <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                       Chưa có nhãn công ty nào
                     </TableCell>

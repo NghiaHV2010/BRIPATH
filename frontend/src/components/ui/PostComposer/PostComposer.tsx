@@ -1,15 +1,18 @@
 import { useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from '../button';
 import { Avatar, AvatarFallback, AvatarImage } from '../avatar';
 import Toolbar from './Toolbar';
 import EmojiPicker from './EmojiPicker';
-import { Send } from 'lucide-react';
+import ImageResizeControls from './ImageResizeControls';
+import { ImageResize } from './ImageResizeExtension';
+import { Send, X } from 'lucide-react';
 import { uploadImageFileToStorage, savePostToBackend } from '@/utils/posts';
+import { useToast } from '../use-toast';
 
 interface PostComposerProps {
   userAvatar?: string;
@@ -29,32 +32,8 @@ export default function PostComposer({
   const [title, setTitle] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
-  // Function to sync images with editor content
-  const syncImagesWithEditor = () => {
-    if (!editor) return;
-    
-    const html = editor.getHTML();
-    const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/g;
-    const editorImages: string[] = [];
-    let match;
-    
-    while ((match = imgRegex.exec(html)) !== null) {
-      editorImages.push(match[1]);
-    }
-    
-    // Update images state to match editor
-    setImages(prev => {
-      const newImages = prev.filter(img => editorImages.includes(img));
-      return newImages;
-    });
-    
-    // Update pending files to match
-    setPendingFiles(prev => {
-      const newPendingFiles = prev.filter(file => editorImages.includes(file.localUrl));
-      return newPendingFiles;
-    });
-  };
 
   const editor = useEditor({
     extensions: [
@@ -62,7 +41,9 @@ export default function PostComposer({
         link: false,
         underline: false,
       }),
-      Image.configure({
+      ImageResize.configure({
+        inline: false,
+        allowBase64: true,
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
         },
@@ -76,7 +57,7 @@ export default function PostComposer({
     editorProps: {
       attributes: {
         class:
-          'ProseMirror prose prose-sm md:prose-base max-w-none focus:outline-none min-h-[160px] px-4 py-3 rounded-xl bg-white',
+          'ProseMirror prose prose-sm md:prose-base max-w-none focus:outline-none min-h-[400px] px-4 py-3 rounded-xl bg-white',
       },
     },
     onCreate: ({ editor }) => {
@@ -84,10 +65,39 @@ export default function PostComposer({
     },
     onUpdate: ({ editor }) => {
       setHasText(!!editor.getText({ blockSeparator: '' }).trim().length);
-      // Sync images with editor content on every update
-      syncImagesWithEditor();
+      
+      // Sync images: remove images from preview if they're deleted from editor
+      const html = editor.getHTML();
+      const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+      const editorImages: string[] = [];
+      let match;
+      
+      while ((match = imgRegex.exec(html)) !== null) {
+        if (match[1]) {
+          editorImages.push(match[1]);
+        }
+      }
+      
+      // Remove images from state if they're not in editor anymore
+      setImages(prev => {
+        const remaining = prev.filter(img => editorImages.includes(img));
+        // Clean up blob URLs that are no longer in editor
+        prev.forEach(img => {
+          if (!editorImages.includes(img) && img.startsWith('blob:')) {
+            URL.revokeObjectURL(img);
+          }
+        });
+        return remaining;
+      });
+      
+      // Also update pending files
+      setPendingFiles(prev => {
+        const remaining = prev.filter(file => editorImages.includes(file.localUrl));
+        return remaining;
+      });
     },
   });
+
 
   const handleImageUpload = () => {
     fileInputRef.current?.click();
@@ -103,22 +113,134 @@ export default function PostComposer({
     setCoverPreview(localUrl);
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const additions: string[] = [];
-    const newPendings: { localUrl: string; file: File }[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
-      const localUrl = URL.createObjectURL(file);
-      additions.push(localUrl);
-      newPendings.push({ localUrl, file });
+  const handleRemoveCover = () => {
+    if (coverPreview) {
+      URL.revokeObjectURL(coverPreview);
     }
-    if (additions.length > 0) {
-      setImages(prev => [...prev, ...additions]);
-      setPendingFiles(prev => [...prev, ...newPendings]);
-      additions.forEach(url => editor?.chain().focus().setImage({ src: url }).run());
+    setCoverPreview(null);
+    setCoverFile(null);
+    // Reset file input
+    if (coverInputRef.current) {
+      coverInputRef.current.value = '';
+    }
+  };
+
+  // Resize image function (similar to Facebook - max width 1200px)
+  const resizeImage = (file: File, maxWidth: number = 1200, maxHeight: number = 1200, quality: number = 0.85): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const img = new Image();
+            img.onload = () => {
+              try {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Calculate new dimensions
+                if (width > maxWidth || height > maxHeight) {
+                  const ratio = Math.min(maxWidth / width, maxHeight / height);
+                  width = width * ratio;
+                  height = height * ratio;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                  reject(new Error('Could not get canvas context'));
+                  return;
+                }
+
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Determine output type - default to jpeg if not specified
+                const outputType = file.type || 'image/jpeg';
+                
+                canvas.toBlob(
+                  (blob) => {
+                    if (!blob) {
+                      reject(new Error('Failed to create blob'));
+                      return;
+                    }
+                    const resizedFile = new File([blob], file.name, {
+                      type: outputType,
+                      lastModified: Date.now(),
+                    });
+                    resolve(resizedFile);
+                  },
+                  outputType,
+                  quality
+                );
+              } catch (error) {
+                reject(error);
+              }
+            };
+            img.onerror = (error) => {
+              reject(new Error('Failed to load image: ' + error));
+            };
+            
+            if (e.target?.result) {
+              img.src = e.target.result as string;
+            } else {
+              reject(new Error('FileReader result is empty'));
+            }
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = (error) => {
+          reject(new Error('FileReader error: ' + error));
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) {
+      return;
+    }
+
+    let processedFile: File = file;
+    
+    try {
+      // Resize image file if it's too large (max 1200px)
+      processedFile = await resizeImage(file, 1200, 1200, 0.85);
+    } catch (resizeError) {
+      console.warn('Resize failed, using original file:', resizeError);
+      processedFile = file;
+    }
+    
+    const localUrl = URL.createObjectURL(processedFile);
+    
+    // Clear previous images and set new one
+    images.forEach(url => URL.revokeObjectURL(url));
+    setImages([localUrl]);
+    setPendingFiles([{ localUrl, file: processedFile }]);
+    
+    // Insert image into editor with a small delay to ensure editor is ready
+    if (editor) {
+      // Use setTimeout to ensure editor state is stable
+      setTimeout(() => {
+        // Use setImage command
+        if (editor.can().setImage({ src: localUrl, width: '500px' })) {
+          editor.chain().focus().setImage({ 
+            src: localUrl, 
+            width: '500px' 
+          }).run();
+        }
+      }, 50);
+    }
+    
+    // Reset file input
+    if (e.target) {
+      e.target.value = '';
     }
   };
 
@@ -135,9 +257,11 @@ export default function PostComposer({
     const imageUrlToRemove = images[index];
     
     // Remove from editor by replacing the image with empty content
+    // Improved regex to handle images with style attributes (float alignment)
     const currentHtml = editor.getHTML();
+    const escapedUrl = imageUrlToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const updatedHtml = currentHtml.replace(
-      new RegExp(`<img[^>]*src="${imageUrlToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`, 'g'),
+      new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi'),
       ''
     );
     
@@ -147,7 +271,9 @@ export default function PostComposer({
     // Clean up the URL
     URL.revokeObjectURL(imageUrlToRemove);
     
-    // The syncImagesWithEditor will be called automatically via onUpdate
+    // Update state to remove the image
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handlePost = async () => {
@@ -227,12 +353,20 @@ export default function PostComposer({
       setCoverPreview(null);
       setCoverFile(null);
       
-      // Show success message (you can replace this with a toast notification)
-      alert("Bài viết đã được đăng thành công!");
+      // Show success toast
+      toast({
+        title: "Thành công!",
+        description: "Bài viết đã được đăng thành công!",
+        variant: "success",
+      });
       
     } catch (error) {
       console.error("PostComposer: failed to submit post", error);
-      alert(`Lỗi khi đăng bài: ${error instanceof Error ? error.message : 'Có lỗi xảy ra'}`);
+      toast({
+        title: "Lỗi",
+        description: error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng bài',
+        variant: "destructive",
+      });
     }
   };
 
@@ -269,12 +403,23 @@ export default function PostComposer({
       {/* Cover image */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <div className="font-medium text-gray-800">Ảnh bìa</div>
-          <Button type="button" variant="outline" onClick={handleCoverUploadClick}>Chọn ảnh bìa</Button>
+          <div className="font-medium text-gray-800">Ảnh bìa <span className="text-xs text-gray-400 font-normal">(tùy chọn)</span></div>
+          {!coverPreview ? (
+            <Button type="button" variant="outline" onClick={handleCoverUploadClick}>Chọn ảnh bìa</Button>
+          ) : (
+            <Button type="button" variant="outline" onClick={handleCoverUploadClick}>Thay đổi</Button>
+          )}
         </div>
         {coverPreview ? (
-          <div className="rounded-xl overflow-hidden border">
+          <div className="relative group rounded-xl overflow-hidden border">
             <img src={coverPreview} alt="Cover preview" className="w-full h-44 object-cover" />
+            <button
+              onClick={handleRemoveCover}
+              className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              title="Xóa ảnh bìa"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         ) : (
           <div className="text-sm text-gray-500">Chưa chọn ảnh bìa</div>
@@ -283,34 +428,48 @@ export default function PostComposer({
       </div>
 
       {/* Editor */}
-      <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 transition">
-        <EditorContent editor={editor} />
+      <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 transition relative flex flex-col">
+        {/* Editor Content - Larger min-height with overflow handling */}
+        <div className="min-h-[400px] overflow-x-auto overflow-y-visible relative flex-1 clearfix">
+          <EditorContent editor={editor} />
+        </div>
         
-        {/* Image Preview */}
-        {images.length > 0 && (
-          <div className="p-4 border-t border-gray-100 bg-white">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {images.map((image, index) => (
-                <div key={index} className="relative group rounded-lg overflow-hidden border">
-                  <img
-                    src={image}
-                    alt={`Upload ${index + 1}`}
-                    className="w-full h-28 sm:h-32 object-cover"
-                  />
-                  <button
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow opacity-0 group-hover:opacity-100 transition"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
+        {/* Bubble Menu for Image Resize Controls - Higher z-index */}
+        {editor && (
+          <BubbleMenu
+            editor={editor}
+            shouldShow={(props) => {
+              const { state } = props;
+              const { selection } = state;
+              const { $anchor } = selection;
+              
+              // Check if selection is on an image node
+              const node = $anchor.node();
+              if (node && node.type.name === 'image') {
+                return true;
+              }
+              
+              // Check parent node
+              const parent = $anchor.parent;
+              if (parent && parent.type.name === 'image') {
+                return true;
+              }
+              
+              // Check node before and after
+              const nodeBefore = $anchor.nodeBefore;
+              const nodeAfter = $anchor.nodeAfter;
+              return (nodeBefore?.type.name === 'image') || 
+                     (nodeAfter?.type.name === 'image');
+            }}
+          >
+            <div className="z-[100]">
+              <ImageResizeControls editor={editor} />
             </div>
-          </div>
+          </BubbleMenu>
         )}
-
-        {/* Toolbar */}
-        <div className="border-t border-gray-100 bg-gray-50">
+        
+        {/* Toolbar - Fixed position with higher z-index */}
+        <div className="sticky bottom-0 border-t border-gray-100 bg-gray-50 z-50 shadow-sm">
           <div className="flex items-center justify-between p-2 md:p-3">
             <div className="flex flex-wrap items-center gap-1.5">
               <Toolbar 
@@ -321,6 +480,29 @@ export default function PostComposer({
             </div>
           </div>
         </div>
+
+        {/* Image Preview - Moved below toolbar to avoid covering resize controls */}
+        {images.length > 0 && (
+          <div className="p-4 border-t border-gray-100 bg-white clear-both">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {images.map((image, index) => (
+                <div key={index} className="relative group rounded-lg overflow-hidden border">
+                  <img
+                    src={image}
+                    alt={`Upload ${index + 1}`}
+                    className="w-full h-28 sm:h-32 object-cover"
+                  />
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow opacity-0 group-hover:opacity-100 transition z-10"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Post Button */}
@@ -344,7 +526,6 @@ export default function PostComposer({
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        multiple
         onChange={handleFileInputChange}
         className="hidden"
       />

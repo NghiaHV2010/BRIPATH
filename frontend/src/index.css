@@ -372,16 +372,107 @@ h1 {
   }
 }
 
+/* Fix BubbleMenu position - prevent it from moving with image alignment */
+[data-tippy-root] {
+  position: fixed !important;
+  z-index: 100 !important;
+}
+
 /* ProseMirror requirement: preserve whitespace and wrapping */
 .ProseMirror {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
-/* Prose styling for rich text editor */
+/* Ensure images in editor don't overflow and cover controls */
+.ProseMirror img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+/* Prevent full-width images from covering toolbar */
+.ProseMirror img[style*="width: 100%"] {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Fix float images - add margin and ensure they don't stick to footer */
+.ProseMirror img[style*="float: left"],
+.ProseMirror img[style*="float:right"] {
+  margin-bottom: 1rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.ProseMirror img[style*="float: left"] {
+  margin-right: 1rem !important;
+  margin-left: 0 !important;
+}
+
+.ProseMirror img[style*="float: right"] {
+  margin-left: 1rem !important;
+  margin-right: 0 !important;
+}
+
+/* Clear float after images to prevent footer from sticking */
+.ProseMirror::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Ensure paragraphs after float images clear properly */
+.ProseMirror img[style*="float"] + p {
+  clear: both;
+}
+
+/* Add min-height to editor container to prevent footer sticking */
+.ProseMirror {
+  min-height: 400px;
+  overflow: visible;
+}
+
+/* Clearfix utility class */
+.clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Fix float images in blog detail page - prevent footer from sticking */
+.prose img[style*="float: left"],
+.prose img[style*="float:right"] {
+  margin-bottom: 1rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.prose img[style*="float: left"] {
+  margin-right: 1rem !important;
+  margin-left: 0 !important;
+}
+
+.prose img[style*="float: right"] {
+  margin-left: 1rem !important;
+  margin-right: 0 !important;
+}
+
+/* Clear float after images in blog content */
+.prose::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Ensure paragraphs after float images clear properly */
+.prose img[style*="float"] + p {
+  clear: both;
+}
+
+/* Prose styling for rich text editor and blog content */
 .prose {
   color: inherit;
   max-width: none;
+  overflow: hidden; /* Clearfix for float images */
 }
 
 .prose h1 {
