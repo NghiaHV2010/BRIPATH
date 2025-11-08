@@ -4,6 +4,7 @@ import AdminHeader from "./adminHeader";
 import DashboardStats from "./dashboardStats";
 import CompanyManagement from "./companyManagement";
 import EventsManagement from "./eventsManagement";
+import ReportsManagement from "./reportsManagement";
 import PaymentsManagement from "./paymentsManagement";
 import Analytics from "./analytics";
 import UserManagement from "./userManagement";
@@ -115,6 +116,9 @@ export default function AdminDashboard() {
       
       case "events":
         return <EventsManagement />;
+      
+      case "reports":
+        return <ReportsManagement />;
       
       case "payments":
         return <PaymentsManagement />;

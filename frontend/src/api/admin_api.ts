@@ -60,3 +60,19 @@ export const getAllCompanyLabels = async () => {
   const response = await axiosConfig.get('/company/label');
   return response.data;
 };
+
+// Reports management
+export const getAllReports = async (page: number = 1, status?: 'pending' | 'approved' | 'rejected') => {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  if (status) {
+    params.append('status', status);
+  }
+  const response = await axiosConfig.get(`/dashboard/reports?${params.toString()}`);
+  return response.data;
+};
+
+export const updateReportStatus = async (reportId: number, status: 'approved' | 'rejected') => {
+  const response = await axiosConfig.put(`/dashboard/report/${reportId}`, { status });
+  return response.data;
+};
