@@ -46,6 +46,7 @@ import { UserSubscription } from "./components/profile/userSubscriptions";
 import { CompanyReviews } from "./pages/profile/company/CompanyReviews";
 import VerifyPhone from "./components/auth/verifyPhone";
 import EventsPage from "./pages/event/EventPage";
+import MyEventsPage from "./pages/profile/myEventsPage";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
@@ -155,6 +156,7 @@ function App() {
             path="followed/companies"
             element={<FollowedCompaniesPage />}
           />
+          <Route path="events" element={<MyEventsPage />} />
           <Route path="notifications" element={<NotificationList />} />
           <Route path="subscriptions" element={<UserSubscription />} />
           {/* Company-specific routes */}

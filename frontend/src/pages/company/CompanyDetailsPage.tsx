@@ -57,7 +57,7 @@ export default function CompanyDetailsPage() {
   } = useCompanyStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const authUser = useAuthStore((s) => s.authUser);
+  const authUser = useAuthStore(s => s.authUser);
   const userId = authUser?.id; // 👈 lấy userId trực tiếp
 
   // Khôi phục vị trí scroll khi quay lại
@@ -82,7 +82,7 @@ export default function CompanyDetailsPage() {
         // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
-          res.data.followedCompanies.length > 0
+            res.data.followedCompanies.length > 0
         );
       } catch (err) {
         console.error("Error fetching company details:", err);
@@ -129,11 +129,11 @@ export default function CompanyDetailsPage() {
   }, [navigationState]);
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
   };
 
   const handleCopyLink = () => {
@@ -185,7 +185,9 @@ export default function CompanyDetailsPage() {
               {/* Company Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${companyDetail.background_url})` }}
+                style={{
+                  backgroundImage: `url(${companyDetail.background_url})`,
+                }}
               />
               {/* Black Gradient Overlay - Bottom to Top and Sides */}
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
@@ -253,7 +255,7 @@ export default function CompanyDetailsPage() {
                 <p className="text-blue-100 text-xl mb-8 max-w-4xl">
                   {companyDetail.description.split("\n")[0]?.trim() ||
                     companyDetail.description.substring(0, 200) +
-                    (companyDetail.description.length > 200 ? "..." : "")}
+                      (companyDetail.description.length > 200 ? "..." : "")}
                 </p>
               )}
 
@@ -327,7 +329,7 @@ export default function CompanyDetailsPage() {
 
                 {companyDetail.jobs && companyDetail.jobs.length > 0 ? (
                   <div className="space-y-6">
-                    {companyDetail.jobs.map((job) => (
+                    {companyDetail.jobs.map(job => (
                       <JobCard
                         key={job.id}
                         job={job}
@@ -386,7 +388,7 @@ export default function CompanyDetailsPage() {
                     ) : (
                       <form
                         className="space-y-4"
-                        onSubmit={async (e) => {
+                        onSubmit={async e => {
                           e.preventDefault();
                           if (!companyId) return;
                           // reset errors
@@ -477,11 +479,9 @@ export default function CompanyDetailsPage() {
                             <select
                               className="w-full border rounded-lg p-2"
                               value={stars}
-                              onChange={(e) =>
-                                setStars(parseInt(e.target.value))
-                              }
+                              onChange={e => setStars(parseInt(e.target.value))}
                             >
-                              {[1, 2, 3, 4, 5].map((s) => (
+                              {[1, 2, 3, 4, 5].map(s => (
                                 <option key={s} value={s}>
                                   {s}
                                 </option>
@@ -503,7 +503,7 @@ export default function CompanyDetailsPage() {
                             className="w-full border rounded-lg p-3 min-h-[100px]"
                             placeholder="Chia sẻ trải nghiệm của bạn..."
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={e => setDescription(e.target.value)}
                           />
                           {descriptionError && (
                             <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -520,7 +520,7 @@ export default function CompanyDetailsPage() {
                             <input
                               className="w-full border rounded-lg p-2"
                               value={benefit}
-                              onChange={(e) => setBenefit(e.target.value)}
+                              onChange={e => setBenefit(e.target.value)}
                               placeholder="Ví dụ: Bảo hiểm, thưởng..."
                             />
                             {benefitError && (
@@ -537,9 +537,7 @@ export default function CompanyDetailsPage() {
                             <input
                               className="w-full border rounded-lg p-2"
                               value={workEnvironment}
-                              onChange={(e) =>
-                                setWorkEnvironment(e.target.value)
-                              }
+                              onChange={e => setWorkEnvironment(e.target.value)}
                               placeholder="Ví dụ: Thân thiện, chuyên nghiệp..."
                             />
                             {workEnvError && (
@@ -603,14 +601,6 @@ export default function CompanyDetailsPage() {
                     </Button>
                   </div>
                 </CardContent>
-              </Card>
-
-              <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
-                <img
-                  src="/src/assets/banner/7.jpg"
-                  alt="Company banner"
-                  className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
-                />
               </Card>
             </div>
           </div>

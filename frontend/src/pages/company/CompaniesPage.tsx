@@ -153,15 +153,6 @@ export default function CompaniesPage() {
       )}
       {/* END THAY ĐỔI */}
 
-      <div className="max-w-full mx-auto px-4 py-18 bg-linear-to-b from-white via-blue-100 to-blue-200 transform transition-transform duration-500  ">
-        <div className="grid grid-cols-1 justify-items-center">
-          <img
-            src="/src/assets/banner/4.jpg"
-            alt="Company banner"
-            className="max-w-2xl aspect-square rounded-xl object-cover"
-          />
-        </div>
-      </div>
       {/* Khối này giữ lại cho Company List bên dưới */}
       <div className="w-full mx-auto px-4 py-12 bg-linear-to-b from-blue-100  to-white ">
         {isLoading ? (

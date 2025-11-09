@@ -1,39 +1,23 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, AlertCircle, Check } from "lucide-react";
-import { toast } from "sonner";
+import { Calendar, Clock, Users, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import ReportDialog from "./ReportDialog";
-import type { Event } from "@/types/event";
+import { ApplyEventDialog } from "./ApplyEventDialog";
+import type { Event } from "@/api/event_api";
 
 interface EventCardProps {
   event: Event;
+  onApplySuccess?: () => void;
 }
 
-const EventCard = ({ event }: EventCardProps) => {
-  const [hasJoined, setHasJoined] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
+const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
 
-  const handleJoin = async () => {
-    setIsJoining(true);
-    try {
-      // API call will be added by user
-      // await axios.post(`${API_URL}/events/${event.id}/join`);
-
-      setTimeout(() => {
-        setHasJoined(!hasJoined);
-        toast.success(
-          hasJoined ? "Đã rời khỏi sự kiện" : "Đã tham gia sự kiện!"
-        );
-        setIsJoining(false);
-      }, 300);
-    } catch (error) {
-      toast.error("Không thể tham gia sự kiện");
-      setIsJoining(false);
-    }
-  };
+  // ✅ Check if user has applied to this event
+  const hasApplied = (event.volunteers?.length ?? 0) > 0;
 
   const formatDate = (dateString: string) => {
     try {
@@ -50,7 +34,7 @@ const EventCard = ({ event }: EventCardProps) => {
         data-testid="event-card"
       >
         {/* Banner Image */}
-        <div className="relative w-full aspect-[16/9] overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300">
+        <div className="relative w-full aspect-video overflow-hidden bg-linear-to-br from-slate-200 to-slate-300">
           {event.banner_url ? (
             <img
               src={event.banner_url}
@@ -63,7 +47,7 @@ const EventCard = ({ event }: EventCardProps) => {
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-500">
+            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-400 to-indigo-500">
               <Calendar className="w-16 h-16 text-white/50" />
             </div>
           )}
@@ -121,26 +105,17 @@ const EventCard = ({ event }: EventCardProps) => {
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-2">
             <Button
-              onClick={handleJoin}
-              disabled={isJoining}
+              onClick={() => setShowApplyDialog(true)}
+              disabled={hasApplied}
               className={`join-button flex-1 font-medium py-5 rounded-lg shadow-sm transition-all ${
-                hasJoined
-                  ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                  : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-              } text-white`}
+                hasApplied
+                  ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
+                  : "bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+              }`}
               data-testid="join-event-button"
             >
-              {hasJoined ? (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Đã tham gia
-                </>
-              ) : (
-                <>
-                  <Users className="w-4 h-4 mr-2" />
-                  {isJoining ? "Đang xử lý..." : "Tham gia"}
-                </>
-              )}
+              <Users className="w-4 h-4 mr-2" />
+              {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
             </Button>
 
             <Button
@@ -156,11 +131,20 @@ const EventCard = ({ event }: EventCardProps) => {
         </CardContent>
       </Card>
 
+      {/* Apply Event Dialog */}
+      <ApplyEventDialog
+        open={showApplyDialog}
+        onOpenChange={setShowApplyDialog}
+        eventId={event.id || ""}
+        eventTitle={event.title}
+        onSuccess={onApplySuccess}
+      />
+
       {/* Report Dialog */}
       <ReportDialog
         open={showReportDialog}
         onOpenChange={setShowReportDialog}
-        eventId={event.id}
+        eventId={event.id || ""}
       />
     </>
   );

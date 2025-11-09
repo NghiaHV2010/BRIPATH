@@ -279,3 +279,35 @@ export const getAllPricingPlans = async (): Promise<any[]> => {
     return [];
   }
 };
+
+
+export const getUserSettings = async (): Promise<any> => {
+  try {
+    const response = await axiosConfig.get('/settings');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user settings:", error);
+    return null;
+  }
+};
+
+export const updateUserSettings = async (settingsData: any): Promise<any> => {
+  try {
+    const response = await axiosConfig.put('/setting', settingsData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user settings:", error);
+    return null;  
+  } 
+};
+
+
+export const getUserSubscription = async (): Promise<any> => {
+  try {
+    const response = await axiosConfig.get('/subscriptions/user');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user subscription:", error);
+    return null;
+  }
+};

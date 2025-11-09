@@ -45,7 +45,7 @@ export default function JobDetailsPage() {
   const [hasViewedJob, setHasViewedJob] = useState(false);
   const viewTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const authUser = useAuthStore((s) => s.authUser);
+  const authUser = useAuthStore(s => s.authUser);
 
   // Safe isSaved
   const isSaved = !!(selectedJob?.isSaved || (jobId && checkIfSaved(jobId)));
@@ -161,21 +161,22 @@ export default function JobDetailsPage() {
 
   const company = companies
     ? {
-      id: companies.id,
-      name: companies.users?.username || "Công ty",
-      avatar_url: companies.users?.avatar_url || "",
-      field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
-      address: [
-        companies.users?.address_street,
-        companies.users?.address_ward,
-        companies.users?.address_city,
-        companies.users?.address_country,
-      ]
-        .filter(Boolean)
-        .join(", ") || location,
-      company_type: (companies as any).company_type,
-      is_verified: (companies as any).is_verified,
-    }
+        id: companies.id,
+        name: companies.users?.username || "Công ty",
+        avatar_url: companies.users?.avatar_url || "",
+        field: companies.fields?.field_name || "Chưa cập nhật ngành nghề",
+        address:
+          [
+            companies.users?.address_street,
+            companies.users?.address_ward,
+            companies.users?.address_city,
+            companies.users?.address_country,
+          ]
+            .filter(Boolean)
+            .join(", ") || location,
+        company_type: (companies as any).company_type,
+        is_verified: (companies as any).is_verified,
+      }
     : null;
 
   const formatJobType = (type: string) => {
@@ -339,7 +340,10 @@ export default function JobDetailsPage() {
                   {/* Job Category and Label */}
                   <div className="flex flex-wrap gap-2">
                     {jobCategories && (
-                      <Badge variant="outline" className="text-blue-600 border-blue-600">
+                      <Badge
+                        variant="outline"
+                        className="text-blue-600 border-blue-600"
+                      >
                         <Tag className="w-3 h-3 mr-1" />
                         {jobCategories.job_category}
                       </Badge>
@@ -351,8 +355,8 @@ export default function JobDetailsPage() {
                           jobLabels.label_name === "Việc gấp"
                             ? "bg-red-100 text-red-700 border-red-200"
                             : jobLabels.label_name === "Việc Hot"
-                              ? "bg-orange-100 text-orange-700 border-orange-200"
-                              : "bg-green-100 text-green-700 border-green-200"
+                            ? "bg-orange-100 text-orange-700 border-orange-200"
+                            : "bg-green-100 text-green-700 border-green-200"
                         }
                       >
                         {jobLabels.label_name}
@@ -406,7 +410,7 @@ export default function JobDetailsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {selectedJob.applicants &&
-                    selectedJob.applicants.length > 0 ? (
+                  selectedJob.applicants.length > 0 ? (
                     <div className="relative group flex-1">
                       <Button
                         disabled
@@ -711,14 +715,6 @@ export default function JobDetailsPage() {
                 <p>• Kiểm tra kỹ thông tin công ty trước khi nộp hồ sơ</p>
                 <p>• Chỉ nộp CV qua hệ thống chính thức của platform</p>
               </CardContent>
-            </Card>
-
-            <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
-              <img
-                src="/src/assets/banner/9.jpg"
-                alt="Company banner"
-                className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
-              />
             </Card>
 
             {/* Add company*/}

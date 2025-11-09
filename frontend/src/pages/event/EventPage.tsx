@@ -1,6 +1,8 @@
-import EventForm from "@/components/event/EventForm";
+import CreateEventDialog from "@/components/event/CreateEventDialog";
 import EventList from "@/components/event/EventList";
+import { Layout } from "@/index";
 import { useState } from "react";
+import { Calendar } from "lucide-react";
 
 const EventsPage = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -10,28 +12,49 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Sự kiện Cộng đồng
-          </h1>
-          <p className="text-slate-600 mt-1 text-sm">
-            Khám phá và tham gia các sự kiện thú vị
-          </p>
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Sự kiện tình nguyện
+            </h1>
+            <p className="text-gray-600">
+              Khám phá và tham gia các hoạt động tình nguyện có ý nghĩa
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Sidebar */}
+            <aside className="lg:col-span-3 space-y-4">
+              {/* Create Event Card */}
+              <CreateEventDialog onEventCreated={handleEventCreated} />
+
+              {/* Info Card */}
+              <div className="bg-linear-to-br from-amber-50 to-orange-50 rounded-lg shadow-sm border border-amber-100 p-4">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-amber-600" />
+                  💡 Gợi ý
+                </h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Tạo sự kiện với mô tả chi tiết và hình ảnh đẹp để thu hút
+                  nhiều người tham gia hơn.
+                </p>
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="lg:col-span-9">
+              <EventList
+                refreshTrigger={refreshTrigger}
+                onApplySuccess={handleEventCreated}
+              />
+            </main>
+          </div>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-4">
-        {/* Create Event Form */}
-        <EventForm onEventCreated={handleEventCreated} />
-
-        {/* Events List */}
-        <EventList refreshTrigger={refreshTrigger} />
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
