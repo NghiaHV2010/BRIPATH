@@ -35,7 +35,7 @@ export function BlogPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-50 to-white">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-emerald-50 to-white">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-emerald-600 mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Đang tải bài viết...</p>
@@ -57,25 +57,25 @@ export function BlogPage() {
   const mbtiTypes = [
     {
       type: "Đơn giản",
-      color: "bg-gradient-to-br from-emerald-200 to-emerald-400",
+      color: "bg-linear-to-br from-emerald-200 to-emerald-400",
     },
     {
       type: "Nhanh chóng",
-      color: "bg-gradient-to-br from-blue-200 to-blue-400",
+      color: "bg-linear-to-br from-blue-200 to-blue-400",
     },
     {
       type: "Tiện lợi",
-      color: "bg-gradient-to-br from-purple-400 to-purple-600",
+      color: "bg-linear-to-br from-purple-400 to-purple-600",
     },
     {
       type: "Phù hợp",
-      color: "bg-gradient-to-br from-yellow-200 to-yellow-400",
+      color: "bg-linear-to-br from-yellow-200 to-yellow-400",
     },
     {
       type: "Chính xác",
-      color: "bg-gradient-to-br from-green-400 to-green-600",
+      color: "bg-linear-to-br from-green-400 to-green-600",
     },
-    { type: "Chất lượng", color: "bg-gradient-to-br from-red-400 to-red-600" },
+    { type: "Chất lượng", color: "bg-linear-to-br from-red-400 to-red-600" },
   ];
 
   const mainFeatured = featuredPosts[0];
@@ -83,14 +83,14 @@ export function BlogPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-white via-emerald-50/30 to-white">
+      <div className="min-h-screen bg-linear-to-b from-white via-emerald-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Section Title */}
           <div className="mb-8  sm:mb-10 lg:mb-12">
-            <h1 className="text-3xl h-15 sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl h-15 sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 bg-linear-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
               Bài viết nổi bật
             </h1>
-            <div className="w-20 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
+            <div className="w-20 h-1 bg-linear-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
           </div>
 
           {/* Featured Section */}
@@ -99,7 +99,7 @@ export function BlogPage() {
             {mainFeatured && (
               <div className="lg:col-span-2">
                 <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 h-full group bg-white">
-                  <div className="relative h-64 sm:h-80 lg:h-96 w-full overflow-hidden bg-gradient-to-br from-emerald-100 to-emerald-50">
+                  <div className="relative h-64 sm:h-80 lg:h-96 w-full overflow-hidden bg-linear-to-br from-emerald-100 to-emerald-50">
                     <img
                       src={
                         mainFeatured.cover_image_url &&
@@ -121,11 +121,11 @@ export function BlogPage() {
                         }
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
                   <div className="p-5 sm:p-6 lg:p-8 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between">
                     <div>
-                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
+                      <div className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
                         <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                         Nổi bật
                       </div>
@@ -147,7 +147,7 @@ export function BlogPage() {
                       )}
                     </div>
                     <Button
-                      className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white gap-2 shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto font-semibold"
+                      className="bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white gap-2 shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto font-semibold"
                       onClick={() => navigate(`/blog/${mainFeatured.id}`)}
                     >
                       Xem chi tiết
@@ -166,7 +166,7 @@ export function BlogPage() {
                   className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 cursor-pointer flex-1 group bg-white"
                   onClick={() => navigate(`/blog/${post.id}`)}
                 >
-                  <div className="relative h-20 sm:h-24 w-full overflow-hidden bg-gradient-to-br from-emerald-400 to-emerald-600">
+                  <div className="relative h-20 sm:h-24 w-full overflow-hidden bg-linear-to-br from-emerald-400 to-emerald-600">
                     <img
                       src={
                         post.cover_image_url &&
@@ -222,7 +222,7 @@ export function BlogPage() {
 
           {/* CTA Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-16">
-            <Card className="bg-gradient-to-br from-emerald-600 to-emerald-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+            <Card className="bg-linear-to-br from-emerald-600 to-emerald-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
               <div className="mb-4 sm:mb-0 text-center sm:text-left">
                 <h3 className="text-4xl sm:text-5xl font-bold mb-2 bg-white/20 backdrop-blur-sm inline-block px-4 py-2 rounded-lg">
                   60.000+
@@ -239,7 +239,7 @@ export function BlogPage() {
               </Button>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-600 to-blue-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+            <Card className="bg-linear-to-br from-blue-600 to-blue-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
               <div className="mb-4 sm:mb-0 text-center sm:text-left">
                 <h3 className="text-4xl sm:text-5xl font-bold mb-2 bg-white/20 backdrop-blur-sm inline-block px-4 py-2 rounded-lg">
                   100+
@@ -263,18 +263,18 @@ export function BlogPage() {
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Tất cả bài viết
               </h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
+              <div className="w-16 h-1 bg-linear-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              {allPosts.map((post, idx) => (
+              {allPosts.map((post) => (
                 <Card
                   key={post.id}
                   className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 cursor-pointer group bg-white"
                   onClick={() => navigate(`/blog/${post.id}`)}
                 >
                   <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] gap-0">
-                    <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-emerald-400 to-emerald-600">
+                    <div className="relative h-full w-full overflow-hidden bg-linear-to-br from-emerald-400 to-emerald-600">
                       <img
                         src={
                           post.cover_image_url &&
@@ -365,8 +365,8 @@ export function BlogPage() {
                           key={idx}
                           onClick={() => setPage(pageNum)}
                           className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${pageNum === page
-                              ? "bg-emerald-600 w-8"
-                              : "bg-gray-300 hover:bg-emerald-400"
+                            ? "bg-emerald-600 w-8"
+                            : "bg-gray-300 hover:bg-emerald-400"
                             }`}
                         />
                       );
@@ -393,7 +393,7 @@ export function BlogPage() {
 
           {/* MBTI Quiz Section */}
           <div className="mt-16 sm:mt-20">
-            <div className="bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-600 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
+            <div className="bg-linear-to-br from-emerald-600 via-emerald-500 to-emerald-600 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 p-6 sm:p-8 lg:p-12 items-center">
                 {/* Left Content */}
                 <div className="text-white text-center lg:text-left">
