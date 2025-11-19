@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 export interface UploadResult {
     success: boolean;
     url?: string;
+    urls?: string[];
     error?: string;
 }
 

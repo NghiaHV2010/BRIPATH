@@ -14,7 +14,7 @@ import {
   Zap,
   Heart,
   Globe,
-  Loader
+  Loader,
 } from "lucide-react";
 import InfiniteScroll from "@/components/animations/InfiniteScrollProps";
 import { useEffect, useState } from "react";
@@ -23,11 +23,7 @@ import { JobCard } from "@/components/job";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const {
-    jobs,
-    isLoading,
-    getAllJobs
-  } = useJobStore();
+  const { jobs, isLoading, getAllJobs } = useJobStore();
 
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
@@ -82,13 +78,15 @@ export default function HomePage() {
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
                 Khám phá con đường sự nghiệp
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-400">
-                  {" "}phù hợp
+                  {" "}
+                  phù hợp
                 </span>
               </h1>
 
               <p className="text-xl text-blue-100 leading-relaxed">
-                Trắc nghiệm nghề nghiệp thông minh, tìm kiếm việc làm phù hợp và kết nối với
-                các công ty hàng đầu. Bắt đầu hành trình sự nghiệp của bạn ngay hôm nay.
+                Trắc nghiệm nghề nghiệp thông minh, tìm kiếm việc làm phù hợp và
+                kết nối với các công ty hàng đầu. Bắt đầu hành trình sự nghiệp
+                của bạn ngay hôm nay.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -141,8 +139,12 @@ export default function HomePage() {
                       <Target className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Trắc nghiệm nghề nghiệp</h3>
-                      <p className="text-blue-100 text-sm">Khám phá nghề phù hợp</p>
+                      <h3 className="font-semibold text-lg">
+                        Trắc nghiệm nghề nghiệp
+                      </h3>
+                      <p className="text-blue-100 text-sm">
+                        Khám phá nghề phù hợp
+                      </p>
                     </div>
                   </div>
 
@@ -157,12 +159,14 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-400" />
-                      <span className="text-sm">Lộ trình phát triển sự nghiệp</span>
+                      <span className="text-sm">
+                        Lộ trình phát triển sự nghiệp
+                      </span>
                     </div>
                   </div>
 
                   <Button
-                    onClick={() => navigate('/quiz')}
+                    onClick={() => navigate("/quiz")}
                     className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30"
                   >
                     Thử ngay
@@ -223,14 +227,18 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-indigo-600 border-indigo-200">
+            <Badge
+              variant="outline"
+              className="mb-4 text-indigo-600 border-indigo-200"
+            >
               Cách thức hoạt động
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Hành trình khám phá sự nghiệp của bạn
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chỉ với 3 bước đơn giản, bạn có thể tìm ra con đường sự nghiệp phù hợp nhất
+              Chỉ với 3 bước đơn giản, bạn có thể tìm ra con đường sự nghiệp phù
+              hợp nhất
             </p>
           </div>
 
@@ -244,9 +252,12 @@ export default function HomePage() {
                   <span className="text-2xl font-bold text-white">1</span>
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Làm trắc nghiệm</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Làm trắc nghiệm
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Trả lời 10 câu hỏi về sở thích, tính cách và mục tiêu của bạn. Trắc nghiệm được thiết kế đơn giản và thú vị.
+                Trả lời 10 câu hỏi về sở thích, tính cách và mục tiêu của bạn.
+                Trắc nghiệm được thiết kế đơn giản và thú vị.
               </p>
             </div>
 
@@ -256,9 +267,12 @@ export default function HomePage() {
                   <span className="text-2xl font-bold text-white">2</span>
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">AI phân tích</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                AI phân tích
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Hệ thống AI của chúng tôi phân tích câu trả lời và so khớp với cơ sở dữ liệu nghề nghiệp chuyên sâu.
+                Hệ thống AI của chúng tôi phân tích câu trả lời và so khớp với
+                cơ sở dữ liệu nghề nghiệp chuyên sâu.
               </p>
             </div>
 
@@ -268,9 +282,12 @@ export default function HomePage() {
                   <span className="text-2xl font-bold text-white">3</span>
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Nhận kết quả</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Nhận kết quả
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Xem top 3 nghề nghiệp phù hợp nhất với bạn cùng lộ trình phát triển sự nghiệp chi tiết.
+                Xem top 3 nghề nghiệp phù hợp nhất với bạn cùng lộ trình phát
+                triển sự nghiệp chi tiết.
               </p>
             </div>
           </div>
@@ -281,14 +298,18 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-blue-600 border-blue-200">
+            <Badge
+              variant="outline"
+              className="mb-4 text-blue-600 border-blue-200"
+            >
               Tính năng nổi bật
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Tại sao chọn BRIPATH?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi cung cấp giải pháp toàn diện để giúp bạn tìm ra con đường sự nghiệp phù hợp nhất
+              Chúng tôi cung cấp giải pháp toàn diện để giúp bạn tìm ra con
+              đường sự nghiệp phù hợp nhất
             </p>
           </div>
 
@@ -300,7 +321,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Trắc nghiệm AI</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Trắc nghiệm thông minh được hỗ trợ bởi AI để phân tích tính cách và sở thích của bạn
+                  Trắc nghiệm thông minh được hỗ trợ bởi AI để phân tích tính
+                  cách và sở thích của bạn
                 </p>
               </CardContent>
             </Card>
@@ -312,7 +334,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Việc làm phù hợp</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Tìm kiếm và ứng tuyển vào các công việc phù hợp với kỹ năng và mục tiêu của bạn
+                  Tìm kiếm và ứng tuyển vào các công việc phù hợp với kỹ năng và
+                  mục tiêu của bạn
                 </p>
               </CardContent>
             </Card>
@@ -324,7 +347,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Kết nối công ty</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Kết nối trực tiếp với các công ty hàng đầu và cơ hội việc làm chất lượng cao
+                  Kết nối trực tiếp với các công ty hàng đầu và cơ hội việc làm
+                  chất lượng cao
                 </p>
               </CardContent>
             </Card>
@@ -334,9 +358,12 @@ export default function HomePage() {
                 <div className="w-16 h-16 bg-linear-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Lộ trình phát triển</h3>
+                <h3 className="text-xl font-semibold mb-4">
+                  Lộ trình phát triển
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Nhận lộ trình phát triển sự nghiệp cá nhân hóa để đạt được mục tiêu của bạn
+                  Nhận lộ trình phát triển sự nghiệp cá nhân hóa để đạt được mục
+                  tiêu của bạn
                 </p>
               </CardContent>
             </Card>
@@ -348,7 +375,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Cộng đồng</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Tham gia cộng đồng người dùng, chia sẻ kinh nghiệm và học hỏi từ nhau
+                  Tham gia cộng đồng người dùng, chia sẻ kinh nghiệm và học hỏi
+                  từ nhau
                 </p>
               </CardContent>
             </Card>
@@ -360,7 +388,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Nhanh chóng</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Hoàn thành trắc nghiệm chỉ trong 5 phút và nhận kết quả ngay lập tức
+                  Hoàn thành trắc nghiệm chỉ trong 5 phút và nhận kết quả ngay
+                  lập tức
                 </p>
               </CardContent>
             </Card>
@@ -396,14 +425,18 @@ export default function HomePage() {
       <section className="py-20 bg-linear-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-purple-600 border-purple-200">
+            <Badge
+              variant="outline"
+              className="mb-4 text-purple-600 border-purple-200"
+            >
               Đánh giá từ người dùng
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Những gì người dùng nói về BRIPATH
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Hàng nghìn người dùng đã tìm thấy con đường sự nghiệp phù hợp với họ
+              Hàng nghìn người dùng đã tìm thấy con đường sự nghiệp phù hợp với
+              họ
             </p>
           </div>
 
@@ -412,11 +445,16 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "BRIPATH đã giúp tôi khám phá ra đam mê thực sự của mình. Trắc nghiệm rất chính xác và gợi ý nghề nghiệp phù hợp hoàn toàn với tính cách của tôi."
+                  "BRIPATH đã giúp tôi khám phá ra đam mê thực sự của mình. Trắc
+                  nghiệm rất chính xác và gợi ý nghề nghiệp phù hợp hoàn toàn
+                  với tính cách của tôi."
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -434,11 +472,16 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "Tôi đã tìm được công việc mơ ước thông qua BRIPATH. Nền tảng này không chỉ giúp tôi hiểu bản thân mà còn kết nối với những cơ hội việc làm tuyệt vời."
+                  "Tôi đã tìm được công việc mơ ước thông qua BRIPATH. Nền tảng
+                  này không chỉ giúp tôi hiểu bản thân mà còn kết nối với những
+                  cơ hội việc làm tuyệt vời."
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-linear-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
@@ -456,11 +499,16 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "Giao diện đẹp, dễ sử dụng và kết quả trắc nghiệm rất hữu ích. Tôi đã giới thiệu cho nhiều bạn bè và họ đều rất hài lòng với dịch vụ này."
+                  "Giao diện đẹp, dễ sử dụng và kết quả trắc nghiệm rất hữu ích.
+                  Tôi đã giới thiệu cho nhiều bạn bè và họ đều rất hài lòng với
+                  dịch vụ này."
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
@@ -481,7 +529,10 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-green-600 border-green-200">
+            <Badge
+              variant="outline"
+              className="mb-4 text-green-600 border-green-200"
+            >
               Câu hỏi thường gặp
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -499,7 +550,9 @@ export default function HomePage() {
                   Trắc nghiệm nghề nghiệp có mất phí không?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Hoàn toàn miễn phí! BRIPATH cung cấp trắc nghiệm nghề nghiệp miễn phí để giúp bạn khám phá con đường sự nghiệp phù hợp. Tuy nhiên, bạn cần đăng nhập để lưu kết quả.
+                  Hoàn toàn miễn phí! BRIPATH cung cấp trắc nghiệm nghề nghiệp
+                  miễn phí để giúp bạn khám phá con đường sự nghiệp phù hợp. Tuy
+                  nhiên, bạn cần đăng nhập để lưu kết quả.
                 </p>
               </CardContent>
             </Card>
@@ -510,7 +563,9 @@ export default function HomePage() {
                   Mất bao lâu để hoàn thành trắc nghiệm?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Trắc nghiệm của chúng tôi được thiết kế để hoàn thành trong khoảng 5-10 phút. Chỉ cần trả lời 10 câu hỏi đơn giản về sở thích và tính cách của bạn.
+                  Trắc nghiệm của chúng tôi được thiết kế để hoàn thành trong
+                  khoảng 5-10 phút. Chỉ cần trả lời 10 câu hỏi đơn giản về sở
+                  thích và tính cách của bạn.
                 </p>
               </CardContent>
             </Card>
@@ -521,7 +576,10 @@ export default function HomePage() {
                   Kết quả trắc nghiệm có chính xác không?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Trắc nghiệm được phát triển dựa trên các nghiên cứu tâm lý học và được hỗ trợ bởi AI để phân tích. Tuy nhiên, kết quả chỉ mang tính tham khảo và bạn nên kết hợp với việc tự đánh giá bản thân.
+                  Trắc nghiệm được phát triển dựa trên các nghiên cứu tâm lý học
+                  và được hỗ trợ bởi AI để phân tích. Tuy nhiên, kết quả chỉ
+                  mang tính tham khảo và bạn nên kết hợp với việc tự đánh giá
+                  bản thân.
                 </p>
               </CardContent>
             </Card>
@@ -532,7 +590,9 @@ export default function HomePage() {
                   Tôi có thể làm lại trắc nghiệm không?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Có, bạn có thể làm lại trắc nghiệm bất cứ lúc nào. Chúng tôi khuyên bạn nên làm lại sau 6 tháng để cập nhật kết quả dựa trên sự thay đổi trong sở thích và mục tiêu của bạn.
+                  Có, bạn có thể làm lại trắc nghiệm bất cứ lúc nào. Chúng tôi
+                  khuyên bạn nên làm lại sau 6 tháng để cập nhật kết quả dựa
+                  trên sự thay đổi trong sở thích và mục tiêu của bạn.
                 </p>
               </CardContent>
             </Card>
@@ -554,15 +614,16 @@ export default function HomePage() {
             </h2>
 
             <p className="text-xl text-gray-600 leading-relaxed">
-              Tham gia hàng nghìn người dùng đã tìm thấy công việc mơ ước thông qua BRIPATH.
-              Bắt đầu ngay hôm nay!
+              Tham gia hàng nghìn người dùng đã tìm thấy công việc mơ ước thông
+              qua BRIPATH. Bắt đầu ngay hôm nay!
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 asChild
                 size="lg"
-                className="bg-linear-to-r from-blue-700 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                variant="outline"
+                className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl font-semibold hover:scale-105 transition-all duration-300"
               >
                 <Link to="/quiz" className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
@@ -599,27 +660,84 @@ export default function HomePage() {
                 <span className="text-xl font-bold">BRIPATH</span>
               </div>
               <p className="text-gray-400 leading-relaxed">
-                Nền tảng định hướng nghề nghiệp hàng đầu, giúp bạn tìm ra con đường sự nghiệp phù hợp nhất.
+                Nền tảng định hướng nghề nghiệp hàng đầu, giúp bạn tìm ra con
+                đường sự nghiệp phù hợp nhất.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Dịch vụ</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/quiz" className="hover:text-white transition-colors">Trắc nghiệm nghề nghiệp</Link></li>
-                <li><Link to="/jobs" className="hover:text-white transition-colors">Tìm việc làm</Link></li>
-                <li><Link to="/companies" className="hover:text-white transition-colors">Công ty</Link></li>
-                <li><Link to="/about" className="hover:text-white transition-colors">Về chúng tôi</Link></li>
+                <li>
+                  <Link
+                    to="/quiz"
+                    className="hover:text-white transition-colors"
+                  >
+                    Trắc nghiệm nghề nghiệp
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/jobs"
+                    className="hover:text-white transition-colors"
+                  >
+                    Tìm việc làm
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/companies"
+                    className="hover:text-white transition-colors"
+                  >
+                    Công ty
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/about"
+                    className="hover:text-white transition-colors"
+                  >
+                    Về chúng tôi
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Hỗ trợ</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/contact" className="hover:text-white transition-colors">Liên hệ</Link></li>
-                <li><Link to="/help" className="hover:text-white transition-colors">Trợ giúp</Link></li>
-                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-                <li><Link to="/privacy" className="hover:text-white transition-colors">Chính sách</Link></li>
+                <li>
+                  <Link
+                    to="/contact"
+                    className="hover:text-white transition-colors"
+                  >
+                    Liên hệ
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/help"
+                    className="hover:text-white transition-colors"
+                  >
+                    Trợ giúp
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/faq"
+                    className="hover:text-white transition-colors"
+                  >
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/privacy"
+                    className="hover:text-white transition-colors"
+                  >
+                    Chính sách
+                  </Link>
+                </li>
               </ul>
             </div>
 

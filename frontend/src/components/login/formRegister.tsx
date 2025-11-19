@@ -143,7 +143,7 @@ export default function FormRegister() {
   useEffect(() => {
     if (remainingSeconds > 0) {
       const timer = setInterval(() => {
-        setRemainingSeconds((prev) => {
+        setRemainingSeconds(prev => {
           if (prev <= 1) {
             setCanResend(true);
             if (email) {
@@ -351,9 +351,6 @@ export default function FormRegister() {
         <div className="w-full max-w-md animate-fade-in-right">
           <div className="bg-white rounded-2xl shadow-xl border border-emerald-200 p-8 transform transition-all duration-300 hover:shadow-2xl">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-full mb-4 animate-bounce-subtle">
-                ✨
-              </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Tạo tài khoản của bạn
               </h2>
@@ -368,7 +365,7 @@ export default function FormRegister() {
                   type="text"
                   placeholder="Nhập tên tài khoản"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={e => setUsername(e.target.value)}
                   className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
@@ -382,7 +379,7 @@ export default function FormRegister() {
                   type="email"
                   placeholder="ví dụ: example@gmail.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md"
                   required
                 />
@@ -397,7 +394,7 @@ export default function FormRegister() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Nhập mật khẩu của bạn"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     className="h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md pr-10"
                     required
                   />
@@ -405,7 +402,7 @@ export default function FormRegister() {
                     tabIndex={-1}
                     type="button"
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                    onClick={() => setShowPassword((p) => !p)}
+                    onClick={() => setShowPassword(p => !p)}
                     className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                   >
                     {showPassword ? (
@@ -426,7 +423,7 @@ export default function FormRegister() {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Nhập lại mật khẩu"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={e => setConfirmPassword(e.target.value)}
                     title="Mật khẩu phải có cả chữ và số"
                     autoComplete="new-password"
                     className={`h-12 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${
@@ -444,7 +441,7 @@ export default function FormRegister() {
                     aria-label={
                       showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
                     }
-                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    onClick={() => setShowConfirmPassword(p => !p)}
                     className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                   >
                     {showConfirmPassword ? (

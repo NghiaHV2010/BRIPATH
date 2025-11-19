@@ -135,11 +135,11 @@ export default function CompanyDetailsPage() {
   }, [navigationState]);
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
   };
 
   const handleCopyLink = () => {
@@ -225,7 +225,9 @@ export default function CompanyDetailsPage() {
               {/* Company Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${companyDetail.background_url})` }}
+                style={{
+                  backgroundImage: `url(${companyDetail.background_url})`,
+                }}
               />
               {/* Black Gradient Overlay - Bottom to Top and Sides */}
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
@@ -535,7 +537,7 @@ export default function CompanyDetailsPage() {
                             className="w-full border border-slate-300 rounded-lg p-3 min-h-[120px] focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             placeholder="Chia sẻ trải nghiệm của bạn về công ty này..."
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={e => setDescription(e.target.value)}
                           />
                           {descriptionError && (
                             <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -571,9 +573,7 @@ export default function CompanyDetailsPage() {
                             <input
                               className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               value={workEnvironment}
-                              onChange={(e) =>
-                                setWorkEnvironment(e.target.value)
-                              }
+                              onChange={e => setWorkEnvironment(e.target.value)}
                               placeholder="Ví dụ: Thân thiện, chuyên nghiệp..."
                             />
                             {workEnvError && (

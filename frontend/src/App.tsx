@@ -46,6 +46,8 @@ import { UserSubscription } from "./components/profile/userSubscriptions";
 import { CompanyReviews } from "./pages/profile/company/CompanyReviews";
 import VerifyPhone from "./components/auth/verifyPhone";
 import EventsPage from "./pages/event/EventPage";
+import MyEventsPage from "./pages/profile/myEventsPage";
+import MyReportsPage from "./pages/profile/myReportsPage";
 import VerifySMS from "./components/VerifySMS";
 import Setup2FAPage from "./pages/auth/Setup2FAPage";
 import Verify2FAPage from "./pages/auth/Verify2FAPage";
@@ -174,6 +176,8 @@ function App() {
           <Route path="applied/jobs" element={<AppliedJobsPage />} />
           <Route path="saved/jobs" element={<SavedJobsPageProfile />} />
           <Route path="suitable/jobs" element={<CVSuitableJobsPage />} />
+          <Route path="events" element={<MyEventsPage />} />
+          <Route path="report" element={<MyReportsPage />} />
           <Route path="followed/companies" element={<FollowedCompaniesPage />} />
           <Route path="notifications" element={<NotificationList />} />
           <Route path="subscriptions" element={<UserSubscription />} />

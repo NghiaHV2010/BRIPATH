@@ -21,6 +21,7 @@ import { AlertCircle, FileText, Loader2, Upload } from "lucide-react";
 import { applyjob, getUserCVs, type CV } from "@/api/job_api";
 import { toast } from "sonner";
 import { uploadUserCV } from "@/api/cv_api";
+import { useSettingsStore } from "@/store/settings.store";
 
 interface ApplyJobDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function ApplyJobDialog({
   jobTitle,
   onSuccess,
 }: ApplyJobDialogProps) {
+  const { settings, fetchSettings } = useSettingsStore();
   const [cvs, setCvs] = useState<CV[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [coverLetter, setCoverLetter] = useState("");
@@ -49,7 +51,9 @@ export function ApplyJobDialog({
   useEffect(() => {
     if (open) {
       loadCVs();
+      loadCoverLetterFromSettings();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const loadCVs = async () => {
@@ -57,15 +61,36 @@ export function ApplyJobDialog({
     setError("");
     try {
       const data = await getUserCVs();
-      setCvs(
-        Array.isArray(data) ? data : Array.isArray(data) ? data : []
-      );
+      setCvs(Array.isArray(data) ? data : Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Không thể tải danh sách CV. Vui lòng thử lại.");
       console.error(err);
       setCvs([]);
     } finally {
       setIsLoadingCVs(false);
+    }
+  };
+
+  const loadCoverLetterFromSettings = async () => {
+    // Fetch settings if not loaded
+    if (settings.length === 0) {
+      await fetchSettings();
+    }
+
+    // Find cover_letter setting
+    const coverLetterSetting = settings.find(s => s.key === "cover_letter");
+
+    if (coverLetterSetting) {
+      // If user selected "Tự động" and has customValue, auto-fill coverLetter
+      if (
+        coverLetterSetting.selectedOption === "Tự động" &&
+        coverLetterSetting.customValue
+      ) {
+        setCoverLetter(coverLetterSetting.customValue);
+      } else {
+        // Otherwise, leave it empty for user to fill
+        setCoverLetter("");
+      }
     }
   };
 
@@ -104,7 +129,7 @@ export function ApplyJobDialog({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-        "Có lỗi xảy ra khi tải CV. Vui lòng thử lại."
+          "Có lỗi xảy ra khi tải CV. Vui lòng thử lại."
       );
       console.error(err);
       toast.error("Lỗi khi tải CV", {
@@ -143,7 +168,7 @@ export function ApplyJobDialog({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-        "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại."
+          "Có lỗi xảy ra khi ứng tuyển. Vui lòng thử lại."
       );
       toast.error("Ứng tuyển thất bại", {
         description:
@@ -227,7 +252,7 @@ export function ApplyJobDialog({
                   <SelectValue placeholder="-- Chọn CV --" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cvs.map((cv) => (
+                  {cvs.map(cv => (
                     <SelectItem key={cv.id} value={cv.id.toString()}>
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
@@ -256,14 +281,21 @@ export function ApplyJobDialog({
               id="cover-letter"
               placeholder="Giới thiệu bản thân và lý do bạn phù hợp với vị trí này..."
               value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
+              onChange={e => setCoverLetter(e.target.value)}
               rows={6}
-              className="resize-none"
               maxLength={1000}
             />
-            <p className="text-xs text-muted-foreground">
-              {coverLetter.length}/1000 ký tự
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                {coverLetter.length}/1000 ký tự
+              </p>
+              {settings.find(s => s.key === "cover_letter")?.selectedOption ===
+                "Tự động" && (
+                <p className="text-xs text-blue-600">
+                  ✨ Đã tự động điền từ cài đặt
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Guidelines */}

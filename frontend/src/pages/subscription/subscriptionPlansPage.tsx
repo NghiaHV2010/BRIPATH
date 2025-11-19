@@ -42,26 +42,32 @@ export default function SubscriptionPlansPage() {
           price: Number(p.price) || 0,
           durationMonths: p.duration_months || 1,
           description: p.description || "",
-          features: Array.from(new Set(
-            (Array.isArray(p.features) ? p.features : [])
-              .map((f: { feature_name?: string } | string) =>
-                typeof f === "string" ? f : f.feature_name || ""
-              )
-              .filter(Boolean)
-          )) as string[],
+          features: Array.from(
+            new Set(
+              (Array.isArray(p.features) ? p.features : [])
+                .map((f: { feature_name?: string } | string) =>
+                  typeof f === "string" ? f : f.feature_name || ""
+                )
+                .filter(Boolean)
+            )
+          ) as string[],
           isRecommended: Boolean(p.recommended_labels),
           isPopular: Boolean(p.verified_badge),
         }));
 
         const dedupMap = new Map<string, SubscriptionPlan>();
         for (const item of normalized) {
-          const key = `${item.name.trim().toLowerCase()}|${item.price}|${item.durationMonths}`;
+          const key = `${item.name.trim().toLowerCase()}|${item.price}|${
+            item.durationMonths
+          }`;
           const existing = dedupMap.get(key);
           if (!existing) {
             dedupMap.set(key, item);
           } else {
             // merge features and keep other fields from the first
-            const mergedFeatures = Array.from(new Set([...(existing.features || []), ...(item.features || [])]));
+            const mergedFeatures = Array.from(
+              new Set([...(existing.features || []), ...(item.features || [])])
+            );
             dedupMap.set(key, { ...existing, features: mergedFeatures });
           }
         }
@@ -108,8 +114,8 @@ export default function SubscriptionPlansPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[2000px] mx-auto px-4 mb-20 items-stretch">
-              {plans.map((plan) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-10xl mx-auto px-4 mb-20 items-stretch">
+              {plans.map(plan => (
                 <SubscriptionCard key={plan.id} plan={plan} />
               ))}
             </div>
