@@ -7,7 +7,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Tags
+  Tags,
+  AlertTriangle
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTitle } from "../ui/sidebar";
 import { useAuthStore } from "../../store/auth";
@@ -32,6 +33,7 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
     { id: "users", label: "Người dùng", icon: Users },
     { id: "companies", label: "Công ty", icon: Building2 },
     { id: "events", label: "Sự kiện", icon: Calendar },
+    { id: "reports", label: "Báo cáo", icon: AlertTriangle },
     { id: "payments", label: "Thanh toán", icon: CreditCard },
     { id: "post-composer", label: "Đăng bài", icon: LayoutDashboard },
     { id: "labels", label: "Quản lý nhãn", icon: Tags },

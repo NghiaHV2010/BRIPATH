@@ -1,47 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-
-// Mock data for the chart
-const mockData = {
-  "7days": [
-    { date: "Jun 24", visitors: 2400 },
-    { date: "Jun 25", visitors: 1200 },
-    { date: "Jun 26", visitors: 1800 },
-    { date: "Jun 27", visitors: 3200 },
-    { date: "Jun 28", visitors: 1600 },
-    { date: "Jun 29", visitors: 1400 },
-    { date: "Jun 30", visitors: 2600 },
-  ],
-  "30days": [
-    { date: "Jun 1", visitors: 1800 },
-    { date: "Jun 5", visitors: 2200 },
-    { date: "Jun 10", visitors: 1600 },
-    { date: "Jun 15", visitors: 2800 },
-    { date: "Jun 20", visitors: 2400 },
-    { date: "Jun 25", visitors: 1200 },
-    { date: "Jun 30", visitors: 2600 },
-  ],
-  "3months": [
-    { date: "Apr", visitors: 12000 },
-    { date: "May", visitors: 15000 },
-    { date: "Jun", visitors: 18000 },
-  ]
-};
+import { getUserAccessStats } from "../../api/admin_api";
+import { Loader2 } from "lucide-react";
 
 interface VisitorChartProps {
   title?: string;
   subtitle?: string;
 }
 
+interface DailyStat {
+  date: string;
+  users: number;
+  fullDate: string;
+}
+
+interface MonthlyStat {
+  month: string;
+  users: number;
+  year: number;
+  monthNumber: number;
+}
+
 export default function VisitorChart({ 
-  title = "Total Visitors", 
-  subtitle = "Total for the last 3 months" 
+  title = "Tổng lượt truy cập", 
+  subtitle = "Tổng cộng trong 3 tháng gần nhất" 
 }: VisitorChartProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<"7days" | "30days" | "3months">("7days");
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyStat[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const currentData = mockData[selectedPeriod];
-  const maxValue = Math.max(...currentData.map(d => d.visitors));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await getUserAccessStats(30);
+        if (response.data) {
+          setDailyStats(response.data.dailyStats || []);
+          setMonthlyStats(response.data.monthlyStats || []);
+        }
+      } catch (error) {
+        console.error("Error fetching visitor data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  const getCurrentData = () => {
+    if (selectedPeriod === "7days") {
+      return dailyStats.map(stat => ({
+        date: stat.date.split(',')[0], // Get day name
+        visitors: stat.users
+      }));
+    } else if (selectedPeriod === "30days") {
+      // Get last 7 data points from daily stats (if available) or sample from monthly
+      if (dailyStats.length >= 7) {
+        // Sample every 4-5 days
+        const sampled = [];
+        const step = Math.ceil(dailyStats.length / 7);
+        for (let i = 0; i < dailyStats.length; i += step) {
+          sampled.push({
+            date: dailyStats[i].date.split(',')[1]?.trim() || dailyStats[i].date,
+            visitors: dailyStats[i].users
+          });
+        }
+        return sampled.slice(0, 7);
+      }
+      return dailyStats.map(stat => ({
+        date: stat.date.split(',')[1]?.trim() || stat.date,
+        visitors: stat.users
+      }));
+    } else {
+      // 3 months - use last 3 months from monthlyStats
+      return monthlyStats.slice(-3).map(stat => ({
+        date: stat.month,
+        visitors: stat.users
+      }));
+    }
+  };
+
+  const currentData = getCurrentData();
+  const maxValue = currentData.length > 0 ? Math.max(...currentData.map(d => d.visitors), 1) : 1;
   
   const formatNumber = (num: number) => {
     if (num >= 1000) {
@@ -49,6 +92,39 @@ export default function VisitorChart({
     }
     return num.toString();
   };
+
+  if (loading) {
+    return (
+      <Card className="border-0 shadow-lg bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-semibold text-gray-900">{title}</CardTitle>
+          <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600">Đang tải dữ liệu...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (currentData.length === 0) {
+    return (
+      <Card className="border-0 shadow-lg bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-semibold text-gray-900">{title}</CardTitle>
+          <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64 text-gray-500">
+            Không có dữ liệu
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-0 shadow-lg bg-white">
@@ -69,7 +145,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 3 months
+              3 tháng gần nhất
             </Button>
             <Button
               variant={selectedPeriod === "30days" ? "default" : "outline"}
@@ -81,7 +157,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 30 days
+              30 ngày gần nhất
             </Button>
             <Button
               variant={selectedPeriod === "7days" ? "default" : "outline"}
@@ -93,7 +169,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 7 days
+              7 ngày gần nhất
             </Button>
           </div>
         </div>
@@ -185,13 +261,13 @@ export default function VisitorChart({
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex justify-between text-sm">
             <div className="text-gray-600">
-              Total: <span className="text-gray-900 font-semibold">{formatNumber(currentData.reduce((sum, d) => sum + d.visitors, 0))}</span>
+              Tổng: <span className="text-gray-900 font-semibold">{formatNumber(currentData.reduce((sum, d) => sum + d.visitors, 0))}</span>
             </div>
             <div className="text-gray-600">
-              Avg: <span className="text-gray-900 font-semibold">{formatNumber(Math.round(currentData.reduce((sum, d) => sum + d.visitors, 0) / currentData.length))}</span>
+              Trung bình: <span className="text-gray-900 font-semibold">{formatNumber(Math.round(currentData.reduce((sum, d) => sum + d.visitors, 0) / currentData.length))}</span>
             </div>
             <div className="text-gray-600">
-              Peak: <span className="text-gray-900 font-semibold">{formatNumber(maxValue)}</span>
+              Cao nhất: <span className="text-gray-900 font-semibold">{formatNumber(maxValue)}</span>
             </div>
           </div>
         </div>

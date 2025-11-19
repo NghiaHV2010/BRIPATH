@@ -60,3 +60,44 @@ export const getAllCompanyLabels = async () => {
   const response = await axiosConfig.get('/company/label');
   return response.data;
 };
+
+// Reports management
+export const getAllReports = async (page: number = 1, status?: 'pending' | 'approved' | 'rejected') => {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  if (status) {
+    params.append('status', status);
+  }
+  const response = await axiosConfig.get(`/dashboard/reports?${params.toString()}`);
+  return response.data;
+};
+
+export const updateReportStatus = async (reportId: number, status: 'approved' | 'rejected') => {
+  const response = await axiosConfig.put(`/dashboard/report/${reportId}`, { status });
+  return response.data;
+};
+
+// User management
+export const getAllUsers = async (page: number = 1, search?: string, roleId?: number | null) => {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  if (search) {
+    params.append('search', search);
+  }
+  if (roleId !== null && roleId !== undefined) {
+    params.append('roleId', roleId.toString());
+  }
+  const response = await axiosConfig.get(`/dashboard/users/list?${params.toString()}`);
+  return response.data;
+};
+
+// Dashboard quick stats and recent activities
+export const getDashboardQuickStats = async () => {
+  const response = await axiosConfig.get('/dashboard/quick-stats');
+  return response.data;
+};
+
+export const getRecentActivities = async () => {
+  const response = await axiosConfig.get('/dashboard/recent-activities');
+  return response.data;
+};

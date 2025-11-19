@@ -3,18 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { getCompaniesByStatus, updateCompanyStatus } from "../../api/admin_api";
 import { Building2, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, MapPin, Calendar } from "lucide-react";
+import { AdminTableSkeleton } from "./AdminTableSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
 
 interface Company {
   id: string;
   fax_code: string;
-  company_type: string;
+  company_type: 'business_househole' | 'business';
   status: string;
   created_at: string;
   business_certificate?: string;
-  field?: string;
+  field_id?: number;
+  fields?: {
+    field_name: string;
+  };
   approved_at?: string;
   users: {
     username: string;
@@ -26,8 +31,6 @@ interface Company {
     address_country?: string;
     phone?: string;
   };
-  companyLabels?: Array<{ label_name: string }>;
-  fields?: Array<{ field_name: string }>;
 }
 
 export default function CompanyManagement() {
@@ -148,6 +151,30 @@ export default function CompanyManagement() {
     return statusCounts[statusType as keyof typeof statusCounts] || 0;
   };
 
+  const getStatusLabel = (statusType: 'pending' | 'approved' | 'rejected') => {
+    switch (statusType) {
+      case 'pending':
+        return 'chờ duyệt';
+      case 'approved':
+        return 'đã duyệt';
+      case 'rejected':
+        return 'từ chối';
+      default:
+        return '';
+    }
+  };
+
+  const getCompanyTypeLabel = (companyType: 'business_househole' | 'business') => {
+    switch (companyType) {
+      case 'business_househole':
+        return 'Hộ kinh doanh';
+      case 'business':
+        return 'Doanh nghiệp';
+      default:
+        return companyType;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Status Tabs */}
@@ -185,25 +212,23 @@ export default function CompanyManagement() {
                   <TableHead>Công ty</TableHead>
                   <TableHead>Mã số thuế</TableHead>
                   <TableHead>Loại hình</TableHead>
+                  <TableHead>Loại doanh nghiệp</TableHead>
                   <TableHead>Trạng thái</TableHead>
                   <TableHead>Ngày đăng ký</TableHead>
                   <TableHead>Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companies && loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2">Đang tải...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                {loading ? (
+                  <AdminTableSkeleton columns={7} rows={5} />
                 ) : companies.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      Không có công ty nào
+                    <TableCell colSpan={7}>
+                      <AdminEmptyState
+                        icon={Building2}
+                        title="Chưa có công ty nào"
+                        description={`Chưa có hồ sơ ${getStatusLabel(status)} nào trong danh sách. Vui lòng kiểm tra lại sau.`}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -223,7 +248,14 @@ export default function CompanyManagement() {
                       <TableCell className="font-mono text-sm">
                         {company.fax_code}
                       </TableCell>
-                      <TableCell>{company.company_type}</TableCell>
+                      <TableCell>
+                        {company.business_certificate || 'Chưa cập nhật'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getCompanyTypeLabel(company.company_type)}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{getStatusBadge(company.status)}</TableCell>
                       <TableCell>
                         {new Date(company.created_at).toLocaleDateString('vi-VN')}
@@ -272,6 +304,9 @@ export default function CompanyManagement() {
                                   <Building2 className="h-5 w-5" />
                                   Chi tiết công ty
                                 </DialogTitle>
+                                <DialogDescription>
+                                  Xem thông tin chi tiết và quản lý trạng thái của công ty
+                                </DialogDescription>
                               </DialogHeader>
                               {selectedCompany && (
                                 <div className="space-y-6">
@@ -301,21 +336,26 @@ export default function CompanyManagement() {
                                           Thông tin công ty
                                         </CardTitle>
                                       </CardHeader>
-                                      <CardContent className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                          <Building2 className="h-4 w-4 text-gray-500" />
-                                          <span className="text-sm">{selectedCompany.company_type}</span>
+                                      <CardContent className="space-y-3">
+                                        <div className="space-y-1">
+                                          <p className="text-xs text-gray-500">Loại doanh nghiệp</p>
+                                          <Badge variant="outline">
+                                            {getCompanyTypeLabel(selectedCompany.company_type)}
+                                          </Badge>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="space-y-1">
+                                          <p className="text-xs text-gray-500">Mã số thuế</p>
                                           <span className="text-sm font-mono">{selectedCompany.fax_code}</span>
                                         </div>
                                         {selectedCompany.business_certificate && (
-                                          <div className="flex items-center gap-2">
+                                          <div className="space-y-1">
+                                            <p className="text-xs text-gray-500">Giấy tờ kinh doanh</p>
                                             <span className="text-sm break-all">{selectedCompany.business_certificate}</span>
                                           </div>
                                         )}
                                         {selectedCompany.users.phone && (
-                                          <div className="flex items-center gap-2">
+                                          <div className="space-y-1">
+                                            <p className="text-xs text-gray-500">Số điện thoại</p>
                                             <span className="text-sm">{selectedCompany.users.phone}</span>
                                           </div>
                                         )}
@@ -342,29 +382,8 @@ export default function CompanyManagement() {
                                       </Card>
                                     )}
 
-                                    {/* Labels */}
-                                    {selectedCompany.companyLabels && selectedCompany.companyLabels.length > 0 && (
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                            <Badge className="h-4 w-4" />
-                                            Nhãn công ty
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                          <div className="flex flex-wrap gap-2">
-                                            {selectedCompany.companyLabels.map((label, index) => (
-                                              <Badge key={index} variant="secondary">
-                                                {label.label_name}
-                                              </Badge>
-                                            ))}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    )}
-
                                     {/* Fields */}
-                                    {selectedCompany.fields && selectedCompany.fields.length > 0 && (
+                                    {selectedCompany.fields && (
                                       <Card>
                                         <CardHeader>
                                           <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -373,13 +392,9 @@ export default function CompanyManagement() {
                                           </CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                          <div className="flex flex-wrap gap-2">
-                                            {selectedCompany.fields.map((field, index) => (
-                                              <Badge key={index} variant="outline">
-                                                {field.field_name}
-                                              </Badge>
-                                            ))}
-                                          </div>
+                                          <Badge variant="outline">
+                                            {selectedCompany.fields.field_name}
+                                          </Badge>
                                         </CardContent>
                                       </Card>
                                     )}

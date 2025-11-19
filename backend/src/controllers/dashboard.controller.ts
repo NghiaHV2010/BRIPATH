@@ -121,6 +121,25 @@ export const getRevenueStats = async (req: Request, res: Response) => {
             }
         });
 
+        // Giao dịch tháng trước
+        const lastMonthTransactions = await prisma.payments.count({
+            where: {
+                status: 'success',
+                created_at: {
+                    gte: new Date(lastMonthYear, lastMonth - 1, 1),
+                    lt: new Date(lastMonthYear, lastMonth, 1)
+                }
+            }
+        });
+
+        // Tính % tăng trưởng giao dịch
+        let transactionsGrowthRate = 0;
+        if (lastMonthTransactions > 0) {
+            transactionsGrowthRate = ((currentMonthTransactions - lastMonthTransactions) / lastMonthTransactions) * 100;
+        } else if (currentMonthTransactions > 0) {
+            transactionsGrowthRate = 100;
+        }
+
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: {
@@ -130,6 +149,8 @@ export const getRevenueStats = async (req: Request, res: Response) => {
                 growthRate: Math.round(growthRate * 100) / 100,
                 totalTransactions,
                 currentMonthTransactions,
+                lastMonthTransactions,
+                transactionsGrowthRate: Math.round(transactionsGrowthRate * 100) / 100,
                 monthlyRevenue,
                 revenueByGateway: revenueByGateway.map(item => ({
                     gateway: item.payment_gateway,
@@ -392,6 +413,27 @@ export const getUserAccessStats = async (req: Request, res: Response) => {
             }
         });
 
+        // User mới đăng ký tháng trước
+        const lastMonthStartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastMonthEndDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        const newUsersLastMonth = await prisma.users.count({
+            where: {
+                created_at: {
+                    gte: lastMonthStartDate,
+                    lt: lastMonthEndDate
+                },
+                is_deleted: false
+            }
+        });
+
+        // Tính % tăng trưởng user mới
+        let newUsersGrowthRate = 0;
+        if (newUsersLastMonth > 0) {
+            newUsersGrowthRate = ((newUsersThisMonth - newUsersLastMonth) / newUsersLastMonth) * 100;
+        } else if (newUsersThisMonth > 0) {
+            newUsersGrowthRate = 100;
+        }
+
         // Tổng số user (không xóa)
         const totalActiveUsers = await prisma.users.count({
             where: {
@@ -402,6 +444,29 @@ export const getUserAccessStats = async (req: Request, res: Response) => {
         // Tỷ lệ user hoạt động
         const activeUserRate = totalActiveUsers > 0 ? (totalUsersLoggedIn / totalActiveUsers) * 100 : 0;
 
+        // Tính % tăng trưởng tỷ lệ user hoạt động (so sánh với tháng trước)
+        const usersLoggedInLastMonth = await prisma.users.count({
+            where: {
+                last_loggedIn: {
+                    not: null
+                },
+                created_at: {
+                    lt: lastMonthEndDate
+                },
+                is_deleted: false
+            }
+        });
+        const totalActiveUsersLastMonth = await prisma.users.count({
+            where: {
+                created_at: {
+                    lt: lastMonthEndDate
+                },
+                is_deleted: false
+            }
+        });
+        const activeUserRateLastMonth = totalActiveUsersLastMonth > 0 ? (usersLoggedInLastMonth / totalActiveUsersLastMonth) * 100 : 0;
+        const activeUserRateGrowth = activeUserRateLastMonth > 0 ? ((activeUserRate - activeUserRateLastMonth) / activeUserRateLastMonth) * 100 : 0;
+
         res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: {
@@ -409,7 +474,10 @@ export const getUserAccessStats = async (req: Request, res: Response) => {
                     totalUsersLoggedIn,
                     totalActiveUsers,
                     activeUserRate: Math.round(activeUserRate * 100) / 100,
-                    newUsersThisMonth
+                    newUsersThisMonth,
+                    newUsersLastMonth,
+                    newUsersGrowthRate: Math.round(newUsersGrowthRate * 100) / 100,
+                    activeUserRateGrowth: Math.round(activeUserRateGrowth * 100) / 100
                 },
                 periodStats: {
                     period: `${days} days`,
@@ -985,6 +1053,282 @@ export const updateReportStatus = async (req: Request, res: Response, next: Next
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let page = parseInt(req.query.page as string || '1');
+        const search = req.query.search as string;
+        const roleId = req.query.roleId ? parseInt(req.query.roleId as string) : null;
+        const numberOfUsers = 20;
+
+        if (isNaN(page) || page < 1) page = 1;
+        page -= 1;
+
+        const where: any = {
+            is_deleted: false,
+            role_id: {
+                not: 3
+            }
+        };
+
+        if (roleId !== null && !isNaN(roleId)) {
+            if (roleId === 3) {
+                return res.status(HTTP_SUCCESS.OK).json({
+                    success: true,
+                    data: [],
+                    totalPages: 0,
+                    totalUsers: 0
+                });
+            }
+            where.role_id = roleId;
+        }
+
+        if (search) {
+            where.OR = [
+                { username: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        // Get total count
+        const totalUsers = await prisma.users.count({ where });
+
+        // Get users with pagination
+        const users = await prisma.users.findMany({
+            where,
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                avatar_url: true,
+                phone: true,
+                address_street: true,
+                address_ward: true,
+                address_city: true,
+                address_country: true,
+                gender: true,
+                last_loggedIn: true,
+                created_at: true,
+                updated_at: true,
+                role_id: true,
+                phone_verified: true,
+                company_id: true
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            skip: page * numberOfUsers,
+            take: numberOfUsers
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: users,
+            totalPages: Math.ceil(totalUsers / numberOfUsers),
+            totalUsers
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getDashboardQuickStats = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Số công ty chờ duyệt
+        const pendingCompanies = await prisma.companies.count({
+            where: { status: 'pending' }
+        });
+
+        // Số sự kiện chờ duyệt
+        const pendingEvents = await prisma.events.count({
+            where: { status: 'pending' }
+        });
+
+        // Số báo cáo chờ duyệt
+        const pendingReports = await prisma.reports.count({
+            where: { status: 'pending' }
+        });
+
+        // Giao dịch hôm nay
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const todayTransactions = await prisma.payments.count({
+            where: {
+                created_at: {
+                    gte: today,
+                    lt: tomorrow
+                },
+                status: 'success'
+            }
+        });
+
+        // Người dùng mới hôm nay
+        const todayNewUsers = await prisma.users.count({
+            where: {
+                created_at: {
+                    gte: today,
+                    lt: tomorrow
+                },
+                is_deleted: false
+            }
+        });
+
+        // Tỷ lệ chuyển đổi (có thể tính từ số giao dịch thành công / tổng giao dịch)
+        const totalTransactions = await prisma.payments.count();
+        const successTransactions = await prisma.payments.count({
+            where: { status: 'success' }
+        });
+        const conversionRate = totalTransactions > 0 ? (successTransactions / totalTransactions) * 100 : 0;
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: {
+                pendingCompanies,
+                pendingEvents,
+                pendingReports,
+                todayTransactions,
+                todayNewUsers,
+                conversionRate: Math.round(conversionRate * 100) / 100
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getRecentActivities = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const activities = [];
+
+        // Công ty mới được duyệt (24h gần nhất)
+        const last24Hours = new Date();
+        last24Hours.setHours(last24Hours.getHours() - 24);
+
+        const recentApprovedCompanies = await prisma.companies.findMany({
+            where: {
+                status: 'approved',
+                approved_at: {
+                    gte: last24Hours
+                }
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true
+                    }
+                }
+            },
+            orderBy: {
+                approved_at: 'desc'
+            },
+            take: 5
+        });
+
+        recentApprovedCompanies.forEach(company => {
+            activities.push({
+                type: 'company_approved',
+                message: `Công ty ${company.users?.username || 'N/A'} đã được duyệt`,
+                time: company.approved_at,
+                color: 'green'
+            });
+        });
+
+        // Giao dịch mới (24h gần nhất)
+        const recentPayments = await prisma.payments.findMany({
+            where: {
+                status: 'success',
+                created_at: {
+                    gte: last24Hours
+                }
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: 5
+        });
+
+        recentPayments.forEach(payment => {
+            activities.push({
+                type: 'payment',
+                message: `Giao dịch mới: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(payment.amount))}`,
+                time: payment.created_at,
+                color: 'blue'
+            });
+        });
+
+        // Sự kiện mới chờ duyệt (lấy 5 sự kiện pending gần nhất)
+        const recentPendingEvents = await prisma.events.findMany({
+            where: {
+                status: 'pending'
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true
+                    }
+                }
+            },
+            orderBy: {
+                start_date: 'desc'
+            },
+            take: 5
+        });
+
+        recentPendingEvents.forEach(event => {
+            activities.push({
+                type: 'event_pending',
+                message: `Sự kiện mới chờ duyệt: ${event.title}`,
+                time: event.start_date,
+                color: 'yellow'
+            });
+        });
+
+        // Người dùng mới đăng ký (24h gần nhất)
+        const recentNewUsers = await prisma.users.findMany({
+            where: {
+                created_at: {
+                    gte: last24Hours
+                },
+                is_deleted: false
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: 5
+        });
+
+        recentNewUsers.forEach(user => {
+            activities.push({
+                type: 'user_registered',
+                message: `Người dùng mới đăng ký: ${user.username}`,
+                time: user.created_at,
+                color: 'purple'
+            });
+        });
+
+        // Sắp xếp theo thời gian mới nhất
+        activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+        // Lấy 10 hoạt động gần nhất
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: activities.slice(0, 10)
         });
     } catch (error) {
         next(error);

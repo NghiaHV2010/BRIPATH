@@ -87,7 +87,7 @@ export default function Toolbar({ editor, onImageUpload }: ToolbarProps) {
         size="sm"
         onClick={onImageUpload}
         className="h-8 w-8 p-0"
-        title="Upload Image"
+        title="Upload ảnh"
       >
         <ImageIcon className="h-4 w-4" />
       </Button>

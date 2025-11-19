@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getRevenueStats, getPaymentStats, getUserAccessStats, getCompaniesByStatus, getEventsByStatus, updateEventStatus, updateCompanyStatus, createJobLabel, createCompanyLabel, createBlogPost, updateBlogPost, deleteBlogPost, getAllReports, updateReportStatus } from '../controllers/dashboard.controller';
+import { getRevenueStats, getPaymentStats, getUserAccessStats, getCompaniesByStatus, getEventsByStatus, updateEventStatus, updateCompanyStatus, createJobLabel, createCompanyLabel, createBlogPost, updateBlogPost, deleteBlogPost, getAllReports, updateReportStatus, getAllUsers, getDashboardQuickStats, getRecentActivities } from '../controllers/dashboard.controller';
 import { authenticationMiddleware, authorizationMiddleware } from '../middlewares/auth.middleware';
 
 const dashboardRouter = Router();
@@ -27,5 +27,10 @@ dashboardRouter.delete('/blog/:blogId', deleteBlogPost);
 
 dashboardRouter.get('/reports', getAllReports);
 dashboardRouter.put('/report/:reportId', updateReportStatus);
+
+dashboardRouter.get('/users/list', getAllUsers);
+
+dashboardRouter.get('/quick-stats', getDashboardQuickStats);
+dashboardRouter.get('/recent-activities', getRecentActivities);
 
 export default dashboardRouter;

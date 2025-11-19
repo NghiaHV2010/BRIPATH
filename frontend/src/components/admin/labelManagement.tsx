@@ -122,14 +122,14 @@ export default function LabelManagement() {
               </TableHeader>
               <TableBody>
                 {jobLabels.length === 0 ? (
-                  <TableRow>
+                  <TableRow key="job-labels-empty">
                     <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                       Chưa có nhãn công việc nào
                     </TableCell>
                   </TableRow>
                 ) : (
                   jobLabels.map((label) => (
-                    <TableRow key={label.id}>
+                    <TableRow key={`job-${label.id}`}>
                       <TableCell className="font-mono text-sm">{label.id}</TableCell>
                       <TableCell className="font-medium">{label.label_name}</TableCell>
                       <TableCell>
@@ -177,14 +177,14 @@ export default function LabelManagement() {
               </TableHeader>
               <TableBody>
                 {companyLabels.length === 0 ? (
-                  <TableRow>
+                  <TableRow key="company-labels-empty">
                     <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                       Chưa có nhãn công ty nào
                     </TableCell>
                   </TableRow>
                 ) : (
-                  companyLabels.map((label) => (
-                    <TableRow key={label.id}>
+                  companyLabels.map((label, index) => (
+                    <TableRow key={`company-${label.id || index}`}>
                       <TableCell className="font-mono text-sm">{label.id}</TableCell>
                       <TableCell className="font-medium">{label.label_name}</TableCell>
                       <TableCell>
