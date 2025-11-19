@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { NODE_ENV } from '../config/env.config';
+import { DATABASE_URL, NODE_ENV } from '../config/env.config';
 
 // Khai báo một biến toàn cục để lưu trữ instance
 const globalForPrisma = globalThis as unknown as {
@@ -12,6 +12,11 @@ export const prisma =
     new PrismaClient({
         // (Tùy chọn) Bật log để xem các query khi ở môi trường dev
         // log: ['query', 'info', 'warn', 'error'],
+        datasources: {
+            db: {
+                url: DATABASE_URL, // Truyền trực tiếp chuỗi kết nối vào đây
+            },
+        },
     });
 
 // Đây là một mẹo để tránh tạo nhiều instance khi
