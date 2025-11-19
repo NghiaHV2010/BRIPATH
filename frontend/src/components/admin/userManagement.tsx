@@ -5,8 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Users, Search, Mail, Phone, MapPin, Calendar, Shield, Eye, User, Building } from "lucide-react";
+import { Users, Search, Mail, Phone, MapPin, Calendar, Shield, Eye, User, Building, ChevronLeft, ChevronRight } from "lucide-react";
 import VisitorChart from "./visitorChart";
+import { getAllUsers } from "../../api/admin_api";
 
 interface User {
   id: string;
@@ -194,143 +195,69 @@ function UserDetailModal({ user, children }: { user: User; children: React.React
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [roleCounts, setRoleCounts] = useState({
+    all: 0,
+    candidate: 0,
+    company: 0,
+    admin: 0
+  });
 
-  // Mock data - in real app, this would come from an API
-  const mockUsers: User[] = [
-    {
-      id: "1",
-      username: "admin_user",
-      email: "admin@example.com",
-      avatar_url: undefined,
-      phone: "0123456789",
-      address_street: "123 Main St",
-      address_ward: "Ward 1",
-      address_city: "Ho Chi Minh City",
-      address_country: "Vietnam",
-      gender: "Male",
-      last_loggedIn: "2024-01-15T10:30:00Z",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-15T10:30:00Z",
-      role_id: 3,
-      phone_verified: true,
-      company_id: undefined
-    },
-    {
-      id: "2",
-      username: "company_user",
-      email: "company@example.com",
-      avatar_url: undefined,
-      phone: "0987654321",
-      address_street: "456 Business Ave",
-      address_ward: "Ward 2",
-      address_city: "Hanoi",
-      address_country: "Vietnam",
-      gender: "Female",
-      last_loggedIn: "2024-01-14T15:45:00Z",
-      created_at: "2024-01-02T00:00:00Z",
-      updated_at: "2024-01-14T15:45:00Z",
-      role_id: 2,
-      phone_verified: true,
-      company_id: "comp_123"
-    },
-    {
-      id: "3",
-      username: "candidate_user",
-      email: "candidate@example.com",
-      avatar_url: undefined,
-      phone: "0555123456",
-      address_street: "789 Student St",
-      address_ward: "Ward 3",
-      address_city: "Da Nang",
-      address_country: "Vietnam",
-      gender: "Other",
-      last_loggedIn: "2024-01-13T09:20:00Z",
-      created_at: "2024-01-03T00:00:00Z",
-      updated_at: "2024-01-13T09:20:00Z",
-      role_id: 1,
-      phone_verified: false,
-      company_id: undefined
-    },
-    {
-      id: "4",
-      username: "john_doe",
-      email: "john.doe@email.com",
-      avatar_url: undefined,
-      phone: "0369852147",
-      address_street: "321 Oak Street",
-      address_ward: "Ward 4",
-      address_city: "Ho Chi Minh City",
-      address_country: "Vietnam",
-      gender: "Male",
-      last_loggedIn: "2024-01-12T14:30:00Z",
-      created_at: "2024-01-04T00:00:00Z",
-      updated_at: "2024-01-12T14:30:00Z",
-      role_id: 1,
-      phone_verified: true,
-      company_id: undefined
-    },
-    {
-      id: "5",
-      username: "jane_smith",
-      email: "jane.smith@company.com",
-      avatar_url: undefined,
-      phone: "0987654321",
-      address_street: "654 Pine Avenue",
-      address_ward: "Ward 5",
-      address_city: "Hanoi",
-      address_country: "Vietnam",
-      gender: "Female",
-      last_loggedIn: "2024-01-11T16:15:00Z",
-      created_at: "2024-01-05T00:00:00Z",
-      updated_at: "2024-01-11T16:15:00Z",
-      role_id: 2,
-      phone_verified: true,
-      company_id: "comp_456"
+  const fetchUsers = async (page: number = 1, search?: string, roleId?: number | null) => {
+    try {
+      setLoading(true);
+      const response = await getAllUsers(page, search, roleId);
+      setUsers(response.data || []);
+      setTotalPages(response.totalPages || 1);
+      setCurrentPage(page);
+      setTotalUsers(response.totalUsers || 0);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const fetchRoleCounts = async () => {
+    try {
+      const [allResponse, candidateResponse, companyResponse] = await Promise.all([
+        getAllUsers(1),
+        getAllUsers(1, undefined, 1),
+        getAllUsers(1, undefined, 2)
+      ]);
+
+      setRoleCounts({
+        all: allResponse.totalUsers || 0,
+        candidate: candidateResponse.totalUsers || 0,
+        company: companyResponse.totalUsers || 0,
+        admin: 0
+      });
+    } catch (error) {
+      console.error("Error fetching role counts:", error);
+    }
+  };
 
   useEffect(() => {
-    // Simulate API call
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        // In real app: const response = await getUsers();
-        // setUsers(response.data);
-        setUsers(mockUsers);
-        setFilteredUsers(mockUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+    fetchRoleCounts();
   }, []);
 
   useEffect(() => {
-    let filtered = users;
+    const timeoutId = setTimeout(() => {
+      fetchUsers(1, searchTerm || undefined, roleFilter);
+    }, 300); // Debounce search
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.phone && user.phone.includes(searchTerm))
-      );
-    }
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, roleFilter]);
 
-    // Filter by role
-    if (roleFilter !== null) {
-      filtered = filtered.filter(user => user.role_id === roleFilter);
-    }
-
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, roleFilter]);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchUsers(page, searchTerm || undefined, roleFilter);
+  };
 
 
   const getStatusColor = (lastLoggedIn?: string) => {
@@ -409,13 +336,6 @@ export default function UserManagement() {
               >
                 Công ty
               </Button>
-              <Button
-                variant={roleFilter === 3 ? "default" : "outline"}
-                onClick={() => setRoleFilter(3)}
-                size="sm"
-              >
-                Admin
-              </Button>
             </div>
           </div>
 
@@ -442,20 +362,28 @@ export default function UserManagement() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : filteredUsers.length === 0 ? (
+                ) : users.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                       Không tìm thấy người dùng nào
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user) => (
+                  users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <User className="h-5 w-5 text-white" />
-                          </div>
+                          {user.avatar_url ? (
+                            <img
+                              src={user.avatar_url}
+                              alt={user.username}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-white" />
+                            </div>
+                          )}
                           <div>
                             <p className="font-medium">{user.username}</p>
                             {user.phone && (
@@ -496,14 +424,69 @@ export default function UserManagement() {
             </Table>
           </div>
 
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-500">
+                Trang {currentPage} / {totalPages} (Tổng: {totalUsers} người dùng)
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Trước
+                </Button>
+
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Sau
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Summary Stats */}
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
-                    <p className="text-2xl font-bold">{users.length}</p>
+                    <p className="text-2xl font-bold">{roleCounts.all}</p>
                   </div>
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
@@ -515,9 +498,7 @@ export default function UserManagement() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Ứng viên</p>
-                    <p className="text-2xl font-bold">
-                      {users.filter(u => u.role_id === 1).length}
-                    </p>
+                    <p className="text-2xl font-bold">{roleCounts.candidate}</p>
                   </div>
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
@@ -529,25 +510,9 @@ export default function UserManagement() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Công ty</p>
-                    <p className="text-2xl font-bold">
-                      {users.filter(u => u.role_id === 2).length}
-                    </p>
+                    <p className="text-2xl font-bold">{roleCounts.company}</p>
                   </div>
                   <Users className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Admin</p>
-                    <p className="text-2xl font-bold">
-                      {users.filter(u => u.role_id === 3).length}
-                    </p>
-                  </div>
-                  <Users className="h-8 w-8 text-red-600" />
                 </div>
               </CardContent>
             </Card>

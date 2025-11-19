@@ -10,11 +10,11 @@ import Analytics from "./analytics";
 import UserManagement from "./userManagement";
 import RevenueCharts from "./revenueCharts";
 import LabelManagement from "./labelManagement";
+import RecentActivity from "./recentActivity";
+import QuickStats from "./quickStats";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { 
-  Settings,
-  TrendingUp,
-  Activity
+  Settings
 } from "lucide-react";
 import { PostComposer } from "../ui/PostComposer";
 
@@ -29,83 +29,12 @@ export default function AdminDashboard() {
                   <DashboardStats />
                   <RevenueCharts />
                   
-                  {/* Recent Activity */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Hoạt động gần đây
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Công ty ABC đã được duyệt</p>
-                        <p className="text-xs text-gray-500">2 giờ trước</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Giao dịch mới: 500,000 VND</p>
-                        <p className="text-xs text-gray-500">4 giờ trước</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Sự kiện mới chờ duyệt</p>
-                        <p className="text-xs text-gray-500">6 giờ trước</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Người dùng mới đăng ký</p>
-                        <p className="text-xs text-gray-500">1 ngày trước</p>
-                      </div>
-                    </div>
+                  {/* Recent Activity and Quick Stats */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <RecentActivity />
+                    <QuickStats />
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Thống kê nhanh
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Công ty chờ duyệt</span>
-                      <span className="font-semibold text-yellow-600">12</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Sự kiện chờ duyệt</span>
-                      <span className="font-semibold text-yellow-600">5</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Giao dịch hôm nay</span>
-                      <span className="font-semibold text-green-600">24</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Người dùng mới</span>
-                      <span className="font-semibold text-blue-600">8</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Tỷ lệ chuyển đổi</span>
-                      <span className="font-semibold text-purple-600">68%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                </div>
         );
       
       case "companies":

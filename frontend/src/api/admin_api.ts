@@ -76,3 +76,28 @@ export const updateReportStatus = async (reportId: number, status: 'approved' | 
   const response = await axiosConfig.put(`/dashboard/report/${reportId}`, { status });
   return response.data;
 };
+
+// User management
+export const getAllUsers = async (page: number = 1, search?: string, roleId?: number | null) => {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  if (search) {
+    params.append('search', search);
+  }
+  if (roleId !== null && roleId !== undefined) {
+    params.append('roleId', roleId.toString());
+  }
+  const response = await axiosConfig.get(`/dashboard/users/list?${params.toString()}`);
+  return response.data;
+};
+
+// Dashboard quick stats and recent activities
+export const getDashboardQuickStats = async () => {
+  const response = await axiosConfig.get('/dashboard/quick-stats');
+  return response.data;
+};
+
+export const getRecentActivities = async () => {
+  const response = await axiosConfig.get('/dashboard/recent-activities');
+  return response.data;
+};

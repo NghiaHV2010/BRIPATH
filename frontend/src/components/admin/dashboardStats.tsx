@@ -91,12 +91,14 @@ export default function DashboardStats() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-gray-900">
-            {formatCurrency(stats.revenue?.totalRevenue || 245000000)}
+            {formatCurrency(stats.revenue?.totalRevenue || 0)}
           </div>
-          <p className="text-xs text-green-600 flex items-center mt-1">
-            <TrendingUp className="h-3 w-3 mr-1" />
-            +20.1% từ tháng trước
-          </p>
+          {stats.revenue?.growthRate !== undefined && (
+            <p className={`text-xs flex items-center mt-1 ${stats.revenue.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stats.revenue.growthRate >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+              {stats.revenue.growthRate >= 0 ? '+' : ''}{stats.revenue.growthRate.toFixed(1)}% từ tháng trước
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -110,12 +112,14 @@ export default function DashboardStats() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-gray-900">
-            +{formatNumber(stats.users?.overview?.newUsersThisMonth || 2350)}
+            +{formatNumber(stats.users?.overview?.newUsersThisMonth || 0)}
           </div>
-          <p className="text-xs text-green-600 flex items-center mt-1">
-            <TrendingUp className="h-3 w-3 mr-1" />
-            +180.1% từ tháng trước
-          </p>
+          {stats.users?.overview?.newUsersGrowthRate !== undefined && (
+            <p className={`text-xs flex items-center mt-1 ${stats.users.overview.newUsersGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stats.users.overview.newUsersGrowthRate >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+              {stats.users.overview.newUsersGrowthRate >= 0 ? '+' : ''}{stats.users.overview.newUsersGrowthRate.toFixed(1)}% từ tháng trước
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -129,12 +133,14 @@ export default function DashboardStats() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-gray-900">
-            +{formatNumber(stats.revenue?.totalTransactions || 12234)}
+            +{formatNumber(stats.revenue?.totalTransactions || 0)}
           </div>
-          <p className="text-xs text-red-600 flex items-center mt-1">
-            <TrendingDown className="h-3 w-3 mr-1" />
-            +19% từ tháng trước
-          </p>
+          {stats.revenue?.transactionsGrowthRate !== undefined && (
+            <p className={`text-xs flex items-center mt-1 ${stats.revenue.transactionsGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stats.revenue.transactionsGrowthRate >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+              {stats.revenue.transactionsGrowthRate >= 0 ? '+' : ''}{stats.revenue.transactionsGrowthRate.toFixed(1)}% từ tháng trước
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -148,12 +154,14 @@ export default function DashboardStats() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-gray-900">
-            {stats.users?.overview?.activeUserRate?.toFixed(1) || 49.65}%
+            {stats.users?.overview?.activeUserRate?.toFixed(1) || 0}%
           </div>
-          <p className="text-xs text-green-600 flex items-center mt-1">
-            <TrendingUp className="h-3 w-3 mr-1" />
-            +12% từ tháng trước
-          </p>
+          {stats.users?.overview?.activeUserRateGrowth !== undefined && (
+            <p className={`text-xs flex items-center mt-1 ${stats.users.overview.activeUserRateGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stats.users.overview.activeUserRateGrowth >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+              {stats.users.overview.activeUserRateGrowth >= 0 ? '+' : ''}{stats.users.overview.activeUserRateGrowth.toFixed(1)}% từ tháng trước
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
