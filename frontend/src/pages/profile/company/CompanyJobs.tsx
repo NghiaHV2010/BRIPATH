@@ -15,7 +15,7 @@ import { useJobStore } from "@/store/job.store"
 import { JobDetailSkeleton } from "@/components/job"
 import { deleteJob } from "@/api/job_api"
 
-export function CompanyProfile() {
+export function CompanyJobs() {
     const authUser = useAuthStore((s) => s.authUser);
     const { selectedJob, isLoading: jobLoading, getJobById } = useJobStore();
     const [jobs, setJobs] = useState<(Job & JobsCountDetails)[]>([])

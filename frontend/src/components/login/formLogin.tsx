@@ -5,6 +5,8 @@ import { Button } from "../ui/button";
 import { useAuthStore } from "../../store/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import GoogleButton from "../ui/googleButton";
+import toast from "react-hot-toast";
+
 export default function FormLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +17,7 @@ export default function FormLogin() {
   const isProcessing = useAuthStore((s) => s.isProcessing);
   const navigate = useNavigate();
   const location = useLocation();
+
   let redirectTo: string | undefined;
   if (
     location.state &&
@@ -32,8 +35,28 @@ export default function FormLogin() {
       return;
     }
     setError("");
+
     try {
-      await login?.(email, password);
+      const result = await login?.(email, password);
+
+      // Check if 2FA is required
+      if (result?.requires2FA && result?.tempToken) {
+        toast.success("Vui lòng xác thực 2FA để tiếp tục");
+
+        // Navigate to 2FA verification page
+        navigate("/verify-2fa", {
+          state: {
+            action: 'login',
+            temp_token: result.tempToken,
+            from: redirectTo || '/'
+          },
+          replace: true
+        });
+        return;
+      }
+
+      // Normal login without 2FA
+      toast.success("Đăng nhập thành công!");
       setTimeout(() => {
         const currentUser = useAuthStore.getState().authUser;
         if (currentUser?.roles.role_name === "Admin") {
@@ -54,7 +77,7 @@ export default function FormLogin() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Gradient Background */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-12 flex-col justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-400 via-blue-500 to-blue-600 p-12 flex-col justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10 text-white animate-fade-in">
           <h1 className="text-4xl font-bold mb-2 animate-slide-up">BRIPATH</h1>

@@ -1,28 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  MapPin,
-  Users,
-  Briefcase,
-  Building2,
-  Copy,
-  ArrowLeft,
-  CircleChevronDown,
-  UserRoundCheck,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-} from "lucide-react";
+import { MapPin, Users, Briefcase, Building2, Copy, ArrowLeft, CircleChevronDown, UserRoundCheck, ChevronLeft, ChevronRight, AlertCircle, Star } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 
-import {
-  CompanyDetailSkeleton,
-  CompanyFeedback,
-} from "../../components/company";
+import { CompanyDetailSkeleton, CompanyFeedback } from "../../components/company";
+import { RecommendedCompaniesCard } from "../../components/company/RecommendedCompanyCard";
 import CompanyMap from "@/components/utils/CompanyMap";
-import { getCompanyDetails, feedbackCompany } from "@/api/company_api";
+import { getCompanyDetails, feedbackCompany, getRecommendedCompanies } from "@/api/company_api";
 import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "../../store/auth";
 import { useCompanyStore } from "../../store/company.store";
@@ -32,25 +18,29 @@ import { JobCard } from "@/components/job";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
-  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(
-    null
-  );
+  const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isFollowed, setIsFollowed] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+
+  // Recommended companies state
+  const [recommendedCompanies, setRecommendedCompanies] = useState<any[]>([]);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(true);
+
   // Feedback form state
   const [stars, setStars] = useState<number>(5);
+  const [hoveredStar, setHoveredStar] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [benefit, setBenefit] = useState<string>("");
   const [workEnvironment, setWorkEnvironment] = useState<string>("");
-  const [isSubmittingFeedback, setIsSubmittingFeedback] =
-    useState<boolean>(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [starsError, setStarsError] = useState<string>("");
   const [benefitError, setBenefitError] = useState<string>("");
   const [workEnvError, setWorkEnvError] = useState<string>("");
+
   const {
     followCompany: followCompanyStore,
     unfollowCompany: unfollowCompanyStore,
@@ -58,14 +48,14 @@ export default function CompanyDetailsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const authUser = useAuthStore((s) => s.authUser);
-  const userId = authUser?.id; // 👈 lấy userId trực tiếp
+  const userId = authUser?.id;
 
-  // Khôi phục vị trí scroll khi quay lại
   const navigationState = location.state as {
     scrollPosition?: number;
     preserveScroll?: boolean;
   } | null;
 
+  // Fetch company details
   useEffect(() => {
     const fetchData = async () => {
       if (!companyId) return;
@@ -79,7 +69,6 @@ export default function CompanyDetailsPage() {
 
         setCompanyDetail(res.data || null);
         setTotalPages(res.totalPages || 1);
-        // Initialize follow state from backend response
         setIsFollowed(
           Array.isArray(res.data?.followedCompanies) &&
           res.data.followedCompanies.length > 0
@@ -94,6 +83,25 @@ export default function CompanyDetailsPage() {
     fetchData();
   }, [companyId, currentPage, userId]);
 
+  // Fetch recommended companies
+  useEffect(() => {
+    const fetchRecommendedCompanies = async () => {
+      try {
+        setIsLoadingRecommended(true);
+        const response = await getRecommendedCompanies();
+        if (response?.success) {
+          setRecommendedCompanies(response.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching recommended companies:", error);
+      } finally {
+        setIsLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommendedCompanies();
+  }, [userId]);
+
   const handleFollow = async () => {
     if (!authUser) {
       setLoginOpen(true);
@@ -105,11 +113,9 @@ export default function CompanyDetailsPage() {
     try {
       if (isFollowed) {
         await unfollowCompanyStore(companyId);
-
         setIsFollowed(false);
       } else {
         await followCompanyStore(companyId);
-
         setIsFollowed(true);
       }
     } catch (err) {
@@ -139,6 +145,40 @@ export default function CompanyDetailsPage() {
   const handleCopyLink = () => {
     const url = `${window.location.origin}/companies/${companyId}`;
     navigator.clipboard.writeText(url);
+    toast({
+      title: "Đã sao chép",
+      description: "Liên kết đã được sao chép vào clipboard",
+    });
+  };
+
+  // Star rating component
+  const StarRating = () => {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setStars(star)}
+              onMouseEnter={() => setHoveredStar(star)}
+              onMouseLeave={() => setHoveredStar(0)}
+              className="focus:outline-none transition-transform hover:scale-110"
+            >
+              <Star
+                className={`w-8 h-8 transition-colors ${star <= (hoveredStar || stars)
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-gray-200 text-gray-200"
+                  }`}
+              />
+            </button>
+          ))}
+        </div>
+        <span className="text-sm text-slate-600 font-medium">
+          {stars} {stars === 1 ? "sao" : "sao"}
+        </span>
+      </div>
+    );
   };
 
   if (isLoading || !companyDetail) {
@@ -327,16 +367,18 @@ export default function CompanyDetailsPage() {
 
                 {companyDetail.jobs && companyDetail.jobs.length > 0 ? (
                   <div className="space-y-6">
-                    {companyDetail.jobs.map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={job}
-                        onClick={() => navigate(`/jobs/${job.id}`)}
-                        // onSave={() => handleSaveJob(job.id)}
-                        compact={false}
-                        isSaved={job.isSaved || false}
-                      />
-                    ))}
+                    <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {companyDetail.jobs.map((job) => (
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onClick={() => navigate(`/jobs/${job.id}`)}
+                          // onSave={() => handleSaveJob(job.id)}
+                          compact={false}
+                          isSaved={job.isSaved || false}
+                        />
+                      ))}
+                    </div>
 
                     {totalPages > 1 && (
                       <div className="flex justify-center items-center gap-4">
@@ -385,7 +427,7 @@ export default function CompanyDetailsPage() {
                       </div>
                     ) : (
                       <form
-                        className="space-y-4"
+                        className="space-y-6"
                         onSubmit={async (e) => {
                           e.preventDefault();
                           if (!companyId) return;
@@ -445,6 +487,7 @@ export default function CompanyDetailsPage() {
                             setBenefit("");
                             setWorkEnvironment("");
                             setStars(5);
+                            setHoveredStar(0);
                             // refresh details to show latest feedbacks
                             const res = await getCompanyDetails(
                               userId ?? "",
@@ -469,39 +512,28 @@ export default function CompanyDetailsPage() {
                           }
                         }}
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm text-slate-600 mb-1">
-                              Số sao
-                            </label>
-                            <select
-                              className="w-full border rounded-lg p-2"
-                              value={stars}
-                              onChange={(e) =>
-                                setStars(parseInt(e.target.value))
-                              }
-                            >
-                              {[1, 2, 3, 4, 5].map((s) => (
-                                <option key={s} value={s}>
-                                  {s}
-                                </option>
-                              ))}
-                            </select>
-                            {starsError && (
-                              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                {starsError}
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                        {/* Star Rating */}
                         <div>
-                          <label className="block text-sm text-slate-600 mb-1">
-                            Mô tả
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Đánh giá của bạn
+                          </label>
+                          <StarRating />
+                          {starsError && (
+                            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-4 h-4" />
+                              {starsError}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Mô tả <span className="text-red-500">*</span>
                           </label>
                           <textarea
-                            className="w-full border rounded-lg p-3 min-h-[100px]"
-                            placeholder="Chia sẻ trải nghiệm của bạn..."
+                            className="w-full border border-slate-300 rounded-lg p-3 min-h-[120px] focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            placeholder="Chia sẻ trải nghiệm của bạn về công ty này..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                           />
@@ -512,16 +544,18 @@ export default function CompanyDetailsPage() {
                             </p>
                           )}
                         </div>
+
+                        {/* Benefit and Work Environment */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm text-slate-600 mb-1">
-                              Lợi ích (tuỳ chọn)
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                              Lợi ích <span className="text-slate-400 text-xs">(tuỳ chọn)</span>
                             </label>
                             <input
-                              className="w-full border rounded-lg p-2"
+                              className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               value={benefit}
                               onChange={(e) => setBenefit(e.target.value)}
-                              placeholder="Ví dụ: Bảo hiểm, thưởng..."
+                              placeholder="Ví dụ: Bảo hiểm, thưởng, du lịch..."
                             />
                             {benefitError && (
                               <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -531,11 +565,11 @@ export default function CompanyDetailsPage() {
                             )}
                           </div>
                           <div>
-                            <label className="block text-sm text-slate-600 mb-1">
-                              Môi trường làm việc (tuỳ chọn)
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                              Môi trường làm việc <span className="text-slate-400 text-xs">(tuỳ chọn)</span>
                             </label>
                             <input
-                              className="w-full border rounded-lg p-2"
+                              className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               value={workEnvironment}
                               onChange={(e) =>
                                 setWorkEnvironment(e.target.value)
@@ -550,8 +584,14 @@ export default function CompanyDetailsPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex justify-end">
-                          <Button type="submit" disabled={isSubmittingFeedback}>
+
+                        {/* Submit Button */}
+                        <div className="flex justify-end pt-2">
+                          <Button
+                            type="submit"
+                            disabled={isSubmittingFeedback}
+                            className="bg-blue-600 hover:bg-blue-700 px-8 py-2"
+                          >
                             {isSubmittingFeedback
                               ? "Đang gửi..."
                               : "Gửi đánh giá"}
@@ -570,14 +610,16 @@ export default function CompanyDetailsPage() {
 
             {/* Right: Sidebar */}
             <div className="space-y-8">
+              {/* Company Map */}
               <Card className="bg-white shadow-lg rounded-2xl z-0">
                 <CompanyMap
                   companyName={companyDetail.users?.username || "Company"}
-                  lat={10.77611}
-                  lng={106.69583}
+                  lat={companyDetail.latitude || 10.777108}
+                  lng={companyDetail.longitude || 106.695441}
                 />
               </Card>
 
+              {/* Share Company */}
               <Card className="bg-white shadow-lg rounded-2xl">
                 <CardHeader className="bg-blue-50 pb-4">
                   <h3 className="text-xl font-bold text-slate-900">
@@ -605,18 +647,17 @@ export default function CompanyDetailsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
-                <img
-                  src="/src/assets/banner/7.jpg"
-                  alt="Company banner"
-                  className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
-                />
-              </Card>
+              {/* Recommended Companies */}
+              <RecommendedCompaniesCard
+                companies={recommendedCompanies}
+                isLoading={isLoadingRecommended}
+              />
             </div>
           </div>
         </div>
       </div>
-      {/* Login Dialog for follow action when unauthenticated */}
+
+      {/* Login Dialog */}
       <LoginDialog
         open={loginOpen}
         onOpenChange={setLoginOpen}

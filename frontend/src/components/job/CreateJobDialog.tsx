@@ -187,10 +187,7 @@ export function CreateJobDialog({ trigger, onJobCreated, jobCategories }: Create
                 label_type: jobForm.label_type === "none" ? null : jobForm.label_type,
                 start_date: jobForm.start_date ? format(jobForm.start_date, 'yyyy-MM-dd') : undefined,
                 end_date: jobForm.end_date ? format(jobForm.end_date, 'yyyy-MM-dd') : undefined,
-            }
-
-            console.log(jobData);
-
+            };
 
             const response = await axiosConfig.post("/job", jobData)
 
@@ -199,6 +196,8 @@ export function CreateJobDialog({ trigger, onJobCreated, jobCategories }: Create
                 setShowDialog(false)
                 resetForm()
                 onJobCreated?.()
+            } else {
+                toast.error(response.data.message || "Có lỗi xảy ra khi tạo công việc")
             }
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Có lỗi xảy ra khi tạo công việc")

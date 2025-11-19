@@ -96,11 +96,21 @@ export interface CompanyDetail {
     followedCompanies?: number;
     jobs?: number;
   };
-  companyTags?: any[] | null;
   feedbacks?: CompanyFeedback[] | null;
   is_verified?: boolean;
   company_type?: string;
-  fields?: any | null;
+  companyTags?: [
+    {
+      tags: {
+        label_name: string
+      }
+    }
+  ];
+  fields?: {
+    field_name?: string;
+  };
+  latitude?: number | null;
+  longitude?: number | null;
   jobs?: Job[];
 
   followedCompanies?: FollowRecord[];
@@ -125,7 +135,7 @@ export interface CompanyField {
 export interface CompanyRegisterResponse {
   message: string;
   data: {
-    id: string; 
+    id: string;
     company_website?: string | null;
     business_certificate?: string | null;
     company_type: string;

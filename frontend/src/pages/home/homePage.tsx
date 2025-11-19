@@ -17,7 +17,7 @@ import {
   Loader
 } from "lucide-react";
 import InfiniteScroll from "@/components/animations/InfiniteScrollProps";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useJobStore } from "@/store/job.store";
 import { JobCard } from "@/components/job";
 
@@ -29,13 +29,33 @@ export default function HomePage() {
     getAllJobs
   } = useJobStore();
 
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  // Check screen size
   useEffect(() => {
-    if (!isLoading)
-      getAllJobs({ page: 1 });
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Only fetch jobs on large screens
+  useEffect(() => {
+    if (isLargeScreen && !isLoading) {
+      getAllJobs({ page: 1 });
+    }
+  }, [isLargeScreen]);
 
-  if (isLoading) {
+
+  if (isLoading && isLargeScreen) {
     return (
       <Loader className="h-10 w-10 text-blue-600 animate-spin absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
     );
@@ -44,13 +64,14 @@ export default function HomePage() {
   return (
     <div className="bg-linear-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-linear-to-r from-blue-600 via-purple-600 to-indigo-700 text-white max-h-screen">
+      <section className="relative overflow-hidden bg-linear-to-r from-blue-600 via-purple-600 to-indigo-700 text-white min-h-screen lg:max-h-screen">
         <div className="absolute inset-0 bg-black/10"></div>
         {/* Animated background elements */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-400/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        <div className="relative max-w-7xl mx-auto px-4 pt-20 pb-20 lg:pt-32 lg:pb-32">
+
+        <div className="relative max-w-7xl mx-auto px-4 pt-20 pb-20 lg:pt-32 lg:pb-32 z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium">
@@ -112,7 +133,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative lg:hidden">
               <div className="relative z-10 bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
@@ -155,32 +176,47 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-full z-0">
-          <InfiniteScroll
-            items={
-              jobs.length > 0
-                ? jobs.map((job) => ({
-                  content: (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      onClick={() => navigate(`/jobs/${job.id}`)}
-                      // onSave={() => handleSaveJob(job.id)}
-                      compact={false}
-                      isSaved={job.isSaved || false}
-                    />
-                  ),
-                }))
-                : []
-            }
-            isTilted={true}
-            tiltDirection='right'
-            autoplay={true}
-            autoplaySpeed={0.5}
-            autoplayDirection="up"
-            pauseOnHover={true}
-          />
-        </div>
+
+        {/* Infinite Scroll - Only on large screens */}
+        {isLargeScreen && (
+          <div className="absolute top-0 right-0 w-full h-full z-0 pointer-events-none">
+            <InfiniteScroll
+              width={{
+                lg: '28rem',
+                xl: '30rem'
+              }}
+              itemMinHeight={{
+                lg: 240,
+                xl: 250
+              }}
+              items={
+                jobs.length > 0
+                  ? jobs.map((job) => ({
+                    content: (
+                      <div className="pointer-events-auto">
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onClick={() => navigate(`/jobs/${job.id}`)}
+                          compact={true}
+                          isSaved={job.isSaved || false}
+                        />
+                      </div>
+                    ),
+                  }))
+                  : []
+              }
+              isTilted={true}
+              tiltDirection='right'
+              autoplay={true}
+              autoplaySpeed={0.5}
+              autoplayDirection="up"
+              pauseOnHover={true}
+              maxHeight="100vh"
+              negativeMargin="-1rem"
+            />
+          </div>
+        )}
       </section>
 
       {/* How it Works Section */}

@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_API_KEY } from "../config/env.config";
 import { CAREERPATHPROMPT } from "../constants/prompt";
+import axios from "axios";
 
 export function convertDate(dateStr?: string): Date | undefined {
     if (!dateStr) return undefined;
@@ -194,3 +195,70 @@ export const hasPaymentByTransactionId = async (prisma: any, transactionId?: str
     const existing = await prisma.payments.findFirst({ where: { transaction_id: transactionId } });
     return !!existing;
 };
+
+export async function getCoordinatesFromAddress(address: {
+    street: string;
+    ward: string;
+    city: string;
+    country: string;
+}): Promise<{ latitude: number; longitude: number } | null> {
+    const openStreetMapUrl = 'https://nominatim.openstreetmap.org/search';
+    const fullAddress = `${address.street}, ${address.ward}, ${address.city}, ${address.country}`;
+
+    try {
+
+        // Call OpenStreetMap Nominatim API
+        const response = await axios.get(openStreetMapUrl, {
+            params: {
+                q: fullAddress,
+                format: 'json',
+                limit: 1,
+                addressdetails: 1
+            },
+            headers: {
+                'User-Agent': 'BRIPATH-App/1.0' // Required by Nominatim
+            },
+            timeout: 15000
+        });
+
+        if (response.data && response.data.length > 0) {
+            const result = response.data[0];
+            return {
+                latitude: parseFloat(result.lat),
+                longitude: parseFloat(result.lon)
+            };
+        }
+
+        // Try alternative query with just city and country if full address fails
+        const simplifiedResponse = await axios.get(openStreetMapUrl, {
+            params: {
+                city: address.city,
+                country: address.country,
+                format: 'json',
+                limit: 1
+            },
+            headers: {
+                'User-Agent': 'BRIPATH-App/1.0'
+            },
+            timeout: 5000
+        });
+
+        if (simplifiedResponse.data && simplifiedResponse.data.length > 0) {
+            const result = simplifiedResponse.data[0];
+            return {
+                latitude: parseFloat(result.lat),
+                longitude: parseFloat(result.lon)
+            };
+        }
+
+        console.warn('Không tìm thấy tọa độ cho địa chỉ:', fullAddress);
+        return null;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Lỗi API định vị địa lý:', error.message);
+        } else {
+            console.error('Lỗi không mong muốn trong quá trình định vị địa lý:', error);
+        }
+        throw error;
+    }
+}

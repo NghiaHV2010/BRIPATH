@@ -8,13 +8,15 @@ interface ImageCropModalProps {
     onClose: () => void;
     imageFile: File | null;
     onCropComplete: (croppedFile: File) => void;
+    aspectRatio?: number; // Width/Height ratio (e.g., 1 for square, 16/9 for landscape, 2.35 for ultra-wide)
 }
 
 export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     isOpen,
     onClose,
     imageFile,
-    onCropComplete
+    onCropComplete,
+    aspectRatio = 1 // Default to square (1:1)
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [imageUrl, setImageUrl] = useState<string>('');
@@ -26,6 +28,44 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     const [isProcessing, setIsProcessing] = useState(false);
     const [isHoveringCrop, setIsHoveringCrop] = useState(false);
 
+    // Calculate initial crop area based on aspect ratio
+    const calculateCropArea = useCallback((dimensions: ImageDimensions): CropArea => {
+        if (aspectRatio === 1) {
+            // Square crop (original logic)
+            return calculateSquareCropArea(dimensions);
+        }
+
+        // Calculate crop area based on aspect ratio
+        let cropWidth: number;
+        let cropHeight: number;
+
+        // Determine if image is wider or taller relative to desired aspect ratio
+        const imageRatio = dimensions.width / dimensions.height;
+
+        if (imageRatio > aspectRatio) {
+            // Image is wider than desired aspect ratio
+            // Use full height and calculate width
+            cropHeight = dimensions.height;
+            cropWidth = cropHeight * aspectRatio;
+        } else {
+            // Image is taller than desired aspect ratio
+            // Use full width and calculate height
+            cropWidth = dimensions.width;
+            cropHeight = cropWidth / aspectRatio;
+        }
+
+        // Center the crop area
+        const x = (dimensions.width - cropWidth) / 2;
+        const y = (dimensions.height - cropHeight) / 2;
+
+        return {
+            x: Math.max(0, x),
+            y: Math.max(0, y),
+            width: cropWidth,
+            height: cropHeight
+        };
+    }, [aspectRatio]);
+
     // Load image when file changes
     useEffect(() => {
         if (imageFile) {
@@ -34,7 +74,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
             getImageDimensions(imageFile).then((dimensions) => {
                 setImageDimensions(dimensions);
-                const initialCrop = calculateSquareCropArea(dimensions);
+                const initialCrop = calculateCropArea(dimensions);
                 setCropArea(initialCrop);
                 setScale(1); // Reset scale when new image is loaded
             }).catch((error) => {
@@ -44,7 +84,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
             return () => URL.revokeObjectURL(url);
         }
-    }, [imageFile, onClose]);
+    }, [imageFile, onClose, calculateCropArea]);
 
     // Draw image and crop overlay on canvas
     const drawCanvas = useCallback(() => {
@@ -76,26 +116,27 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             // Draw crop overlay
             const cropX = offsetX + (cropArea.x * imageScale);
             const cropY = offsetY + (cropArea.y * imageScale);
-            const cropSize = cropArea.width * imageScale;
+            const cropWidth = cropArea.width * imageScale;
+            const cropHeight = cropArea.height * imageScale;
 
             // Darken areas outside crop
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, 0, canvasSize, canvasSize);
 
             // Clear crop area
-            ctx.clearRect(cropX, cropY, cropSize, cropSize);
+            ctx.clearRect(cropX, cropY, cropWidth, cropHeight);
 
             // Redraw image in crop area
             ctx.drawImage(
                 image,
                 cropArea.x, cropArea.y, cropArea.width, cropArea.height,
-                cropX, cropY, cropSize, cropSize
+                cropX, cropY, cropWidth, cropHeight
             );
 
             // Draw crop border
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 2;
-            ctx.strokeRect(cropX, cropY, cropSize, cropSize);
+            ctx.strokeRect(cropX, cropY, cropWidth, cropHeight);
 
             // Draw corner handles
             const handleSize = 8;
@@ -103,21 +144,19 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             // Top-left
             ctx.fillRect(cropX - handleSize / 2, cropY - handleSize / 2, handleSize, handleSize);
             // Top-right
-            ctx.fillRect(cropX + cropSize - handleSize / 2, cropY - handleSize / 2, handleSize, handleSize);
+            ctx.fillRect(cropX + cropWidth - handleSize / 2, cropY - handleSize / 2, handleSize, handleSize);
             // Bottom-left
-            ctx.fillRect(cropX - handleSize / 2, cropY + cropSize - handleSize / 2, handleSize, handleSize);
+            ctx.fillRect(cropX - handleSize / 2, cropY + cropHeight - handleSize / 2, handleSize, handleSize);
             // Bottom-right
-            ctx.fillRect(cropX + cropSize - handleSize / 2, cropY + cropSize - handleSize / 2, handleSize, handleSize);
+            ctx.fillRect(cropX + cropWidth - handleSize / 2, cropY + cropHeight - handleSize / 2, handleSize, handleSize);
 
-            // Add drag indicator for non-square images
-            if (imageDimensions.width !== imageDimensions.height) {
-                ctx.fillStyle = '#3b82f6';
-                ctx.font = '12px sans-serif';
-                ctx.textAlign = 'center';
-                const centerX = cropX + cropSize / 2;
-                const centerY = cropY + cropSize / 2;
-                ctx.fillText('Kéo để di chuyển', centerX, centerY + 4);
-            }
+            // Add drag indicator
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            const centerX = cropX + cropWidth / 2;
+            const centerY = cropY + cropHeight / 2;
+            ctx.fillText('Kéo để di chuyển', centerX, centerY + 4);
         };
         image.src = imageUrl;
     }, [imageUrl, imageDimensions, cropArea]);
@@ -193,10 +232,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         // Check if mouse is within the crop area
         const cropX = offsetX + (cropArea.x * imageScale);
         const cropY = offsetY + (cropArea.y * imageScale);
-        const cropSize = cropArea.width * imageScale;
+        const cropWidth = cropArea.width * imageScale;
+        const cropHeight = cropArea.height * imageScale;
 
-        if (mouseX >= cropX && mouseX <= cropX + cropSize &&
-            mouseY >= cropY && mouseY <= cropY + cropSize) {
+        if (mouseX >= cropX && mouseX <= cropX + cropWidth &&
+            mouseY >= cropY && mouseY <= cropY + cropHeight) {
             setIsDragging(true);
             setDragStart({
                 x: mouseX,
@@ -254,10 +294,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         // Check if mouse is within the crop area
         const cropX = offsetX + (cropArea.x * imageScale);
         const cropY = offsetY + (cropArea.y * imageScale);
-        const cropSize = cropArea.width * imageScale;
+        const cropWidth = cropArea.width * imageScale;
+        const cropHeight = cropArea.height * imageScale;
 
-        const isOverCrop = mouseX >= cropX && mouseX <= cropX + cropSize &&
-            mouseY >= cropY && mouseY <= cropY + cropSize;
+        const isOverCrop = mouseX >= cropX && mouseX <= cropX + cropWidth &&
+            mouseY >= cropY && mouseY <= cropY + cropHeight;
 
         setIsHoveringCrop(isOverCrop);
     };
@@ -267,20 +308,41 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         if (!imageDimensions) return;
 
         const scaleValue = newScale[0];
-        const minSize = Math.min(imageDimensions.width, imageDimensions.height);
-        const newSize = minSize / scaleValue;
+
+        // Calculate new dimensions based on aspect ratio and scale
+        let newWidth: number;
+        let newHeight: number;
+
+        if (aspectRatio === 1) {
+            // Square crop
+            const minSize = Math.min(imageDimensions.width, imageDimensions.height);
+            newWidth = newHeight = minSize / scaleValue;
+        } else {
+            // Non-square crop
+            const imageRatio = imageDimensions.width / imageDimensions.height;
+
+            if (imageRatio > aspectRatio) {
+                // Image is wider - use height as reference
+                newHeight = imageDimensions.height / scaleValue;
+                newWidth = newHeight * aspectRatio;
+            } else {
+                // Image is taller - use width as reference
+                newWidth = imageDimensions.width / scaleValue;
+                newHeight = newWidth / aspectRatio;
+            }
+        }
 
         setCropArea(prev => {
             const centerX = prev.x + prev.width / 2;
             const centerY = prev.y + prev.height / 2;
-            const newX = Math.max(0, Math.min(imageDimensions.width - newSize, centerX - newSize / 2));
-            const newY = Math.max(0, Math.min(imageDimensions.height - newSize, centerY - newSize / 2));
+            const newX = Math.max(0, Math.min(imageDimensions.width - newWidth, centerX - newWidth / 2));
+            const newY = Math.max(0, Math.min(imageDimensions.height - newHeight, centerY - newHeight / 2));
 
             return {
                 x: newX,
                 y: newY,
-                width: newSize,
-                height: newSize
+                width: newWidth,
+                height: newHeight
             };
         });
         setScale(scaleValue);
@@ -351,7 +413,9 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         setIsProcessing(true);
         try {
-            const croppedFile = await cropImage(imageFile, cropArea, 300);
+            // For non-square crops, use appropriate output size
+            const outputSize = aspectRatio === 1 ? 300 : Math.max(cropArea.width, cropArea.height);
+            const croppedFile = await cropImage(imageFile, cropArea, outputSize);
             onCropComplete(croppedFile);
             onClose();
         } catch (error) {
@@ -361,11 +425,22 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         }
     };
 
+    // Get aspect ratio label for display
+    const getAspectRatioLabel = () => {
+        if (aspectRatio === 1) return 'Vuông (1:1)';
+        if (aspectRatio === 16 / 9) return 'Phong cảnh (16:9)';
+        if (aspectRatio === 2.35) return 'Siêu rộng (2.35:1)';
+        if (aspectRatio === 4 / 3) return 'Tiêu chuẩn (4:3)';
+        return `Tùy chỉnh (${aspectRatio.toFixed(2)}:1)`;
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Cắt ảnh đại diện</DialogTitle>
+                    <DialogTitle>
+                        Cắt ảnh - {getAspectRatioLabel()}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
@@ -396,7 +471,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                     </div>
 
                     {/* Zoom slider */}
-                    <div className="space-y-2 ">
+                    <div className="space-y-2">
                         <label className="text-sm font-medium">Thu phóng</label>
                         <div className="flex items-center justify-between text-lg font-bold">
                             <p>+</p>
@@ -409,18 +484,17 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                             step="0.1"
                             value={scale}
                             onChange={(e) => handleScaleChange([parseFloat(e.target.value)])}
-                            className="w-full h-2 !bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
+                            className="w-full h-2 bg-gray-300! rounded-lg appearance-none cursor-pointer slider"
                         />
-
                     </div>
 
-                    {/* Position controls - show for all non-square images */}
-                    {imageDimensions && imageDimensions.width !== imageDimensions.height && (
+                    {/* Position controls */}
+                    {imageDimensions && (
                         <div className="space-y-3">
                             <label className="text-sm font-medium">Vị trí cắt</label>
 
-                            {/* Horizontal positioning - always show for wide images */}
-                            {imageDimensions.width > imageDimensions.height && (
+                            {/* Horizontal positioning */}
+                            {(imageDimensions.width > cropArea.width) && (
                                 <div className="space-y-2">
                                     <div className="text-xs text-gray-600">Ngang:</div>
                                     <div className="flex space-x-2">
@@ -452,48 +526,52 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                                 </div>
                             )}
 
-                            {/* Vertical positioning - always show for tall images, and also for wide images */}
-                            <div className="space-y-2">
-                                <div className="text-xs text-gray-600">Dọc:</div>
-                                <div className="flex space-x-2">
+                            {/* Vertical positioning */}
+                            {(imageDimensions.height > cropArea.height) && (
+                                <div className="space-y-2">
+                                    <div className="text-xs text-gray-600">Dọc:</div>
+                                    <div className="flex space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={moveCropToTop}
+                                            className="flex-1"
+                                        >
+                                            Trên
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={moveCropCenterVertical}
+                                            className="flex-1"
+                                        >
+                                            Giữa
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={moveCropToBottom}
+                                            className="flex-1"
+                                        >
+                                            Dưới
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Center button */}
+                            {(imageDimensions.width > cropArea.width || imageDimensions.height > cropArea.height) && (
+                                <div className="flex justify-center">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={moveCropToTop}
-                                        className="flex-1"
+                                        onClick={moveCropToCenter}
+                                        className="px-6"
                                     >
-                                        Trên
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={moveCropCenterVertical}
-                                        className="flex-1"
-                                    >
-                                        Giữa
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={moveCropToBottom}
-                                        className="flex-1"
-                                    >
-                                        Dưới
+                                        Căn giữa hoàn toàn
                                     </Button>
                                 </div>
-                            </div>
-
-                            {/* Additional center button for full centering */}
-                            <div className="flex justify-center">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={moveCropToCenter}
-                                    className="px-6"
-                                >
-                                    Căn giữa hoàn toàn
-                                </Button>
-                            </div>
+                            )}
                         </div>
                     )}
 

@@ -3,10 +3,13 @@ import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
 import OpenAI from "openai";
 import { OPENAI_API_KEY, OPENAI_MODEL } from "../config/env.config";
-import { createNotificationData } from "../utils";
+import { createNotificationData, getCoordinatesFromAddress } from "../utils";
 import { prisma } from "../libs/prisma";
 import { AuthUserRequestDto } from "../types/auth.types";
 import { redis } from "../libs/redis";
+import { activityRepository } from "../repositories/activity.repository";
+import { PrismaClient } from "@prisma/client";
+import { userRepository } from "../repositories/user.repository";
 
 export const followCompany = async (req: Request, res: Response, next: NextFunction) => {
     const { id: user_id, company_id: myCompanyId } = req.user as AuthUserRequestDto;
@@ -247,8 +250,7 @@ export const unfollowCompany = async (req: Request, res: Response, next: NextFun
 }
 
 export const applyJob = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const job_id = req.params.jobId
     const { cv_id, description } = req.body;
 
@@ -452,8 +454,7 @@ export const feedbackCompany = async (req: Request, res: Response, next: NextFun
 }
 
 export const getLastestUserChat = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
 
     try {
         const messages = await prisma.messages.findMany({
@@ -588,8 +589,7 @@ export const applyEvent = async (req: Request, res: Response, next: NextFunction
 }
 
 export const feedbackJob = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const job_id = req.params.jobId;
     const { cv_id, is_good }: { cv_id: number, is_good: boolean } = req.body;
 
@@ -646,77 +646,22 @@ export const feedbackJob = async (req: Request, res: Response, next: NextFunctio
 }
 
 export const getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
+    const cacheKey = `profile:${id}`;
 
     try {
-        const user = await prisma.users.findFirst({
-            where: {
-                id
-            },
-            include: {
-                companies: company_id ? {
-                    select: {
-                        jobs: {
-                            select: {
-                                _count: {
-                                    select: {
-                                        applicants: {
-                                            where: {
-                                                status: 'pending'
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        status: true,
-                        background_url: true,
-                        business_certificate: true,
-                        description: true,
+        const cachedUser = await redis.get(cacheKey);
 
-                    }
-                } : false,
-                roles: {
-                    select: {
-                        role_name: true
-                    }
-                },
-                events: {
-                    where: {
-                        status: 'approved',
-                    },
-                    select: {
-                        _count: {
-                            select: {
-                                volunteers: {
-                                    where: {
-                                        status: 'pending'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                _count: {
-                    select: {
-                        userNotifications: {
-                            where: {
-                                is_read: false
-                            }
-                        },
-                        followedCompanies: true,
-                        savedJobs: true,
-                    }
-                }
-            },
-            omit: {
-                password: true,
-                firebase_uid: true,
-                is_deleted: true,
-                role_id: true
-            }
-        });
+        if (cachedUser) {
+            return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedUser));
+        }
+
+        const user = await userRepository.getUserProfile(id, company_id);
+
+        await redis.set(cacheKey, JSON.stringify({
+            success: true,
+            data: user
+        }), 'EX', 3600);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -737,11 +682,11 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
         address_country?: string,
         gender?: 'male' | 'female' | 'others',
     }
-    const { id, company_id } = req.user as AuthUserRequestDto;
+    const { id, company_id, roles } = req.user as AuthUserRequestDto;
     const { username, avatar_url, address_street, address_ward, address_city, address_country, gender } = req.body as RequestBody
 
-    if (username && username?.length < 10) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tên người dùng quá ngắn, tối thiểu 10 ký tự!"));
+    if (username && username?.length < 5) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tên người dùng quá ngắn, tối thiểu 5 ký tự!"));
     }
 
     if (avatar_url && !avatar_url?.includes("http")) {
@@ -753,91 +698,122 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
     }
 
     try {
-        const result = await prisma.$transaction(async (tx) => {
-            const user = await tx.users.update({
-                where: {
-                    id
-                },
-                data: {
-                    username,
-                    avatar_url,
-                    address_street,
-                    address_ward,
-                    address_city,
-                    address_country,
-                    gender
-                },
-                include: {
-                    companies: company_id ? {
-                        select: {
-                            jobs: {
-                                select: {
-                                    _count: {
-                                        select: {
-                                            applicants: {
-                                                where: {
-                                                    status: 'pending'
+        const result = await prisma.$transaction(async (tx: PrismaClient) => {
+            const [user, activity] = await Promise.all([
+                tx.users.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        username,
+                        avatar_url,
+                        address_street,
+                        address_ward,
+                        address_city,
+                        address_country,
+                        gender
+                    },
+                    include: {
+                        companies: company_id ? {
+                            select: {
+                                background_url: true,
+                                jobs: {
+                                    select: {
+                                        _count: {
+                                            select: {
+                                                applicants: {
+                                                    where: {
+                                                        status: 'pending'
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                    } : false,
-                    roles: {
-                        select: {
-                            role_name: true
-                        }
-                    },
-                    events: {
-                        where: {
-                            status: 'approved',
+                        } : false,
+                        roles: {
+                            select: {
+                                role_name: true
+                            }
                         },
-                        select: {
-                            _count: {
-                                select: {
-                                    volunteers: {
-                                        where: {
-                                            status: 'pending'
+                        events: {
+                            where: {
+                                status: 'approved',
+                            },
+                            select: {
+                                _count: {
+                                    select: {
+                                        volunteers: {
+                                            where: {
+                                                status: 'pending'
+                                            }
                                         }
+                                    }
+                                }
+                            }
+                        },
+                        _count: {
+                            select: {
+                                userNotifications: {
+                                    where: {
+                                        is_read: false
                                     }
                                 }
                             }
                         }
                     },
-                    _count: {
-                        select: {
-                            userNotifications: {
-                                where: {
-                                    is_read: false
-                                }
-                            }
-                        }
+                    omit: {
+                        password: true,
+                        firebase_uid: true,
+                        is_deleted: true,
+                        role_id: true
                     }
-                },
-                omit: {
-                    password: true,
-                    firebase_uid: true,
-                    is_deleted: true,
-                    role_id: true
-                }
-            });
+                }),
+                activityRepository.create(tx, id, `Bạn đã cập nhật hồ sơ cá nhân`)
+            ]);
 
-            await tx.userActivitiesHistory.create({
-                data: {
-                    activity_name: `Bạn đã cập nhật hồ sơ cá nhân`,
-                    user_id: id
+
+            if (roles.role_name === 'Company' && company_id) {
+                const hasCompleteAddress = address_street && address_ward && address_city && address_country;
+
+                if (hasCompleteAddress) {
+                    try {
+                        const coordinates = await getCoordinatesFromAddress({
+                            street: address_street,
+                            ward: address_ward,
+                            city: address_city,
+                            country: address_country
+                        });
+
+                        if (coordinates) {
+                            await tx.companies.update({
+                                where: {
+                                    id: company_id
+                                },
+                                data: {
+                                    latitude: coordinates.latitude,
+                                    longitude: coordinates.longitude
+                                }
+                            });
+                        }
+                    } catch (geoError) {
+                        console.error('Error updating company coordinates:', geoError);
+                        // Don't fail the entire transaction if geocoding fails
+                    }
                 }
-            });
+            }
 
             return user;
         });
 
         const cacheKey = `check_auth:${result.id}`;
+        const cacheProfileKey = `profile:${result.id}`;
 
-        await redis.del(cacheKey);
-        console.log('CACHE INVALIDATED');
+        await Promise.all([
+            redis.del(cacheKey),
+            redis.del(cacheProfileKey)
+        ]);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -1042,8 +1018,7 @@ export const getAllUserSavedJobs = async (req: Request, res: Response, next: Nex
 }
 
 export const getAllUserFollowedCompanies = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
 
     try {
         const followedCompanies = await prisma.followedCompanies.findMany({
@@ -1083,8 +1058,7 @@ export const getAllUserFollowedCompanies = async (req: Request, res: Response, n
 }
 
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const { title, description } = req.body as { title: string, description?: string };
 
     try {
@@ -1106,8 +1080,7 @@ export const createReport = async (req: Request, res: Response, next: NextFuncti
 }
 
 export const getAllUserReports = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const numberOfReports = 20;
     let page: number = parseInt(req.query.page as string || '1');
 

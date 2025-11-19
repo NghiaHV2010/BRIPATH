@@ -2,7 +2,13 @@ import { create } from "zustand";
 import { HTTP_SUCCESS } from "../constants/httpCode";
 import type { AxiosError, AxiosResponse } from "axios";
 import axiosConfig from "../config/axios.config";
-import { registerValidate as apiRegisterValidate, sendRegisterEmail as apiSendRegisterEmail, login as apiLogin, logout as apiLogout } from "../api/auth_api";
+import {
+	registerValidate as apiRegisterValidate,
+	sendRegisterEmail as apiSendRegisterEmail,
+	login as apiLogin,
+	logout as apiLogout,
+	verify2FALogin as apiVerify2FALogin
+} from "../api/auth_api";
 
 // Reflect backend /check response shape (subset). Feel free to expand as needed.
 export interface AuthUser {
@@ -12,6 +18,7 @@ export interface AuthUser {
 	email: string;
 	phone_verified: boolean;
 	company_id?: string | null;
+	is_2fa_enabled: boolean;
 	roles: {
 		role_name: string;
 	};
@@ -24,16 +31,20 @@ interface AuthState {
 	isProcessing: boolean;
 	authUser: AuthUser | null;
 	error: string | null;
+	requires2FA: boolean;
+	tempToken: string | null;
 	checkAuth: () => Promise<void>;
 	registerValidate: (u: string, e: string, p: string) => Promise<void>;
 	sendRegisterEmail: () => Promise<void>;
 	clearError: () => void;
-	login?: (email: string, password: string) => Promise<void>;
+	login?: (email: string, password: string) => Promise<{ requires2FA: boolean; tempToken?: string }>;
+	verify2FALogin?: (tempToken: string, token: string) => Promise<void>;
 	logout?: () => Promise<void>;
 	updateUser: (updates: Partial<AuthUser>) => void;
 	// Helper methods for role checking
 	isCompany: () => boolean;
 	isUser: () => boolean;
+	isAdmin: () => boolean;
 	hasCompany: () => boolean;
 }
 
@@ -42,6 +53,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 	isProcessing: false,
 	authUser: null,
 	error: null,
+	requires2FA: false,
+	tempToken: null,
 
 	checkAuth: async () => {
 		try {
@@ -99,23 +112,55 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 	},
 
 	login: async (email: string, password: string) => {
-		set({ isProcessing: true, error: null });
+		set({ isProcessing: true, error: null, requires2FA: false, tempToken: null });
 		try {
-			// Trim to prevent accidental space issues that can cause 400 invalid credentials
 			const cleanEmail = email.trim();
 			const cleanPassword = password.trim();
 			const data = await apiLogin(cleanEmail, cleanPassword);
-			// giả định backend trả user ở data.data || data.user
+
+			// Check if 2FA is required
+			if (data.requires_2fa) {
+				set({
+					requires2FA: true,
+					tempToken: data.temp_token,
+					isProcessing: false
+				});
+				return {
+					requires2FA: true,
+					tempToken: data.temp_token
+				};
+			}
+
+			// Normal login without 2FA
 			const user = (data && (data.data || data.user)) || null;
-			set({ authUser: user });
+			set({ authUser: user, isProcessing: false });
+			return { requires2FA: false };
 		} catch (err) {
 			const axiosErr = err as AxiosError<unknown>;
 			const resp = (axiosErr.response?.data || {}) as Record<string, unknown>;
 			const message = (typeof resp.message === 'string' && resp.message) || (typeof resp.error === 'string' && resp.error) || 'Đăng nhập thất bại';
-			set({ error: message, authUser: null });
+			set({ error: message, authUser: null, isProcessing: false });
 			throw err;
-		} finally {
-			set({ isProcessing: false });
+		}
+	},
+
+	verify2FALogin: async (tempToken: string, token: string) => {
+		set({ isProcessing: true, error: null });
+		try {
+			const data = await apiVerify2FALogin(tempToken, token);
+			const user = (data && (data.data || data.user)) || null;
+			set({
+				authUser: user,
+				requires2FA: false,
+				tempToken: null,
+				isProcessing: false
+			});
+		} catch (err) {
+			const axiosErr = err as AxiosError<unknown>;
+			const resp = (axiosErr.response?.data || {}) as Record<string, unknown>;
+			const message = (typeof resp.message === 'string' && resp.message) || (typeof resp.error === 'string' && resp.error) || 'Xác thực 2FA thất bại';
+			set({ error: message, isProcessing: false });
+			throw err;
 		}
 	},
 

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticationMiddleware, authorizationMiddleware } from "../middlewares/auth.middleware";
-import { createCompany, feedbackCV, getAllCompanies, getApplicantsByStatus, getCompaniesByFilter, getCompanyByID, updateApplicantStatus, getAllCompanyFields, getAllCompanyLabel, updateCompanyProfile, getRecommendedCompanies, getFeedbackByCompanyID, compareCvandJob, getApplicantByID, compareCvandJobStats } from "../controllers/company.controller";
+import { createCompany, feedbackCV, getAllCompanies, getApplicantsByStatus, getCompaniesByFilter, getCompanyByID, updateApplicantStatus, getAllCompanyFields, getAllCompanyLabel, updateCompanyProfile, getRecommendedCompanies, getFeedbackByCompanyID, compareCvandJob, getApplicantByID, compareCvandJobStats, getAllApplicants, filterSuitableApplicants, getAllSuitableApplicants } from "../controllers/company.controller";
+import { subscriptionMiddleware } from "../middlewares";
 
 const companyRouter = Router();
 
@@ -21,7 +22,10 @@ companyRouter.post('/feedback/cv/:cvId', authenticationMiddleware, authorization
 
 companyRouter.get('/applicants/:jobId', authenticationMiddleware, authorizationMiddleware("Company"), getApplicantsByStatus);
 companyRouter.get('/applicant/:applicantId', authenticationMiddleware, authorizationMiddleware("Company"), getApplicantByID);
-companyRouter.put('/applicant/:applicantId', authenticationMiddleware, authorizationMiddleware("Company"), updateApplicantStatus);
+companyRouter.put('/applicants/status', authenticationMiddleware, authorizationMiddleware("Company"), updateApplicantStatus);
+companyRouter.get('/all-applicants/:jobId', authenticationMiddleware, authorizationMiddleware("Company"), getAllApplicants);
+companyRouter.get('/suitable-applicants/:jobId', authenticationMiddleware, authorizationMiddleware("Company"), subscriptionMiddleware(), filterSuitableApplicants);
+companyRouter.get('/suitable-all-applicants/:jobId', authenticationMiddleware, authorizationMiddleware("Company"), subscriptionMiddleware(), getAllSuitableApplicants);
 
 companyRouter.get('/compare-stats/:cvId/:jobId', authenticationMiddleware, authorizationMiddleware("Company"), compareCvandJobStats);
 

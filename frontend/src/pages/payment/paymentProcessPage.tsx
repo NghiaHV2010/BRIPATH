@@ -18,7 +18,7 @@ interface PaymentPlan {
   features: any[];
 }
 
-interface PaymentProcessPageProps {}
+interface PaymentProcessPageProps { }
 
 const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
   const navigate = useNavigate();
@@ -69,9 +69,9 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
       const getTransferContent = () => {
         return `TKP${SEPAY_VA} SEPAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       };
-      
+
       const transferContent = getTransferContent();
-      
+
       // Call backend to create order and save mapping
       const response = await axiosConfig.post('/sepay/create-order', {
         amount: plan.price,
@@ -98,10 +98,10 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
       setPaymentData(paymentInfo);
       setIsCountdownActive(true);
-      
+
       // Start polling for payment status
       startPaymentPolling(response.data.data.orderId);
-      
+
     } catch (error) {
       console.error('SePay payment error:', error);
       toast.error('Có lỗi xảy ra khi tạo thanh toán');
@@ -113,8 +113,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
   const cancelAllPendingOrders = async () => {
     try {
-      const response = await axiosConfig.delete('/sepay/cancel-all');
-      console.log(`Cancelled ${response.data.cancelledCount} pending orders`);
+      await axiosConfig.delete('/sepay/cancel-all');
     } catch (error) {
       console.error('Error cancelling orders:', error);
     }
@@ -143,18 +142,18 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     pollingIntervalRef.current = setInterval(async () => {
       try {
         const response = await axiosConfig.get(`/sepay/status/${orderId}`);
-        
+
         if (response.data.success && response.data.data.status === 'success') {
           setPaymentStatus('success');
           setIsCountdownActive(false);
           clearInterval(pollingIntervalRef.current!);
           pollingIntervalRef.current = null;
           toast.success('Thanh toán thành công!');
-          
+
           // Redirect to success page after 3 seconds
           setTimeout(() => {
-            navigate('/payment/success', { 
-              state: { plan, paymentMethod, orderId } 
+            navigate('/payment/success', {
+              state: { plan, paymentMethod, orderId }
             });
           }, 3000);
         }
@@ -179,23 +178,16 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleQRScan = (result: string) => {
-    console.log('QR Code scanned:', result);
-    toast.success('Đã quét mã QR thành công!');
-    // Here you can process the QR code result
-    // For example, extract payment information from the QR code
-  };
-
   const handleCountdownTimeUp = async () => {
     if (!paymentData?.orderId) return;
-    
+
     try {
       // Clear polling interval
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
       }
-      
+
       // Auto cancel order when time is up
       await axiosConfig.delete(`/sepay/cancel/${paymentData.orderId}`);
       toast.error('Hết thời gian thanh toán. Đơn hàng đã được hủy tự động.');
@@ -233,7 +225,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                   <span>Quay lại</span>
                 </Button>
               </div>
-              
+
               <div className="text-right">
                 <h1 className="text-lg font-semibold text-blue-600">
                   Đang tạo thanh toán
@@ -279,7 +271,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                   <span>Quay lại</span>
                 </Button>
               </div>
-              
+
               <div className="text-right">
                 <h1 className="text-lg font-semibold text-green-600">
                   Thanh toán thành công
@@ -303,13 +295,13 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                 Gói dịch vụ của bạn đã được kích hoạt
               </p>
               <div className="space-y-3">
-                <Button 
+                <Button
                   onClick={() => navigate('/subscriptions')}
                   className="w-full"
                 >
                   Về trang gói dịch vụ
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => navigate('/profile')}
                   className="w-full"
@@ -342,7 +334,7 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                   <span>Quay lại</span>
                 </Button>
               </div>
-              
+
               <div className="text-right">
                 <h1 className="text-lg font-semibold text-red-600">
                   Thanh toán thất bại
@@ -366,13 +358,13 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
                 Có lỗi xảy ra trong quá trình thanh toán
               </p>
               <div className="space-y-3">
-                <Button 
+                <Button
                   onClick={() => navigate('/subscriptions')}
                   className="w-full"
                 >
                   Về trang gói dịch vụ
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => navigate('/profile')}
                   className="w-full"
@@ -394,17 +386,17 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleBackClick}
-                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
-                >
+                className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Quay lại</span>
               </Button>
             </div>
-            
+
             <div className="text-right">
               <h1 className="text-lg font-semibold text-gray-900">
                 Thanh toán SePay
@@ -428,175 +420,175 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
             </p>
           </div>
 
-        {paymentData && (
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Payment Countdown */}
-            {isCountdownActive && paymentStatus === 'pending' && (
-              <div className="md:col-span-2">
-                <PaymentCountdown
-                  onTimeUp={handleCountdownTimeUp}
-                  duration={10}
+          {paymentData && (
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Payment Countdown */}
+              {isCountdownActive && paymentStatus === 'pending' && (
+                <div className="md:col-span-2">
+                  <PaymentCountdown
+                    onTimeUp={handleCountdownTimeUp}
+                    duration={10}
+                  />
+                </div>
+              )}
+
+              {/* Payment Instructions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <QrCode className="h-5 w-5 mr-2" />
+                    Hướng dẫn thanh toán
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2">Thông tin chuyển khoản:</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Số tài khoản:</span>
+                        <div className="flex items-center">
+                          <span className="font-mono font-bold">{SEPAY_VA}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard(SEPAY_VA)}
+                            className="ml-2 h-6 w-6 p-0"
+                          >
+                            {copied ? <CheckCircle className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Ngân hàng:</span>
+                        <span className="font-semibold">{SEPAY_BANK}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Số tiền:</span>
+                        <span className="font-bold text-blue-600">{formatPrice(paymentData.amount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Nội dung:</span>
+                        <div className="flex items-center">
+                          <span className="font-mono text-xs">{paymentData.transferContent.split(' ').pop()}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard(paymentData.transferContent.split(' ').pop() || '')}
+                            className="ml-2 h-6 w-6 p-0"
+                          >
+                            {copied ? <CheckCircle className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="flex items-start">
+                      <AlertCircle className="h-5 w-5 text-yellow-600 mr-2 mt-0.5 shrink-0" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-yellow-800 mb-1">Lưu ý quan trọng:</p>
+                        <ul className="text-yellow-700 space-y-1">
+                          <li>• Chuyển khoản chính xác số tiền: <strong>{formatPrice(paymentData.amount)}</strong></li>
+                          <li>• Nội dung chuyển khoản phải chính xác: <strong>{paymentData.transferContent.split(' ').pop()}</strong></li>
+                          <li>• Giao dịch sẽ được xử lý tự động trong vòng 5-10 phút</li>
+                          <li>• Không cần mã số thuế, chỉ cần tài khoản cá nhân</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* QR Code with scanner layout */}
+              <div className="space-y-4">
+                <QRCodeDisplay
+                  qrCodeUrl={paymentData.qrCodeUrl}
+                  title="Mã QR thanh toán"
+                  description="Quét mã QR để chuyển khoản nhanh chóng"
                 />
+                <QRScannerButton
+                  onScan={() => { return; }}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Mở camera quét QR
+                </QRScannerButton>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Payment Instructions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <QrCode className="h-5 w-5 mr-2" />
-                  Hướng dẫn thanh toán
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2">Thông tin chuyển khoản:</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Số tài khoản:</span>
-                      <div className="flex items-center">
-                        <span className="font-mono font-bold">{SEPAY_VA}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard(SEPAY_VA)}
-                          className="ml-2 h-6 w-6 p-0"
-                        >
-                          {copied ? <CheckCircle className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Ngân hàng:</span>
-                      <span className="font-semibold">{SEPAY_BANK}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Số tiền:</span>
-                      <span className="font-bold text-blue-600">{formatPrice(paymentData.amount)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Nội dung:</span>
-                      <div className="flex items-center">
-                        <span className="font-mono text-xs">{paymentData.transferContent.split(' ').pop()}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard(paymentData.transferContent.split(' ').pop() || '')}
-                          className="ml-2 h-6 w-6 p-0"
-                        >
-                          {copied ? <CheckCircle className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+          {/* Order Summary */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Tóm tắt đơn hàng</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Gói dịch vụ:</span>
+                  <span className="font-semibold">{plan?.plan_name || 'N/A'}</span>
                 </div>
-
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <div className="flex items-start">
-                    <AlertCircle className="h-5 w-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <p className="font-semibold text-yellow-800 mb-1">Lưu ý quan trọng:</p>
-                      <ul className="text-yellow-700 space-y-1">
-                        <li>• Chuyển khoản chính xác số tiền: <strong>{formatPrice(paymentData.amount)}</strong></li>
-                        <li>• Nội dung chuyển khoản phải chính xác: <strong>{paymentData.transferContent.split(' ').pop()}</strong></li>
-                        <li>• Giao dịch sẽ được xử lý tự động trong vòng 5-10 phút</li>
-                        <li>• Không cần mã số thuế, chỉ cần tài khoản cá nhân</li>
-                      </ul>
-                    </div>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Thời gian:</span>
+                  <span>{plan?.duration_months || 0} tháng</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex justify-between">
+                  <span>Phương thức:</span>
+                  <span>SePay - Chuyển khoản</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Tổng cộng:</span>
+                  <span className="text-blue-600">{formatPrice(plan.price)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* QR Code with scanner layout */}
-            <div className="space-y-4">
-              <QRCodeDisplay
-                qrCodeUrl={paymentData.qrCodeUrl}
-                title="Mã QR thanh toán"
-                description="Quét mã QR để chuyển khoản nhanh chóng"
-              />
-              <QRScannerButton
-                onScan={handleQRScan}
-                variant="outline"
-                className="w-full"
-              >
-                Mở camera quét QR
-              </QRScannerButton>
-            </div>
-          </div>
-        )}
+          {/* Status Indicator */}
+          <Card className="mt-8">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-center space-x-4">
+                <Clock className="h-6 w-6 text-blue-500 animate-pulse" />
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900">Đang chờ thanh toán</h3>
+                  <p className="text-sm text-gray-600">
+                    Hệ thống sẽ tự động xác nhận khi nhận được chuyển khoản
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Order Summary */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Tóm tắt đơn hàng</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Gói dịch vụ:</span>
-                <span className="font-semibold">{plan?.plan_name || 'N/A'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Thời gian:</span>
-                <span>{plan?.duration_months || 0} tháng</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Phương thức:</span>
-                <span>SePay - Chuyển khoản</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Tổng cộng:</span>
-                <span className="text-blue-600">{formatPrice(plan.price)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Action Buttons */}
+          <div className="flex justify-center mt-8 space-x-4">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                try {
+                  const response = await axiosConfig.get(`/sepay/status/${paymentData?.orderId}`);
 
-        {/* Status Indicator */}
-        <Card className="mt-8">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center space-x-4">
-              <Clock className="h-6 w-6 text-blue-500 animate-pulse" />
-              <div className="text-center">
-                <h3 className="font-semibold text-gray-900">Đang chờ thanh toán</h3>
-                <p className="text-sm text-gray-600">
-                  Hệ thống sẽ tự động xác nhận khi nhận được chuyển khoản
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="flex justify-center mt-8 space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={async () => {
-              try {
-                const response = await axiosConfig.get(`/sepay/status/${paymentData?.orderId}`);
-                
-                if (response.data.success) {
-                  if (response.data.data.status === 'success') {
-                    toast.success('Thanh toán đã được xác nhận!');
-                    setPaymentStatus('success');
+                  if (response.data.success) {
+                    if (response.data.data.status === 'success') {
+                      toast.success('Thanh toán đã được xác nhận!');
+                      setPaymentStatus('success');
+                    } else {
+                      toast.info('Chưa nhận được thanh toán. Vui lòng kiểm tra lại.');
+                    }
                   } else {
-                    toast.info('Chưa nhận được thanh toán. Vui lòng kiểm tra lại.');
+                    toast.error('Không thể kiểm tra trạng thái thanh toán');
                   }
-                } else {
-                  toast.error('Không thể kiểm tra trạng thái thanh toán');
+                } catch (error) {
+                  toast.error('Lỗi khi kiểm tra trạng thái');
                 }
-              } catch (error) {
-                toast.error('Lỗi khi kiểm tra trạng thái');
-              }
-            }}
-            className="px-6 py-2"
-          >
-            <Clock className="h-4 w-4 mr-2" />
-            Kiểm tra trạng thái
-          </Button>
-        </div>
+              }}
+              className="px-6 py-2"
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Kiểm tra trạng thái
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -612,13 +604,13 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex gap-3">
-            <AlertDialogCancel 
+            <AlertDialogCancel
               onClick={handleCancelDialog}
               className="flex-1"
             >
               Không
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleConfirmCancel}
               className="flex-1 bg-red-600 hover:bg-red-700"
             >

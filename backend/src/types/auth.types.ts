@@ -12,6 +12,7 @@ export interface AuthUserRequestDto {
     email: string;
     phone_verified: boolean;
     company_id?: string | null;
+    is_2fa_enabled: boolean;
     roles: {
         role_name: string;
     };

@@ -157,7 +157,15 @@ export default function FollowedCompaniesPage() {
                       <div className="flex items-start gap-4">
                         <div className="shrink-0">
                           <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Building2 className="h-6 w-6 text-white" />
+                            {company.users?.avatar_url ? (
+                              <img
+                                src={company.users.avatar_url}
+                                alt={company.users.username || 'Công ty'}
+                                className="h-full w-full rounded-md object-contain"
+                              />
+                            ) : (
+                              <Building2 className="h-6 w-6 text-white" />
+                            )}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">

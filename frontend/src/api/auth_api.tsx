@@ -1,12 +1,12 @@
 import axiosConfig from "../config/axios.config";
 
 export const login = async (email: string, password: string) => {
-  const res = await axiosConfig.post(
-    `/login`,
-    { email, password },
-    { withCredentials: true }
-  );
-  return res.data;
+  try {
+    const response = await axiosConfig.post('/login', { email, password });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
 };
 
 export const logout = async () => {
@@ -42,4 +42,44 @@ export const verifyRegisterEmail = async (token: string) => {
 export const verifySMS = async (token: string) => {
   const res = await axiosConfig.post(`/verify-sms`, { token });
   return res.data;
+};
+
+export const create2FAQR = async () => {
+  try {
+    const response = await axiosConfig.get('/enable-2fa');
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};
+
+export const verify2FA = async (token: string) => {
+  try {
+    const response = await axiosConfig.post('/verify-2fa', { token });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};
+
+export const disable2FA = async (token: string) => {
+  try {
+    const response = await axiosConfig.post('/disable-2fa', { token });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};
+
+export const verify2FALogin = async (tempToken: string, token: string) => {
+  try {
+    const response = await axiosConfig.post('/login/verify-2fa', {
+      temp_token: tempToken,
+      token
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
 };

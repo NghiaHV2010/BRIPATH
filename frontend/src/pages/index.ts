@@ -1,4 +1,3 @@
-
 // Login pages
 export { default as ForgotPasswordPage } from "./login/forgotPasswordPage";
 export { default as LoginPage } from "./login/loginPage";
@@ -29,3 +28,6 @@ export { default as CompaniesPage } from "./company/CompaniesPage";
 
 // Admin pages
 export { default as AdminPage } from "./admin/adminPage";
+
+// 2FA setup page
+export { default as Setup2FAPage } from "./auth/Setup2FAPage";

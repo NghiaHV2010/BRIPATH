@@ -83,17 +83,17 @@ export default function CompanyCard({
 
         <CardContent className="p-6 -mt-10 relative">
           {/* Avatar */}
-          <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 border-4 border-white mx-auto relative">
+          <div className="size-24 bg-white rounded-lg shadow-lg flex items-center justify-center mb-4 border-4 border-white mx-auto relative">
             {is_verified && (
-              <div className="absolute -bottom-1 -right-1 bg-cyan-400 rounded-full p-0.5">
-                <CircleChevronDown className="size-4 text-white" />
+              <div className="absolute -top-2 -right-3 bg-cyan-400 rounded-full p-0.5">
+                <CircleChevronDown className="size-5 text-white" />
               </div>
             )}
             {users?.avatar_url ? (
               <img
                 src={users.avatar_url}
                 alt={users.username || "Company"}
-                className="w-full h-full rounded-full object-contain"
+                className="w-full h-full object-contain"
               />
             ) : (
               <Building2 className="w-8 h-8 text-blue-600" />
@@ -148,13 +148,3 @@ export default function CompanyCard({
     </>
   );
 }
-
-// note:
-
-// + quizlanding page -> check xem có get user career path có data thì hiện
-
-// + CompanyPage      -> sửa phần filter, phần theo dõi company y như savejob bên job
-
-// + Nan khi follow
-
-// CHECK LẠI BẢNG userActivitiesHistory -> activity name 100 hơi ít

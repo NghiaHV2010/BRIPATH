@@ -23,17 +23,23 @@ export const uploadUserCV = async <T>(file: File) => {
   const formData = new FormData();
   formData.append("cv", file);
 
-  const response = await axiosConfig.post<UploadCVResponse<T>>(
-    "/cv/upload",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
+  try {
+    const response = await axiosConfig.post<UploadCVResponse<T>>(
+      "/cv/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
       }
-    }
-  );
+    );
 
-  return response.data.data;
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    // @ts-ignore
+    throw error.response.data;
+  }
 };
 
 export const fetchUserCVs = async (): Promise<ResumeListItem[]> => {

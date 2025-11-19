@@ -9,7 +9,6 @@ interface CompanyCarouselProps {
   companies: CompanySummary[];
   onCompanyClick?: (companyId: string) => void;
   title?: string;
-  // isFixed prop not used for simplicity and consistency with JobCarousel's display approach
 }
 
 export default function CompanyCarousel({
@@ -159,7 +158,7 @@ export default function CompanyCarousel({
             >
               {/* Render mỗi slide */}
               {Array.from({ length: totalSlides }).map((_, slideIndex) => (
-                <div key={slideIndex} className="w-full flex-shrink-0">
+                <div key={slideIndex} className="w-full shrink-0">
                   {/* Grid hiển thị 1, 2, hoặc 3 cột */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {displayCompanies
@@ -188,11 +187,10 @@ export default function CompanyCarousel({
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex
-                      ? "bg-blue-600"
-                      : "bg-slate-300 hover:bg-slate-400"
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex
+                    ? "bg-blue-600"
+                    : "bg-slate-300 hover:bg-slate-400"
+                    }`}
                   aria-label={`Chuyển đến slide ${index + 1}`}
                 />
               ))}

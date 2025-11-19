@@ -30,24 +30,6 @@ export const createPayment = async (req: Request, res: Response) => {
                 }
             });
 
-            // Create activity history
-            await tx.userActivitiesHistory.create({
-                data: {
-                    user_id,
-                    activity_name: `Bạn đã thanh toán ${amount} ${currency || 'VND'} thành công qua ${payment_gateway}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
-                }
-            });
-
-            // Create notification
-            await tx.userNotifications.create({
-                data: {
-                    title: 'Thanh toán thành công!',
-                    content: `Bạn đã thanh toán đơn hàng ${transaction_id} thành công với số tiền ${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
-                    type: 'pricing_plan',
-                    user_id: user_id
-                }
-            });
-
             // Create subscription if plan_id is provided and payment is successful
             if (plan_id && status === 'success') {
                 const plan = await tx.membershipPlans.findUnique({
@@ -59,38 +41,38 @@ export const createPayment = async (req: Request, res: Response) => {
                     const endDate = new Date();
                     endDate.setMonth(endDate.getMonth() + plan.duration_months);
 
-                    await tx.subscriptions.create({
-                        data: {
-                            user_id: user_id,
-                            amount_paid: BigInt(amount),
-                            payment_id: payment.id,
-                            plan_id: plan.id,
-                            start_date: startDate,
-                            end_date: endDate,
-                            status: 'on_going',
-                            remaining_urgent_jobs: plan.urgent_jobs_limit || 0,
-                            remaining_quality_jobs: plan.quality_jobs_limit || 0,
-                            remaining_total_jobs: plan.total_jobs_limit || 0
-                        }
-                    });
-
-                    // // Create additional activity history for subscription
-                    // await tx.userActivitiesHistory.create({
-                    //     data: {
-                    //         user_id,
-                    //         activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
-                    //     }
-                    // });
-
-                    // // Create additional notification for subscription activation
-                    // await tx.userNotifications.create({
-                    //     data: {
-                    //         title: 'Gói dịch vụ đã được kích hoạt!',
-                    //         content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-                    //         type: 'pricing_plan',
-                    //         user_id: user_id
-                    //     }
-                    // });
+                    await Promise.all([
+                        tx.subscriptions.create({
+                            data: {
+                                user_id: user_id,
+                                amount_paid: BigInt(amount),
+                                payment_id: payment.id,
+                                plan_id: plan.id,
+                                start_date: startDate,
+                                end_date: endDate,
+                                status: 'on_going',
+                                remaining_urgent_jobs: plan.urgent_jobs_limit || 0,
+                                remaining_quality_jobs: plan.quality_jobs_limit || 0,
+                                remaining_total_jobs: plan.total_jobs_limit || 0
+                            }
+                        }),
+                        // Create additional activity history for subscription
+                        tx.userActivitiesHistory.create({
+                            data: {
+                                user_id,
+                                activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
+                            }
+                        }),
+                        // // Create additional notification for subscription activation
+                        tx.userNotifications.create({
+                            data: {
+                                title: 'Gói dịch vụ đã được kích hoạt!',
+                                content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+                                type: 'pricing_plan',
+                                user_id: user_id
+                            }
+                        }),
+                    ]);
                 }
             }
 

@@ -244,3 +244,12 @@ export const getUserCVs = async (): Promise<CV[]> => {
     throw error;
   }
 };
+
+export const getRecommendedJobs = async () => {
+  try {
+    const response = await axiosConfig.get('/recommend-jobs');
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};

@@ -18,18 +18,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
-import { CompanyCarousel } from "@/components/company";
-import { useCompanyStore } from "../../store/company.store";
 
 export default function QuizLandingPage() {
   const navigate = useNavigate();
   const [starting, setStarting] = useState(false);
   const [hasCareerPath, setHasCareerPath] = useState(false);
-  const { companies, fetchCompanies } = useCompanyStore();
-
-  useEffect(() => {
-    fetchCompanies(1).catch(() => {});
-  }, [fetchCompanies]);
 
   useEffect(() => {
     let mounted = true;
@@ -87,7 +80,7 @@ export default function QuizLandingPage() {
     const delay = new Promise((resolve) => setTimeout(resolve, 500));
     try {
       await Promise.all([
-        resetAnswer().catch(() => {}),
+        resetAnswer().catch(() => { }),
         fetchQuestions(),
         delay, // đảm bảo tối thiểu 500ms loading
       ]);
@@ -199,7 +192,7 @@ export default function QuizLandingPage() {
 
             <div className="min-h-screen bg-transparent flex flex-col items-center p-0 w-full max-w-none">
               {/* Section 1 */}
-              <div className="w-full py-10 px-4 md:px-12 lg:px-24 xl:px-40 bg-gradient-to-b from-white via-emerald-100 to-white">
+              <div className="w-full py-10 px-4 md:px-12 lg:px-24 xl:px-40 bg-linear-to-b from-white via-emerald-100 to-white">
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">
                   Các nhóm tính cách bạn nên biết
                 </h2>
@@ -252,7 +245,7 @@ export default function QuizLandingPage() {
                       className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-transform hover:scale-[1.02]"
                     >
                       <div
-                        className={`bg-gradient-to-br ${item.color} h-24 sm:h-28 md:h-32 rounded-lg mb-3 flex items-center justify-center`}
+                        className={`bg-linear-to-br ${item.color} h-24 sm:h-28 md:h-32 rounded-lg mb-3 flex items-center justify-center`}
                       >
                         <div className="text-white text-center">
                           <div className="text-xl sm:text-2xl font-bold">
@@ -271,26 +264,8 @@ export default function QuizLandingPage() {
                 </div>
               </div>
 
-              <div>
-                <div className="relative left-1/2 right-1/2 w-[95%] max-w-[1700px] -translate-x-1/2 mb-12 mt-12">
-                  {companies && companies.length > 0 && (
-                    <CompanyCarousel
-                      companies={companies.slice(0, 6)}
-                      onCompanyClick={(companyId: string) => {
-                        sessionStorage.setItem(
-                          "companyScrollPosition",
-                          window.scrollY.toString()
-                        );
-                        sessionStorage.setItem("companyPage", "1");
-                        navigate(`/companies/${companyId}`);
-                      }}
-                      title="Công ty nổi bật"
-                    />
-                  )}
-                </div>
-              </div>
               {/* Section 2 */}
-              <div className="w-full py-20 bg-gradient-to-b from-white via-emerald-50 to-white">
+              <div className="w-full py-20 bg-linear-to-b from-white via-emerald-50 to-white">
                 <div className="max-w-5xl mx-auto px-6 text-center">
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                     Hướng dẫn khám phá lộ trình nghề nghiệp
@@ -321,7 +296,7 @@ export default function QuizLandingPage() {
                         key={idx}
                         className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                       >
-                        <div className="text-5xl flex-shrink-0">
+                        <div className="text-5xl shrink-0">
                           {guide.icon}
                         </div>
                         <div className="text-left">

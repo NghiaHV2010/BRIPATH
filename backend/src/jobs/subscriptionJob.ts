@@ -3,7 +3,7 @@ import { broadcastToClients } from "../libs/wsServer";
 import { prisma } from "../libs/prisma";
 
 
-// Cron mỗi 5 phút kiểm tra "Việc gấp" trong giờ vàng
+// Cron mỗi phút kiểm tra "Việc gấp" trong giờ vàng
 cron.schedule("* * * * *", async () => {
     const currentTimeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
     const vietnamTime = new Date(currentTimeString);
@@ -31,6 +31,7 @@ cron.schedule("* * * * *", async () => {
         LEFT JOIN users u ON u."company_id" = c.id
         LEFT JOIN applicants a ON a.job_id = j.id
         INNER JOIN "jobLabels" l ON j.label_id = l.id
+        WHERE jl.label_name = 'Việc gấp'
         ORDER BY RANDOM()
         LIMIT 12;
         `.catch((error) => {

@@ -199,23 +199,65 @@ export const getApplicantsByJobId = async (
   }
 };
 
+// Update the function signature and implementation
 export const updateApplicantStatus = async (
+  applicants: Array<{
+    applicant_id: number;
+    job_id: string;
+    feedback?: string;
+    status: 'approved' | 'rejected';
+  }>
+): Promise<{
+  success: boolean;
+  data: {
+    count: number;
+    applicants: Array<{
+      cv_id: number;
+      job_id: string;
+      status: string;
+      feedback: string | null;
+      verified_date: string;
+      cvs: {
+        id: number;
+        fullname: string;
+        email: string;
+        users_id: string;
+      };
+    }>;
+  };
+}> => {
+  try {
+    const response = await axiosConfig.put('/applicants/status', {
+      applicants
+    });
+
+    if (!response.data.success) {
+      throw new Error('Failed to update applicant status');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating applicant status:", error);
+    throw error;
+  }
+};
+
+// Keep the old function for single updates if needed (backward compatibility)
+export const updateSingleApplicantStatus = async (
   applicantId: number,
   job_id: string,
   feedback: string,
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'approved' | 'rejected'
 ): Promise<boolean> => {
   try {
-    const response = await axiosConfig.put(`/applicant/${applicantId}`, {
+    const response = await updateApplicantStatus([{
+      applicant_id: applicantId,
       job_id,
       feedback,
       status
-    });
+    }]);
 
-    if (!response.data.success)
-      return false;
-
-    return true;
+    return response.success;
   } catch (error) {
     console.error("Error updating applicant status:", error);
     throw error;
@@ -274,6 +316,196 @@ export const compareCvAndJobStats = async (cvId: number, jobId: string): Promise
     return null;
   } catch (error) {
     console.error("Error comparing CV and job stats:", error);
+    throw error;
+  }
+};
+
+export interface UpdateCompanyProfileRequest {
+  background_url?: string;
+  company_website?: string;
+  description?: string;
+  employees?: number;
+  // Add other fields as needed
+}
+
+export const updateCompanyProfile = async (companyId: string, data: UpdateCompanyProfileRequest) => {
+  try {
+    const response = await axiosConfig.put(`/company/${companyId}`, data);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error;
+  }
+};
+
+export const getRecommendedCompanies = async () => {
+  try {
+    const response = await axiosConfig.get('/recommended-companies');
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};
+
+// Add this interface
+export interface AllApplicantsResponse {
+  success: boolean;
+  data: {
+    job_title: string;
+    applicants: Array<{
+      cv_id: number;
+      job_id: string;
+      description: string | null;
+      apply_date: string;
+      verified_date: string | null;
+      status: string;
+      feedback: string | null;
+      cvs: {
+        id: number;
+        fullname: string;
+        age: number | null;
+        gender: string | null;
+        email: string;
+        phone: string;
+        address: string;
+        introduction: string | null;
+        soft_skills: string[];
+        primary_skills: string[];
+        hobbies: string | null;
+        others: string | null;
+        apply_job: string;
+        career_goal: string | null;
+        awards: Array<{
+          title: string;
+          description: string | null;
+          start_date: string | null;
+          end_date: string | null;
+        }>;
+        certificates: Array<{
+          title: string;
+          link: string | null;
+          description: string | null;
+          start_date: string | null;
+          end_date: string | null;
+        }>;
+        projects: Array<{
+          title: string;
+          description: string | null;
+          start_date: string | null;
+          end_date: string | null;
+        }>;
+        educations: Array<{
+          school: string;
+          graduated_type: string;
+          gpa: number | null;
+          start_date: string | null;
+          end_date: string | null;
+        }>;
+        experiences: Array<{
+          company_name: string;
+          title: string;
+          description: string | null;
+          start_date: string | null;
+          end_date: string | null;
+        }>;
+        languages: Array<{
+          name: string;
+          certificate: string | null;
+          level: string;
+        }>;
+        references: any[];
+      };
+    }>;
+    total: number;
+    status: string;
+  };
+}
+
+// Add this function
+export const getAllApplicantsByJobId = async (
+  jobId: string,
+  status?: 'pending' | 'approved'
+): Promise<AllApplicantsResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (status) {
+      params.append('status', status);
+    }
+
+    const response = await axiosConfig.get(
+      `/all-applicants/${jobId}${params.toString() ? `?${params.toString()}` : ''}`
+    );
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch all applicants');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all applicants:", error);
+    throw error;
+  }
+};
+
+// Add these interfaces
+export interface SuitableApplicant {
+  id: number;
+  fullname: string;
+  apply_job: string;
+  created_at: string;
+  primary_skills: string[];
+  users: {
+    id: string;
+    avatar_url: string;
+  };
+  _count: {
+    projects: number;
+    experiences: number;
+    educations: number;
+    certificates: number;
+    languages: number;
+    references: number;
+    awards: number;
+  };
+  score: number;
+  status?: string;
+}
+
+export interface SuitableApplicantsResponse {
+  success: boolean;
+  data: SuitableApplicant[];
+}
+
+// Add these functions
+export const filterSuitableApplicants = async (
+  jobId: string
+): Promise<SuitableApplicantsResponse> => {
+  try {
+    const response = await axiosConfig.get(`/suitable-applicants/${jobId}`);
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch suitable applicants');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching suitable applicants:", error);
+    throw error;
+  }
+};
+
+export const getAllSuitableApplicants = async (
+  jobId: string
+): Promise<SuitableApplicantsResponse> => {
+  try {
+    const response = await axiosConfig.get(`/suitable-all-applicants/${jobId}`);
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch all suitable applicants');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all suitable applicants:", error);
     throw error;
   }
 };

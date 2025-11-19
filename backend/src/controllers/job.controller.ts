@@ -28,11 +28,9 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
         const cachedJobs = await redis.get(cacheKey);
 
         if (cachedJobs) {
-            console.log('CACHE JOBS HIT');
             return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedJobs));
         }
 
-        console.log('CACHE JOBS MISS');
         const { jobs, total_jobs } = await getAllJobsService(page, user_id);
 
         await redis.set(cacheKey, JSON.stringify({
@@ -115,6 +113,71 @@ export const getJobsByFilter = async (req: Request, res: Response, next: NextFun
             totalJobs: total_jobs,
             totalPages: Math.ceil(total_jobs / numberOfJobs)
         })
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getJobsSummaryByCompanyId = async (req: Request, res: Response, next: NextFunction) => {
+    const { company_id } = req.user as AuthUserRequestDto;
+    let page = parseInt(req.query?.page as string || '1');
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trang không hợp lệ!"));
+    }
+    page -= 1;
+
+    try {
+        const [totalJobs, jobs] = await Promise.all([
+            prisma.jobs.count({
+                where: {
+                    company_id,
+                    status: 'on_going'
+                }
+            }),
+            prisma.jobs.findMany({
+                where: {
+                    company_id,
+                    status: 'on_going'
+                },
+                select: {
+                    id: true,
+                    job_title: true,
+                    quantity: true,
+                    end_date: true,
+                    jobCategories: {
+                        select: {
+                            job_category: true
+                        }
+                    },
+                    jobLabels: {
+                        select: {
+                            label_name: true
+                        }
+                    },
+                    _count: {
+                        select: {
+                            applicants: {
+                                where: {
+                                    status: 'pending'
+                                }
+                            }
+                        }
+                    }
+                },
+                take: numberOfJobs,
+                skip: page * numberOfJobs,
+                orderBy: {
+                    created_at: 'desc'
+                }
+            })
+        ]);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: jobs,
+            totalPages: Math.ceil(totalJobs / numberOfJobs),
+        });
     } catch (error) {
         next(error);
     }
@@ -640,106 +703,6 @@ export const getRecommendedJobs = async (req: Request, res: Response, next: Next
         next(error);
     }
 
-}
-
-export const filterSuitableCVforJob = async (req: Request, res: Response, next: NextFunction) => {
-    const { company_id } = req.user as AuthUserRequestDto;
-    // @ts-ignore
-    const { ai_matchings } = req.plan;
-    const jobId = req.params.jobId;
-
-    try {
-        if (!ai_matchings) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
-        }
-
-        const isJobExisted = await prisma.jobs.findFirst({
-            where: {
-                id: jobId,
-                company_id
-            }
-        });
-        if (!isJobExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
-        }
-
-        // Lấy ra tất cả các cv đã ứng tuyển mà phù hợp với job nhất
-        const suitableCVs = await prisma.$queryRaw`
-            SELECT 
-                c.id,
-                c.fullname,
-                a.status,
-                1 - (c.embedding <=> j.embedding) AS score
-            FROM applicants a
-            INNER JOIN cvs c ON a.cv_id = c.id
-            CROSS JOIN (
-                SELECT embedding
-                FROM jobs
-                WHERE id = ${jobId}
-            ) AS j
-            WHERE a.job_id = ${jobId} AND a.status = 'Đang chờ'
-            ORDER BY score DESC
-            LIMIT 20;
-        `;
-
-        return res.status(HTTP_SUCCESS.OK).json({
-            success: true,
-            data: suitableCVs
-        });
-    } catch (error) {
-        next(error);
-    }
-}
-
-export const getAllSuitableCVs = async (req: Request, res: Response, next: NextFunction) => {
-    const { company_id } = req.user as AuthUserRequestDto;
-    // @ts-ignore
-    const { ai_matchings, ai_networking_limit } = req.plan;
-    const jobId = req.params.jobId;
-
-    try {
-        if (!ai_matchings) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
-        }
-
-        const isJobExisted = await prisma.jobs.findFirst({
-            where: {
-                id: jobId,
-                company_id
-            }
-        });
-        if (!isJobExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
-        }
-
-        // Lấy ra tất cả các cv bên ngoài phạm vi đã ứng tuyển mà phù hợp với job nhất
-        const suitableCVs = await prisma.$queryRaw`
-            SELECT 
-                c.id,
-                c.fullname,
-                1 - (c.embedding <=> j.embedding) AS score
-            FROM cvs c
-            CROSS JOIN (
-                SELECT embedding 
-                FROM jobs 
-                WHERE id = ${jobId}
-            ) AS j
-            WHERE c.id NOT IN (
-                SELECT a.cv_id 
-                FROM applicants a 
-                WHERE a.job_id = ${jobId}
-            )
-            ORDER BY score DESC
-            LIMIT ${ai_networking_limit};
-        `;
-
-        return res.status(HTTP_SUCCESS.OK).json({
-            success: true,
-            data: suitableCVs
-        });
-    } catch (error) {
-        next(error);
-    }
 }
 
 export const createJobView = async (req: Request, res: Response, next: NextFunction) => {

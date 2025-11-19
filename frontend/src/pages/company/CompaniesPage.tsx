@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  CompanyList,
-  CompanyFilters,
-  CompanyPagination,
-  CompanyCarousel,
-} from "../../components/company";
+import { CompanyList, CompanyFilters, CompanyPagination, CompanyCarousel } from "../../components/company";
 import { useCompanyStore } from "../../store/company.store";
 import { Layout } from "../../components/layout";
 
@@ -151,24 +146,14 @@ export default function CompaniesPage() {
           />
         </div>
       )}
-      {/* END THAY ĐỔI */}
 
-      <div className="max-w-full mx-auto px-4 py-18 bg-linear-to-b from-white via-blue-100 to-blue-200 transform transition-transform duration-500  ">
-        <div className="grid grid-cols-1 justify-items-center">
-          <img
-            src="/src/assets/banner/4.jpg"
-            alt="Company banner"
-            className="max-w-2xl aspect-square rounded-xl object-cover"
-          />
-        </div>
-      </div>
       {/* Khối này giữ lại cho Company List bên dưới */}
-      <div className="w-full mx-auto px-4 py-12 bg-linear-to-b from-blue-100  to-white ">
+      <div className="w-full mx-auto px-4 py-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 ">
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-slate-600 font-medium">Loading companies...</p>
+              <p className="text-slate-600 font-medium">Đang tải...</p>
             </div>
           </div>
         ) : (

@@ -608,6 +608,8 @@ model users {
   updated_at             DateTime                 @updatedAt
   role_id                Int
   phone_verified         Boolean                  @default(false)
+  is_2fa_enabled         Boolean                  @default(false)
+  secret_2fa             String?                  @db.VarChar(255)
   company_id             String?                  @unique
   events                 events[]
   volunteers             volunteers[]

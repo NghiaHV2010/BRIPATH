@@ -5,105 +5,152 @@ import { convertDate } from "../utils";
 import { errorHandler } from "../utils/error";
 import { CVSTATSPROMPT } from "../constants/prompt";
 import { prisma } from "../libs/prisma";
+import { CV, CVStats, IFILE } from "../types/cv.types";
+import { AuthUserRequestDto } from "../types/auth.types";
 
-interface IFILE {
-    name: string;
-    data: Buffer;
-    size: number;
-    mimetype: string;
-}
+// Store for SSE clients and processing status
+const sseClients = new Map<string, Response>();
+const processingStatus = new Map<string, any>();
+const processingLocks = new Map<string, boolean>(); // Add lock to prevent duplicate processing
 
-interface CV {
-    fullname: string;
-    email?: string | undefined;
-    phone?: string | undefined;
-    dob?: string | undefined;
-    address?: string | undefined;
-    primarySkills?: string[] | undefined;
-    projects: [
-        {
-            project_title: string,
-            project_description?: string | undefined,
-            project_startDate?: string | undefined;
-            project_endDate?: string | undefined;
-        }
-    ];
-    experiences: [
-        {
-            startDate?: string | undefined;
-            endDate?: string | undefined;
-            company?: string | undefined;
-            title?: string | undefined;
-            description?: string | undefined;
-        }
-    ];
-    educations: [
-        {
-            startDate?: string | undefined;
-            endDate?: string | undefined;
-            school?: string | undefined;
-            gpa?: string | undefined;
-            graduate_type?: string | undefined;
-        }
-    ];
-    certificates: [
-        {
-            startDate?: string | undefined;
-            endDate?: string | undefined;
-            name?: string | undefined;
-            link?: string | undefined;
-            description?: string | undefined;
-        }
-    ];
-    summary?: string | undefined;
-    languages: [
-        {
-            name: string;
-            certificate?: string | undefined;
-            level?: string | undefined;
-        }
-    ];
-    apply_job?: string | undefined;
-    career_goal?: string | undefined;
-    softSkills?: string[] | undefined;
-    references: [
-        {
-            name: string;
-            phone?: string | undefined;
-            email?: string | undefined;
-        }
-    ];
-    awards: [
-        {
-            title: string;
-            description?: string | undefined;
-            startDate?: string | undefined;
-            endDate?: string | undefined;
-        }
-    ];
-}
-
-interface CVStats {
-    technical: number;
-    communication: number;
-    teamwork: number;
-    problem_solving: number;
-    creativity: number;
-    leadership: number;
-    summary: string
-}
-
+// Regular POST endpoint for uploading CV
 export const uploadCV = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // @ts-ignore
-        const user_id = req.user.id;
-        let cv;
+    const maxCVsAllowed = 2; // Set maximum CVs allowed per user
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const file = req.files?.cv as IFILE;
 
-        const file: IFILE = req.files?.cv as IFILE;
+    // Generate unique session ID
+    const sessionId = `${user_id}_${Date.now()}`;
+
+    try {
+        const totalCVs = await prisma.cvs.count({ where: { users_id: user_id } });
+
+        if (totalCVs >= maxCVsAllowed) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, `Bạn chỉ được phép tải lên tối đa ${maxCVsAllowed} CV.`));
+        }
+
+        // Initialize processing status
+        processingStatus.set(sessionId, {
+            status: 'initializing',
+            message: 'Đang khởi tạo...',
+            progress: 0
+        });
+
+        // Send initial response with session ID
+        res.status(HTTP_SUCCESS.ACCEPTED).json({
+            success: true,
+            sessionId,
+            message: 'CV upload started. Connect to SSE endpoint for progress.'
+        });
+
+        // Start background processing (non-blocking)
+        setImmediate(() => processCV(sessionId, user_id, file));
+
+    } catch (error) {
+        processingStatus.delete(sessionId);
+        processingLocks.delete(sessionId);
+        next(error);
+    }
+};
+
+// SSE endpoint for real-time updates
+export const uploadCVStream = async (req: Request, res: Response, next: NextFunction) => {
+    const sessionId = req.query.sessionId as string;
+
+    if (!sessionId) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Session ID is required"));
+    }
+
+    // Check if session exists
+    if (!processingStatus.has(sessionId)) {
+        return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Session not found or expired"));
+    }
+
+    // Prevent duplicate connections for the same session
+    if (sseClients.has(sessionId)) {
+        return next(errorHandler(HTTP_ERROR.CONFLICT, "Session already has an active connection"));
+    }
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    // Store client connection
+    sseClients.set(sessionId, res);
+
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({
+        status: 'connected',
+        message: 'Connected to upload stream',
+        progress: 0
+    })}\n\n`);
+
+    // Send current status
+    const currentStatus = processingStatus.get(sessionId);
+    if (currentStatus && currentStatus.status !== 'initializing') {
+        res.write(`data: ${JSON.stringify(currentStatus)}\n\n`);
+    }
+
+    // Handle client disconnect
+    req.on('close', () => {
+        sseClients.delete(sessionId);
+        console.log(`SSE client disconnected: ${sessionId}`);
+    });
+};
+
+// Background CV processing function
+async function processCV(sessionId: string, user_id: string, file: IFILE) {
+    // Check if already processing
+    if (processingLocks.get(sessionId)) {
+        console.log(`Session ${sessionId} is already being processed`);
+        return;
+    }
+
+    // Set processing lock
+    processingLocks.set(sessionId, true);
+
+    const sendUpdate = (data: any) => {
+        processingStatus.set(sessionId, data);
+        const client = sseClients.get(sessionId);
+
+        if (client && !client.writableEnded) {
+            try {
+                client.write(`data: ${JSON.stringify(data)}\n\n`);
+            } catch (error) {
+                console.error(`Error writing to SSE client ${sessionId}:`, error);
+                sseClients.delete(sessionId);
+            }
+        }
+    };
+
+    try {
+        // Step 1: Extract text
+        sendUpdate({
+            status: 'extracting',
+            message: 'Đang trích xuất văn bản từ CV...',
+            progress: 10
+        });
 
         const rawText = await extractTextFromCV(file.data, file.mimetype);
 
-        const formatedCV: CV = await formatText(rawText);
+        // Step 2: Format CV
+        sendUpdate({
+            status: 'formatting',
+            message: 'Đang phân tích CV...',
+            progress: 30
+        });
+
+        const formatedCV: CV = await formatText(sessionId, rawText, sendUpdate);
+
+        // Step 3: Create embeddings
+        sendUpdate({
+            status: 'embedding',
+            message: 'Đang định dạng CV...',
+            progress: 70
+        });
 
         const content = `
             Tiêu đề: ${formatedCV.apply_job}.
@@ -114,7 +161,7 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
             Chứng chỉ: ${JSON.stringify(formatedCV.certificates)}.
             Mô tả: ${formatedCV.summary || formatedCV.career_goal}.
             Địa chỉ: ${formatedCV.address}.
-            `;
+        `;
 
         const [vector, cvStatsResult] = await Promise.all([
             embeddingData(content),
@@ -125,11 +172,17 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
             throw new Error('Failed to analyze CV stats');
         }
 
-        // @ts-ignore
-        const cvStats: CVStats = cvStatsResult as CVStats;
+        const cvStats = cvStatsResult as CVStats;
 
-        await prisma.$transaction(async (tx) => {
-            cv = await tx.cvs.create({
+        // Step 4: Save to database
+        sendUpdate({
+            status: 'saving',
+            message: 'Đang lưu CV vào hệ thống...',
+            progress: 90
+        });
+
+        const result = await prisma.$transaction(async (tx) => {
+            const cv = await tx.cvs.create({
                 data: {
                     users_id: user_id,
                     fullname: formatedCV.fullname,
@@ -210,41 +263,103 @@ export const uploadCV = async (req: Request, res: Response, next: NextFunction) 
                 }
             });
 
-            await tx.$queryRaw`UPDATE cvs SET embedding=${vector} WHERE id=${cv.id}`;
+            await Promise.all([
+                tx.$queryRaw`UPDATE cvs SET embedding=${vector} WHERE id=${cv.id}`,
+                tx.cv_stats.create({
+                    data: {
+                        cv_id: cv.id,
+                        technical: cvStats.technical,
+                        communication: cvStats.communication,
+                        teamwork: cvStats.teamwork,
+                        problem_solving: cvStats.problem_solving,
+                        creativity: cvStats.creativity,
+                        leadership: cvStats.leadership,
+                        summary: cvStats.summary
+                    }
+                }),
+                tx.userActivitiesHistory.create({
+                    data: {
+                        user_id,
+                        activity_name: `Bạn vừa đăng tải CV #${cv.id} lên hệ thống.`
+                    }
+                })
+            ])
 
-            await tx.cv_stats.create({
-                data: {
-                    cv_id: cv.id,
-                    technical: cvStats.technical,
-                    communication: cvStats.communication,
-                    teamwork: cvStats.teamwork,
-                    problem_solving: cvStats.problem_solving,
-                    creativity: cvStats.creativity,
-                    leadership: cvStats.leadership,
-                    summary: cvStats.summary
-                }
-            });
-
-            await tx.userActivitiesHistory.create({
-                data: {
-                    user_id,
-                    activity_name: `Bạn vừa đăng tải CV #${cv.id} lên hệ thống.`
-                }
-            });
-        }).catch((e) => next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi! Vui lòng thử lại")));
-
-        res.status(HTTP_SUCCESS.OK).json({
-            success: true,
-            data: cv
+            return cv;
         });
+
+        // Step 5: Complete
+        sendUpdate({
+            status: 'complete',
+            message: 'Tải CV thành công!',
+            progress: 100,
+            data: result
+        });
+
+        // Close connection and cleanup after delay
+        setTimeout(() => {
+            const client = sseClients.get(sessionId);
+            if (client && !client.writableEnded) {
+                try {
+                    client.end();
+                } catch (error) {
+                    console.error(`Error closing SSE client ${sessionId}:`, error);
+                }
+            }
+            sseClients.delete(sessionId);
+            processingStatus.delete(sessionId);
+            processingLocks.delete(sessionId);
+        }, 2000);
+
     } catch (error) {
-        next(error);
+        sendUpdate({
+            status: 'error',
+            message: error instanceof Error ? error.message : 'Đã xảy ra lỗi không xác định',
+            progress: 0
+        });
+
+        // Close connection and cleanup on error
+        setTimeout(() => {
+            const client = sseClients.get(sessionId);
+            if (client && !client.writableEnded) {
+                try {
+                    client.end();
+                } catch (error) {
+                    console.error(`Error closing SSE client ${sessionId}:`, error);
+                }
+            }
+            sseClients.delete(sessionId);
+            processingStatus.delete(sessionId);
+            processingLocks.delete(sessionId);
+        }, 2000);
     }
-};
+}
+
+// Cleanup old sessions periodically (run every 10 minutes)
+setInterval(() => {
+    const now = Date.now();
+    for (const [sessionId] of processingStatus) {
+        const sessionTime = parseInt(sessionId.split('_')[1]);
+        // Remove sessions older than 30 minutes
+        if (now - sessionTime > 30 * 60 * 1000) {
+            const client = sseClients.get(sessionId);
+            if (client && !client.writableEnded) {
+                try {
+                    client.end();
+                } catch (error) {
+                    console.error(`Error cleaning up session ${sessionId}:`, error);
+                }
+            }
+            sseClients.delete(sessionId);
+            processingStatus.delete(sessionId);
+            processingLocks.delete(sessionId);
+            console.log(`Cleaned up expired session: ${sessionId}`);
+        }
+    }
+}, 10 * 60 * 1000);
 
 export const getUserCV = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
 
     try {
         const cv = await prisma.cvs.findMany({
@@ -281,8 +396,7 @@ export const getUserCV = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const deleteCV = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const cv_id = req.params.id;
 
     try {
@@ -309,8 +423,7 @@ export const deleteCV = async (req: Request, res: Response, next: NextFunction) 
 }
 
 export const getSuitableJobs = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const cv_id = parseInt(req.params.id);
 
     if (cv_id < 1 || isNaN(cv_id)) {
@@ -329,7 +442,6 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
             return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Hồ sơ không tồn tại!"));
         }
 
-        // tính trọng số động
         const savedCount = await prisma.savedJobs.count({ where: { user_id } });
         const feedbackCount = await prisma.aiFeedbacks.count({ where: { cv_id, is_good: true } });
 
@@ -402,7 +514,6 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
         LIMIT 10;
         `);
 
-
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: jobs
@@ -413,8 +524,7 @@ export const getSuitableJobs = async (req: Request, res: Response, next: NextFun
 }
 
 export const getUserCVById = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const cv_id = parseInt(req.params.id as string);
 
     if (cv_id < 1 || isNaN(cv_id)) {
@@ -451,8 +561,7 @@ export const getUserCVById = async (req: Request, res: Response, next: NextFunct
 };
 
 export const getCVStats = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user_id = req.user.id;
+    const { id: user_id } = req.user as AuthUserRequestDto;
     const cv_id = parseInt(req.params.id as string);
 
     if (cv_id < 1 || isNaN(cv_id)) {

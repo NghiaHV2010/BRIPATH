@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import SePayService from '../services/sepay.service';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType } from '@prisma/client';
+import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType, PrismaClient } from '@prisma/client';
 import { hasPaymentByTransactionId, saveSePayOrderMapping, getSePayOrderMapping, deleteSePayOrderMapping } from '../utils/payment.utils';
 import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
+import { sendEmailWithRetry } from '../utils/emailHandler';
+import { errorHandler } from '../utils/error';
+import { invoiceEmailTemplate } from '../constants/emailTemplate';
 
 /**
  * Create SePay order
@@ -94,21 +97,20 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
 };
 
 /**
- * Handle SePay webhook
+ * Handle SePay webhook - Optimized version
  */
 export const handleSePayWebhook = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const webhookData: SePayWebhookData = req.body;
+  const webhookData: SePayWebhookData = req.body;
 
+  try {
     console.log('=== SePay Webhook Received ===');
-    console.log('Full webhook data:', JSON.stringify(webhookData, null, 2));
+    console.log('Transaction ID:', webhookData.id);
     console.log('Content:', webhookData.content);
-    console.log('Description:', webhookData.description);
-    console.log('Transfer Amount:', webhookData.transferAmount);
-    console.log('Transfer Type:', webhookData.transferType);
+    console.log('Amount:', webhookData.transferAmount);
+    console.log('Type:', webhookData.transferType);
     console.log('================================');
 
-    // Validate webhook data
+    // Early validation - fail fast
     if (!webhookData.id || !webhookData.transferType || !webhookData.transferAmount) {
       console.error('Invalid webhook data:', webhookData);
       return res.status(400).json({
@@ -117,190 +119,238 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
       });
     }
 
-    // Check if it's a successful incoming transaction
-    if (webhookData.transferType === 'in' && webhookData.transferAmount > 0) {
-      try {
-        // Extract order ID from transaction content
-        // SePay users put order ID in the transfer content/description
-        const orderId = extractOrderIdFromContent(webhookData.content) ||
-          extractOrderIdFromContent(webhookData.description);
-
-        // Extract plan code for logging
-        const planCode = extractPlanCodeFromContent(webhookData.content) ||
-          extractPlanCodeFromContent(webhookData.description);
-
-        console.log('Extracted order ID:', orderId);
-        console.log('Extracted plan code:', planCode);
-
-        if (orderId) {
-          const exists = await hasPaymentByTransactionId(prisma, orderId);
-
-          if (!exists) {
-            // Get order mapping
-            const mapping = await getSePayOrderMapping(prisma, orderId);
-
-            if (mapping) {
-              console.log('Processing payment for mapping:', mapping);
-
-              await prisma.$transaction(async (tx: any) => {
-                // Create payment record
-                const payment = await tx.payments.create({
-                  data: {
-                    amount: BigInt(webhookData.transferAmount),
-                    currency: 'VND',
-                    payment_gateway: 'SePay' as PaymentGateway,
-                    payment_method: 'bank_transfer' as PaymentMethod,
-                    transaction_id: orderId,
-                    status: 'success' as PaymentStatus,
-                    user_id: mapping.user_id
-                  }
-                });
-
-                // Create notification
-                await tx.userNotifications.create({
-                  data: {
-                    user_id: mapping.user_id,
-                    title: 'Thanh toán thành công',
-                    content: `Bạn đã thanh toán đơn hàng ${orderId} thành công với số tiền ${webhookData.transferAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}${planCode ? ` cho gói ${planCode}` : ''}. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`,
-                    type: 'pricing_plan' as NotificationsType,
-                  } as any
-                });
-
-                // Create activity history
-                const plan = await tx.membershipPlans.findFirst({
-                  where: { id: mapping.plan_id }
-                });
-
-                await tx.userActivitiesHistory.create({
-                  data: {
-                    user_id: mapping.user_id,
-                    activity_name: `Thanh toán gói ${plan?.plan_name || 'dịch vụ'} thành công qua SePay${planCode ? ` (${planCode})` : ''}`,
-                  }
-                });
-
-                // Create subscription if plan exists
-                if (plan) {
-                  await tx.subscriptions.create({
-                    data: {
-                      user_id: mapping.user_id,
-                      amount_paid: BigInt(webhookData.transferAmount),
-                      payment_id: payment.id,
-                      plan_id: plan.id,
-                      start_date: new Date(),
-                      end_date: new Date(new Date().setMonth(new Date().getMonth() + plan.duration_months)),
-                      status: 'on_going',
-                      remaining_urgent_jobs: plan.urgent_jobs_limit || 0,
-                      remaining_quality_jobs: plan.quality_jobs_limit || 0,
-                      remaining_total_jobs: plan.total_jobs_limit || 0
-                    }
-                  });
-
-                  // Create additional activity history for subscription
-                  // await tx.userActivitiesHistory.create({
-                  //   data: {
-                  //     user_id: mapping.user_id,
-                  //     activity_name: `Gói ${plan.plan_name} đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ!`,
-                  //   }
-                  // });
-
-                  // // Create additional notification for subscription activation
-                  // await tx.userNotifications.create({
-                  //   data: {
-                  //     title: 'Gói dịch vụ đã được kích hoạt!',
-                  //     content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-                  //     type: 'pricing_plan' as NotificationsType,
-                  //     user_id: mapping.user_id
-                  //   } as any
-                  // });
-                }
-
-                // Update company verification if applicable
-                if (mapping.company_id) {
-                  const tag = await tx.tags.findFirst({
-                    where: { label_name: "Đề xuất" }
-                  });
-
-                  if (tag) {
-                    await tx.companies.update({
-                      where: { id: mapping.company_id },
-                      data: {
-                        is_verified: true,
-                        companyTags: {
-                          connectOrCreate: {
-                            where: {
-                              company_id_tag_id: {
-                                company_id: mapping.company_id,
-                                tag_id: tag.id
-                              }
-                            },
-                            create: {
-                              tag_id: tag.id
-                            }
-                          }
-                        }
-                      }
-                    });
-                  }
-                }
-              });
-
-              // Clean up mapping
-              await deleteSePayOrderMapping(prisma, orderId);
-              console.log('Payment processed successfully for order:', orderId);
-            } else {
-              console.log('No mapping found for order:', orderId);
-            }
-          } else {
-            console.log('Payment already exists for order:', orderId);
-          }
-        } else {
-          console.log('No order ID found in content:', webhookData.content);
-        }
-      } catch (paymentError) {
-        console.error('SePay payment processing error:', paymentError);
-      }
+    // Only process successful incoming transactions
+    if (webhookData.transferType !== 'in' || webhookData.transferAmount <= 0) {
+      return res.status(201).json({
+        success: true,
+        message: 'Transaction ignored (not incoming or zero amount)'
+      });
     }
 
-    // Return success response for SePay (HTTP 201 as per SePay docs)
+    // Respond to SePay immediately (within 3 seconds requirement)
     res.status(201).json({
       success: true,
-      message: 'Webhook processed successfully'
+      message: 'Webhook received, processing in background'
     });
+
+    // Process payment asynchronously
+    processSePayPayment(webhookData).catch((error) => {
+      console.error('Background payment processing error:', error);
+    });
+
   } catch (error) {
     console.error('SePay webhook error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Webhook processing failed'
-    });
+
+    // If we haven't sent a response yet
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: 'Webhook processing failed'
+      });
+    }
   }
 };
 
 /**
- * Extract order ID from SePay transaction content
+ * Process SePay payment in background
+ */
+async function processSePayPayment(webhookData: SePayWebhookData): Promise<void> {
+  try {
+    // Extract order ID and plan code
+    const orderId = extractOrderIdFromContent(webhookData.content) ||
+      extractOrderIdFromContent(webhookData.description);
+
+    if (!orderId) {
+      console.log('No order ID found in webhook content');
+      return;
+    }
+
+    const planCode = extractPlanCodeFromContent(webhookData.content) ||
+      extractPlanCodeFromContent(webhookData.description);
+
+    console.log('Processing payment for order:', orderId);
+    console.log('Plan code:', planCode);
+
+    // Check for duplicate payment (idempotency)
+    const exists = await hasPaymentByTransactionId(prisma, orderId);
+    if (exists) {
+      console.log('Payment already processed for order:', orderId);
+      return;
+    }
+
+    // Get order mapping
+    const mapping = await getSePayOrderMapping(prisma, orderId);
+    if (!mapping) {
+      console.log('No mapping found for order:', orderId);
+      return;
+    }
+
+    console.log('Found mapping:', mapping);
+
+    // Process payment in a single transaction
+    const result = await prisma.$transaction(async (tx: PrismaClient) => {
+      // Fetch data in parallel
+      const [user, plan, existingTag] = await Promise.all([
+        tx.users.findFirst({
+          where: { id: mapping.user_id },
+          select: { email: true }
+        }),
+        tx.membershipPlans.findFirst({
+          where: { id: mapping.plan_id }
+        }),
+        mapping.company_id
+          ? tx.tags.findFirst({ where: { label_name: "Đề xuất" } })
+          : Promise.resolve(null)
+      ]);
+
+      if (!user || !plan) {
+        throw new Error('User or plan not found');
+      }
+
+      // Calculate subscription dates
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + plan.duration_months);
+
+      // Create payment record
+      const payment = await tx.payments.create({
+        data: {
+          amount: BigInt(webhookData.transferAmount),
+          currency: 'VND',
+          payment_gateway: 'SePay' as PaymentGateway,
+          payment_method: 'bank_transfer' as PaymentMethod,
+          transaction_id: orderId,
+          status: 'success' as PaymentStatus,
+          user_id: mapping.user_id
+        },
+      });
+
+      // Create subscription and related records in parallel
+      const [subscription] = await Promise.all([
+        tx.subscriptions.create({
+          data: {
+            user_id: mapping.user_id,
+            amount_paid: BigInt(webhookData.transferAmount),
+            payment_id: payment.id,
+            plan_id: plan.id,
+            start_date: startDate,
+            end_date: endDate,
+            status: 'on_going',
+            remaining_urgent_jobs: plan.urgent_jobs_limit || 0,
+            remaining_quality_jobs: plan.quality_jobs_limit || 0,
+            remaining_total_jobs: plan.total_jobs_limit || 0
+          }
+        }),
+        // Create activity history
+        tx.userActivitiesHistory.create({
+          data: {
+            user_id: mapping.user_id,
+            activity_name: `Thanh toán gói ${plan.plan_name} thành công qua SePay${planCode ? ` (${planCode})` : ''}`,
+          }
+        }),
+        // Create notification
+        tx.userNotifications.create({
+          data: {
+            title: 'Gói dịch vụ đã được kích hoạt!',
+            content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
+            type: 'pricing_plan' as NotificationsType,
+            user_id: mapping.user_id
+          } as any
+        }),
+        // Update company verification if applicable
+        mapping.company_id && existingTag
+          ? tx.companies.update({
+            where: { id: mapping.company_id },
+            data: {
+              is_verified: true,
+              companyTags: {
+                connectOrCreate: {
+                  where: {
+                    company_id_tag_id: {
+                      company_id: mapping.company_id,
+                      tag_id: existingTag.id
+                    }
+                  },
+                  create: {
+                    tag_id: existingTag.id
+                  }
+                }
+              }
+            }
+          })
+          : Promise.resolve(null)
+      ]);
+
+      return {
+        email: user.email,
+        transaction_id: payment.transaction_id,
+        plan_name: plan.plan_name,
+        start_date: subscription.start_date,
+        end_date: subscription.end_date,
+        amount_paid: subscription.amount_paid
+      };
+    }, {
+      maxWait: 10000, // Maximum time to wait for transaction to start
+      timeout: 20000, // Maximum time for entire transaction
+    });
+
+    // Clean up mapping after successful processing
+    await deleteSePayOrderMapping(prisma, orderId);
+    console.log('Payment processed successfully for order:', orderId);
+
+    // Send email asynchronously (non-blocking)
+    setImmediate(async () => {
+      try {
+        await sendEmailWithRetry(
+          result.email,
+          "BRIPATH - Hóa đơn điện tử",
+          invoiceEmailTemplate(
+            result.transaction_id,
+            result.plan_name,
+            result.start_date.toLocaleDateString(),
+            result.end_date.toLocaleDateString(),
+            result.amount_paid.toString(),
+            'Chuyển khoản'
+          )
+        );
+        console.log('Invoice email sent successfully to:', result.email);
+      } catch (emailError) {
+        console.error('Failed to send invoice email:', emailError);
+        // Don't throw - email failure shouldn't fail the payment
+      }
+    });
+
+  } catch (error) {
+    console.error('SePay payment processing error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Extract order ID from SePay transaction content - Optimized
  */
 const extractOrderIdFromContent = (content: string): string | null => {
   if (!content) return null;
 
-  // Look for order ID pattern in transaction content
-  // Format: TKP69880428888 SEPAY_1234567890_abc123 PLANCODE
-  // or: TKP69880428888 SEPAY_1234567890_abc123
-  const orderIdMatch = content.match(/SEPAY_\d+_[a-z0-9]+/i);
-  return orderIdMatch ? orderIdMatch[0] : null;
+  // Use regex exec for better performance
+  const match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
+  return match ? match[0] : null;
 };
 
 /**
- * Extract plan code from SePay transaction content
+ * Extract plan code from SePay transaction content - Optimized
  */
 const extractPlanCodeFromContent = (content: string): string | null => {
   if (!content) return null;
 
-  // Look for plan code after order ID
-  // Format: TKP69880428888 SEPAY_1234567890_abc123 PLANCODE
-  const parts = content.split(' ');
-  if (parts.length >= 3) {
-    return parts[2]; // Plan code is the third part
-  }
-  return null;
+  // Use indexOf for faster splitting
+  const firstSpace = content.indexOf(' ');
+  if (firstSpace === -1) return null;
+
+  const secondSpace = content.indexOf(' ', firstSpace + 1);
+  if (secondSpace === -1) return null;
+
+  return content.slice(secondSpace + 1).trim() || null;
 };
 
 /**

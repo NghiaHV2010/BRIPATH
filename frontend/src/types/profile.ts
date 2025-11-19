@@ -16,8 +16,36 @@ export interface UserProfile {
     phone_verified: boolean;
     company_id: string | null;
     role_id: number;
-    companies: {
-        jobs: any[];
+    is_2fa_enabled: boolean;
+    companies?: {
+        jobs?: [
+            {
+                _count: {
+                    applicants: number
+                }
+            }
+        ];
+        status: string;
+        company_type: string;
+        fax_code: string;
+        company_website?: string;
+        is_verified?: boolean;
+        background_url?: string;
+        business_certificate: string;
+        description?: string;
+        longitude?: number;
+        latitude?: number;
+        employees?: number;
+        companyTags?: [
+            {
+                tags: {
+                    label_name: string
+                }
+            }
+        ];
+        fields?: {
+            field_name: string;
+        }
     };
     roles: {
         role_name: string;
@@ -32,7 +60,8 @@ export interface UserProfile {
 
 export interface UserProfileResponse {
     success: boolean;
-    data: UserProfile;
+    data?: UserProfile;
+    message?: string;
 }
 
 

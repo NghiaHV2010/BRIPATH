@@ -127,8 +127,111 @@ export const userRepository = {
                 firebase_uid: true,
                 password: true,
                 is_deleted: true,
+                secret_2fa: true,
+            }
+        });
+    },
+
+    //get user's profile
+    getUserProfile: async (user_id: string, company_id?: string) => {
+        return prisma.users.findFirst({
+            where: {
+                id: user_id
+            },
+            include: {
+                companies: company_id ? {
+                    select: {
+                        jobs: {
+                            select: {
+                                _count: {
+                                    select: {
+                                        applicants: {
+                                            where: {
+                                                status: 'pending'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        status: true,
+                        company_type: true,
+                        fax_code: true,
+                        company_website: true,
+                        is_verified: true,
+                        background_url: true,
+                        business_certificate: true,
+                        description: true,
+                        longitude: true,
+                        latitude: true,
+                        employees: true,
+                        companyTags: {
+                            select: {
+                                tags: {
+                                    select: {
+                                        label_name: true
+                                    }
+                                }
+                            }
+                        },
+                        fields: {
+                            select: {
+                                field_name: true
+                            }
+                        },
+                    }
+                } : false,
+                roles: {
+                    select: {
+                        role_name: true
+                    }
+                },
+                events: {
+                    where: {
+                        status: 'approved',
+                    },
+                    select: {
+                        _count: {
+                            select: {
+                                volunteers: {
+                                    where: {
+                                        status: 'pending'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        userNotifications: {
+                            where: {
+                                is_read: false
+                            }
+                        },
+                        followedCompanies: true,
+                        savedJobs: true,
+                    }
+                }
+            },
+            omit: {
+                password: true,
+                firebase_uid: true,
+                is_deleted: true,
+                role_id: true,
+                secret_2fa: true,
+            }
+        });
+    },
+
+    update2FA: async (user_id: string, updateData: { secret_2fa?: string, is_2fa_enabled?: boolean }) => {
+        return prisma.users.update({
+            where: {
+                id: user_id
+            },
+            data: {
+                ...updateData
             }
         });
     }
-
 }

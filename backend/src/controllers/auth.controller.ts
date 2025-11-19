@@ -1,13 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import serviceAccount from "../../serviceAccountKey.json";
+import jwt from "jsonwebtoken";
+import admin, { ServiceAccount } from "firebase-admin";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import jwt from "jsonwebtoken";
 import { ACCESS_SECRET, FRONTEND_URL } from "../config/env.config";
-import { emailForgotPasswordTemplate, emailVerifyTemplate } from "../constants/emailTemplate";
-import admin, { ServiceAccount } from "firebase-admin";
-import serviceAccount from "../../serviceAccountKey.json";
+import { NextFunction, Request, Response } from "express";
 import { sendEmailWithRetry, validateEmail } from "../utils/emailHandler";
-import { changePasswordService, forgotPasswordService, googleLoginService, loginService, logoutService, resetPasswordService, sendOTPService, validateRegisterService, verifyEmailService, verifySMSService } from "../services/auth.service";
+import { emailForgotPasswordTemplate, emailVerifyTemplate } from "../constants/emailTemplate";
+import { changePasswordService, enable2FAService, forgotPasswordService, googleLoginService, loginService, logoutService, resetPasswordService, sendOTPService, sendSMSOTPService, validateRegisterService, verify2FAService, verifyEmailService, verifySMSOTPService, verifySMSService, verify2FALoginService } from "../services/auth.service";
 import { AuthUserRequestDto, GoogleLoginRequestDto, RegisterRequestDto, SendOTPRequestDto } from "../types/auth.types";
 
 export const validateRegisterInput = async (req: Request, res: Response, next: NextFunction) => {
@@ -116,6 +116,15 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         const loginResult = await loginService(email, password, res);
 
+        if ('requires_2fa' in loginResult && loginResult.requires_2fa) {
+            return res.status(HTTP_SUCCESS.OK).json({
+                success: true,
+                requires_2fa: true,
+                temp_token: loginResult.temp_token,
+                message: "Vui lòng xác thực 2FA để tiếp tục"
+            });
+        }
+
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             data: loginResult
@@ -126,8 +135,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    const { id: user_id } = req.user as AuthUserRequestDto;
+
     try {
-        await logoutService(req, res);
+        await logoutService(res, user_id);
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -152,8 +163,17 @@ export const googleLogin = async (req: Request, res: Response, next: NextFunctio
             return res.redirect(`${FRONTEND_URL}/login?error=authentication_failed`);
         }
 
-        await googleLoginService(user, res);
+        const loginResult = await googleLoginService(user, res);
 
+        // Check if 2FA is required
+        if ('requires_2fa' in loginResult && loginResult.requires_2fa) {
+            // Redirect to 2FA verification page with temp token
+            return res.redirect(
+                `${FRONTEND_URL}/verify-2fa?action=login&temp_token=${loginResult.temp_token}&provider=google`
+            );
+        }
+
+        // Normal Google login without 2FA
         res.redirect(`${FRONTEND_URL}/?login=success`);
     } catch (error) {
         console.error('Google login error:', error);
@@ -180,6 +200,46 @@ export const verifySMS = async (req: Request, res: Response, next: NextFunction)
             });
         }
     } catch (error) {
+        next(error);
+    }
+}
+
+export const sendSMSOTP = async (req: Request, res: Response, next: NextFunction) => {
+    const { phone } = req.body as { phone: string };
+
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phone)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, 'Số điện thoại không hợp lệ. Vui lòng sử dụng định dạng quốc tế (VD: +84912345678)'));
+    }
+
+    try {
+        await sendSMSOTPService(res, phone);
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "OTP đã được gửi đến số điện thoại của bạn!"
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const verifySMSOTP = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const data = req.otp;
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const { otp } = req.body as { otp: string };
+    try {
+        if (data.otp !== otp) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã OTP không hợp lệ!"));
+        }
+
+        const result = await verifySMSOTPService(res, user_id, data.phone as string);
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: result
+        });
+    }
+    catch (error) {
         next(error);
     }
 }
@@ -263,6 +323,73 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
             message: "Đặt lại mật khẩu thành công!"
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const enable2FA = async (req: Request, res: Response, next: NextFunction) => {
+    const { id: user_id, email } = req.user as AuthUserRequestDto;
+    try {
+        const result = await enable2FAService(user_id, email);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const verify2FA = async (req: Request, res: Response, next: NextFunction) => {
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const { token } = req.body as { token: string };
+
+    try {
+        await verify2FAService(user_id, token, false);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Xác thực thành công!",
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const disable2FA = async (req: Request, res: Response, next: NextFunction) => {
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const { token } = req.body as { token: string };
+
+    try {
+        await verify2FAService(user_id, token, true);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            message: "Tắt 2FA thành công!",
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Add new controller for 2FA login verification
+export const verify2FALogin = async (req: Request, res: Response, next: NextFunction) => {
+    const { temp_token, token } = req.body as { temp_token: string, token: string };
+
+    if (!temp_token || !token) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Thông tin xác thực không đầy đủ!"));
+    }
+
+    try {
+        const result = await verify2FALoginService(temp_token, token, res);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: result,
+            message: "Đăng nhập thành công!"
         });
     } catch (error) {
         next(error);

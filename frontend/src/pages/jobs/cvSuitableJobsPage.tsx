@@ -16,7 +16,7 @@ import {
 } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Upload, FileText, X, SquareArrowOutUpRight, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Upload, FileText, X, SquareArrowOutUpRight, ThumbsUp, ThumbsDown, TrendingUp } from "lucide-react";
 import { JobCard } from "../../components/job";
 import { ResumeCard } from "../../components/resume/resumeCard";
 import { Resume } from "../../components/resume/resume";
@@ -27,6 +27,7 @@ import type { Resume as ResumeType, ResumeListItem } from "../../types/resume";
 // Extended Job type with feedback information
 type JobWithFeedback = Job & {
   is_good?: boolean | null;
+  score?: number;
 };
 
 export default function CVSuitableJobsPage() {
@@ -43,6 +44,32 @@ export default function CVSuitableJobsPage() {
   const [isLoadingResumeDetail, setIsLoadingResumeDetail] = useState(false);
   const [resumeDetailError, setResumeDetailError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Format score to percentage with 1 decimal place
+  const formatMatchScore = (score?: number): string => {
+    if (!score) return "0.0";
+    return (score * 100).toFixed(1);
+  };
+
+  // Get match score color based on percentage
+  const getMatchScoreColor = (score?: number): string => {
+    if (!score) return "text-gray-500 bg-gray-100 border-gray-300";
+    const percentage = score * 100;
+    if (percentage >= 80) return "text-green-700 bg-green-100 border-green-300";
+    if (percentage >= 60) return "text-blue-700 bg-blue-100 border-blue-300";
+    if (percentage >= 40) return "text-yellow-700 bg-yellow-100 border-yellow-300";
+    return "text-orange-700 bg-orange-100 border-orange-300";
+  };
+
+  // Get match level text
+  const getMatchLevel = (score?: number): string => {
+    if (!score) return "Không xác định";
+    const percentage = score * 100;
+    if (percentage >= 80) return "Rất phù hợp";
+    if (percentage >= 60) return "Phù hợp";
+    if (percentage >= 40) return "Tạm ổn";
+    return "Ít phù hợp";
+  };
 
   // Fetch user CVs on component mount
   useEffect(() => {
@@ -137,6 +164,8 @@ export default function CVSuitableJobsPage() {
             : job
         )
       );
+
+      toast.success(isGood ? "Cảm ơn phản hồi tích cực của bạn!" : "Cảm ơn phản hồi của bạn!");
 
     } catch (error) {
       console.error("Error submitting job feedback:", error);
@@ -301,7 +330,24 @@ export default function CVSuitableJobsPage() {
             ) : suitableJobs.length > 0 ? (
               <div className="max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-12">
                 {suitableJobs.map((job) => (
-                  <div key={job.id}>
+                  <div key={job.id} className="relative hover:scale-none">
+                    {/* Match Score Badge */}
+                    <div className="absolute -top-4 -left-1 z-10 ">
+                      <div className={`px-3 py-1.5 rounded-full border-2 shadow-lg ${getMatchScoreColor(job.score)}`}>
+                        <div className="flex items-center gap-1.5">
+                          <TrendingUp className="w-4 h-4" />
+                          <div className="flex flex-col items-start leading-none">
+                            <span className="text-xs font-semibold">
+                              {formatMatchScore(job.score)}%
+                            </span>
+                            <span className="text-[10px] font-medium opacity-80">
+                              {getMatchLevel(job.score)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <JobCard
                       job={job}
                       onClick={() => navigate(`/jobs/${job.id}`)}
@@ -420,6 +466,16 @@ export default function CVSuitableJobsPage() {
               padding: "12px 16px",
               fontSize: "14px",
               maxWidth: "400px",
+            },
+            success: {
+              style: {
+                background: "#10B981",
+                color: "white",
+              },
+              iconTheme: {
+                primary: "white",
+                secondary: "#10B981",
+              },
             },
           }}
         />

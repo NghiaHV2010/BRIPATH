@@ -46,7 +46,6 @@ export const updateUserAvatar = async (avatarUrl: string): Promise<UserProfileRe
 
     return null;
   } catch (error) {
-    console.error("Error updating user avatar:", error);
     return null;
   }
 };
@@ -60,9 +59,8 @@ export const updateUserProfile = async (profileData: UpdateUserProfileRequest): 
     }
 
     return null;
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    return null;
+  } catch (error: any) {
+    return error.response?.data || null;
   }
 };
 
@@ -96,7 +94,6 @@ export const changePassword = async (passwordData: ChangePasswordRequest): Promi
 
     return null;
   } catch (error: any) {
-    console.error("Error changing password:", error);
     throw new Error(error.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu");
   }
 };
@@ -247,7 +244,7 @@ export const forgotPasswordApi = async (email: string) => {
   }
 };
 
-export const sendResetOtpApi  = async () => {
+export const sendResetOtpApi = async () => {
   try {
     const res = await axiosConfig.get(`/register/email`);
     return res.data;

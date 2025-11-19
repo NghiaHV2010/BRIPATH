@@ -109,7 +109,7 @@ export const getSuitableJobCategories = async (req: Request, res: Response, next
             WHERE rn <= 3
             GROUP BY category_id, job_category, category_description
             ORDER BY score DESC
-            LIMIT 3;
+            LIMIT 2;
         `;
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -140,11 +140,22 @@ export const restartUserAnswer = async (req: Request, res: Response, next: NextF
 }
 
 export const createCareerPath = async (req: Request, res: Response, next: NextFunction) => {
+    const maxCareerPathsPerUser = 3;
     // @ts-ignore
     const user_id = req.user.id;
     const { id, jobSpecialize }: { id: number, jobSpecialize: string } = req.body;
 
     try {
+        const existingCareerPathsCount = await prisma.careerPaths.count({
+            where: {
+                user_id
+            }
+        });
+
+        if (existingCareerPathsCount >= maxCareerPathsPerUser) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, `Bạn chỉ được tạo tối đa ${maxCareerPathsPerUser} lộ trình.`));
+        }
+
         const isJobSpecializeExisted = await prisma.jobSpecialized.findUnique({
             where: {
                 id,
@@ -158,7 +169,6 @@ export const createCareerPath = async (req: Request, res: Response, next: NextFu
 
         const careerPathData = await generateCareerPath(jobSpecialize).catch((e) => next(e));
 
-        console.log(careerPathData);
         if (!careerPathData || careerPathData instanceof Error) {
             return next(errorHandler(HTTP_ERROR.INTERNAL_SERVER_ERROR, "Tạo lộ trình thất bại"));
         }

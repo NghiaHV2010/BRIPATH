@@ -25,7 +25,6 @@ export default function SavedJobsPage() {
         const res = await getSavedJobs();
 
         if (res.success) {
-          console.log(res.data);
           setSavedJobs(res.data);
         } else {
           alert("Không thể tải danh sách công việc đã lưu. Vui lòng thử lại.");
@@ -73,7 +72,11 @@ export default function SavedJobsPage() {
   };
 
   if (loading && !savedJobs) {
-    return <Loader className="size-10 animate-spin" />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader className="size-10 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   return (
@@ -118,33 +121,41 @@ export default function SavedJobsPage() {
         </div>
       </div>
 
-      {/* Jobs List */}
-      <div className="space-y-4">
-        {filteredJobs.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <Bookmark className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {savedJobs.length === 0 ? "Chưa có công việc nào được lưu" : "Không tìm thấy công việc phù hợp"}
-            </h3>
-            <p className="text-gray-500 mb-6">
-              {savedJobs.length === 0
-                ? "Hãy khám phá và lưu những công việc bạn quan tâm để dễ dàng theo dõi sau này."
-                : "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy công việc phù hợp."
-              }
-            </p>
-            {savedJobs.length === 0 && (
-              <Link
-                to="/jobs"
-                className=""
-              >
-                Khám phá công việc
-              </Link>
-            )}
-          </div>
-        ) : (
-          filteredJobs.map((j) => (
+      {/* Jobs List - Grid Layout */}
+      {filteredJobs.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <Bookmark className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {savedJobs.length === 0 ? "Chưa có công việc nào được lưu" : "Không tìm thấy công việc phù hợp"}
+          </h3>
+          <p className="text-gray-500 mb-6">
+            {savedJobs.length === 0
+              ? "Hãy khám phá và lưu những công việc bạn quan tâm để dễ dàng theo dõi sau này."
+              : "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy công việc phù hợp."
+            }
+          </p>
+          {savedJobs.length === 0 && (
+            <Link
+              to="/jobs"
+              className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Khám phá công việc
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {filteredJobs.map((j) => (
             <div key={j.jobs.id} className="relative">
-              <p className="absolute top-1 right-2 z-10 font-thin text-sm text-gray-600">{new Date(j.saved_at).toLocaleString()}</p>
+              {/* <div className="absolute top-2 right-2 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
+                <p className="text-xs font-medium text-gray-600">
+                  {new Date(j.saved_at).toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div> */}
               <JobCard
                 job={j.jobs}
                 onClick={() => handleJobClick(j.jobs.id)}
@@ -152,9 +163,9 @@ export default function SavedJobsPage() {
                 isSaved={true}
               />
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

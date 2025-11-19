@@ -1,6 +1,6 @@
 export default function CompanyDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 animate-pulse">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-12 px-4 animate-pulse">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
           <div className="h-64 bg-slate-200" />

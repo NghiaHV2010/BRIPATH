@@ -33,6 +33,13 @@ interface Config {
     REDIS_URL: string;
     UPSTASH_REDIS_REST_URL: string;
     UPSTASH_REDIS_REST_TOKEN: string;
+    TWILIO_ACCOUNT_SID: string;
+    TWILIO_AUTH_TOKEN: string;
+    TWILIO_PHONE_NUMBER: string;
+    INFOBIP_API_KEY: string;
+    INFOBIP_BASE_URL: string;
+    TWO_FA_SECRET_KEY: string;
+    TWO_FA_SECRET_IV: string;
 }
 
 dotenv.config();
@@ -72,6 +79,13 @@ const config: Config = {
     REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || '',
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || '',
+    TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
+    TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
+    TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || '',
+    INFOBIP_API_KEY: process.env.INFOBIP_API_KEY || '',
+    INFOBIP_BASE_URL: process.env.INFOBIP_BASE_URL || '',
+    TWO_FA_SECRET_KEY: process.env.TWO_FA_SECRET_KEY || '',
+    TWO_FA_SECRET_IV: process.env.TWO_FA_SECRET_IV || ''
 };
 
 export const {
@@ -106,5 +120,12 @@ export const {
     REDIS_URL,
     UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN,
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_PHONE_NUMBER,
+    INFOBIP_API_KEY,
+    INFOBIP_BASE_URL,
+    TWO_FA_SECRET_KEY,
+    TWO_FA_SECRET_IV
 } = config;
 

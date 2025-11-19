@@ -19,7 +19,12 @@ export const submitQuiz = () =>
 
 export const createCPAPI = (id: number, jobSpecialize: string) =>
   axiosConfig.post("/careerpath", { id, jobSpecialize })
-    .then(res => res.data ?? {});
+    .then(res => res.data)
+    .catch((error) => {
+      if (error.response && error.response.data) {
+        return error.response.data;
+      }
+    });
 
 
 export const resetAnswer = async () => {

@@ -41,6 +41,12 @@ export function ProfileSidebar({
     const authUser = useAuthStore((state) => state.authUser);
     const updateUser = useAuthStore((state) => state.updateUser);
 
+    const roleMap = {
+        User: "Ứng viên",
+        Company: "Nhà tuyển dụng",
+        Admin: "Quản trị viên",
+    };
+
     const handleItemClick = (href: string) => {
         navigate(href);
     };
@@ -155,7 +161,7 @@ export function ProfileSidebar({
                 <h2 className="mt-4 text-lg font-semibold text-gray-900 text-center">
                     {username}
                 </h2>
-                <p className="text-sm text-gray-500 text-center">{role}</p>
+                <p className="text-sm text-gray-500 text-center">{roleMap[role as keyof typeof roleMap]}</p>
 
                 <Button
                     variant='custom'

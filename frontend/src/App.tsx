@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 import {
   ForgotPasswordPage,
@@ -40,16 +40,22 @@ import ProfileLayout from "./components/layout/profileLayout";
 import CareerPathPage from "./pages/quiz/CareerPathPage";
 import { BlogPage } from "./pages/blog/BlogPage";
 import BlogDetail from "./pages/blog/BlogDetail";
-import { CompanyProfile } from "./pages/profile/company/CompanyProfile";
+import { CompanyJobs } from "./pages/profile/company/CompanyJobs";
 import { JobApplicationsPage } from "./pages/profile/company/JobApplicationsPage";
 import { UserSubscription } from "./components/profile/userSubscriptions";
 import { CompanyReviews } from "./pages/profile/company/CompanyReviews";
 import VerifyPhone from "./components/auth/verifyPhone";
 import EventsPage from "./pages/event/EventPage";
+import VerifySMS from "./components/VerifySMS";
+import Setup2FAPage from "./pages/auth/Setup2FAPage";
+import Verify2FAPage from "./pages/auth/Verify2FAPage";
+import { Loader } from "lucide-react";
+import toast from "react-hot-toast";
 
 function App() {
   const { checkAuth, authUser, isCheckingAuth } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Smart scroll behavior
   useEffect(() => {
@@ -81,8 +87,25 @@ function App() {
     }
   }, [location.search, checkAuth]);
 
+  // Handle Google OAuth errors
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get("error");
+
+    if (error) {
+      if (error === "authentication_failed") {
+        toast.error("Xác thực Google thất bại");
+      } else if (error === "server_error") {
+        toast.error("Lỗi hệ thống");
+      }
+
+      // Clean up URL
+      navigate("/login", { replace: true });
+    }
+  }, [location.search, navigate]);
+
   if (isCheckingAuth && !authUser) {
-    return <div />; // khong can loader
+    return <Loader className="animate-spin m-auto mt-20 size-12" />;
   }
 
   return (
@@ -113,7 +136,7 @@ function App() {
           }
         />
         <Route path="/login" element={<LoginPage />} />
-        {/* <Route path="/sms" element={<VerifySMS />} /> */}
+        <Route path="/sms" element={<VerifySMS />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
           path="/register/email/:token"
@@ -151,10 +174,7 @@ function App() {
           <Route path="applied/jobs" element={<AppliedJobsPage />} />
           <Route path="saved/jobs" element={<SavedJobsPageProfile />} />
           <Route path="suitable/jobs" element={<CVSuitableJobsPage />} />
-          <Route
-            path="followed/companies"
-            element={<FollowedCompaniesPage />}
-          />
+          <Route path="followed/companies" element={<FollowedCompaniesPage />} />
           <Route path="notifications" element={<NotificationList />} />
           <Route path="subscriptions" element={<UserSubscription />} />
           {/* Company-specific routes */}
@@ -162,7 +182,7 @@ function App() {
             path="jobs"
             element={
               <CompanyRoute>
-                <CompanyProfile />
+                <CompanyJobs />
               </CompanyRoute>
             }
           />
@@ -219,6 +239,19 @@ function App() {
             </AdminRoute>
           }
         />
+
+        {/* 2FA Setup Route */}
+        <Route
+          path="/setup-2fa"
+          element={
+            <ProtectedRoute>
+              <Setup2FAPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 2FA Disable Route */}
+        <Route path="/verify-2fa" element={<Verify2FAPage />} />
 
         {/* Catch-all Route */}
         <Route

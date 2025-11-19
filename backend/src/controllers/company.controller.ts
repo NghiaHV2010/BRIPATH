@@ -4,6 +4,7 @@ import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
 import { redis } from "../libs/redis";
+import { AuthUserRequestDto } from "src/types/auth.types";
 
 const numberOfCompanies = 12;
 
@@ -143,7 +144,6 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
         const cachedCompanies = await redis.get(cacheKey);
 
         if (cachedCompanies) {
-            console.log('CACHE COMPANIES HIT');
             return res.status(HTTP_SUCCESS.OK).json(JSON.parse(cachedCompanies));
         }
 
@@ -195,8 +195,6 @@ export const getAllCompanies = async (req: Request, res: Response, next: NextFun
             skip: page * numberOfCompanies
         });
 
-        console.log('CACHE COMPANIES MISS');
-
         await redis.set(cacheKey, JSON.stringify({
             success: true,
             data: companies,
@@ -235,6 +233,8 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                 description: true,
                 employees: true,
                 is_verified: true,
+                latitude: true,
+                longitude: true,
                 users: {
                     select: {
                         username: true,
@@ -348,8 +348,6 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
 }
 
 export const getRecommendedCompanies = async (req: Request, res: Response, next: NextFunction) => {
-    const user_id = req.query?.userId as string;
-
     try {
         // Raw query to get recommended companies
         const companies = await prisma.$queryRawUnsafe(`
@@ -376,20 +374,7 @@ export const getRecommendedCompanies = async (req: Request, res: Response, next:
             FROM "companyTags" ct
             INNER JOIN tags t ON ct.tag_id = t.id
             WHERE ct.company_id = c.id
-        ) AS "companyTags",
-        ${user_id
-                ? `(SELECT json_agg(
-                        json_build_object(
-                            'user_id', fc.user_id,
-                            'followed_at', fc.followed_at,
-                            'is_notified', fc.is_notified
-                        )
-                    )
-                    FROM followed_companies fc
-                    WHERE fc.company_id = c.id AND fc.user_id = '${user_id}'
-                ) AS followed_companies`
-                : `NULL AS followed_companies`
-            }
+        ) AS "companyTags"
     FROM companies c
     INNER JOIN users u ON c.id = u.company_id
     LEFT JOIN fields f ON c.field_id = f.id
@@ -576,8 +561,7 @@ export const feedbackCV = async (req: Request, res: Response, next: NextFunction
 }
 
 export const getApplicantsByStatus = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
+    const { company_id } = req.user as AuthUserRequestDto;
     const { jobId } = req.params;
     const { page, status } = req.query as { page: string, status: string };
     const numberOfApplicantsToShow = 10;
@@ -683,77 +667,166 @@ export const getApplicantsByStatus = async (req: Request, res: Response, next: N
 }
 
 export const updateApplicantStatus = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
-    const applicantId: number = parseInt(req.params.applicantId);
-    const { job_id, feedback, status } = req.body as { job_id: string, feedback: string, status: string };
+    const { company_id } = req.user as AuthUserRequestDto;
+    const { applicants } = req.body as {
+        applicants: Array<{
+            applicant_id: number;
+            job_id: string;
+            feedback?: string;
+            status: 'approved' | 'rejected';
+        }>
+    };
 
-    if (!status || (status !== 'approved' && status !== 'rejected')) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn một trong các trạng thái: 'approved', 'rejected'"));
+    // Validate applicants array
+    if (!applicants || !Array.isArray(applicants) || applicants.length === 0) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Danh sách ứng viên không hợp lệ!"));
     }
 
-    if (!applicantId || isNaN(applicantId)) {
-        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Ứng viên không hợp lệ!"));
+    // Validate each applicant object
+    for (const applicant of applicants) {
+        if (!applicant.applicant_id || isNaN(applicant.applicant_id)) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "ID ứng viên không hợp lệ!"));
+        }
+        if (!applicant.job_id) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "ID công việc không hợp lệ!"));
+        }
+        if (!applicant.status || (applicant.status !== 'approved' && applicant.status !== 'rejected')) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ. Vui lòng chọn 'approved' hoặc 'rejected'"));
+        }
     }
 
     try {
-        const isApplicantExisted = await prisma.applicants.findUnique({
+        // Get all unique applicant IDs and job IDs for querying
+        const applicantIds = applicants.map(a => a.applicant_id);
+        const jobIds = [...new Set(applicants.map(a => a.job_id))];
+
+        // Verify all applicants exist and belong to the company
+        const existingApplicants = await prisma.applicants.findMany({
             where: {
-                cv_id_job_id: {
-                    job_id,
-                    cv_id: applicantId
+                cv_id: {
+                    in: applicantIds
+                },
+                job_id: {
+                    in: jobIds
                 }
             },
             include: {
                 cvs: {
                     select: {
-                        users_id: true
+                        users_id: true,
+                        fullname: true
                     }
                 },
-                jobs: true
+                jobs: {
+                    select: {
+                        company_id: true,
+                        job_title: true
+                    }
+                }
             }
         });
 
-        if (!isApplicantExisted) {
-            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Ứng viên không tồn tại!"));
+        // Create a map for quick lookup
+        const applicantMap = new Map(
+            existingApplicants.map(a => [`${a.cv_id}-${a.job_id}`, a])
+        );
+
+        // Validate all requested applicants exist
+        const missingApplicants: string[] = [];
+        const invalidApplicants: string[] = [];
+        const nonPendingApplicants: string[] = [];
+
+        for (const applicant of applicants) {
+            const key = `${applicant.applicant_id}-${applicant.job_id}`;
+            const existing = applicantMap.get(key);
+
+            if (!existing) {
+                missingApplicants.push(`CV ID: ${applicant.applicant_id}, Job ID: ${applicant.job_id}`);
+                continue;
+            }
+
+            if (existing.jobs.company_id !== company_id) {
+                invalidApplicants.push(existing.cvs.fullname);
+                continue;
+            }
+
+            if (existing.status !== 'pending') {
+                nonPendingApplicants.push(existing.cvs.fullname);
+            }
         }
-        if (isApplicantExisted.jobs.company_id !== company_id) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền cập nhật trạng thái cho ứng viên này!"));
+
+        // Return validation errors
+        if (missingApplicants.length > 0) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, `Không tìm thấy ứng viên: ${missingApplicants.join('; ')}`));
         }
-        if (isApplicantExisted.status !== 'pending') {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Chỉ có thể cập nhật trạng thái cho các ứng viên đang chờ duyệt!"));
+
+        if (invalidApplicants.length > 0) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, `Bạn không có quyền cập nhật trạng thái cho: ${invalidApplicants.join(', ')}`));
         }
+
+        if (nonPendingApplicants.length > 0) {
+            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, `Chỉ có thể cập nhật ứng viên đang chờ duyệt. Ứng viên không phù hợp: ${nonPendingApplicants.join(', ')}`));
+        }
+
+        // Perform bulk update in a transaction
         const result = await prisma.$transaction(async (tx) => {
-            const applicant = await tx.applicants.update({
-                where: {
-                    cv_id_job_id: {
-                        job_id,
-                        cv_id: applicantId
+            const updatePromises = applicants.map(async (applicant) => {
+                const key = `${applicant.applicant_id}-${applicant.job_id}`;
+                const existing = applicantMap.get(key)!;
+
+                // Update individual applicant
+                const updated = await tx.applicants.update({
+                    where: {
+                        cv_id_job_id: {
+                            cv_id: applicant.applicant_id,
+                            job_id: applicant.job_id
+                        }
+                    },
+                    data: {
+                        status: applicant.status,
+                        feedback: applicant.feedback || null,
+                        verified_date: new Date()
+                    },
+                    include: {
+                        cvs: {
+                            select: {
+                                id: true,
+                                fullname: true,
+                                email: true,
+                                users_id: true
+                            }
+                        }
                     }
-                },
-                data: {
-                    status,
-                    feedback,
-                    verified_date: new Date()
-                },
-                include: {
-                    cvs: true
-                }
+                });
+
+                // Create notification for this applicant
+                const notificationData = createNotificationData(
+                    existing.jobs.job_title,
+                    applicant.status,
+                    "applicant",
+                    "user",
+                    applicant.feedback
+                );
+
+                await tx.userNotifications.create({
+                    data: {
+                        user_id: existing.cvs.users_id,
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                    }
+                });
+
+                return updated;
             });
 
-            const notificationData = createNotificationData(isApplicantExisted.jobs.job_title, status, "applicant", "user", feedback);
+            const updatedApplicants = await Promise.all(updatePromises);
 
-            await tx.userNotifications.create({
-                data: {
-                    user_id: isApplicantExisted.cvs.users_id,
-                    title: notificationData.title,
-                    content: notificationData.content,
-                    type: notificationData.type,
-                }
-            });
-
-            return applicant;
-        })
+            return {
+                count: updatedApplicants.length,
+                applicants: updatedApplicants
+            };
+        });
 
         return res.status(HTTP_SUCCESS.OK).json({
             success: true,
@@ -763,6 +836,112 @@ export const updateApplicantStatus = async (req: Request, res: Response, next: N
         next(error);
     }
 }
+
+export const getAllApplicants = async (req: Request, res: Response, next: NextFunction) => {
+    const { company_id } = req.user as AuthUserRequestDto;
+    const { status } = req.query as { status?: 'pending' | 'approved' };
+    const { jobId } = req.params;
+
+    // Validate status
+    if (status && status !== 'pending' && status !== 'approved') {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái không hợp lệ! Chỉ chấp nhận 'pending' hoặc 'approved'"));
+    }
+
+    try {
+        // Verify job belongs to company
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            },
+            select: {
+                id: true,
+                job_title: true
+            }
+        });
+
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại hoặc bạn không có quyền truy cập!"));
+        }
+
+        // Build where clause
+        const whereClause: any = {
+            job_id: jobId
+        };
+
+        if (status) {
+            whereClause.status = status;
+        }
+
+        const applicants = await prisma.applicants.findMany({
+            where: whereClause,
+            include: {
+                cvs: {
+                    include: {
+                        awards: true,
+                        certificates: true,
+                        projects: true,
+                        educations: true,
+                        experiences: true,
+                        languages: true,
+                        references: true,
+                    }
+                }
+            },
+            orderBy: {
+                apply_date: 'desc'
+            }
+        });
+
+        // Mask sensitive data for non-approved applicants
+        const maskedApplicants = applicants.map(applicant => {
+            const masked = { ...applicant };
+
+            if (applicant.status !== 'approved') {
+                // Mask phone
+                if (masked.cvs.phone) {
+                    const phone = masked.cvs.phone;
+                    const lastFourDigits = phone.slice(-4);
+                    const maskedPart = '*'.repeat(Math.max(phone.length - 4, 0));
+                    masked.cvs.phone = maskedPart + lastFourDigits;
+                }
+
+                // Mask email
+                if (masked.cvs.email) {
+                    const email = masked.cvs.email;
+                    const atIndex = email.indexOf('@');
+                    if (atIndex > 0) {
+                        const domainPart = email.substring(atIndex);
+                        masked.cvs.email = '***' + domainPart;
+                    }
+                }
+
+                // Mask address
+                if (masked.cvs.address) {
+                    const addressParts = masked.cvs.address.split(',').map(part => part.trim());
+                    if (addressParts.length > 2) {
+                        const lastTwoParts = addressParts.slice(-2).join(', ');
+                        masked.cvs.address = lastTwoParts;
+                    }
+                }
+            }
+            return masked;
+        });
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: {
+                job_title: isJobExisted.job_title,
+                applicants: maskedApplicants,
+                total: maskedApplicants.length,
+                status: status || 'all'
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 export const getAllCompanyFields = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -821,17 +1000,27 @@ export const updateCompanyProfile = async (req: Request, res: Response, next: Ne
     }
 
     try {
+        const updateData: Partial<RequestBody> = {};
+
+        if (company_website) {
+            updateData.company_website = company_website;
+        }
+        if (description) {
+            updateData.description = description;
+        }
+        if (background_url) {
+            updateData.background_url = background_url;
+        }
+        if (employees) {
+            updateData.employees = employees;
+        }
+
         const result = await prisma.$transaction(async (tx) => {
             const company = await tx.companies.update({
                 where: {
                     id: company_id
                 },
-                data: {
-                    company_website,
-                    description,
-                    background_url,
-                    employees,
-                },
+                data: updateData,
                 include: {
                     users: {
                         omit: {
@@ -926,8 +1115,6 @@ export const compareCvandJob = async (req: Request, res: Response, next: NextFun
 
 
 export const getApplicantByID = async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const { company_id } = req.user;
     const applicantId: number = parseInt(req.params.applicantId);
     const { jobId, status } = req.query as { jobId: string, status: 'pending' | 'approved' | 'rejected' };
 
@@ -959,11 +1146,41 @@ export const getApplicantByID = async (req: Request, res: Response, next: NextFu
                         },
                     },
                 }
-            }
+            },
         });
 
         if (!isApplicantExisted) {
             return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Ứng viên không tồn tại!"));
+        }
+
+        // Mask sensitive data if status is not 'approved'
+        if (status !== 'approved') {
+            if (isApplicantExisted.cvs.phone) {
+                const phone = isApplicantExisted.cvs.phone;
+                const lastFourDigits = phone.slice(-4);
+                const maskedPart = '*'.repeat(Math.max(phone.length - 4, 0));
+                isApplicantExisted.cvs.phone = maskedPart + lastFourDigits;
+            }
+
+            if (isApplicantExisted.cvs.email) {
+                const email = isApplicantExisted.cvs.email;
+                const atIndex = email.indexOf('@');
+                if (atIndex > 0) {
+                    const domainPart = email.substring(atIndex);
+                    isApplicantExisted.cvs.email = '***' + domainPart;
+                }
+            }
+
+            if (isApplicantExisted.cvs.address) {
+                const addressParts = isApplicantExisted.cvs.address.split(',').map(part => part.trim());
+                if (addressParts.length > 2) {
+                    const lastTwoParts = addressParts.slice(-2).join(', ');
+                    isApplicantExisted.cvs.address = lastTwoParts;
+                } else if (addressParts.length > 0) {
+                    // If less than or equal to 2 parts, just show them
+                    isApplicantExisted.cvs.address = addressParts.join(', ');
+                }
+            }
         }
 
         return res.status(HTTP_SUCCESS.OK).json({
@@ -1002,6 +1219,196 @@ export const compareCvandJobStats = async (req: Request, res: Response, next: Ne
                 cv,
                 job
             }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const filterSuitableApplicants = async (req: Request, res: Response, next: NextFunction) => {
+    const { company_id } = req.user as AuthUserRequestDto;
+    // @ts-ignore
+    const { ai_matchings } = req.plan.membershipPlans;
+    const jobId = req.params.jobId;
+
+    try {
+        if (!ai_matchings) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
+        }
+
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            }
+        });
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        // Get suitable CV IDs with scores first
+        const suitableCVsWithScores = await prisma.$queryRaw<Array<{ id: number; score: number; status: string }>>`
+            SELECT 
+                c.id,
+                a.status,
+                1 - (c.embedding <=> j.embedding) AS score
+            FROM applicants a
+            INNER JOIN cvs c ON a.cv_id = c.id
+            CROSS JOIN (
+                SELECT embedding
+                FROM jobs
+                WHERE id = ${jobId}
+            ) AS j
+            WHERE a.job_id = ${jobId} AND a.status = 'Đang chờ'
+            ORDER BY score DESC
+            LIMIT 20;
+        `;
+
+        // Get the CV IDs
+        const cvIds = suitableCVsWithScores.map(cv => cv.id);
+
+        // Fetch full CV data with all required relations
+        const suitableCVs = await prisma.cvs.findMany({
+            where: {
+                id: {
+                    in: cvIds
+                }
+            },
+            select: {
+                id: true,
+                fullname: true,
+                apply_job: true,
+                created_at: true,
+                primary_skills: true,
+                users: {
+                    select: {
+                        id: true,
+                        avatar_url: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        projects: true,
+                        experiences: true,
+                        educations: true,
+                        certificates: true,
+                        languages: true,
+                        references: true,
+                        awards: true,
+                    }
+                }
+            }
+        });
+
+        // Merge scores with CV data and sort by score
+        const suitableCVsWithData = suitableCVs.map(cv => {
+            const scoreData = suitableCVsWithScores.find(s => s.id === cv.id);
+            return {
+                ...cv,
+                score: scoreData?.score || 0,
+                status: scoreData?.status || 'pending'
+            };
+        }).sort((a, b) => b.score - a.score);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: suitableCVsWithData
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllSuitableApplicants = async (req: Request, res: Response, next: NextFunction) => {
+    const { company_id } = req.user as AuthUserRequestDto;
+    // @ts-ignore
+    const { ai_matchings, ai_networking_limit } = req.plan.membershipPlans;
+    const jobId = req.params.jobId;
+
+    try {
+        if (!ai_matchings) {
+            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Gói của bạn không có quyền sử dụng tính năng này!"));
+        }
+
+        const isJobExisted = await prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company_id
+            }
+        });
+        if (!isJobExisted) {
+            return next(errorHandler(HTTP_ERROR.NOT_FOUND, "Công việc không tồn tại!"));
+        }
+
+        // Get suitable CV IDs with scores first
+        const suitableCVsWithScores = await prisma.$queryRaw<Array<{ id: number; score: number }>>`
+            SELECT 
+                c.id,
+                1 - (c.embedding <=> j.embedding) AS score
+            FROM cvs c
+            CROSS JOIN (
+                SELECT embedding 
+                FROM jobs 
+                WHERE id = ${jobId}
+            ) AS j
+            WHERE c.id NOT IN (
+                SELECT a.cv_id 
+                FROM applicants a 
+                WHERE a.job_id = ${jobId}
+            )
+            ORDER BY score DESC
+            LIMIT ${ai_networking_limit};
+        `;
+
+        // Get the CV IDs
+        const cvIds = suitableCVsWithScores.map(cv => cv.id);
+
+        // Fetch full CV data with all required relations
+        const suitableCVs = await prisma.cvs.findMany({
+            where: {
+                id: {
+                    in: cvIds
+                }
+            },
+            select: {
+                id: true,
+                fullname: true,
+                apply_job: true,
+                created_at: true,
+                primary_skills: true,
+                users: {
+                    select: {
+                        id: true,
+                        avatar_url: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        projects: true,
+                        experiences: true,
+                        educations: true,
+                        certificates: true,
+                        languages: true,
+                        references: true,
+                        awards: true,
+                    }
+                }
+            }
+        });
+
+        // Merge scores with CV data and sort by score
+        const suitableCVsWithData = suitableCVs.map(cv => {
+            const scoreData = suitableCVsWithScores.find(s => s.id === cv.id);
+            return {
+                ...cv,
+                score: scoreData?.score || 0
+            };
+        }).sort((a, b) => b.score - a.score);
+
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: suitableCVsWithData
         });
     } catch (error) {
         next(error);

@@ -5,7 +5,6 @@ import { HTTP_ERROR } from "../constants/httpCode";
 import { ACCESS_SECRET, REFRESH_SECRET } from "../config/env.config";
 import { setCookie } from "../utils/cookie.util";
 import { AuthUserRequestDto } from "../types/auth.types";
-import { userRepository } from "../repositories/user.repository";
 import { checkAuthenticationService } from "../services/auth.service";
 
 export const authenticationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -101,12 +100,10 @@ export const emailOTPMiddleware = async (req: Request, res: Response, next: Next
 
 export const authorizationMiddleware = (role: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const { id: user_id } = req.user as AuthUserRequestDto;
+        const { id: user_id, roles } = req.user as AuthUserRequestDto;
 
         try {
-            const user = await userRepository.findById(user_id);
-
-            if (user?.roles.role_name !== role) {
+            if (roles.role_name !== role) {
                 return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn không có quyền thực hiện yêu cầu này"));
             }
 
@@ -118,10 +115,10 @@ export const authorizationMiddleware = (role: string) => {
 }
 
 export const twoFactorMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const { phone_verified } = req.user as AuthUserRequestDto;
+    const { is_2fa_enabled } = req.user as AuthUserRequestDto;
 
-    if (!phone_verified)
-        return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Vui lòng xác thực số điện thoại"));
+    if (!is_2fa_enabled)
+        return next(errorHandler(HTTP_ERROR.UNAUTHORIZED, "Vui lòng xác thực 2 yếu tố!"));
 
     next();
 }

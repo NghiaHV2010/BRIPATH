@@ -12,10 +12,12 @@ import {
   JobDescriptionCard,
   JobApplicationInstructions,
 } from "../../components/job";
+import { RecommendedJobsCard } from "../../components/job/RecommendedJobCard";
 import { ApplyJobDialog } from "../../components/job/ApplyJobDialog";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import { useAuthStore } from "../../store/auth";
 import axiosConfig from "../../config/axios.config";
+import { getRecommendedJobs } from "../../api/job_api";
 
 export default function JobDetailsPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -27,6 +29,10 @@ export default function JobDetailsPage() {
   const pendingActionRef = useRef<null | "apply" | "save">(null);
   const [hasViewedJob, setHasViewedJob] = useState(false);
   const viewTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Recommended jobs state
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(true);
 
   const authUser = useAuthStore((s) => s.authUser);
   const isSaved = !!(selectedJob?.isSaved || (jobId && checkIfSaved(jobId)));
@@ -45,6 +51,25 @@ export default function JobDetailsPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  // Fetch recommended jobs
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setIsLoadingRecommended(true);
+        const response = await getRecommendedJobs();
+        if (response?.success) {
+          setRecommendedJobs(response.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching recommended jobs:", error);
+      } finally {
+        setIsLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommendedJobs();
   }, []);
 
   useEffect(() => {
@@ -84,7 +109,6 @@ export default function JobDetailsPage() {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
   useEffect(() => {
@@ -276,6 +300,12 @@ export default function JobDetailsPage() {
           <div className="space-y-6">
             {company && <CompanyCard company={company} />}
 
+            {/* Recommended Jobs */}
+            <RecommendedJobsCard
+              jobs={recommendedJobs}
+              isLoading={isLoadingRecommended}
+            />
+
             {/* Safety Tips */}
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="p-6 text-orange-700 text-sm space-y-2">
@@ -286,14 +316,6 @@ export default function JobDetailsPage() {
                 <p>• Kiểm tra kỹ thông tin công ty trước khi nộp hồ sơ</p>
                 <p>• Chỉ nộp CV qua hệ thống chính thức của platform</p>
               </CardContent>
-            </Card>
-
-            <Card className="bg-white shadow-lg rounded-2xl overflow-hidden">
-              <img
-                src="/src/assets/banner/9.jpg"
-                alt="Company banner"
-                className="w-full h-auto rounded-2xl object-cover transform transition-transform duration-500 hover:scale-105"
-              />
             </Card>
           </div>
         </div>

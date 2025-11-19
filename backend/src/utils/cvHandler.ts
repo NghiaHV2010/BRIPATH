@@ -21,21 +21,47 @@ export const extractTextFromCV = async (file: Buffer, mimeType: string): Promise
     }
 };
 
-export const formatText = async (rawText: string) => {
+export const formatText = async (sessionId: string, rawText: string, sendUpdate: (data: any) => void) => {
+    const openai = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+    });
+
+    let fullContent = '';
+
     try {
-        const response = await AI.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: rawText,
-            config: {
-                systemInstruction: CVPROMPT,
-                responseMimeType: "application/json"
-            }
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: CVPROMPT },
+                { role: "user", content: rawText }
+            ],
+            response_format: {
+                type: "json_object"
+            },
+            temperature: 0.3,
+            stream: true,
         });
 
-        const parseText = JSON.parse(response.text!);
+        for await (const chunk of response) {
+            const content = chunk.choices[0].delta?.content;
+            if (content) {
+                fullContent += content;
+                // Send streaming data
+                sendUpdate({
+                    status: 'streaming',
+                    chunk: content,
+                    type: 'cv_format',
+                    progress: 20 + Math.min((fullContent.length / 1000) * 40, 40) // 20-60%
+                });
+            }
+        }
+
+        // Parse and return the complete JSON
+        const parseText = JSON.parse(fullContent);
         return parseText;
     } catch (error) {
-        return error;
+        console.error("Error formatting text:", error);
+        throw error;
     }
 }
 
@@ -47,9 +73,10 @@ export const embeddingData = async (data: string) => {
         });
 
         //@ts-ignore
-        return vector.embeddings[0].values;
+        return vector.embeddings[0].values as number[][];
     } catch (error) {
-        return error;
+        console.error("Error embedding data:", error);
+        throw error;
     }
 }
 
@@ -73,6 +100,7 @@ export const analystDataStats = async (prompt: string) => {
         const content = response.choices[0].message.content;
         return JSON.parse(content ?? "{}");
     } catch (error) {
-        console.error("Error analyzing CV:", error);
+        console.error("Error analyzing CV stats:", error);
+        throw error;
     }
 }

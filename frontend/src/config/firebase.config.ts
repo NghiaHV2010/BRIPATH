@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, type ConfirmationResult } from "firebase/auth";
 import { initializeFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-
+// import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,16 +27,27 @@ const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true,
 });
 
+// let appCheck;
+// if (typeof window !== 'undefined') {
+//   appCheck = initializeAppCheck(app, {
+//     provider: new ReCaptchaEnterpriseProvider(
+//       import.meta.env.VITE_FIREBASE_RECAPTCHA_KEY! // This should be your reCAPTCHA Enterprise site key
+//     ),
+//     isTokenAutoRefreshEnabled: true
+//   });
+// }
+
 // Configure Firebase Storage
 const storageBucket = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string | undefined;
 const storage = storageBucket ? getStorage(app, `gs://${storageBucket}`) : getStorage(app);
 
-export { 
-  analytics, 
-  auth, 
-  db, 
-  storage, 
-  signInWithPhoneNumber, 
-  RecaptchaVerifier, 
-  type ConfirmationResult 
+export {
+  analytics,
+  auth,
+  db,
+  storage,
+  // appCheck,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+  type ConfirmationResult
 };

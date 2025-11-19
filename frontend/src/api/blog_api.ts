@@ -80,7 +80,7 @@ export const getAllBlogPosts = async (
 ): Promise<{ success: boolean; data: BlogPost[]; total?: number; page?: number; pageSize?: number; totalPages?: number }> => {
   try {
     const response = await axiosConfig.get<{ success: boolean; data: BlogPost[]; total: number; page: number; pageSize: number; totalPages: number }>(`/blogs`, { params: { page, limit } });
-    console.log("Fetched blog posts:", response.data);
+
     return response.data;
   } catch (error: any) {
     console.error("Error fetching blog posts:", error.response?.data || error.message);
