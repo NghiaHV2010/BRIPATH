@@ -6,6 +6,8 @@ import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { getAllReports, updateReportStatus } from "../../api/admin_api";
 import { AlertTriangle, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, Calendar, User } from "lucide-react";
+import { AdminTableSkeleton } from "./AdminTableSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
 
 interface Report {
   id: number;
@@ -173,18 +175,15 @@ export default function ReportsManagement() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2">Đang tải...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <AdminTableSkeleton columns={6} rows={5} />
                 ) : reports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      Không có báo cáo nào
+                    <TableCell colSpan={6}>
+                      <AdminEmptyState
+                        icon={AlertTriangle}
+                        title="Chưa có báo cáo nào"
+                        description="Khi người dùng gửi báo cáo, chúng sẽ hiển thị tại đây."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

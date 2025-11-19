@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Users, Search, Mail, Phone, MapPin, Calendar, Shield, Eye, User, Building, ChevronLeft, ChevronRight } from "lucide-react";
 import VisitorChart from "./visitorChart";
 import { getAllUsers } from "../../api/admin_api";
+import { AdminTableSkeleton } from "./AdminTableSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
 
 interface User {
   id: string;
@@ -289,8 +291,8 @@ export default function UserManagement() {
     <div className="space-y-6">
       {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <VisitorChart title="Total Users" subtitle="User growth over time" />
-        <VisitorChart title="User Activity" subtitle="Active users by period" />
+        <VisitorChart title="Tổng số người dùng" subtitle="Tăng trưởng người dùng theo thời gian" />
+        <VisitorChart title="Hoạt động người dùng" subtitle="Mức độ hoạt động theo từng giai đoạn" />
       </div>
       
       <Card>
@@ -354,18 +356,15 @@ export default function UserManagement() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2">Đang tải...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <AdminTableSkeleton columns={6} rows={6} />
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      Không tìm thấy người dùng nào
+                    <TableCell colSpan={6}>
+                      <AdminEmptyState
+                        icon={Users}
+                        title="Không tìm thấy người dùng"
+                        description="Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để xem thêm kết quả."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

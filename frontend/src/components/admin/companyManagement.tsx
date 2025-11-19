@@ -6,6 +6,8 @@ import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { getCompaniesByStatus, updateCompanyStatus } from "../../api/admin_api";
 import { Building2, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, MapPin, Calendar } from "lucide-react";
+import { AdminTableSkeleton } from "./AdminTableSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
 
 interface Company {
   id: string;
@@ -148,6 +150,19 @@ export default function CompanyManagement() {
     return statusCounts[statusType as keyof typeof statusCounts] || 0;
   };
 
+  const getStatusLabel = (statusType: 'pending' | 'approved' | 'rejected') => {
+    switch (statusType) {
+      case 'pending':
+        return 'chờ duyệt';
+      case 'approved':
+        return 'đã duyệt';
+      case 'rejected':
+        return 'từ chối';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Status Tabs */}
@@ -191,19 +206,16 @@ export default function CompanyManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companies && loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2">Đang tải...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                {loading ? (
+                  <AdminTableSkeleton columns={6} rows={5} />
                 ) : companies.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      Không có công ty nào
+                    <TableCell colSpan={6}>
+                      <AdminEmptyState
+                        icon={Building2}
+                        title="Chưa có công ty nào"
+                        description={`Chưa có hồ sơ ${getStatusLabel(status)} nào trong danh sách. Vui lòng kiểm tra lại sau.`}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

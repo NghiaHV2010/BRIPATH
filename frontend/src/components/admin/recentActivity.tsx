@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { TrendingUp, Loader2 } from "lucide-react";
+import {TrendingUp, CheckCircle2, AlertTriangle, UserPlus, Building2, FileWarning, RefreshCw} from "lucide-react";
 import { getRecentActivities } from "../../api/admin_api";
+import { AdminCardSkeleton } from "./AdminCardSkeleton";
+import { Skeleton } from "../ui/skeleton";
 
 interface Activity {
   type: string;
@@ -13,6 +16,7 @@ interface Activity {
 export default function RecentActivity() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -20,6 +24,7 @@ export default function RecentActivity() {
         setLoading(true);
         const response = await getRecentActivities();
         setActivities(response.data || []);
+        setLastUpdated(new Date());
       } catch (error) {
         console.error("Error fetching recent activities:", error);
       } finally {
@@ -67,49 +72,125 @@ export default function RecentActivity() {
     }
   };
 
+  type ActivityMeta = { icon: LucideIcon; badge: string; badgeClass: string };
+
+  const activityMeta: Record<string, ActivityMeta> = {
+    success: {
+      icon: CheckCircle2,
+      badge: "Hoàn tất",
+      badgeClass: "bg-emerald-50 text-emerald-700",
+    },
+    warning: {
+      icon: AlertTriangle,
+      badge: "Cảnh báo",
+      badgeClass: "bg-amber-50 text-amber-700",
+    },
+    user: {
+      icon: UserPlus,
+      badge: "Người dùng",
+      badgeClass: "bg-blue-50 text-blue-700",
+    },
+    company: {
+      icon: Building2,
+      badge: "Doanh nghiệp",
+      badgeClass: "bg-slate-50 text-slate-700",
+    },
+    report: {
+      icon: FileWarning,
+      badge: "Báo cáo",
+      badgeClass: "bg-purple-50 text-purple-700",
+    },
+  };
+
+  const getActivityMeta = (type: string) => {
+    return activityMeta[type] || {
+      icon: TrendingUp,
+      badge: "Hệ thống",
+      badgeClass: "bg-gray-100 text-gray-600",
+    };
+  };
+
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Hoạt động gần đây
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">Đang tải...</span>
-          </div>
-        </CardContent>
-      </Card>
+      <AdminCardSkeleton
+        title="Hoạt động gần đây"
+        icon={<TrendingUp className="h-5 w-5" />}
+      >
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="flex items-start gap-3">
+              <Skeleton className="h-9 w-9 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </AdminCardSkeleton>
     );
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Hoạt động gần đây
+        <CardTitle className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Hoạt động gần đây
+          </span>
+          {lastUpdated && (
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Cập nhật {getTimeAgo(lastUpdated.toISOString())}
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Không có hoạt động nào gần đây
+          <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500">
+            <TrendingUp className="h-6 w-6 mb-2 text-gray-400" />
+            <p>Hiện chưa có hoạt động nào gần đây</p>
+            <p className="text-sm text-gray-400">Hệ thống sẽ tự động cập nhật khi có thay đổi.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {activities.map((activity, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div className={`w-2 h-2 ${getColorClass(activity.color)} rounded-full`}></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{activity.message}</p>
-                  <p className="text-xs text-gray-500">{getTimeAgo(activity.time)}</p>
+            {activities.map((activity, index) => {
+              const meta = getActivityMeta(activity.type);
+              const Icon = meta.icon;
+              return (
+                <div
+                  key={`${activity.time}-${index}`}
+                  className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3"
+                >
+                  <div className="flex flex-col items-center">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm`}>
+                      <Icon className="h-4 w-4 text-gray-600" />
+                    </div>
+                    {index !== activities.length - 1 && (
+                      <span className="mt-1 h-full w-px flex-1 bg-gradient-to-b from-gray-200 to-transparent" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.badgeClass}`}>
+                        {meta.badge}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>{getTimeAgo(activity.time)}</span>
+                      <span>•</span>
+                      <span className="font-medium text-gray-400 uppercase tracking-wide">
+                        {activity.type}
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`mt-1 h-2 w-2 rounded-full ${getColorClass(activity.color)}`} />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

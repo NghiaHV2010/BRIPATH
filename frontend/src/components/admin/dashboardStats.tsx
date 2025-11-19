@@ -1,70 +1,89 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getRevenueStats, getUserAccessStats, getPaymentStats } from "../../api/admin_api";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  DollarSign, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  DollarSign,
   CreditCard,
-  Activity
+  Activity,
 } from "lucide-react";
+import { AdminCardSkeleton } from "./AdminCardSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
+import { Skeleton } from "../ui/skeleton";
 
 interface StatsData {
   revenue: any;
   users: any;
   payments: any;
-  loading: boolean;
 }
 
 export default function DashboardStats() {
-  const [stats, setStats] = useState<StatsData>({
-    revenue: null,
-    users: null,
-    payments: null,
-    loading: true
-  });
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        setLoading(true);
         const [revenueData, usersData, paymentsData] = await Promise.all([
           getRevenueStats(),
           getUserAccessStats(),
-          getPaymentStats()
+          getPaymentStats(),
         ]);
 
         setStats({
           revenue: revenueData.data,
           users: usersData.data,
           payments: paymentsData.data,
-          loading: false
         });
+        setLastUpdated(new Date());
       } catch (error) {
         console.error("Error fetching stats:", error);
-        setStats(prev => ({ ...prev, loading: false }));
+        setStats(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchStats();
   }, []);
 
-  if (stats.loading) {
+  if (loading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
-              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
-            </CardContent>
-          </Card>
+        {["Tổng doanh thu", "Người dùng mới", "Giao dịch", "Hiệu suất"].map((title) => (
+          <AdminCardSkeleton key={title} title={title} icon={<Skeleton className="h-4 w-4 rounded-full" />}>
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          </AdminCardSkeleton>
         ))}
       </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Thống kê tổng quan
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AdminEmptyState
+            icon={Activity}
+            title="Không thể tải thống kê"
+            description="Vui lòng thử làm mới trang hoặc kiểm tra lại kết nối."
+          />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -84,7 +103,14 @@ export default function DashboardStats() {
       {/* Total Revenue */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-gray-700">TỔNG DOANH THU</CardTitle>
+          <CardTitle className="text-sm font-medium text-gray-700 flex items-center justify-between w-full">
+            <span>TỔNG DOANH THU</span>
+            {lastUpdated && (
+              <span className="text-[11px] font-normal text-gray-500">
+                {`Cập nhật ${lastUpdated.toLocaleTimeString("vi-VN")}`}
+              </span>
+            )}
+          </CardTitle>
           <div className="p-2 bg-blue-500 rounded-full">
             <DollarSign className="h-4 w-4 text-white" />
           </div>

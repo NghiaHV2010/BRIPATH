@@ -5,6 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../ui/badge";
 import { getEventsByStatus, updateEventStatus } from "../../api/admin_api";
 import { Calendar, CheckCircle, XCircle, Eye, MapPin, Clock } from "lucide-react";
+import { AdminTableSkeleton } from "./AdminTableSkeleton";
+import { AdminEmptyState } from "./AdminEmptyState";
 
 interface Event {
   id: string;
@@ -74,6 +76,19 @@ export default function EventsManagement() {
     return events.filter(e => e.status === statusType).length;
   };
 
+  const getStatusLabel = (statusType: 'pending' | 'approved' | 'rejected') => {
+    switch (statusType) {
+      case 'pending':
+        return 'chờ duyệt';
+      case 'approved':
+        return 'đã duyệt';
+      case 'rejected':
+        return 'từ chối';
+      default:
+        return '';
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
@@ -129,18 +144,15 @@ export default function EventsManagement() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2">Đang tải...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <AdminTableSkeleton columns={7} rows={5} />
                 ) : events.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                      Không có sự kiện nào
+                    <TableCell colSpan={7}>
+                      <AdminEmptyState
+                        icon={Calendar}
+                        title="Chưa có sự kiện nào"
+                        description={`Danh sách sự kiện ${getStatusLabel(status)} hiện đang trống.`}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

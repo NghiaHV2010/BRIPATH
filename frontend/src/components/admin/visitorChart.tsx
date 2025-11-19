@@ -23,8 +23,8 @@ interface MonthlyStat {
 }
 
 export default function VisitorChart({ 
-  title = "Total Visitors", 
-  subtitle = "Total for the last 3 months" 
+  title = "Tổng lượt truy cập", 
+  subtitle = "Tổng cộng trong 3 tháng gần nhất" 
 }: VisitorChartProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<"7days" | "30days" | "3months">("7days");
   const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
@@ -145,7 +145,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 3 months
+              3 tháng gần nhất
             </Button>
             <Button
               variant={selectedPeriod === "30days" ? "default" : "outline"}
@@ -157,7 +157,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 30 days
+              30 ngày gần nhất
             </Button>
             <Button
               variant={selectedPeriod === "7days" ? "default" : "outline"}
@@ -169,7 +169,7 @@ export default function VisitorChart({
                   : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50"
               }`}
             >
-              Last 7 days
+              7 ngày gần nhất
             </Button>
           </div>
         </div>
@@ -261,13 +261,13 @@ export default function VisitorChart({
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex justify-between text-sm">
             <div className="text-gray-600">
-              Total: <span className="text-gray-900 font-semibold">{formatNumber(currentData.reduce((sum, d) => sum + d.visitors, 0))}</span>
+              Tổng: <span className="text-gray-900 font-semibold">{formatNumber(currentData.reduce((sum, d) => sum + d.visitors, 0))}</span>
             </div>
             <div className="text-gray-600">
-              Avg: <span className="text-gray-900 font-semibold">{formatNumber(Math.round(currentData.reduce((sum, d) => sum + d.visitors, 0) / currentData.length))}</span>
+              Trung bình: <span className="text-gray-900 font-semibold">{formatNumber(Math.round(currentData.reduce((sum, d) => sum + d.visitors, 0) / currentData.length))}</span>
             </div>
             <div className="text-gray-600">
-              Peak: <span className="text-gray-900 font-semibold">{formatNumber(maxValue)}</span>
+              Cao nhất: <span className="text-gray-900 font-semibold">{formatNumber(maxValue)}</span>
             </div>
           </div>
         </div>

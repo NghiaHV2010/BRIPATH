@@ -129,7 +129,7 @@ export default function LabelManagement() {
                   </TableRow>
                 ) : (
                   jobLabels.map((label) => (
-                    <TableRow key={label.id}>
+                    <TableRow key={`job-${label.id}`}>
                       <TableCell className="font-mono text-sm">{label.id}</TableCell>
                       <TableCell className="font-medium">{label.label_name}</TableCell>
                       <TableCell>
@@ -183,8 +183,8 @@ export default function LabelManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  companyLabels.map((label) => (
-                    <TableRow key={label.id}>
+                  companyLabels.map((label, index) => (
+                    <TableRow key={`company-${label.id || index}`}>
                       <TableCell className="font-mono text-sm">{label.id}</TableCell>
                       <TableCell className="font-medium">{label.label_name}</TableCell>
                       <TableCell>
