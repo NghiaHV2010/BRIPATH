@@ -154,7 +154,7 @@ export default function CompaniesPage() {
       {/* END THAY ĐỔI */}
 
       {/* Khối này giữ lại cho Company List bên dưới */}
-      <div className="w-full mx-auto px-4 py-12 bg-linear-to-b from-blue-100  to-white ">
+      <div className="w-full mx-auto px-4 py-12 ">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 ">
             <div className="flex flex-col items-center gap-4">

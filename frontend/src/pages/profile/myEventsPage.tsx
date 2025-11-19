@@ -301,7 +301,7 @@ export default function MyEventsPage() {
                 <div className="flex flex-col md:flex-row gap-4">
                   {/* Banner Image */}
                   {event.banner_url && (
-                    <div className="w-full md:w-48 h-32 shrink-0">
+                    <div className="w-full md:w-44 h-32 shrink-0">
                       <img
                         src={event.banner_url}
                         alt={event.title}

@@ -311,3 +311,72 @@ export const getUserSubscription = async (): Promise<any> => {
     return null;
   }
 };
+
+// Report API
+export interface CreateReportRequest {
+  title: string;
+  description: string;
+}
+
+export interface CreateReportResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+export interface Report {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface GetUserReportsResponse {
+  success: boolean;
+  data: Report[];
+  totalPages: number;
+}
+
+export const createReport = async (reportData: CreateReportRequest): Promise<CreateReportResponse> => {
+  try {
+    const response = await axiosConfig.post('/report', reportData, {
+      withCredentials: true,
+    });
+
+    return {
+      success: response.data.success || true,
+      message: response.data.message || "Báo cáo đã được gửi thành công",
+      data: response.data.data,
+    };
+  } catch (error: any) {
+    console.error("Error creating report:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Có lỗi xảy ra khi gửi báo cáo",
+    };
+  }
+};
+
+export const getUserReports = async (page: number = 1): Promise<GetUserReportsResponse> => {
+  try {
+    const response = await axiosConfig.get(`/reports?page=${page}`, {
+      withCredentials: true,
+    });
+
+    return {
+      success: response.data.success || true,
+      data: response.data.data || [],
+      totalPages: response.data.totalPages || 1,
+    };
+  } catch (error: any) {
+    console.error("Error fetching user reports:", error);
+    return {
+      success: false,
+      data: [],
+      totalPages: 1,
+    };
+  }
+};

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Loader2, Settings, Palette, Globe } from "lucide-react";
 import { useSettingsStore } from "@/store/settings.store";
 import { useAuthStore } from "@/store/auth";

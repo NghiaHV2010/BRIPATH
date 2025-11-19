@@ -80,7 +80,7 @@ export default function CompanyRegistrationDialog({
     field: keyof CompanyRegistrationPayload,
     value: string | null
   ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
   };
 
@@ -101,7 +101,8 @@ export default function CompanyRegistrationDialog({
       // Luu theo ma fax
       const storageRef = ref(
         storage,
-        `business_certificate/${formData.fax_code || "temp"}/${Date.now()}_${file.name
+        `business_certificate/${formData.fax_code || "temp"}/${Date.now()}_${
+          file.name
         }`
       );
 
@@ -109,19 +110,19 @@ export default function CompanyRegistrationDialog({
 
       uploadTask.on(
         "state_changed",
-        (snapshot) => {
+        snapshot => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setUploadProgress(progress);
         },
-        (error) => {
+        error => {
           console.error(error);
           setError("Tải lên thất bại, vui lòng thử lại.");
           setIsUploading(false);
         },
         async () => {
           const url = await getDownloadURL(uploadTask.snapshot.ref);
-          setFormData((prev) => ({ ...prev, business_certificate: url }));
+          setFormData(prev => ({ ...prev, business_certificate: url }));
           setIsUploading(false);
           setUploadProgress(100);
           setError("");
@@ -135,7 +136,7 @@ export default function CompanyRegistrationDialog({
   };
 
   const handleRemoveFile = () => {
-    setFormData((prev) => ({ ...prev, business_certificate: null }));
+    setFormData(prev => ({ ...prev, business_certificate: null }));
     setUploadProgress(0);
   };
 
@@ -209,7 +210,7 @@ export default function CompanyRegistrationDialog({
               </label>
               <Select
                 value={formData.company_type ?? ""}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   handleInputChange("company_type", value)
                 }
                 disabled={isLoading}
@@ -233,7 +234,7 @@ export default function CompanyRegistrationDialog({
               </label>
               <Select
                 value={formData.field ?? ""}
-                onValueChange={(value) => handleInputChange("field", value)}
+                onValueChange={value => handleInputChange("field", value)}
                 disabled={isLoading || isLoadingFields}
               >
                 <SelectTrigger>
@@ -244,7 +245,7 @@ export default function CompanyRegistrationDialog({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {fields.map((f) => (
+                  {fields.map(f => (
                     <SelectItem key={f.id} value={String(f.field_name)}>
                       {f.field_name}
                     </SelectItem>
@@ -258,12 +259,12 @@ export default function CompanyRegistrationDialog({
           <div className="space-y-1">
             <label className="text-sm font-medium flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              Mã fax
+              Mã số thuế (Fax code)
             </label>
             <Input
               type="text"
               value={formData.fax_code ?? ""}
-              onChange={(e) =>
+              onChange={e =>
                 handleInputChange("fax_code", e.target.value ?? null)
               }
               placeholder="Nhập mã fax của doanh nghiệp"
@@ -279,10 +280,11 @@ export default function CompanyRegistrationDialog({
             </label>
             {!formData.business_certificate ? (
               <label
-                className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-6 cursor-pointer ${isUploading
+                className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-6 cursor-pointer ${
+                  isUploading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-50"
-                  }`}
+                }`}
               >
                 <Upload className="w-8 h-8 text-gray-400" />
                 <span className="text-gray-600 text-sm mt-2">
@@ -295,7 +297,7 @@ export default function CompanyRegistrationDialog({
                   type="file"
                   className="hidden"
                   disabled={isUploading}
-                  onChange={(e) => {
+                  onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) handleFileUpload(file);
                   }}
@@ -348,8 +350,9 @@ export default function CompanyRegistrationDialog({
             <Button
               type="submit"
               disabled={isLoading || isUploading}
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-medium ${isLoading || isUploading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`bg-blue-600 hover:bg-blue-700 text-white font-medium ${
+                isLoading || isUploading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isLoading ? "Đang đăng ký..." : "Đăng ký"}
             </Button>

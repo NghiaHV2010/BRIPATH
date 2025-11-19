@@ -34,7 +34,7 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
         data-testid="event-card"
       >
         {/* Banner Image */}
-        <div className="relative w-full aspect-video overflow-hidden bg-linear-to-br from-slate-200 to-slate-300">
+        <div className="relative w-full aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 to-slate-300">
           {event.banner_url ? (
             <img
               src={event.banner_url}
@@ -60,7 +60,7 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
             className="text-lg sm:text-xl font-bold text-slate-900 leading-snug"
             data-testid="event-title"
           >
-            {event.title}
+            Sự kiện: {event.title}
           </h3>
 
           {/* Date and Quantity Info */}
@@ -71,7 +71,8 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
             >
               <Calendar className="w-4 h-4 text-blue-500" />
               <span>
-                {formatDate(event.start_date)} - {formatDate(event.end_date)}
+                Diễn ra vào: {formatDate(event.start_date)} -{" "}
+                {formatDate(event.end_date)}
               </span>
             </div>
             <div
@@ -90,7 +91,7 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
               data-testid="event-working-time"
             >
               <Clock className="w-4 h-4 text-green-500" />
-              <span>{event.working_time}</span>
+              Thời gian làm việc: <span>{event.working_time}</span>
             </div>
           )}
 
@@ -99,7 +100,7 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
             className="text-slate-600 text-sm leading-relaxed line-clamp-3"
             data-testid="event-description"
           >
-            {event.description}
+            Chi tiết: {event.description}
           </p>
 
           {/* Action Buttons */}
@@ -107,17 +108,18 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
             <Button
               onClick={() => setShowApplyDialog(true)}
               disabled={hasApplied}
-              className={`join-button flex-1 font-medium py-5 rounded-lg shadow-sm transition-all ${
+              className={`join-button flex-1 font-medium py-2 rounded-lg shadow-sm transition-all
+              ${
                 hasApplied
                   ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
                   : "bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-              }`}
+              }
+              hover:scale-102`}
               data-testid="join-event-button"
             >
               <Users className="w-4 h-4 mr-2" />
               {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
             </Button>
-
             <Button
               onClick={() => setShowReportDialog(true)}
               variant="outline"
