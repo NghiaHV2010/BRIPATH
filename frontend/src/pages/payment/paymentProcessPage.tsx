@@ -72,39 +72,42 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
 
       const transferContent = getTransferContent();
 
-      // Call backend to create order and save mapping
-      const response = await axiosConfig.post('/sepay/create-order', {
+      const createOrderResponse = await axiosConfig.post('/sepay/create-order', {
         amount: plan.price,
         description: transferContent,
         planId: plan.id,
         companyId: null
       });
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Failed to create order');
+      if (!createOrderResponse.data.success) {
+        throw new Error(createOrderResponse.data.message || 'Failed to create order');
       }
 
-      // Use the order data from backend
+      const orderId = createOrderResponse.data.data.orderId;
+
+
       const paymentInfo = {
-        orderId: response.data.data.orderId,
-        amount: response.data.data.amount,
-        description: response.data.data.description,
-        transferContent: response.data.data.description,
-        vaNumber: response.data.data.vaNumber,
-        bank: response.data.data.bankCode,
-        qrCodeUrl: response.data.data.qrCodeUrl,
-        paymentUrl: response.data.data.paymentUrl
+        orderId: orderId,
+        amount: createOrderResponse.data.data.amount,
+        description: createOrderResponse.data.data.description,
+        transferContent: createOrderResponse.data.data.description,
+        vaNumber: createOrderResponse.data.data.vaNumber,
+        bank: createOrderResponse.data.data.bankCode,
+        qrCodeUrl: createOrderResponse.data.data.qrCodeUrl,
+        paymentUrl: createOrderResponse.data.data.paymentUrl
       };
 
       setPaymentData(paymentInfo);
       setIsCountdownActive(true);
 
-      // Start polling for payment status
-      startPaymentPolling(response.data.data.orderId);
+      checkPaymentStatusImmediate(orderId);
 
-    } catch (error) {
+      // Start polling for payment status
+      startPaymentPolling(orderId);
+
+    } catch (error: any) {
       console.error('SePay payment error:', error);
-      toast.error('Có lỗi xảy ra khi tạo thanh toán');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi tạo thanh toán');
       setPaymentStatus('failed');
     } finally {
       setIsLoading(false);
@@ -133,34 +136,54 @@ const PaymentProcessPage: React.FC<PaymentProcessPageProps> = () => {
     setShowCancelDialog(false);
   };
 
+  // Immediate check for payment status
+  const checkPaymentStatusImmediate = async (orderId: string) => {
+    try {
+      const response = await axiosConfig.get(`/sepay/status/${orderId}`);
+      if (response.data.success && response.data.data.status === 'success') {
+        handlePaymentSuccess(orderId);
+      }
+    } catch (error) {
+      console.error('Immediate status check error:', error);
+    }
+  };
+
+  // Handle payment success
+  const handlePaymentSuccess = (orderId: string) => {
+    setPaymentStatus('success');
+    setIsCountdownActive(false);
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    toast.success('Thanh toán thành công!');
+
+    // Redirect to success page after 2 seconds
+    setTimeout(() => {
+      navigate('/payment/success', {
+        state: { plan, paymentMethod, orderId }
+      });
+    }, 2000);
+  };
+
   const startPaymentPolling = (orderId: string) => {
     // Clear any existing polling
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
 
+    // Poll more frequently for faster updates (3 seconds instead of 5)
     pollingIntervalRef.current = setInterval(async () => {
       try {
         const response = await axiosConfig.get(`/sepay/status/${orderId}`);
 
         if (response.data.success && response.data.data.status === 'success') {
-          setPaymentStatus('success');
-          setIsCountdownActive(false);
-          clearInterval(pollingIntervalRef.current!);
-          pollingIntervalRef.current = null;
-          toast.success('Thanh toán thành công!');
-
-          // Redirect to success page after 3 seconds
-          setTimeout(() => {
-            navigate('/payment/success', {
-              state: { plan, paymentMethod, orderId }
-            });
-          }, 3000);
+          handlePaymentSuccess(orderId);
         }
       } catch (error) {
         console.error('Polling error:', error);
       }
-    }, 5000); // Poll every 5 seconds
+    }, 3000); // Poll every 3 seconds for faster updates
 
     // Stop polling after 15 minutes
     setTimeout(() => {

@@ -11,7 +11,8 @@ export const generateSePayOrderId = (): string => {
 };
 
 /**
- * Generate SePay QR Code URL
+ * Generate SePay QR Code URL using VietQR API
+ * VietQR is a reliable Vietnamese QR code service
  */
 export const generateSePayQRUrl = (
   vaNumber: string,
@@ -19,21 +20,22 @@ export const generateSePayQRUrl = (
   amount: number,
   orderId: string
 ): string => {
-  const baseUrl = 'https://qr.sepay.vn/img';
   // SePay VA format: TKP + VA number + order ID
   const description = `TKP${vaNumber} ${orderId}`;
+  
+  // Use VietQR API for QR code generation
+  // Format: https://img.vietqr.io/image/{bankCode}-{accountNumber}-compact.png?amount={amount}&addInfo={description}
   const params = new URLSearchParams({
-    acc: vaNumber,
-    bank: bankCode,
     amount: amount.toString(),
-    des: description
+    addInfo: description
   });
   
-  return `${baseUrl}?${params.toString()}`;
+  return `https://img.vietqr.io/image/${bankCode}-${vaNumber}-compact.png?${params.toString()}`;
 };
 
 /**
- * Generate SePay payment URL (same as QR but for direct link)
+ * Generate SePay payment URL for direct bank transfer link
+ * Uses VietQR transfer URL format
  */
 export const generateSePayPaymentUrl = (
   vaNumber: string,
@@ -41,7 +43,17 @@ export const generateSePayPaymentUrl = (
   amount: number,
   orderId: string
 ): string => {
-  return generateSePayQRUrl(vaNumber, bankCode, amount, orderId);
+  // SePay VA format: TKP + VA number + order ID
+  const description = `TKP${vaNumber} ${orderId}`;
+  
+  // Use VietQR transfer URL format
+  // Format: https://www.vietqr.io/transfer/{bankCode}-{accountNumber}?amount={amount}&addInfo={description}
+  const params = new URLSearchParams({
+    amount: amount.toString(),
+    addInfo: description
+  });
+  
+  return `https://www.vietqr.io/transfer/${bankCode}-${vaNumber}?${params.toString()}`;
 };
 
 /**
@@ -148,6 +160,6 @@ export const getDefaultSePayConfig = () => {
   return {
     vaNumber: SEPAY_VA_NUMBER,
     bankCode: SEPAY_BANK_CODE,
-    baseUrl: 'https://qr.sepay.vn'
+    baseUrl: 'https://www.vietqr.io'
   };
 };

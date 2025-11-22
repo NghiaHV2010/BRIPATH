@@ -13,14 +13,13 @@ import {
   getDefaultSePayConfig,
   formatSePayAmount
 } from '../utils/sepay.utils';
-import { SEPAY_VA_NUMBER, SEPAY_BANK_CODE, SEPAY_API_KEY, SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
+import { SEPAY_VA_NUMBER, SEPAY_BANK_CODE, SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
 
 class SePayService {
   private config: {
     vaNumber: string;
     bankCode: string;
     baseUrl: string;
-    apiKey: string;
     webhookUrl: string;
     returnUrl: string;
   };
@@ -28,7 +27,6 @@ class SePayService {
   constructor() {
     this.config = {
       ...getDefaultSePayConfig(),
-      apiKey: SEPAY_API_KEY,
       webhookUrl: SEPAY_WEBHOOK_URL,
       returnUrl: SEPAY_RETURN_URL
     };
@@ -62,36 +60,39 @@ class SePayService {
       const orderId = params.orderId || generateSePayOrderId();
       const amount = formatSePayAmount(params.amount);
       
-      // If API key is available, try to use SePay API
-      if (this.config.apiKey && this.config.apiKey !== '') {
-        console.log('Using SePay API with key:', this.config.apiKey.substring(0, 10) + '...');
-        
-        try {
-          // Call SePay API to create order
-          const sepayResponse = await this.callSePayAPI({
-            orderId,
-            amount: params.amount,
-            description: params.description,
-            webhookUrl: this.config.webhookUrl,
-            returnUrl: this.config.returnUrl
-          });
-          
+      // Try to create dynamic QR from SePay using qr.sepay.vn service
+      // This uses SePay's QR generation service (not SDK)
+      try {
+        console.log('🔄 Attempting to create dynamic QR from SePay service...');
+        const sepayQRResult = await this.createDynamicQRFromSePay({
+          orderId,
+          amount: params.amount,
+          description: params.description,
+          webhookUrl: this.config.webhookUrl,
+          returnUrl: this.config.returnUrl
+        });
+
+        if (sepayQRResult) {
+          console.log('✅ Dynamic QR created from SePay service');
           return {
             orderId,
+            vaNumber: sepayQRResult.vaNumber || this.config.vaNumber,
+            bankCode: sepayQRResult.bankCode || this.config.bankCode,
+            qrCodeUrl: sepayQRResult.qrCodeUrl,
+            paymentUrl: sepayQRResult.paymentUrl,
             amount: params.amount,
             description: params.description,
-            vaNumber: sepayResponse.vaNumber || this.config.vaNumber,
-            bankCode: sepayResponse.bankCode || this.config.bankCode,
-            qrCodeUrl: sepayResponse.qrCodeUrl,
-            paymentUrl: sepayResponse.paymentUrl
+            success: true,
+            message: 'Dynamic QR created from SePay service'
           };
-        } catch (apiError) {
-          console.error('SePay API call failed, falling back to local generation:', apiError);
-          // Fall through to local generation
         }
+      } catch (error: any) {
+        console.warn('⚠️ Failed to create dynamic QR from SePay, using fallback:', error.message);
+        // Fall through to local generation
       }
       
-      // Generate QR code locally (current implementation)
+      // Fallback: Use local QR generation (VietQR)
+      console.log('📱 Using local QR generation (VietQR)');
       const qrCodeUrl = generateSePayQRUrl(
         this.config.vaNumber,
         this.config.bankCode,
@@ -197,9 +198,12 @@ class SePayService {
   }
 
   /**
-   * Call SePay API to create order
+   * Create dynamic QR from SePay using qr.sepay.vn service
+   * Format: https://qr.sepay.vn/img?acc=SO_TAI_KHOAN&bank=NGAN_HANG&amount=SO_TIEN&des=NOI_DUNG
+   * 
+   * Reference: https://qr.sepay.vn (SePay QR Code Generator)
    */
-  private async callSePayAPI(params: {
+  private async createDynamicQRFromSePay(params: {
     orderId: string;
     amount: number;
     description: string;
@@ -210,41 +214,47 @@ class SePayService {
     bankCode: string;
     qrCodeUrl: string;
     paymentUrl: string;
-  }> {
-    const apiUrl = 'https://api.sepay.vn/v1/orders'; // SePay API endpoint
+  } | null> {
+    // Use VA number (account number) for QR generation
+    // If merchant_id is provided and different from VA, you can use it
+    const accountNumber = this.config.vaNumber;
     
-    const requestBody = {
-      orderId: params.orderId,
-      amount: params.amount,
-      description: params.description,
-      webhookUrl: params.webhookUrl,
-      returnUrl: params.returnUrl,
-      vaNumber: this.config.vaNumber,
-      bankCode: this.config.bankCode
-    };
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.config.apiKey}`,
-        'X-API-Key': this.config.apiKey
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      throw new Error(`SePay API error: ${response.status} ${response.statusText}`);
+    if (!accountNumber || !this.config.bankCode) {
+      console.warn('⚠️ Missing account number or bank code for SePay QR');
+      return null;
     }
 
-    const data = await response.json() as any;
-    
-    return {
-      vaNumber: data.vaNumber || this.config.vaNumber,
-      bankCode: data.bankCode || this.config.bankCode,
-      qrCodeUrl: data.qrCodeUrl,
-      paymentUrl: data.paymentUrl
-    };
+    try {
+      // Create SePay dynamic QR URL using qr.sepay.vn service
+      // Format: https://qr.sepay.vn/img?acc=SO_TAI_KHOAN&bank=NGAN_HANG&amount=SO_TIEN&des=NOI_DUNG
+      const qrParams = new URLSearchParams({
+        acc: accountNumber,
+        bank: this.config.bankCode,
+        amount: params.amount.toString(),
+        des: params.description
+        // template: 'compact' // Optional: 'compact' or 'qronly'
+      });
+
+      const qrCodeUrl = `https://qr.sepay.vn/img?${qrParams.toString()}`;
+      
+      // Payment URL - SePay might have a transfer URL, or use the same QR URL
+      // For now, we'll use the QR URL as payment URL
+      const paymentUrl = qrCodeUrl;
+
+      console.log('✅ Created dynamic QR from SePay service (qr.sepay.vn)');
+      console.log('📱 QR URL:', qrCodeUrl);
+
+      return {
+        vaNumber: accountNumber,
+        bankCode: this.config.bankCode,
+        qrCodeUrl,
+        paymentUrl
+      };
+      
+    } catch (error: any) {
+      console.error('❌ Error creating dynamic QR from SePay:', error);
+      return null;
+    }
   }
 
   /**
