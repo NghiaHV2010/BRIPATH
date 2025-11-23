@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import SePayService from '../services/sepay.service';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { PrismaClient } from '@prisma/client';
+import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType, PrismaClient } from '@prisma/client';
 import { hasPaymentByTransactionId, saveSePayOrderMapping, getSePayOrderMapping, deleteSePayOrderMapping } from '../utils/payment.utils';
 import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
+import { errorHandler } from '../utils/error';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
 import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
 
@@ -83,7 +84,6 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
         message: 'Order ID is required'
       });
     }
-
     const result = await SePayService.queryOrder({ orderId });
 
     res.status(HTTP_SUCCESS.OK).json({
@@ -100,6 +100,12 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
  * Handle SePay webhook - Optimized version
  */
 export const handleSePayWebhook = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('🔔 Webhook request received');
+  console.log('📍 URL:', req.originalUrl || req.url);
+  console.log('🌐 Method:', req.method);
+  console.log('📦 Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📄 Body:', JSON.stringify(req.body, null, 2));
+
   const webhookData: SePayWebhookData = req.body;
 
   try {
@@ -108,6 +114,7 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
     console.log('Content:', webhookData.content);
     console.log('Amount:', webhookData.transferAmount);
     console.log('Type:', webhookData.transferType);
+    console.log('Full webhook data:', JSON.stringify(webhookData, null, 2));
     console.log('================================');
 
     // Early validation - fail fast
@@ -138,15 +145,21 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
       console.error('Background payment processing error:', error);
     });
 
-  } catch (error) {
-    console.error('SePay webhook error:', error);
+  } catch (error: any) {
+    console.error('❌ SePay webhook error:', error);
+    console.error('Error stack:', error?.stack);
+    console.error('Error message:', error?.message);
+    console.error('Error details:', JSON.stringify(error, null, 2));
 
     // If we haven't sent a response yet
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
-        message: 'Webhook processing failed'
+        message: 'Webhook processing failed',
+        error: process.env.NODE_ENV === 'development' ? error?.message : undefined
       });
+    } else {
+      console.error('⚠️ Response already sent, cannot send error response');
     }
   }
 };
@@ -156,12 +169,18 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
  */
 async function processSePayPayment(webhookData: SePayWebhookData): Promise<void> {
   try {
+    console.log('🔄 Starting payment processing...');
+    console.log('📄 Webhook content:', webhookData.content);
+    console.log('📄 Webhook description:', webhookData.description);
+
     // Extract order ID and plan code
     const orderId = extractOrderIdFromContent(webhookData.content) ||
       extractOrderIdFromContent(webhookData.description);
 
     if (!orderId) {
-      console.log('No order ID found in webhook content');
+      console.error('❌ No order ID found in webhook content');
+      console.error('Content:', webhookData.content);
+      console.error('Description:', webhookData.description);
       return;
     }
 
@@ -223,10 +242,10 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         data: {
           amount: BigInt(webhookData.transferAmount),
           currency: 'VND',
-          payment_gateway: 'SePay',
-          payment_method: 'bank_transfer',
+          payment_gateway: 'SePay' as PaymentGateway,
+          payment_method: 'bank_transfer' as PaymentMethod,
           transaction_id: orderId,
-          status: 'success',
+          status: 'success' as PaymentStatus,
           user_id: mapping.user_id
         },
       });
@@ -259,7 +278,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
           data: {
             title: 'Gói dịch vụ đã được kích hoạt!',
             content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-            type: 'pricing_plan',
+            type: 'pricing_plan' as NotificationsType,
             user_id: mapping.user_id
           } as any
         }),
@@ -296,8 +315,8 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         amount_paid: subscription.amount_paid
       };
     }, {
-      maxWait: 15000, // Maximum time to wait for transaction to start
-      timeout: 30000, // Maximum time for entire transaction
+      maxWait: 10000, // Maximum time to wait for transaction to start
+      timeout: 20000, // Maximum time for entire transaction
     });
 
     // Clean up mapping after successful processing
@@ -327,8 +346,11 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
       }
     });
 
-  } catch (error) {
-    console.error('SePay payment processing error:', error);
+  } catch (error: any) {
+    console.error('❌ SePay payment processing error:', error);
+    console.error('Error stack:', error?.stack);
+    console.error('Error message:', error?.message);
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     throw error;
   }
 }
@@ -429,12 +451,11 @@ export const cancelSePayOrder = async (req: Request, res: Response, next: NextFu
         message: 'You can only cancel your own orders'
       });
     }
-
     // Check if payment already exists (don't allow cancel if paid)
     const existingPayment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay'
+        payment_gateway: 'SePay' as PaymentGateway
       }
     });
 
@@ -488,7 +509,7 @@ export const cancelAllPendingOrders = async (req: Request, res: Response, next: 
       const existingPayment = await prisma.payments.findFirst({
         where: {
           transaction_id: order.order_id,
-          payment_gateway: 'SePay'
+          payment_gateway: 'SePay' as PaymentGateway
         }
       });
 
@@ -529,7 +550,7 @@ export const checkPaymentStatus = async (req: Request, res: Response, next: Next
     const payment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay'
+        payment_gateway: 'SePay' as PaymentGateway
       },
       include: {
         subscriptions: true

@@ -13,6 +13,13 @@ import { authenticationMiddleware } from '../middlewares/auth.middleware';
 const sepayRouter = Router();
 
 // Public webhook endpoint (no auth required)
+sepayRouter.get('/webhook/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Webhook endpoint is accessible',
+    timestamp: new Date().toISOString()
+  });
+});
 sepayRouter.post('/webhook', handleSePayWebhook);
 
 // Protected routes
