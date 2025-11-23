@@ -207,6 +207,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
     // but database stores SEPAY_17639169686517_v2lzxa6i (with underscores)
     // Try to find mapping with both formats
     let mapping = await getSePayOrderMapping(prisma, orderId);
+    console.log('🔍 First lookup result:', mapping ? 'Found' : 'Not found');
 
     // If not found, try normalized version (add underscores if missing)
     if (!mapping && !orderId.includes('_')) {
@@ -217,6 +218,36 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
       if (mapping) {
         orderId = normalizedOrderId; // Use normalized ID for consistency
         console.log('✅ Found mapping with normalized order ID');
+      } else {
+        console.log('❌ Not found with normalized order ID either');
+      }
+    }
+
+    // If still not found, try reverse normalization (remove underscores if present)
+    if (!mapping && orderId.includes('_')) {
+      const denormalizedOrderId = orderId.replace(/_/g, '');
+      console.log('🔄 Trying denormalized order ID (no underscores):', denormalizedOrderId);
+      mapping = await getSePayOrderMapping(prisma, denormalizedOrderId);
+      if (mapping) {
+        orderId = denormalizedOrderId; // Use denormalized ID
+        console.log('✅ Found mapping with denormalized order ID');
+      }
+    }
+
+    // Debug: List all recent SePay orders to help troubleshoot
+    if (!mapping) {
+      try {
+        const recentOrders = await prisma.sepayOrders.findMany({
+          take: 10,
+          orderBy: { created_at: 'desc' },
+          select: { order_id: true, created_at: true }
+        });
+        console.log('📋 Recent SePay orders in database:', recentOrders.map(o => ({
+          order_id: o.order_id,
+          created_at: o.created_at
+        })));
+      } catch (error) {
+        console.error('Error fetching recent orders:', error);
       }
     }
 
