@@ -8,6 +8,7 @@ import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
+import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
 
 /**
  * Create SePay order
@@ -167,24 +168,30 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
     const planCode = extractPlanCodeFromContent(webhookData.content) ||
       extractPlanCodeFromContent(webhookData.description);
 
-    console.log('Processing payment for order:', orderId);
-    console.log('Plan code:', planCode);
+    console.log('🔄 Processing payment for order:', orderId);
+    console.log('📋 Plan code:', planCode);
 
     // Check for duplicate payment (idempotency)
     const exists = await hasPaymentByTransactionId(prisma, orderId);
     if (exists) {
-      console.log('Payment already processed for order:', orderId);
+      console.log('⚠️ Payment already processed for order:', orderId);
       return;
     }
 
     // Get order mapping
     const mapping = await getSePayOrderMapping(prisma, orderId);
     if (!mapping) {
-      console.log('No mapping found for order:', orderId);
+      console.log('❌ No mapping found for order:', orderId);
+      console.log('💡 This might mean the order was not created properly or already processed');
       return;
     }
 
-    console.log('Found mapping:', mapping);
+    console.log('✅ Found mapping:', {
+      user_id: mapping.user_id,
+      amount: mapping.amount,
+      plan_id: mapping.plan_id,
+      company_id: mapping.company_id
+    });
 
     // Process payment in a single transaction
     const result = await prisma.$transaction(async (tx: PrismaClient) => {
@@ -295,7 +302,8 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
 
     // Clean up mapping after successful processing
     await deleteSePayOrderMapping(prisma, orderId);
-    console.log('Payment processed successfully for order:', orderId);
+    console.log('✅ Payment processed successfully for order:', orderId);
+    console.log('📧 Invoice email will be sent to:', result.email);
 
     // Send email asynchronously (non-blocking)
     setImmediate(async () => {

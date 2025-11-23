@@ -18,7 +18,6 @@ interface Config {
     COOKIE_CONFIG_SECURE: boolean;
     NODE_ENV: string;
     RESEND_API_KEY: string;
-    SEPAY_API_KEY: string;
     SEPAY_WEBHOOK_URL: string;
     SEPAY_RETURN_URL: string;
     SEPAY_VA_NUMBER: string;
@@ -64,7 +63,6 @@ const config: Config = {
     COOKIE_CONFIG_SECURE: process.env.COOKIE_CONFIG_SECURE === 'true',
     NODE_ENV: process.env.NODE_ENV || 'development',
     RESEND_API_KEY: process.env.RESEND_API_KEY || '',
-    SEPAY_API_KEY: process.env.SEPAY_API_KEY!,
     SEPAY_WEBHOOK_URL: process.env.SEPAY_WEBHOOK_URL!,
     SEPAY_RETURN_URL: process.env.SEPAY_RETURN_URL!,
     SEPAY_VA_NUMBER: process.env.SEPAY_VA_NUMBER!,
@@ -106,7 +104,6 @@ export const {
     COOKIE_CONFIG_SECURE,
     NODE_ENV,
     RESEND_API_KEY,
-    SEPAY_API_KEY,
     SEPAY_WEBHOOK_URL,
     SEPAY_RETURN_URL,
     SEPAY_VA_NUMBER,
