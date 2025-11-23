@@ -38,7 +38,6 @@ export const createSePayOrder = async (req: Request, res: Response, next: NextFu
     // Save order mapping FIRST before creating order
     try {
       await saveSePayOrderMapping(prisma, orderId, userId, Number(amount), Number(planId) || 0, companyId);
-      console.log('SePay order mapping saved:', { orderId, userId, amount, planId, companyId });
     } catch (mappingError) {
       console.error('SePay order mapping error:', mappingError);
       return res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
@@ -100,40 +99,21 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
  * Handle SePay webhook - Optimized version
  */
 export const handleSePayWebhook = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('🔔 Webhook request received');
-  console.log('📍 URL:', req.originalUrl || req.url);
-  console.log('🌐 Method:', req.method);
-  console.log('📦 Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('📄 Body:', JSON.stringify(req.body, null, 2));
-
   // Verify API Key authentication (if configured)
   if (SEPAY_SECRET) {
     const authHeader = req.headers.authorization;
     const expectedAuth = `Apikey ${SEPAY_SECRET}`;
-
     if (!authHeader || authHeader !== expectedAuth) {
-      console.error('❌ Webhook authentication failed');
-      console.error('Received Authorization:', authHeader);
-      console.error('Expected Authorization:', expectedAuth);
+      console.error('Webhook authentication failed');
       return res.status(401).json({
         success: false,
         message: 'Unauthorized - Invalid API Key'
       });
     }
-    console.log('✅ Webhook authentication successful');
   }
-
   const webhookData: SePayWebhookData = req.body;
 
   try {
-    console.log('=== SePay Webhook Received ===');
-    console.log('Transaction ID:', webhookData.id);
-    console.log('Content:', webhookData.content);
-    console.log('Amount:', webhookData.transferAmount);
-    console.log('Type:', webhookData.transferType);
-    console.log('Full webhook data:', JSON.stringify(webhookData, null, 2));
-    console.log('================================');
-
     // Early validation - fail fast
     if (!webhookData.id || !webhookData.transferType || !webhookData.transferAmount) {
       console.error('Invalid webhook data:', webhookData);
@@ -163,20 +143,14 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
     });
 
   } catch (error: any) {
-    console.error('❌ SePay webhook error:', error);
-    console.error('Error stack:', error?.stack);
-    console.error('Error message:', error?.message);
-    console.error('Error details:', JSON.stringify(error, null, 2));
+    console.error('SePay webhook error:', error);
 
-    // If we haven't sent a response yet
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
         message: 'Webhook processing failed',
         error: process.env.NODE_ENV === 'development' ? error?.message : undefined
       });
-    } else {
-      console.error('⚠️ Response already sent, cannot send error response');
     }
   }
 };
@@ -186,98 +160,48 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
  */
 async function processSePayPayment(webhookData: SePayWebhookData): Promise<void> {
   try {
-    console.log('🔄 Starting payment processing...');
-    console.log('📄 Webhook content:', webhookData.content);
-    console.log('📄 Webhook description:', webhookData.description);
 
-    // Extract order ID and plan code
     let orderId = extractOrderIdFromContent(webhookData.content) ||
       extractOrderIdFromContent(webhookData.description);
 
     if (!orderId) {
-      console.error('❌ No order ID found in webhook content');
-      console.error('Content:', webhookData.content);
-      console.error('Description:', webhookData.description);
+      console.error('No order ID found in webhook content');
       return;
     }
 
-    console.log('📋 Extracted order ID from webhook:', orderId);
-
     // Normalize order ID: webhook may return SEPAY17639169686517v2lzxa6i (no underscores)
     // but database stores SEPAY_17639169686517_v2lzxa6i (with underscores)
-    // Try to find mapping with both formats
     let mapping = await getSePayOrderMapping(prisma, orderId);
-    console.log('🔍 First lookup result:', mapping ? 'Found' : 'Not found');
-
+    
     // If not found, try normalized version (add underscores if missing)
     if (!mapping && !orderId.includes('_')) {
-      // Convert SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
       const normalizedOrderId = normalizeSePayOrderId(orderId);
-      console.log('🔄 Trying normalized order ID:', normalizedOrderId);
       mapping = await getSePayOrderMapping(prisma, normalizedOrderId);
       if (mapping) {
-        orderId = normalizedOrderId; // Use normalized ID for consistency
-        console.log('✅ Found mapping with normalized order ID');
-      } else {
-        console.log('❌ Not found with normalized order ID either');
+        orderId = normalizedOrderId;
       }
     }
 
     // If still not found, try reverse normalization (remove underscores if present)
     if (!mapping && orderId.includes('_')) {
       const denormalizedOrderId = orderId.replace(/_/g, '');
-      console.log('🔄 Trying denormalized order ID (no underscores):', denormalizedOrderId);
       mapping = await getSePayOrderMapping(prisma, denormalizedOrderId);
       if (mapping) {
-        orderId = denormalizedOrderId; // Use denormalized ID
-        console.log('✅ Found mapping with denormalized order ID');
+        orderId = denormalizedOrderId;
       }
     }
 
-    // Debug: List all recent SePay orders to help troubleshoot
-    if (!mapping) {
-      try {
-        const recentOrders = await prisma.sepayOrders.findMany({
-          take: 10,
-          orderBy: { created_at: 'desc' },
-          select: { order_id: true, created_at: true }
-        });
-        console.log('📋 Recent SePay orders in database:', recentOrders.map(o => ({
-          order_id: o.order_id,
-          created_at: o.created_at
-        })));
-      } catch (error) {
-        console.error('Error fetching recent orders:', error);
-      }
-    }
-
-    const planCode = extractPlanCodeFromContent(webhookData.content) ||
-      extractPlanCodeFromContent(webhookData.description);
-
-    console.log('🔄 Processing payment for order:', orderId);
-    console.log('📋 Plan code:', planCode);
-
-    // Check for duplicate payment (idempotency) - check both formats
+    // Check for duplicate payment (idempotency)
     const exists = await hasPaymentByTransactionId(prisma, orderId) ||
       (!orderId.includes('_') && await hasPaymentByTransactionId(prisma, normalizeSePayOrderId(orderId)));
     if (exists) {
-      console.log('⚠️ Payment already processed for order:', orderId);
       return;
     }
 
-    // Get order mapping (already fetched above)
     if (!mapping) {
-      console.log('❌ No mapping found for order:', orderId);
-      console.log('💡 This might mean the order was not created properly or already processed');
+      console.error('No mapping found for order:', orderId);
       return;
     }
-
-    console.log('✅ Found mapping:', {
-      user_id: mapping.user_id,
-      amount: mapping.amount,
-      plan_id: mapping.plan_id,
-      company_id: mapping.company_id
-    });
 
     // Process payment in a single transaction
     const result = await prisma.$transaction(async (tx: PrismaClient) => {
@@ -337,7 +261,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         tx.userActivitiesHistory.create({
           data: {
             user_id: mapping.user_id,
-            activity_name: `Thanh toán gói ${plan.plan_name} thành công qua SePay${planCode ? ` (${planCode})` : ''}`,
+            activity_name: `Thanh toán gói ${plan.plan_name} thành công qua SePay`,
           }
         }),
         // Create notification
@@ -406,7 +330,6 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
             'Chuyển khoản'
           )
         );
-        console.log('Invoice email sent successfully to:', result.email);
       } catch (emailError) {
         console.error('Failed to send invoice email:', emailError);
         // Don't throw - email failure shouldn't fail the payment
@@ -441,22 +364,6 @@ const extractOrderIdFromContent = (content: string): string | null => {
   // Fallback to old format (with underscores): SEPAY_timestamp_random
   match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
   return match ? match[0] : null;
-};
-
-/**
- * Extract plan code from SePay transaction content - Optimized
- */
-const extractPlanCodeFromContent = (content: string): string | null => {
-  if (!content) return null;
-
-  // Use indexOf for faster splitting
-  const firstSpace = content.indexOf(' ');
-  if (firstSpace === -1) return null;
-
-  const secondSpace = content.indexOf(' ', firstSpace + 1);
-  if (secondSpace === -1) return null;
-
-  return content.slice(secondSpace + 1).trim() || null;
 };
 
 /**

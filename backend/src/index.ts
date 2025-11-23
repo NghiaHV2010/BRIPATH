@@ -64,9 +64,6 @@ app.use((req, res, next) => {
                     return callback(null, true);
                 }
 
-                console.warn(`CORS rejected origin: ${origin}`);
-                console.log(`Allowed origins: ${FRONTEND_URLS.join(', ')}`);
-
                 return callback(new Error('Not allowed by CORS'), false);
             }) as CorsOriginChecker,
             credentials: true,
