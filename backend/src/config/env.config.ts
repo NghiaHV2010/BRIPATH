@@ -39,6 +39,7 @@ interface Config {
     INFOBIP_BASE_URL: string;
     TWO_FA_SECRET_KEY: string;
     TWO_FA_SECRET_IV: string;
+    SEPAY_SECRET: string;
 }
 
 dotenv.config();
@@ -83,7 +84,8 @@ const config: Config = {
     INFOBIP_API_KEY: process.env.INFOBIP_API_KEY || '',
     INFOBIP_BASE_URL: process.env.INFOBIP_BASE_URL || '',
     TWO_FA_SECRET_KEY: process.env.TWO_FA_SECRET_KEY || '',
-    TWO_FA_SECRET_IV: process.env.TWO_FA_SECRET_IV || ''
+    TWO_FA_SECRET_IV: process.env.TWO_FA_SECRET_IV || '',
+    SEPAY_SECRET: process.env.SEPAY_SECRET || ''
 };
 
 export const {
@@ -123,6 +125,7 @@ export const {
     INFOBIP_API_KEY,
     INFOBIP_BASE_URL,
     TWO_FA_SECRET_KEY,
-    TWO_FA_SECRET_IV
+    TWO_FA_SECRET_IV,
+    SEPAY_SECRET
 } = config;
 

@@ -47,25 +47,50 @@ interface CorsOriginCallback {
 interface CorsOriginChecker {
     (origin: string | undefined, callback: CorsOriginCallback): void;
 }
+app.use((req, res, next) => {
+    if (req.path.includes('/webhook')) {
+        cors({
+            origin: true, // Allow all origins
+            credentials: false,
+            methods: ['GET', 'POST', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization']
+        })(req, res, next);
+    } else {
+        cors({
+            origin: ((origin: string | undefined, callback: CorsOriginCallback) => {
+                if (!origin) return callback(null, true);
 
-app.use(cors({
-    origin: ((origin: string | undefined, callback: CorsOriginCallback) => {
-        // Allow requests with no origin (like mobile apps or Postman)
-        if (!origin) return callback(null, true);
+                if (FRONTEND_URLS.includes(origin)) {
+                    return callback(null, true);
+                }
 
-        // Check if the origin is in the allowed list
-        if (FRONTEND_URLS.includes(origin)) {
-            return callback(null, true);
-        }
+                console.warn(`CORS rejected origin: ${origin}`);
+                console.log(`Allowed origins: ${FRONTEND_URLS.join(', ')}`);
 
-        // Log rejected origins for debugging
-        console.warn(`CORS rejected origin: ${origin}`);
-        console.log(`Allowed origins: ${FRONTEND_URLS.join(', ')}`);
+                return callback(new Error('Not allowed by CORS'), false);
+            }) as CorsOriginChecker,
+            credentials: true,
+        })(req, res, next);
+    }
+});
+// app.use(cors({
+//     origin: ((origin: string | undefined, callback: CorsOriginCallback) => {
+//         // Allow requests with no origin (like mobile apps or Postman)
+//         if (!origin) return callback(null, true);
 
-        return callback(new Error('Not allowed by CORS'), false);
-    }) as CorsOriginChecker,
-    credentials: true,
-}));
+//         // Check if the origin is in the allowed list
+//         if (FRONTEND_URLS.includes(origin)) {
+//             return callback(null, true);
+//         }
+
+//         // Log rejected origins for debugging
+//         console.warn(`CORS rejected origin: ${origin}`);
+//         console.log(`Allowed origins: ${FRONTEND_URLS.join(', ')}`);
+
+//         return callback(new Error('Not allowed by CORS'), false);
+//     }) as CorsOriginChecker,
+//     credentials: true,
+// }));
 
 app.use(fileUpload());
 

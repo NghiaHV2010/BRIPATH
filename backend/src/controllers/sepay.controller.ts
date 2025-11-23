@@ -9,7 +9,7 @@ import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
 import { errorHandler } from '../utils/error';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
-import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
+import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL, SEPAY_SECRET } from '../config/env.config';
 
 /**
  * Create SePay order
@@ -105,6 +105,22 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
   console.log('🌐 Method:', req.method);
   console.log('📦 Headers:', JSON.stringify(req.headers, null, 2));
   console.log('📄 Body:', JSON.stringify(req.body, null, 2));
+
+  if (SEPAY_SECRET) {
+    const authHeader = req.headers.authorization;
+    const expectedAuth = `Apikey ${SEPAY_SECRET}`;
+
+    if (!authHeader || authHeader !== expectedAuth) {
+      console.error('❌ Webhook authentication failed');
+      console.error('Received Authorization:', authHeader);
+      console.error('Expected Authorization:', expectedAuth);
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Invalid API Key'
+      });
+    }
+    console.log('✅ Webhook authentication successful');
+  }
 
   const webhookData: SePayWebhookData = req.body;
 
