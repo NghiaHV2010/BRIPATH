@@ -7,9 +7,8 @@ import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
-import { errorHandler } from '../utils/error';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
-import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL, SEPAY_SECRET } from '../config/env.config';
+import { SEPAY_SECRET } from '../config/env.config';
 
 /**
  * Create SePay order
@@ -84,6 +83,7 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
         message: 'Order ID is required'
       });
     }
+
     const result = await SePayService.queryOrder({ orderId });
 
     res.status(HTTP_SUCCESS.OK).json({
@@ -106,6 +106,7 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
   console.log('📦 Headers:', JSON.stringify(req.headers, null, 2));
   console.log('📄 Body:', JSON.stringify(req.body, null, 2));
 
+  // Verify API Key authentication (if configured)
   if (SEPAY_SECRET) {
     const authHeader = req.headers.authorization;
     const expectedAuth = `Apikey ${SEPAY_SECRET}`;
@@ -190,7 +191,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
     console.log('📄 Webhook description:', webhookData.description);
 
     // Extract order ID and plan code
-    const orderId = extractOrderIdFromContent(webhookData.content) ||
+    let orderId = extractOrderIdFromContent(webhookData.content) ||
       extractOrderIdFromContent(webhookData.description);
 
     if (!orderId) {
@@ -200,21 +201,40 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
       return;
     }
 
+    console.log('📋 Extracted order ID from webhook:', orderId);
+
+    // Normalize order ID: webhook may return SEPAY17639169686517v2lzxa6i (no underscores)
+    // but database stores SEPAY_17639169686517_v2lzxa6i (with underscores)
+    // Try to find mapping with both formats
+    let mapping = await getSePayOrderMapping(prisma, orderId);
+
+    // If not found, try normalized version (add underscores if missing)
+    if (!mapping && !orderId.includes('_')) {
+      // Convert SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
+      const normalizedOrderId = normalizeSePayOrderId(orderId);
+      console.log('🔄 Trying normalized order ID:', normalizedOrderId);
+      mapping = await getSePayOrderMapping(prisma, normalizedOrderId);
+      if (mapping) {
+        orderId = normalizedOrderId; // Use normalized ID for consistency
+        console.log('✅ Found mapping with normalized order ID');
+      }
+    }
+
     const planCode = extractPlanCodeFromContent(webhookData.content) ||
       extractPlanCodeFromContent(webhookData.description);
 
     console.log('🔄 Processing payment for order:', orderId);
     console.log('📋 Plan code:', planCode);
 
-    // Check for duplicate payment (idempotency)
-    const exists = await hasPaymentByTransactionId(prisma, orderId);
+    // Check for duplicate payment (idempotency) - check both formats
+    const exists = await hasPaymentByTransactionId(prisma, orderId) ||
+      (!orderId.includes('_') && await hasPaymentByTransactionId(prisma, normalizeSePayOrderId(orderId)));
     if (exists) {
       console.log('⚠️ Payment already processed for order:', orderId);
       return;
     }
 
-    // Get order mapping
-    const mapping = await getSePayOrderMapping(prisma, orderId);
+    // Get order mapping (already fetched above)
     if (!mapping) {
       console.log('❌ No mapping found for order:', orderId);
       console.log('💡 This might mean the order was not created properly or already processed');
@@ -373,12 +393,22 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
 
 /**
  * Extract order ID from SePay transaction content - Optimized
+ * Supports both formats:
+ * - Old format: SEPAY_17639169686517_v2lzxa6i (with underscores)
+ * - New format: SEPAY17639169686517v2lzxa6i (without underscores)
  */
 const extractOrderIdFromContent = (content: string): string | null => {
   if (!content) return null;
 
-  // Use regex exec for better performance
-  const match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
+  // Try new format first (without underscores): SEPAY + timestamp + random
+  // Pattern: SEPAY followed by digits, then alphanumeric
+  let match = /SEPAY\d+[a-z0-9]+/i.exec(content);
+  if (match) {
+    return match[0];
+  }
+
+  // Fallback to old format (with underscores): SEPAY_timestamp_random
+  match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
   return match ? match[0] : null;
 };
 
@@ -396,6 +426,28 @@ const extractPlanCodeFromContent = (content: string): string | null => {
   if (secondSpace === -1) return null;
 
   return content.slice(secondSpace + 1).trim() || null;
+};
+
+/**
+ * Normalize SePay order ID format
+ * Converts SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
+ * This handles the case where webhook returns order ID without underscores
+ * but database stores it with underscores
+ */
+const normalizeSePayOrderId = (orderId: string): string => {
+  // If already has underscores, return as is
+  if (orderId.includes('_')) {
+    return orderId;
+  }
+
+  // Pattern: SEPAY + digits + alphanumeric
+  // Convert SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
+  const match = /^SEPAY(\d+)([a-z0-9]+)$/i.exec(orderId);
+  if (match) {
+    return `SEPAY_${match[1]}_${match[2]}`;
+  }
+
+  return orderId; // Return as is if pattern doesn't match
 };
 
 /**
@@ -467,6 +519,7 @@ export const cancelSePayOrder = async (req: Request, res: Response, next: NextFu
         message: 'You can only cancel your own orders'
       });
     }
+
     // Check if payment already exists (don't allow cancel if paid)
     const existingPayment = await prisma.payments.findFirst({
       where: {
