@@ -397,21 +397,21 @@ const extractPlanCodeFromContent = (content: string): string | null => {
 
 /**
  * Normalize SePay order ID format
- * Converts SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
- * This handles the case where webhook returns order ID without underscores
- * but database stores it with underscores
+ * Format: SEPAY + timestamp (13 digits) + random (9 chars)
  */
 const normalizeSePayOrderId = (orderId: string): string => {
-  // If already has underscores, return as is
   if (orderId.includes('_')) {
     return orderId;
   }
 
-  // Pattern: SEPAY + digits + alphanumeric
-  // Convert SEPAY17639169686517v2lzxa6i to SEPAY_17639169686517_v2lzxa6i
-  const match = /^SEPAY(\d+)([a-z0-9]+)$/i.exec(orderId);
+  const match = /^SEPAY(\d{13})([a-z0-9]{9})$/i.exec(orderId);
   if (match) {
     return `SEPAY_${match[1]}_${match[2]}`;
+  }
+
+  const fallbackMatch = /^SEPAY(\d+)([a-z0-9]+)$/i.exec(orderId);
+  if (fallbackMatch) {
+    return `SEPAY_${fallbackMatch[1]}_${fallbackMatch[2]}`;
   }
 
   return orderId; // Return as is if pattern doesn't match
