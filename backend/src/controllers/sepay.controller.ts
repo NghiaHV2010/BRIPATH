@@ -160,7 +160,6 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
  */
 async function processSePayPayment(webhookData: SePayWebhookData): Promise<void> {
   try {
-
     let orderId = extractOrderIdFromContent(webhookData.content) ||
       extractOrderIdFromContent(webhookData.description);
 
@@ -199,9 +198,28 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
     }
 
     if (!mapping) {
+      try {
+        const recentOrders = await prisma.sepayOrders.findMany({
+          take: 10,
+          orderBy: { created_at: 'desc' },
+          select: { order_id: true, created_at: true }
+        });
+        console.log('📋 Recent SePay orders in database:', recentOrders.map(o => ({
+          order_id: o.order_id,
+          created_at: o.created_at
+        })));
+      } catch (error) {
+        console.error('Error fetching recent orders:', error);
+      }
       console.error('No mapping found for order:', orderId);
       return;
     }
+
+    const planCode = extractPlanCodeFromContent(webhookData.content) ||
+      extractPlanCodeFromContent(webhookData.description);
+
+    console.log('🔄 Processing payment for order:', orderId);
+    console.log('📋 Plan code:', planCode);
 
     // Process payment in a single transaction
     const result = await prisma.$transaction(async (tx: PrismaClient) => {
@@ -312,8 +330,6 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
 
     // Clean up mapping after successful processing
     await deleteSePayOrderMapping(prisma, orderId);
-    console.log('✅ Payment processed successfully for order:', orderId);
-    console.log('📧 Invoice email will be sent to:', result.email);
 
     // Send email asynchronously (non-blocking)
     setImmediate(async () => {
@@ -337,10 +353,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
     });
 
   } catch (error: any) {
-    console.error('❌ SePay payment processing error:', error);
-    console.error('Error stack:', error?.stack);
-    console.error('Error message:', error?.message);
-    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    console.error('SePay payment processing error:', error);
     throw error;
   }
 }
@@ -364,6 +377,22 @@ const extractOrderIdFromContent = (content: string): string | null => {
   // Fallback to old format (with underscores): SEPAY_timestamp_random
   match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
   return match ? match[0] : null;
+};
+
+/**
+ * Extract plan code from SePay transaction content - Optimized
+ */
+const extractPlanCodeFromContent = (content: string): string | null => {
+  if (!content) return null;
+
+  // Use indexOf for faster splitting
+  const firstSpace = content.indexOf(' ');
+  if (firstSpace === -1) return null;
+
+  const secondSpace = content.indexOf(' ', firstSpace + 1);
+  if (secondSpace === -1) return null;
+
+  return content.slice(secondSpace + 1).trim() || null;
 };
 
 /**
