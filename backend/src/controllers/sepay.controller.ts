@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import SePayService from '../services/sepay.service';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { hasPaymentByTransactionId, saveSePayOrderMapping, getSePayOrderMapping, deleteSePayOrderMapping } from '../utils/payment.utils';
 import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
-import { errorHandler } from '../utils/error';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
 
 /**
@@ -217,10 +216,10 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         data: {
           amount: BigInt(webhookData.transferAmount),
           currency: 'VND',
-          payment_gateway: 'SePay' as PaymentGateway,
-          payment_method: 'bank_transfer' as PaymentMethod,
+          payment_gateway: 'SePay',
+          payment_method: 'bank_transfer',
           transaction_id: orderId,
-          status: 'success' as PaymentStatus,
+          status: 'success',
           user_id: mapping.user_id
         },
       });
@@ -253,7 +252,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
           data: {
             title: 'Gói dịch vụ đã được kích hoạt!',
             content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-            type: 'pricing_plan' as NotificationsType,
+            type: 'pricing_plan',
             user_id: mapping.user_id
           } as any
         }),
@@ -290,8 +289,8 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         amount_paid: subscription.amount_paid
       };
     }, {
-      maxWait: 10000, // Maximum time to wait for transaction to start
-      timeout: 20000, // Maximum time for entire transaction
+      maxWait: 15000, // Maximum time to wait for transaction to start
+      timeout: 30000, // Maximum time for entire transaction
     });
 
     // Clean up mapping after successful processing
@@ -427,7 +426,7 @@ export const cancelSePayOrder = async (req: Request, res: Response, next: NextFu
     const existingPayment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay' as PaymentGateway
+        payment_gateway: 'SePay'
       }
     });
 
@@ -481,7 +480,7 @@ export const cancelAllPendingOrders = async (req: Request, res: Response, next: 
       const existingPayment = await prisma.payments.findFirst({
         where: {
           transaction_id: order.order_id,
-          payment_gateway: 'SePay' as PaymentGateway
+          payment_gateway: 'SePay'
         }
       });
 
@@ -522,7 +521,7 @@ export const checkPaymentStatus = async (req: Request, res: Response, next: Next
     const payment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay' as PaymentGateway
+        payment_gateway: 'SePay'
       },
       include: {
         subscriptions: true

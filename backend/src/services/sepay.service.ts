@@ -13,7 +13,7 @@ import {
   getDefaultSePayConfig,
   formatSePayAmount
 } from '../utils/sepay.utils';
-import { SEPAY_VA_NUMBER, SEPAY_BANK_CODE, SEPAY_API_KEY, SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
+import { SEPAY_API_KEY, SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
 
 class SePayService {
   private config: {
@@ -58,14 +58,14 @@ class SePayService {
           };
         }
       }
-      
+
       const orderId = params.orderId || generateSePayOrderId();
       const amount = formatSePayAmount(params.amount);
-      
+
       // If API key is available, try to use SePay API
       if (this.config.apiKey && this.config.apiKey !== '') {
         console.log('Using SePay API with key:', this.config.apiKey.substring(0, 10) + '...');
-        
+
         try {
           // Call SePay API to create order
           const sepayResponse = await this.callSePayAPI({
@@ -75,7 +75,7 @@ class SePayService {
             webhookUrl: this.config.webhookUrl,
             returnUrl: this.config.returnUrl
           });
-          
+
           return {
             orderId,
             amount: params.amount,
@@ -90,7 +90,7 @@ class SePayService {
           // Fall through to local generation
         }
       }
-      
+
       // Generate QR code locally (current implementation)
       const qrCodeUrl = generateSePayQRUrl(
         this.config.vaNumber,
@@ -98,7 +98,7 @@ class SePayService {
         amount,
         orderId
       );
-      
+
       const paymentUrl = generateSePayPaymentUrl(
         this.config.vaNumber,
         this.config.bankCode,
@@ -212,7 +212,7 @@ class SePayService {
     paymentUrl: string;
   }> {
     const apiUrl = 'https://api.sepay.vn/v1/orders'; // SePay API endpoint
-    
+
     const requestBody = {
       orderId: params.orderId,
       amount: params.amount,
@@ -238,7 +238,7 @@ class SePayService {
     }
 
     const data = await response.json() as any;
-    
+
     return {
       vaNumber: data.vaNumber || this.config.vaNumber,
       bankCode: data.bankCode || this.config.bankCode,
