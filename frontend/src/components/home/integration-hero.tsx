@@ -50,7 +50,7 @@ export default function IntegrationHero() {
                     <div className="flex gap-10 whitespace-nowrap animate-scroll-left hover:paused">
                         {repeatedIcons(ICONS_ROW1, 4).map((src, i) => (
                             <div key={i} className="h-20 w-20 shrink-0 rounded-2xl bg-white dark:bg-gray-800 shadow-[0_0_15px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform duration-300">
-                                <img src={src} alt="icon" className="h-10 w-10 object-contain" />
+                                <img src={src} alt="icon" loading="lazy" className="h-10 w-10 object-contain" />
                             </div>
                         ))}
                     </div>
@@ -59,7 +59,7 @@ export default function IntegrationHero() {
                     <div className="flex gap-10 whitespace-nowrap mt-8 animate-scroll-right hover:paused">
                         {repeatedIcons(ICONS_ROW2, 4).map((src, i) => (
                             <div key={i} className="h-20 w-20 shrink-0 rounded-2xl bg-white dark:bg-gray-800 shadow-[0_0_15px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform duration-300">
-                                <img src={src} alt="icon" className="h-10 w-10 object-contain" />
+                                <img src={src} alt="icon" loading="lazy" className="h-10 w-10 object-contain" />
                             </div>
                         ))}
                     </div>
