@@ -52,30 +52,32 @@ const ReportDialog = ({ open, onOpenChange, eventId }: ReportDialogProps) => {
 
   const handleSubmitReport = async () => {
     if (!selectedReason || !description.trim()) {
-      toast.error("Vui lòng nhập mô tả chi tiết");
+      toast.error("Vui lòng nhập mô tả chi tiết", {
+        duration: 3000,
+      });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const result = await createReport({
+      await createReport({
         title: `Báo cáo sự kiện: ${selectedReason.label}`,
         description: `Báo cáo sự kiện ID: ${eventId}\nLý do: ${selectedReason.label}\n\nChi tiết: ${description}`,
       });
 
-      if (result.success) {
-        toast.success("Báo cáo chờ duyệt thành công. Cảm ơn bạn đã phản hồi.");
-        onOpenChange(false);
-        // Reset state
-        setStep("select");
-        setSelectedReason(null);
-        setDescription("");
-      } else {
-        toast.error(result.message || "Không thể gửi báo cáo");
-      }
-    } catch (error) {
-      toast.error("Không thể gửi báo cáo");
+      toast.success("Báo cáo của bạn đã được gửi và đang chờ xem xét", {
+        duration: 3000,
+      });
+      onOpenChange(false);
+      // Reset state
+      setStep("select");
+      setSelectedReason(null);
+      setDescription("");
+    } catch {
+      toast.error("Không thể gửi báo cáo", {
+        duration: 3000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +162,7 @@ const ReportDialog = ({ open, onOpenChange, eventId }: ReportDialogProps) => {
                 placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..."
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                className="min-h-[120px] resize-none"
+                className="min-h-[120px] max-h-[200px] resize-y overflow-y-auto w-full"
                 disabled={isSubmitting}
               />
               <p className="text-xs text-slate-500 mt-1">

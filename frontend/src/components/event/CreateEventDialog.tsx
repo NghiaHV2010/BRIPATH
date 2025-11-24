@@ -123,6 +123,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
         ...formData,
         quantity: Number(formData.quantity),
       };
+      console.log("Creating event with payload:", payload);
       await createEvent(payload);
       toast.success("Tạo sự kiện thành công!");
       setFormData({
@@ -145,6 +146,24 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
       setIsSubmitting(false);
       setIsUploading(false);
     }
+  };
+
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      // Clear all form data when closing
+      setFormData({
+        title: "",
+        description: "",
+        start_date: "",
+        end_date: "",
+        quantity: "",
+        working_time: "",
+        banner_url: "",
+      });
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    setIsOpen(open);
   };
 
   const handleTriggerClick = async () => {
@@ -180,33 +199,38 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
       {/* Trigger Button */}
       <div
         onClick={handleTriggerClick}
-        className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-3 rounded-lg transition-colors border border-slate-200 bg-white shadow-sm"
+        className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-slate-50 p-2 sm:p-3 rounded-lg transition-colors border border-slate-200 bg-white shadow-sm w-full"
       >
-        <div className="p-2 bg-blue-600 rounded-full">
-          <Plus className="w-5 h-5 text-white" />
+        <div className="p-1.5 sm:p-2 bg-blue-600 rounded-full shrink-0">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
         </div>
         <input
           type="text"
           placeholder="Tạo sự kiện mới..."
-          className="flex-1 bg-transparent border-0 outline-none text-slate-600 cursor-pointer"
+          className="flex-1 bg-transparent border-0 outline-none text-slate-600 cursor-pointer text-sm sm:text-base min-w-0"
           readOnly
         />
-        <ImageIcon className="w-5 h-5 text-slate-400" />
+        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 shrink-0" />
       </div>
 
       {/* Dialog Form */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
+        <DialogContent className="max-w-[95vw] sm:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <Calendar className="w-5 h-5 text-white" />
+            <DialogTitle className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-xl font-bold">Tạo sự kiện mới</span>
+              <span className="text-lg sm:text-xl font-bold">
+                Tạo sự kiện mới
+              </span>
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-3 sm:space-y-4 py-3 sm:py-4"
+          >
             {/* Title */}
             <div className="space-y-2">
               <Input
@@ -217,7 +241,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                 onChange={e =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
+                className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-lg font-medium"
                 autoFocus
               />
             </div>
@@ -232,16 +256,16 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                 onChange={e =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="min-h-[100px] border-slate-300 focus:ring-blue-500 focus:border-blue-500 "
+                className="min-h-20 sm:min-h-[100px] max-h-[300px] border-slate-300 focus:ring-blue-500 focus:border-blue-500 resize-y w-full text-sm sm:text-base overflow-y-auto"
               />
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div className="space-y-2">
                 <Label
                   htmlFor="start_date"
-                  className="text-slate-700 text-sm font-medium"
+                  className="text-slate-700 text-xs sm:text-sm font-medium"
                 >
                   Ngày bắt đầu
                 </Label>
@@ -254,7 +278,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                       value={formData.start_date}
                       readOnly
                       placeholder="Chọn ngày bắt đầu"
-                      className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white"
+                      className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white text-sm sm:text-base"
                     />
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -281,7 +305,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
               <div className="space-y-2">
                 <Label
                   htmlFor="end_date"
-                  className="text-slate-700 text-sm font-medium"
+                  className="text-slate-700 text-xs sm:text-sm font-medium"
                 >
                   Ngày kết thúc
                 </Label>
@@ -294,7 +318,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                       value={formData.end_date}
                       readOnly
                       placeholder="Chọn ngày kết thúc"
-                      className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white"
+                      className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white text-sm sm:text-base"
                     />
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -321,11 +345,11 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
             </div>
 
             {/* Quantity and Working Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div className="space-y-2">
                 <Label
                   htmlFor="quantity"
-                  className="text-slate-700 text-sm font-medium"
+                  className="text-slate-700 text-xs sm:text-sm font-medium"
                 >
                   Số lượng
                 </Label>
@@ -338,14 +362,14 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                   onChange={e =>
                     setFormData({ ...formData, quantity: e.target.value })
                   }
-                  className="border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   min="1"
                 />
               </div>
               <div className="space-y-2">
                 <Label
                   htmlFor="working_time"
-                  className="text-slate-700 text-sm font-medium"
+                  className="text-slate-700 text-xs sm:text-sm font-medium"
                 >
                   Thời gian
                 </Label>
@@ -357,7 +381,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                   onChange={e =>
                     setFormData({ ...formData, working_time: e.target.value })
                   }
-                  className="border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="border-slate-300 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -366,23 +390,23 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
             <div className="space-y-2">
               <Label
                 htmlFor="banner_image"
-                className="text-slate-700 text-sm font-medium"
+                className="text-slate-700 text-xs sm:text-sm font-medium"
               >
                 Banner sự kiện
               </Label>
               {!formData.banner_url ? (
                 <label
-                  className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-6 cursor-pointer ${
+                  className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-4 sm:p-6 cursor-pointer ${
                     isUploading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-gray-50"
                   }`}
                 >
-                  <ImageIcon className="w-8 h-8 text-gray-400" />
-                  <span className="text-gray-600 text-sm mt-2">
+                  <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+                  <span className="text-gray-600 text-xs sm:text-sm mt-2 text-center">
                     Chọn banner cho sự kiện
                   </span>
-                  <span className="text-gray-400 text-xs mt-1">
+                  <span className="text-gray-400 text-[10px] sm:text-xs mt-1 text-center">
                     (PNG, JPG, WEBP - Tối đa 10MB)
                   </span>
                   <input
@@ -412,49 +436,50 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
                   <img
                     src={formData.banner_url}
                     alt="Event banner"
-                    className="w-full h-48 object-cover rounded-md"
+                    className="w-full h-32 sm:h-48 object-cover rounded-md"
                   />
                   <Button
                     type="button"
                     onClick={handleRemoveFile}
-                    className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-500 hover:text-red-500 shadow-md"
+                    className="absolute top-3 right-3 bg-white rounded-full p-1.5 sm:p-2 text-gray-500 hover:text-red-500 shadow-md"
                     variant="ghost"
                     size="sm"
                   >
-                    <ImageIcon className="w-4 h-4" />✕
+                    <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4" />✕
                   </Button>
                 </div>
               )}
             </div>
 
             {/* Action Buttons */}
-            <DialogFooter className="pt-4">
+            <DialogFooter className="pt-3 sm:pt-4 gap-2 flex-col sm:flex-row">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsOpen(false)}
                 disabled={isSubmitting || isUploading}
+                className="w-full sm:w-auto text-sm sm:text-base"
               >
                 Hủy
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting || isUploading}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto text-sm sm:text-base"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                     Đang tạo...
                   </>
                 ) : isUploading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                     Đang upload ({Math.round(uploadProgress)}%)...
                   </>
                 ) : (
                   <>
-                    <Send className="w-4 h-4 mr-2" />
+                    <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                     Tạo sự kiện
                   </>
                 )}

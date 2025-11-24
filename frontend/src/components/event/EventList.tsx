@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import EventCard from "./EventCard";
 import { Button } from "../ui/button";
 import { getAllEvents, type Event } from "@/api/event_api";
@@ -15,32 +15,48 @@ const EventList = ({ refreshTrigger, onApplySuccess }: EventListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Reset when refresh trigger changes
   useEffect(() => {
-    fetchEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshTrigger, currentPage]);
+    setEvents([]);
+    setCurrentPage(1);
+    fetchEvents(1, true);
+  }, [refreshTrigger]);
 
-  const fetchEvents = async () => {
-    setIsLoading(true);
+  const fetchEvents = async (page: number, isInitial = false) => {
+    if (isInitial) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+
     try {
-      const response = await getAllEvents(currentPage);
-      setEvents(response.data);
+      const response = await getAllEvents(page);
+
+      if (isInitial || page === 1) {
+        setEvents(response.data);
+      } else {
+        setEvents(prev => [...prev, ...response.data]);
+      }
+
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast.error("Không thể tải danh sách sự kiện");
-      setEvents([]);
+      if (isInitial) {
+        setEvents([]);
+      }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchEvents(nextPage, false);
   };
 
   if (isLoading) {
@@ -75,50 +91,33 @@ const EventList = ({ refreshTrigger, onApplySuccess }: EventListProps) => {
         ))}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div
-          className="flex items-center justify-center gap-2 mt-8 pb-8"
-          data-testid="pagination-controls"
-        >
+      {/* Load More Button */}
+      {currentPage < totalPages && (
+        <div className="flex items-center justify-center mt-8 pb-8">
           <Button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            variant="outline"
-            size="sm"
-            className="pagination-button border-slate-300 hover:bg-blue-50 hover:border-blue-400"
-            data-testid="prev-page-button"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-medium transition-all"
+            data-testid="load-more-button"
           >
-            <ChevronLeft className="w-4 h-4" />
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Đang tải...
+              </>
+            ) : (
+              "Xem thêm sự kiện"
+            )}
           </Button>
+        </div>
+      )}
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-            <Button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              variant={currentPage === page ? "default" : "outline"}
-              size="sm"
-              className={`pagination-button w-8 h-8 p-0 ${
-                currentPage === page
-                  ? "bg-linear-to-r from-blue-500 to-indigo-600 text-white border-0"
-                  : "border-slate-300 hover:bg-blue-50 hover:border-blue-400"
-              }`}
-              data-testid={`page-${page}-button`}
-            >
-              {page}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            variant="outline"
-            size="sm"
-            className="pagination-button border-slate-300 hover:bg-blue-50 hover:border-blue-400"
-            data-testid="next-page-button"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+      {/* End message */}
+      {currentPage >= totalPages && events.length > 0 && (
+        <div className="text-center py-8">
+          <p className="text-slate-400 text-sm">
+            Đã hiển thị tất cả {events.length} sự kiện
+          </p>
         </div>
       )}
     </div>

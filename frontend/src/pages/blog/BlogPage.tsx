@@ -1,15 +1,41 @@
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, ChevronRight, Loader2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Calendar, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { getAllBlogPosts } from "@/api/blog_api";
 import type { BlogPost as ApiBlogPost } from "@/api/blog_api";
 import { Layout } from "@/components";
 import { useNavigate } from "react-router";
+import { motion } from "framer-motion";
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
 
 export function BlogPage() {
+  const [posts, setPosts] = useState<ApiBlogPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<ApiBlogPost[]>([]);
-  const [allPosts, setAllPosts] = useState<ApiBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
@@ -18,10 +44,17 @@ export function BlogPage() {
   useEffect(() => {
     const loadBlogData = async () => {
       try {
-        const resp = await getAllBlogPosts(page, 12);
+        setLoading(true);
+        const resp = await getAllBlogPosts(page, 9);
         const items = resp.success ? resp.data : [];
-        setFeaturedPosts(items.slice(0, 4));
-        setAllPosts(items);
+        setPosts(items);
+
+        // Load featured posts only on first page
+        if (page === 1 && items.length > 0) {
+          setFeaturedPosts(items.slice(0, 6));
+          console.log("Featured posts loaded:", items.slice(0, 6).length);
+        }
+
         if (resp.totalPages) setTotalPages(resp.totalPages);
       } catch (error) {
         console.error("Error loading blog posts:", error);
@@ -33,257 +66,74 @@ export function BlogPage() {
     loadBlogData();
   }, [page]);
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-emerald-50 to-white">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-emerald-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Đang tải bài viết...</p>
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-10 h-10 animate-spin text-emerald-600 mx-auto mb-3" />
+            <p className="text-gray-600">Đang tải bài viết...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
-  const handleCarouselNext = () => {
-    setPage(prev => Math.min(prev + 1, totalPages));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCarouselPrev = () => {
-    setPage(prev => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const mbtiTypes = [
-    {
-      type: "Đơn giản",
-      color: "bg-linear-to-br from-emerald-200 to-emerald-400",
-    },
-    {
-      type: "Nhanh chóng",
-      color: "bg-linear-to-br from-blue-200 to-blue-400",
-    },
-    {
-      type: "Tiện lợi",
-      color: "bg-linear-to-br from-purple-400 to-purple-600",
-    },
-    {
-      type: "Phù hợp",
-      color: "bg-linear-to-br from-yellow-200 to-yellow-400",
-    },
-    {
-      type: "Chính xác",
-      color: "bg-linear-to-br from-green-400 to-green-600",
-    },
-    { type: "Chất lượng", color: "bg-linear-to-br from-red-400 to-red-600" },
-  ];
-
-  const mainFeatured = featuredPosts[0];
-  const sideFeatured = featuredPosts.slice(1);
-
   return (
     <Layout>
-      <div className="min-h-screen bg-linear-to-b from-white via-emerald-50/30 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-          {/* Section Title */}
-          <div className="mb-8  sm:mb-10 lg:mb-12">
-            <h1 className="text-3xl h-15 sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 bg-linear-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-              Bài viết nổi bật
-            </h1>
-            <div className="w-20 h-1 bg-linear-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
-          </div>
-
-          {/* Featured Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
-            {/* Main Featured Post */}
-            {mainFeatured && (
-              <div className="lg:col-span-2">
-                <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 h-full group bg-white">
-                  <div className="relative h-64 sm:h-80 lg:h-96 w-full overflow-hidden bg-linear-to-br from-emerald-100 to-emerald-50">
-                    <img
-                      src={
-                        mainFeatured.cover_image_url &&
-                          !mainFeatured.cover_image_url.includes(
-                            "via.placeholder.com"
-                          )
-                          ? mainFeatured.cover_image_url
-                          : "/placeholder.svg"
-                      }
-                      alt={mainFeatured.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      onError={e => {
-                        const img = e.currentTarget as HTMLImageElement;
-                        if (
-                          img.src !==
-                          window.location.origin + "/placeholder.svg"
-                        ) {
-                          img.src = "/placeholder.svg";
-                        }
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  </div>
-                  <div className="p-5 sm:p-6 lg:p-8 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between">
-                    <div>
-                      <div className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        Nổi bật
-                      </div>
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors duration-300">
-                        {mainFeatured.title}
-                      </h2>
-                      {mainFeatured.created_at && (
-                        <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                          {new Date(mainFeatured.created_at).toLocaleDateString(
-                            "vi-VN",
-                            {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            }
-                          )}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      className="bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white gap-2 shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto font-semibold"
-                      onClick={() => navigate(`/blog/${mainFeatured.id}`)}
-                    >
-                      Xem chi tiết
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            {/* Side Featured Posts */}
-            <div className="space-y-3 sm:space-y-4 h-full flex flex-col justify-between">
-              {sideFeatured.slice(0, 3).map((post, idx) => (
-                <Card
-                  key={post.id}
-                  className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 cursor-pointer flex-1 group bg-white"
-                  onClick={() => navigate(`/blog/${post.id}`)}
-                >
-                  <div className="relative h-20 sm:h-24 w-full overflow-hidden bg-linear-to-br from-emerald-400 to-emerald-600">
-                    <img
-                      src={
-                        post.cover_image_url &&
-                          !post.cover_image_url.includes("via.placeholder.com")
-                          ? post.cover_image_url
-                          : "/placeholder.svg"
-                      }
-                      alt={post.title}
-                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
-                      onError={e => {
-                        const img = e.currentTarget as HTMLImageElement;
-                        if (
-                          img.src !==
-                          window.location.origin + "/placeholder.svg"
-                        ) {
-                          img.src = "/placeholder.svg";
-                        }
-                      }}
-                    />
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-emerald-600 text-xs font-bold px-2 py-1 rounded-full">
-                      #{idx + 2}
-                    </div>
-                  </div>
-                  <div className="p-3 sm:p-4">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 text-sm sm:text-base mb-2 group-hover:text-emerald-600 transition-colors duration-300">
-                      {post.title}
-                    </h3>
-                    {post.created_at && (
-                      <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
-                        <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                        {new Date(post.created_at).toLocaleDateString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
-                      </p>
-                    )}
-                    <Button
-                      variant="outline"
-                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white bg-transparent h-7 sm:h-8 px-3 text-xs w-full transition-all duration-300 font-semibold"
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`/blog/${post.id}`);
-                      }}
-                    >
-                      Đọc ngay <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-16">
-            <Card className="bg-linear-to-br from-emerald-600 to-emerald-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
-              <div className="mb-4 sm:mb-0 text-center sm:text-left">
-                <h3 className="text-4xl sm:text-5xl font-bold mb-2 bg-white/20 backdrop-blur-sm inline-block px-4 py-2 rounded-lg">
-                  60.000+
-                </h3>
-                <p className="text-emerald-50 font-medium mt-3">
-                  Việc làm đang tuyển dụng
-                </p>
-              </div>
-              <Button
-                className="bg-white text-emerald-600 hover:bg-emerald-50 font-bold shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110"
-                onClick={() => navigate("/jobs")}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Featured Section - Top 6 Posts (Newspaper Style) */}
+          {page === 1 && featuredPosts.length > 0 && (
+            <div className="mb-16">
+              {/* Header */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="mb-10"
               >
-                Tìm việc ngay
-              </Button>
-            </Card>
+                <div className="flex items-end gap-4 mb-2">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                    Blog nổi bật
+                    <div className="h-1 mt-5 w-full bg-blue-600 mb-2"></div>
+                  </h2>
+                </div>
+              </motion.div>
 
-            <Card className="bg-linear-to-br from-blue-600 to-blue-500 text-white border-0 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
-              <div className="mb-4 sm:mb-0 text-center sm:text-left">
-                <h3 className="text-4xl sm:text-5xl font-bold mb-2 bg-white/20 backdrop-blur-sm inline-block px-4 py-2 rounded-lg">
-                  100+
-                </h3>
-                <p className="text-blue-50 font-medium mt-3">
-                  Công ty hàng đầu các ngành nghề
-                </p>
-              </div>
-              <Button
-                className="bg-white text-blue-600 hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110"
-                onClick={() => navigate("/companies")}
-              >
-                Khám phá ngay
-              </Button>
-            </Card>
-          </div>
-
-          {/* All Posts Section */}
-          <div>
-            <div className="mb-8 sm:mb-10">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                Tất cả bài viết
-              </h2>
-              <div className="w-16 h-1 bg-linear-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              {allPosts.map((post) => (
-                <Card
-                  key={post.id}
-                  className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 cursor-pointer group bg-white"
-                  onClick={() => navigate(`/blog/${post.id}`)}
+              {/* Featured Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:min-h-[580px]">
+                {/* Hero Post - Left Side */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className="lg:col-span-7 flex"
                 >
-                  <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] gap-0">
-                    <div className="relative h-full w-full overflow-hidden bg-linear-to-br from-emerald-400 to-emerald-600">
+                  <div
+                    className="cursor-pointer group flex flex-col w-full"
+                    onClick={() => navigate(`/blog/${featuredPosts[0].id}`)}
+                  >
+                    <div className="relative flex-1 min-h-[280px] md:min-h-[350px] lg:min-h-[480px] overflow-hidden rounded-xl border-2 border-gray-200">
                       <img
                         src={
-                          post.cover_image_url &&
-                            !post.cover_image_url.includes("via.placeholder.com")
-                            ? post.cover_image_url
+                          featuredPosts[0].cover_image_url &&
+                          !featuredPosts[0].cover_image_url.includes(
+                            "via.placeholder.com"
+                          )
+                            ? featuredPosts[0].cover_image_url
                             : "/placeholder.svg"
                         }
-                        alt={post.title}
-                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                        alt={featuredPosts[0].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         onError={e => {
                           const img = e.currentTarget as HTMLImageElement;
                           if (
@@ -294,150 +144,251 @@ export function BlogPage() {
                           }
                         }}
                       />
-                    </div>
-                    <div className="p-3 sm:p-4 flex flex-col justify-between">
-                      <div>
-                        <div className="text-xs font-bold text-emerald-600 mb-1 uppercase tracking-wider">
-                          Bài viết
-                        </div>
-                        <h3 className="font-bold text-gray-900 line-clamp-2 text-sm sm:text-base mb-2 group-hover:text-emerald-600 transition-colors duration-300">
-                          {post.title}
-                        </h3>
-                        {post.created_at && (
-                          <p className="text-xs text-gray-500 flex items-center gap-1.5 mb-2">
-                            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                            {new Date(post.created_at).toLocaleDateString(
-                              "vi-VN",
-                              {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              }
-                            )}
-                          </p>
-                        )}
+                      {/* Tag Number */}
+                      <div className="absolute top-4 left-4 bg-blue-600 text-white font-bold text-lg w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                        1
                       </div>
-                      <Button
-                        variant="outline"
-                        className="border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white bg-transparent h-8 px-3 text-xs transition-all duration-300 font-semibold w-full"
-                        onClick={e => {
-                          e.stopPropagation();
-                          navigate(`/blog/${post.id}`);
-                        }}
-                      >
-                        Đọc ngay <ArrowRight className="w-3 h-3 ml-1" />
-                      </Button>
+                    </div>
+                    <div className="mt-4 shrink-0">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 cursor-pointer">
+                              {featuredPosts[0].title.split(" ").length > 15
+                                ? featuredPosts[0].title
+                                    .split(" ")
+                                    .slice(0, 15)
+                                    .join(" ") + "..."
+                                : featuredPosts[0].title}
+                            </h3>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-md">
+                            <p className="text-sm">{featuredPosts[0].title}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      {featuredPosts[0].created_at && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{formatDate(featuredPosts[0].created_at)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
+                </motion.div>
 
-            {/* Pagination */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-10 sm:mt-12">
+                {/* Side Posts - Right Side */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="lg:col-span-5 flex flex-col"
+                >
+                  {featuredPosts.slice(1, 6).map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+                      className="group cursor-pointer flex-1 py-4 border-b border-gray-200 last:border-0"
+                      onClick={() => navigate(`/blog/${post.id}`)}
+                    >
+                      <div className="flex gap-4 h-full">
+                        <div className="relative w-28 md:w-32 h-20 md:h-24 shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
+                          <img
+                            src={
+                              post.cover_image_url &&
+                              !post.cover_image_url.includes(
+                                "via.placeholder.com"
+                              )
+                                ? post.cover_image_url
+                                : "/placeholder.svg"
+                            }
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                            onError={e => {
+                              const img = e.currentTarget as HTMLImageElement;
+                              if (
+                                img.src !==
+                                window.location.origin + "/placeholder.svg"
+                              ) {
+                                img.src = "/placeholder.svg";
+                              }
+                            }}
+                          />
+                          {/* Tag Number */}
+                          <div className="absolute top-2 left-2 bg-blue-600 text-white font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md">
+                            {index + 2}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <h4 className="font-bold text-xs md:text-sm text-gray-900 mb-auto line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 cursor-pointer">
+                                  {post.title}
+                                </h4>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-md">
+                                <p className="text-sm">{post.title}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          {post.created_at && (
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-auto pt-2">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>{formatDate(post.created_at)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+              {/* Separator Line */}
+              <div className="mt-12 border-t-2 border-gray-300"></div>
+            </div>
+          )}
+
+          {/* Blog Grid */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
+          >
+            {posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="group cursor-pointer pb-6 border-b border-gray-200"
+                onClick={() => navigate(`/blog/${post.id}`)}
+              >
+                <div className="flex gap-4">
+                  <div className="relative w-36 h-28 shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
+                    <img
+                      src={
+                        post.cover_image_url &&
+                        !post.cover_image_url.includes("via.placeholder.com")
+                          ? post.cover_image_url
+                          : "/placeholder.svg"
+                      }
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                      onError={e => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        if (
+                          img.src !==
+                          window.location.origin + "/placeholder.svg"
+                        ) {
+                          img.src = "/placeholder.svg";
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
+                            {post.title}
+                          </h3>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-md">
+                          <p className="text-sm">{post.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {post.created_at && (
+                      <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-500 mt-auto">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{formatDate(post.created_at)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center justify-center gap-2"
+            >
               <Button
                 variant="outline"
                 size="icon"
-                onClick={handleCarouselPrev}
+                onClick={() => {
+                  setPage(prev => Math.max(prev - 1, 1));
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 disabled={page === 1}
-                className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 w-10 h-10"
+                className="h-9 w-9"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4" />
               </Button>
 
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: Math.min(totalPages, 5) }).map(
-                    (_, idx) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = idx + 1;
-                      } else if (page <= 3) {
-                        pageNum = idx + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + idx;
-                      } else {
-                        pageNum = page - 2 + idx;
-                      }
-
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  pageNum => {
+                    // Show first, last, current, and adjacent pages
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      Math.abs(pageNum - page) <= 1
+                    ) {
                       return (
-                        <button
-                          key={idx}
-                          onClick={() => setPage(pageNum)}
-                          className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${pageNum === page
-                            ? "bg-emerald-600 w-8"
-                            : "bg-gray-300 hover:bg-emerald-400"
-                            }`}
-                        />
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="icon"
+                          onClick={() => {
+                            setPage(pageNum);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className={`h-9 w-9 ${
+                            page === pageNum
+                              ? "bg-emerald-600 hover:bg-emerald-700"
+                              : ""
+                          }`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    } else if (pageNum === page - 2 || pageNum === page + 2) {
+                      return (
+                        <span key={pageNum} className="px-2 text-gray-400">
+                          ...
+                        </span>
                       );
                     }
-                  )}
-                </div>
-
-                <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
-                  {page} / {totalPages}
-                </span>
+                    return null;
+                  }
+                )}
               </div>
 
               <Button
                 variant="outline"
                 size="icon"
-                onClick={handleCarouselNext}
+                onClick={() => {
+                  setPage(prev => Math.min(prev + 1, totalPages));
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 disabled={page === totalPages}
-                className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 w-10 h-10"
+                className="h-9 w-9"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4" />
               </Button>
-            </div>
-          </div>
-
-          {/* MBTI Quiz Section */}
-          <div className="mt-16 sm:mt-20">
-            <div className="bg-linear-to-br from-emerald-600 via-emerald-500 to-emerald-600 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 p-6 sm:p-8 lg:p-12 items-center">
-                {/* Left Content */}
-                <div className="text-white text-center lg:text-left">
-                  <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-                    <span className="text-sm sm:text-base font-bold bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                      MBTI
-                    </span>
-                    <span className="text-sm sm:text-base font-bold bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                      top cv
-                    </span>
-                  </div>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 leading-tight">
-                    TRẮC NGHIỆM
-                    <br />
-                    TÍNH CÁCH
-                  </h2>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold mb-8 text-emerald-50">
-                    Định hướng nghề nghiệp - Lộ trình rõ ràng
-                  </p>
-
-                  <Button
-                    onClick={() => navigate("/quiz")}
-                    className="bg-white text-emerald-600 hover:bg-emerald-50 font-bold gap-2 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                  >
-                    Làm trắc nghiệm ngay
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                {/* Right MBTI Cards Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {mbtiTypes.map((mbti, idx) => (
-                    <div
-                      key={mbti.type}
-                      className={`${mbti.color} rounded-xl sm:rounded-2xl p-4 sm:p-6 flex items-center justify-center text-white font-bold text-sm sm:text-base lg:text-lg shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110 hover:-translate-y-2 animate-fade-in`}
-                      style={{ animationDelay: `${idx * 0.1}s` }}
-                    >
-                      {mbti.type}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </Layout>

@@ -23,6 +23,12 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
             take: numberOfEvents,
             skip: page * numberOfEvents,
             include: {
+                users: {
+                    select: {
+                        username: true,
+                        avatar_url: true,
+                    }
+                },
                 volunteers: user_id ? {
                     where: {
                         user_id
@@ -58,7 +64,8 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const { id: user_id } = req.user as AuthUserRequestDto;
     const { id: subscription_id } = req.plan;
     const { title, description, start_date, end_date, quantity, working_time, banner_url }: RequestBody = req.body;
-
+    console.log(req.body);
+    
     if (title.length < 10) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tiêu đề quá ngắn (tối thiểu 10 ký tự)"));
     }

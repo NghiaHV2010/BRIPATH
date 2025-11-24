@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, AlertCircle } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import { format } from "date-fns";
 import ReportDialog from "./ReportDialog";
-import { ApplyEventDialog } from "./ApplyEventDialog";
+import { LoginDialog } from "@/components/login/LoginDialog";
+import { useAuthStore } from "@/store/auth";
 import type { Event } from "@/api/event_api";
 
 interface EventCardProps {
@@ -12,12 +11,13 @@ interface EventCardProps {
   onApplySuccess?: () => void;
 }
 
-const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
-  const [showApplyDialog, setShowApplyDialog] = useState(false);
+const EventCard = ({ event }: EventCardProps) => {
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
-  // ✅ Check if user has applied to this event
-  const hasApplied = (event.volunteers?.length ?? 0) > 0;
+  const authUser = useAuthStore(state => state.authUser);
 
   const formatDate = (dateString: string) => {
     try {
@@ -27,120 +27,113 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
     }
   };
 
+  const imageSrc =
+    !imageError && event.banner_url
+      ? event.banner_url
+      : `https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80&sat=-25&blend=0F172A&blend-mode=screen&sig=${
+          event.id ?? event.title
+        }`;
+
+  const handleReportClick = () => {
+    if (!authUser) {
+      setShowLoginDialog(true);
+    } else {
+      setShowReportDialog(true);
+    }
+  };
+
   return (
     <>
-      <Card
-        className="event-card-hover overflow-hidden border-slate-200 shadow-sm hover:shadow-md bg-white transition-shadow"
+      <div
+        className="m-4 max-w-3xl w-full rounded-4xl bg-background border border-primary/10 shadow-2xl/10 p-4"
         data-testid="event-card"
       >
-        {/* Banner Image */}
-        <div className="relative w-full aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 to-slate-300">
-          {event.banner_url ? (
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 card-header">
+          <div className="flex items-center gap-4">
             <img
-              src={event.banner_url}
-              alt={event.title}
-              className="banner-image w-full h-full object-cover"
-              data-testid="event-banner-image"
-              onError={e => {
-                (e.target as HTMLImageElement).src =
-                  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800";
-              }}
+              src={
+                event.users?.avatar_url ||
+                `https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=150&h=150&fit=crop`
+              }
+              alt={event.users?.username || "User"}
+              width={35}
+              height={35}
+              className="rounded-full object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-400 to-indigo-500">
-              <Calendar className="w-16 h-16 text-white/50" />
+            <div>
+              <h3 className="flex flex-col">
+                <span className="font-semibold">
+                  {event.users?.username || "Anonymous"}
+                </span>
+                <span className="flex items-center gap-2 opacity-70 text-sm">
+                  <h2>
+                    Ngày bắt đầu: {formatDate(event.start_date)} -{" "}
+                    {formatDate(event.end_date)}
+                  </h2>
+                </span>
+              </h3>
             </div>
-          )}
+          </div>
+          <button
+            onClick={handleReportClick}
+            className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition text-sm font-medium"
+          >
+            Báo cáo
+          </button>
         </div>
 
         {/* Content */}
-        <CardContent className="p-4 sm:p-5 space-y-3">
+        <div className="mt-4 flex flex-col gap-6">
           {/* Title */}
-          <h3
-            className="text-lg sm:text-xl font-bold text-slate-900 leading-snug"
+          <h2
+            className="text-xl font-bold text-slate-900"
             data-testid="event-title"
           >
-            Sự kiện: {event.title}
-          </h3>
-
-          {/* Date and Quantity Info */}
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-            <div
-              className="flex items-center gap-1.5"
-              data-testid="event-dates"
-            >
-              <Calendar className="w-4 h-4 text-blue-500" />
-              <span>
-                Diễn ra vào: {formatDate(event.start_date)} -{" "}
-                {formatDate(event.end_date)}
-              </span>
-            </div>
-            <div
-              className="flex items-center gap-1.5"
-              data-testid="event-quantity"
-            >
-              <Users className="w-4 h-4 text-indigo-500" />
-              <span>{event.quantity} chỗ</span>
-            </div>
-          </div>
-
-          {/* Working Time */}
-          {event.working_time && (
-            <div
-              className="flex items-center gap-1.5 text-sm text-slate-600"
-              data-testid="event-working-time"
-            >
-              <Clock className="w-4 h-4 text-green-500" />
-              Thời gian làm việc: <span>{event.working_time}</span>
-            </div>
-          )}
+            {event.title}
+          </h2>
 
           {/* Description */}
           <p
-            className="text-slate-600 text-sm leading-relaxed line-clamp-3"
+            className="whitespace-pre-wrap text-slate-700 leading-relaxed"
             data-testid="event-description"
           >
-            Chi tiết: {event.description}
+            {event.description}
           </p>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-2">
-            <Button
-              onClick={() => setShowApplyDialog(true)}
-              disabled={hasApplied}
-              className={`join-button flex-1 font-medium py-2 rounded-lg shadow-sm transition-all
-              ${
-                hasApplied
-                  ? "bg-emerald-600 text-white cursor-not-allowed hover:bg-emerald-700"
-                  : "bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-              }
-              hover:scale-102`}
-              data-testid="join-event-button"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              {hasApplied ? "✓ Đã ứng tuyển" : "Ứng tuyển"}
-            </Button>
-            <Button
-              onClick={() => setShowReportDialog(true)}
-              variant="outline"
-              size="icon"
-              className="border-slate-300 hover:bg-red-50 hover:border-red-400 hover:text-red-600 rounded-lg h-11 w-11"
-              data-testid="report-event-button"
-            >
-              <AlertCircle className="w-5 h-5" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Banner Image */}
+          <img
+            src={imageSrc}
+            alt={event.title}
+            width={1920}
+            height={1080}
+            className="max-w-full rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity border border-slate-200"
+            data-testid="event-banner-image"
+            onError={() => setImageError(true)}
+            onClick={() => setShowImageModal(true)}
+            loading="lazy"
+          />
+        </div>
 
-      {/* Apply Event Dialog */}
-      <ApplyEventDialog
-        open={showApplyDialog}
-        onOpenChange={setShowApplyDialog}
-        eventId={event.id || ""}
-        eventTitle={event.title}
-        onSuccess={onApplySuccess}
-      />
+        {/* Event Info */}
+        <div className="mt-4 flex justify-evenly gap-2">
+          {event.working_time && (
+            <div className="flex grow items-center justify-center gap-3 rounded-xl px-4 py-2">
+              <Clock />
+              <span className="inline font-medium">
+                Thời gian: {event.working_time}
+              </span>
+            </div>
+          )}
+
+          <div className="flex grow items-center justify-center gap-3 rounded-xl px-4 py-2">
+            <Users />
+            <span className="inline font-medium">
+              Số lượng: {event.quantity}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Report Dialog */}
       <ReportDialog
@@ -148,6 +141,45 @@ const EventCard = ({ event, onApplySuccess }: EventCardProps) => {
         onOpenChange={setShowReportDialog}
         eventId={event.id || ""}
       />
+
+      {/* Login Dialog */}
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 cursor-pointer"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-7xl max-h-[90vh] w-full">
+            <img
+              src={imageSrc}
+              alt={event.title}
+              className="w-full h-full object-contain rounded-lg"
+              onClick={e => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
