@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calendar, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Loader2 } from "lucide-react";
 import { getAllBlogPosts } from "@/api/blog_api";
 import type { BlogPost as ApiBlogPost } from "@/api/blog_api";
 import { Layout } from "@/components";
@@ -37,34 +37,84 @@ export function BlogPage() {
   const [posts, setPosts] = useState<ApiBlogPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<ApiBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const loadBlogData = async () => {
-      try {
+  const fetchBlogs = async (page: number, isInitial: boolean = false) => {
+    try {
+      if (isInitial) {
         setLoading(true);
-        const resp = await getAllBlogPosts(page, 9);
-        const items = resp.success ? resp.data : [];
-        setPosts(items);
+      } else {
+        setIsLoadingMore(true);
+      }
 
+      const resp = await getAllBlogPosts(page, 9);
+      const items = resp.success ? resp.data : [];
+
+      if (isInitial) {
+        setPosts(items);
         // Load featured posts only on first page
         if (page === 1 && items.length > 0) {
           setFeaturedPosts(items.slice(0, 6));
           console.log("Featured posts loaded:", items.slice(0, 6).length);
         }
-
-        if (resp.totalPages) setTotalPages(resp.totalPages);
-      } catch (error) {
-        console.error("Error loading blog posts:", error);
-      } finally {
-        setLoading(false);
+      } else {
+        // Append new posts
+        setPosts(prev => [...prev, ...items]);
       }
-    };
 
-    loadBlogData();
-  }, [page]);
+      if (resp.totalPages) setTotalPages(resp.totalPages);
+    } catch (error) {
+      console.error("Error loading blog posts:", error);
+    } finally {
+      setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Save scroll position and state before navigating
+  const handlePostClick = (postId: number | undefined) => {
+    if (!postId) return;
+    sessionStorage.setItem("blogScrollPosition", window.scrollY.toString());
+    sessionStorage.setItem("blogCurrentPage", currentPage.toString());
+    sessionStorage.setItem("blogPosts", JSON.stringify(posts));
+    sessionStorage.setItem("blogFeaturedPosts", JSON.stringify(featuredPosts));
+    sessionStorage.setItem("blogTotalPages", totalPages.toString());
+    navigate(`/blog/${postId}`);
+  };
+
+  // Restore state on mount
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem("blogScrollPosition");
+    const savedCurrentPage = sessionStorage.getItem("blogCurrentPage");
+    const savedPosts = sessionStorage.getItem("blogPosts");
+    const savedFeaturedPosts = sessionStorage.getItem("blogFeaturedPosts");
+    const savedTotalPages = sessionStorage.getItem("blogTotalPages");
+
+    if (savedScrollPosition && savedPosts && savedCurrentPage) {
+      // Restore state
+      setPosts(JSON.parse(savedPosts));
+      setFeaturedPosts(JSON.parse(savedFeaturedPosts || "[]"));
+      setCurrentPage(parseInt(savedCurrentPage));
+      setTotalPages(parseInt(savedTotalPages || "1"));
+      setLoading(false);
+
+      // Restore scroll position after content is rendered
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        // Clear saved state
+        sessionStorage.removeItem("blogScrollPosition");
+        sessionStorage.removeItem("blogCurrentPage");
+        sessionStorage.removeItem("blogPosts");
+        sessionStorage.removeItem("blogFeaturedPosts");
+        sessionStorage.removeItem("blogTotalPages");
+      }, 100);
+    } else {
+      fetchBlogs(1, true);
+    }
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
@@ -89,10 +139,10 @@ export function BlogPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Featured Section - Top 6 Posts (Newspaper Style) */}
-          {page === 1 && featuredPosts.length > 0 && (
+          {currentPage === 1 && featuredPosts.length > 0 && (
             <div className="mb-16">
               {/* Header */}
               <motion.div
@@ -100,14 +150,7 @@ export function BlogPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="mb-10"
-              >
-                <div className="flex items-end gap-4 mb-2">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
-                    Blog nổi bật
-                    <div className="h-1 mt-5 w-full bg-blue-600 mb-2"></div>
-                  </h2>
-                </div>
-              </motion.div>
+              ></motion.div>
 
               {/* Featured Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:min-h-[580px]">
@@ -120,7 +163,7 @@ export function BlogPage() {
                 >
                   <div
                     className="cursor-pointer group flex flex-col w-full"
-                    onClick={() => navigate(`/blog/${featuredPosts[0].id}`)}
+                    onClick={() => handlePostClick(featuredPosts[0].id)}
                   >
                     <div className="relative flex-1 min-h-[280px] md:min-h-[350px] lg:min-h-[480px] overflow-hidden rounded-xl border-2 border-gray-200">
                       <img
@@ -144,10 +187,6 @@ export function BlogPage() {
                           }
                         }}
                       />
-                      {/* Tag Number */}
-                      <div className="absolute top-4 left-4 bg-blue-600 text-white font-bold text-lg w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
-                        1
-                      </div>
                     </div>
                     <div className="mt-4 shrink-0">
                       <TooltipProvider>
@@ -191,7 +230,7 @@ export function BlogPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                       className="group cursor-pointer flex-1 py-4 border-b border-gray-200 last:border-0"
-                      onClick={() => navigate(`/blog/${post.id}`)}
+                      onClick={() => handlePostClick(post.id)}
                     >
                       <div className="flex gap-4 h-full">
                         <div className="relative w-28 md:w-32 h-20 md:h-24 shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
@@ -216,10 +255,6 @@ export function BlogPage() {
                               }
                             }}
                           />
-                          {/* Tag Number */}
-                          <div className="absolute top-2 left-2 bg-blue-600 text-white font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md">
-                            {index + 2}
-                          </div>
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col">
                           <TooltipProvider>
@@ -246,11 +281,18 @@ export function BlogPage() {
                   ))}
                 </motion.div>
               </div>
-              {/* Separator Line */}
-              <div className="mt-12 border-t-2 border-gray-300"></div>
             </div>
           )}
+        </div>
 
+        {/* Divider before All Blogs - Full Width */}
+        <div className="w-full mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-blue-400 text-center">
+            Bài viết mới nhất
+          </h2>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Blog Grid */}
           <motion.div
             variants={containerVariants}
@@ -266,7 +308,7 @@ export function BlogPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
                 className="group cursor-pointer pb-6 border-b border-gray-200"
-                onClick={() => navigate(`/blog/${post.id}`)}
+                onClick={() => handlePostClick(post.id)}
               >
                 <div className="flex gap-4">
                   <div className="relative w-36 h-28 shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
@@ -315,79 +357,43 @@ export function BlogPage() {
             ))}
           </motion.div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
+          {/* Load More Button */}
+          {currentPage < totalPages ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center justify-center gap-2"
+              className="flex justify-center"
             >
               <Button
-                variant="outline"
-                size="icon"
                 onClick={() => {
-                  setPage(prev => Math.max(prev - 1, 1));
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  const nextPage = currentPage + 1;
+                  setCurrentPage(nextPage);
+                  fetchBlogs(nextPage, false);
                 }}
-                disabled={page === 1}
-                className="h-9 w-9"
+                disabled={isLoadingMore}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
               >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  pageNum => {
-                    // Show first, last, current, and adjacent pages
-                    if (
-                      pageNum === 1 ||
-                      pageNum === totalPages ||
-                      Math.abs(pageNum - page) <= 1
-                    ) {
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={page === pageNum ? "default" : "outline"}
-                          size="icon"
-                          onClick={() => {
-                            setPage(pageNum);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className={`h-9 w-9 ${
-                            page === pageNum
-                              ? "bg-emerald-600 hover:bg-emerald-700"
-                              : ""
-                          }`}
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    } else if (pageNum === page - 2 || pageNum === page + 2) {
-                      return (
-                        <span key={pageNum} className="px-2 text-gray-400">
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  }
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Đang tải...
+                  </>
+                ) : (
+                  "Xem thêm bài viết"
                 )}
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  setPage(prev => Math.min(prev + 1, totalPages));
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                disabled={page === totalPages}
-                className="h-9 w-9"
-              >
-                <ChevronRight className="w-4 h-4" />
               </Button>
             </motion.div>
+          ) : (
+            totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center text-gray-500 text-sm py-4"
+              >
+                Đã hiển thị tất cả {posts.length} bài viết
+              </motion.div>
+            )
           )}
         </div>
       </div>

@@ -16,8 +16,16 @@ const EventCard = ({ event }: EventCardProps) => {
   const [imageError, setImageError] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const authUser = useAuthStore(state => state.authUser);
+
+  // Check if description is long (more than 300 characters)
+  const isLongDescription = event.description && event.description.length > 300;
+  const displayedDescription =
+    isExpanded || !isLongDescription
+      ? event.description
+      : event.description.substring(0, 300);
 
   const formatDate = (dateString: string) => {
     try {
@@ -45,7 +53,7 @@ const EventCard = ({ event }: EventCardProps) => {
   return (
     <>
       <div
-        className="m-4 max-w-3xl w-full rounded-4xl bg-background border border-primary/10 shadow-2xl/10 p-4"
+        className="w-full rounded-4xl bg-background border border-primary/10 shadow-2xl/10 p-4"
         data-testid="event-card"
       >
         {/* Header */}
@@ -94,12 +102,36 @@ const EventCard = ({ event }: EventCardProps) => {
           </h2>
 
           {/* Description */}
-          <p
-            className="whitespace-pre-wrap text-slate-700 leading-relaxed"
-            data-testid="event-description"
-          >
-            {event.description}
-          </p>
+          <div className="text-slate-700 leading-relaxed">
+            <p className="whitespace-pre-wrap" data-testid="event-description">
+              {displayedDescription}
+              {isLongDescription && !isExpanded && "..."}
+            </p>
+            {isLongDescription && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-blue-600 hover:text-blue-700 font-medium mt-2 inline-flex items-center gap-1 transition"
+              >
+                {isExpanded ? "Thu gọn" : "Xem thêm"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-4 w-4 transition-transform ${
+                    isExpanded ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
 
           {/* Banner Image */}
           <img
