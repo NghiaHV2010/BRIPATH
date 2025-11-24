@@ -139,7 +139,7 @@ const EventCard = ({ event }: EventCardProps) => {
             alt={event.title}
             width={1920}
             height={1080}
-            className="max-w-full rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity border border-slate-200"
+            className="w-full h-[400px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity border border-slate-200"
             data-testid="event-banner-image"
             onError={() => setImageError(true)}
             onClick={() => setShowImageModal(true)}
@@ -183,11 +183,11 @@ const EventCard = ({ event }: EventCardProps) => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 cursor-pointer"
           onClick={() => setShowImageModal(false)}
         >
-          <div className="relative max-w-7xl max-h-[90vh] w-full">
+          <div className="relative w-full max-w-5xl">
             <img
               src={imageSrc}
               alt={event.title}
-              className="w-full h-full object-contain rounded-lg"
+              className="w-full max-h-[85vh] object-contain rounded-lg"
               onClick={e => e.stopPropagation()}
             />
             <button

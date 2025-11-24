@@ -37,7 +37,7 @@ const EventsPage = () => {
       setIsLoadingJobs(true);
       try {
         const jobsResponse = await getRecommendedJobs();
-        setRecommendedJobs(jobsResponse.data?.slice(0, 3) || []);
+        setRecommendedJobs(jobsResponse.data || []);
       } catch (error) {
         console.error("Error fetching recommended jobs:", error);
       } finally {
