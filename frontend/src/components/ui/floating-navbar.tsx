@@ -158,7 +158,7 @@ export default function FloatingNavbar() {
                         <SheetTrigger asChild>
                             <Button
                                 size="icon"
-                                className="rounded-full bg-white/50  text-white p-1 border! border-gray-300!"
+                                className="rounded-full bg-white/50  text-white border! border-blue-500!"
                             >
                                 {authUser?.avatar_url ? (
                                     <img
