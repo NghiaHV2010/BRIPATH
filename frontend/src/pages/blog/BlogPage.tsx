@@ -190,19 +190,25 @@ export function BlogPage() {
                     </div>
                     <div className="mt-4 shrink-0">
                       <TooltipProvider>
-                        <Tooltip>
+                        <Tooltip delayDuration={300}>
                           <TooltipTrigger asChild>
                             <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 cursor-pointer">
-                              {featuredPosts[0].title.split(" ").length > 15
+                              {featuredPosts[0].title.split(" ").length > 16
                                 ? featuredPosts[0].title
                                     .split(" ")
-                                    .slice(0, 15)
+                                    .slice(0, 16)
                                     .join(" ") + "..."
                                 : featuredPosts[0].title}
                             </h3>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-md">
-                            <p className="text-sm">{featuredPosts[0].title}</p>
+                          <TooltipContent
+                            side="top"
+                            className="max-w-3xl bg-gray-900 text-white border-gray-800 px-4 py-3 rounded-lg shadow-xl z-100"
+                            sideOffset={8}
+                          >
+                            <p className="text-sm leading-relaxed wrap-break-word whitespace-normal">
+                              {featuredPosts[0].title}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -258,14 +264,25 @@ export function BlogPage() {
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col">
                           <TooltipProvider>
-                            <Tooltip>
+                            <Tooltip delayDuration={300}>
                               <TooltipTrigger asChild>
                                 <h4 className="font-bold text-xs md:text-sm text-gray-900 mb-auto line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 cursor-pointer">
-                                  {post.title}
+                                  {post.title.split(" ").length > 16
+                                    ? post.title
+                                        .split(" ")
+                                        .slice(0, 16)
+                                        .join(" ") + "..."
+                                    : post.title}
                                 </h4>
                               </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-md">
-                                <p className="text-sm">{post.title}</p>
+                              <TooltipContent
+                                side="top"
+                                className="max-w-3xl bg-gray-900 text-white border-gray-800 px-4 py-3 rounded-lg shadow-xl z-100"
+                                sideOffset={8}
+                              >
+                                <p className="text-sm leading-relaxed wrap-break-word whitespace-normal">
+                                  {post.title}
+                                </p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -334,14 +351,23 @@ export function BlogPage() {
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col">
                     <TooltipProvider>
-                      <Tooltip>
+                      <Tooltip delayDuration={300}>
                         <TooltipTrigger asChild>
                           <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
-                            {post.title}
+                            {post.title.split(" ").length > 16
+                              ? post.title.split(" ").slice(0, 16).join(" ") +
+                                "..."
+                              : post.title}
                           </h3>
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-md">
-                          <p className="text-sm">{post.title}</p>
+                        <TooltipContent
+                          side="top"
+                          className="max-w-3xl bg-gray-900 text-white border-gray-800 px-4 py-3 rounded-lg shadow-xl z-100"
+                          sideOffset={8}
+                        >
+                          <p className="text-sm leading-relaxed wrap-break-word whitespace-normal">
+                            {post.title}
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
