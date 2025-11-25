@@ -11,7 +11,6 @@ export default function BlogDetail() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [showHero, setShowHero] = useState(true);
   const [showHeading, setShowHeading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export default function BlogDetail() {
           if (firstImgMatch && resp.data.cover_image_url && firstImgMatch[1] === resp.data.cover_image_url) {
             hideHero = true;
           }
-          setShowHero(!hideHero);
 
           // If the title already appears very early in content, hide separate heading
           const plain = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -61,25 +59,15 @@ export default function BlogDetail() {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-6 py-8">
         {showHeading && (
-          <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+          <h1 className="text-2xl! md:text-3xl! font-bold">{post.title}</h1>
         )}
-        {showHero && (
-          <div className="rounded-xl overflow-hidden mb-6 bg-gray-100">
-            <img
-              src={(post.cover_image_url && !post.cover_image_url.includes('via.placeholder.com')) ? post.cover_image_url : "/placeholder.svg"}
-              alt={post.title}
-              className="w-full h-72 object-cover"
-              onError={(e) => {
-                const img = e.currentTarget as HTMLImageElement;
-                if (img.src !== window.location.origin + "/placeholder.svg") {
-                  img.src = "/placeholder.svg";
-                }
-              }}
-            />
-          </div>
-        )}
+        <div className="flex my-4 items-center text-sm text-gray-500 justify-between w-full">
+          <span>Bởi BRIPATH</span>
+          <span>{new Date(post.created_at || "").toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric" })}</span>
+        </div>
+        <hr className="w-full mb-4" />
         <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
       </div>
     </Layout>

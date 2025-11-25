@@ -103,39 +103,54 @@ export default function FloatingNavbar() {
 
     return (
         <div className="lg:hidden fixed bottom-6 left-0 right-0 flex justify-center z-50 px-4">
-            <nav className="flex items-center justify-center space-x-1 sm:space-x-4 rounded-full border bg-white/95 backdrop-blur-md p-2 shadow-lg">
+            <nav className="flex items-center justify-center space-x-2 sm:space-x-4 rounded-full border bg-white/95 backdrop-blur-md py-2 px-4 shadow-lg">
                 {/* Jobs Button */}
-                <Button
-                    variant={isRouteActive("/jobs") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToJobs(navigate)}
-                >
-                    <Briefcase className="h-5 w-5" />
-                    <span className="sr-only">Việc làm</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/jobs") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToJobs(navigate)}
+                    >
+                        <Briefcase className="h-5 w-5" />
+                        <span className="sr-only">Việc làm</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/jobs") ? "text-blue-600" : "text-gray-500"}`}>
+                        Việc làm
+                    </p>
+                </div>
 
                 {/* Companies Button */}
-                <Button
-                    variant={isRouteActive("/companies") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToCompanies(navigate)}
-                >
-                    <Building2 className="h-5 w-5" />
-                    <span className="sr-only">Công ty</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/companies") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToCompanies(navigate)}
+                    >
+                        <Building2 className="h-5 w-5" />
+                        <span className="sr-only">Công ty</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/companies") ? "text-blue-600" : "text-gray-500"}`}>
+                        Công ty
+                    </p>
+                </div>
 
                 {/* Events Button */}
-                <Button
-                    variant={isRouteActive("/event") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToEvent(navigate)}
-                >
-                    <Calendar className="h-5 w-5" />
-                    <span className="sr-only">Sự kiện</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/event") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToEvent(navigate)}
+                    >
+                        <Calendar className="h-5 w-5" />
+                        <span className="sr-only">Sự kiện</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/event") ? "text-blue-600" : "text-gray-500"}`}>
+                        Sự kiện
+                    </p>
+                </div>
 
                 {/* Center - Profile Avatar (if authenticated) or Menu Button (if not) */}
                 {isAuthenticated ? (
@@ -333,37 +348,52 @@ export default function FloatingNavbar() {
                 )}
 
                 {/* Quiz/Career Path Button */}
-                <Button
-                    variant={isRouteActive("/quiz") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToCareerPath(navigate)}
-                >
-                    <Map className="h-5 w-5" />
-                    <span className="sr-only">Lộ trình nghề nghiệp</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/quiz") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToCareerPath(navigate)}
+                    >
+                        <Map className="h-5 w-5" />
+                        <span className="sr-only">Lộ trình nghề nghiệp</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/quiz") ? "text-blue-600" : "text-gray-500"}`}>
+                        Lộ trình
+                    </p>
+                </div>
 
                 {/* Blog Button */}
-                <Button
-                    variant={isRouteActive("/blog") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToBlog(navigate)}
-                >
-                    <BookOpen className="h-5 w-5" />
-                    <span className="sr-only">Blog</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/blog") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToBlog(navigate)}
+                    >
+                        <BookOpen className="h-5 w-5" />
+                        <span className="sr-only">Blog</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/blog") ? "text-blue-600" : "text-gray-500"}`}>
+                        Blog
+                    </p>
+                </div>
 
                 {/* Subscription Button */}
-                <Button
-                    variant={isRouteActive("/subscription") ? "default" : "ghost"}
-                    size="icon"
-                    className="rounded-full shadow-none"
-                    onClick={() => navigateToSubscription(navigate)}
-                >
-                    <CreditCard className="h-5 w-5" />
-                    <span className="sr-only">Gói dịch vụ</span>
-                </Button>
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant={isRouteActive("/subscription") ? "default" : "ghost"}
+                        size="icon"
+                        className="rounded-full shadow-none size-8"
+                        onClick={() => navigateToSubscription(navigate)}
+                    >
+                        <CreditCard className="h-5 w-5" />
+                        <span className="sr-only">Gói dịch vụ</span>
+                    </Button>
+                    <p className={`text-[10px] font-medium ${isRouteActive("/subscription") ? "text-blue-600" : "text-gray-500"}`}>
+                        Dịch vụ
+                    </p>
+                </div>
             </nav>
         </div>
     );
