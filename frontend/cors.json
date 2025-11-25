@@ -3,6 +3,7 @@
     "origin": [
       "http://localhost:5173",
       "https://bripath.online",
+      "https://api.bripath.online",
       "bripath.online"
     ],
     "method": [
