@@ -40,6 +40,7 @@ export const TestimonialsColumn = (props: {
                                             height={40}
                                             src={image}
                                             alt={name}
+                                            loading="lazy"
                                             className="h-10 w-10 rounded-full object-cover border border-gray-100"
                                         />
                                         <div className="flex flex-col">

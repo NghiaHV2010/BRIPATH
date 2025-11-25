@@ -92,7 +92,7 @@ export function ChatPopup() {
     return (
         <>
             {isOpen && (
-                <Card className="fixed bottom-24 right-6 w-96 h-[600px] max-h-[80vh] shadow-2xl border-gray-200 flex flex-col z-50">
+                <Card className="fixed max-[555px]:bottom-32 bottom-24 max-[555px]:right-2 right-4 w-96 h-[600px] max-h-[80vh] shadow-2xl border-gray-200 flex flex-col z-50">
                     <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
@@ -189,7 +189,7 @@ export function ChatPopup() {
 
             <div
                 onClick={toggleChat}
-                className={`fixed flex justify-center items-center bottom-4 right-4 z-70 rounded-full cursor-pointer group ${isOpen ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg size-16 p-2' : 'bg-none size-24 md:size-28'}`}
+                className={`fixed flex justify-center items-center max-[555px]:bottom-20 bottom-4 max-[555px]:right-2 right-4 z-70 rounded-full cursor-pointer group ${isOpen ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg max-[555px]:size-10 max-[555px]:p-0 size-16 p-2' : 'bg-none size-20 md:size-28'}`}
             >
                 {isOpen ? (
                     <X className="w-6 h-6" />
@@ -199,7 +199,7 @@ export function ChatPopup() {
                             <img src='/assets/icons/icon_chatbot.png' className='w-full h-full' />
                         </div>
                         {/* Hover bubble */}
-                        <div className="absolute -top-7 right-7 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        <div className="max-[555px]:hidden absolute -top-7 right-7 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                             <div className="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg relative">
                                 Bạn cần tớ hỗ trợ gì?
                                 {/* Arrow pointing down */}

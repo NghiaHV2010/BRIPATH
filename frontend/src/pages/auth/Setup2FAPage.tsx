@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader, Shield, AlertCircle, Smartphone } from "lucide-react";
+import { Loader, Shield, AlertCircle, Smartphone, Copy, Check } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "@/components/layout";
 import { create2FAQR, verify2FA } from "@/api";
@@ -22,6 +22,7 @@ export default function Setup2FAPage() {
     const [verificationCode, setVerificationCode] = useState("");
     const [isVerifying, setIsVerifying] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isCopied, setIsCopied] = useState(false);
 
     useEffect(() => {
         fetchQRCode();
@@ -45,6 +46,19 @@ export default function Setup2FAPage() {
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleCopySecret = async () => {
+        if (qrData?.secret) {
+            try {
+                await navigator.clipboard.writeText(qrData.secret);
+                setIsCopied(true);
+                toast.success("Đã sao chép mã bí mật!");
+                setTimeout(() => setIsCopied(false), 2000);
+            } catch (error) {
+                toast.error("Không thể sao chép. Vui lòng copy thủ công.");
+            }
         }
     };
 
@@ -172,21 +186,57 @@ export default function Setup2FAPage() {
                                 <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                                     2
                                 </div>
-                                <h3 className="font-semibold text-lg text-slate-900">Quét mã QR</h3>
+                                <h3 className="font-semibold text-lg text-slate-900">Quét mã QR hoặc nhập mã thủ công</h3>
                             </div>
                             <p className="text-slate-600 pl-10">
-                                Mở ứng dụng và quét mã QR bên dưới:
+                                Mở ứng dụng và quét mã QR bên dưới hoặc nhập mã bí mật:
                             </p>
 
                             {qrData && (
-                                <div className="pl-10 flex flex-col items-center gap-4">
+                                <div className="pl-10 space-y-4">
                                     {/* QR Code */}
-                                    <div className="p-4 bg-white rounded-xl border-2 border-slate-200 shadow-sm">
-                                        <img
-                                            src={qrData.qrCodeDataURL}
-                                            alt="2FA QR Code"
-                                            className="w-64 h-64"
-                                        />
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="p-4 bg-white rounded-xl border-2 border-slate-200 shadow-sm">
+                                            <img
+                                                src={qrData.qrCodeDataURL}
+                                                alt="2FA QR Code"
+                                                className="w-64 h-64"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Secret Key Section */}
+                                    <div className="max-w-xl">
+                                        <Label htmlFor="secret-key" className="text-sm font-medium text-slate-700">
+                                            Hoặc nhập mã bí mật thủ công:
+                                        </Label>
+                                        <div className="mt-2 flex gap-2">
+                                            <div className="flex-1 relative">
+                                                <Input
+                                                    id="secret-key"
+                                                    type="text"
+                                                    value={qrData.secret}
+                                                    readOnly
+                                                    className="font-mono text-sm bg-slate-50 pr-10"
+                                                />
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={handleCopySecret}
+                                                className="shrink-0"
+                                            >
+                                                {isCopied ? (
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                ) : (
+                                                    <Copy className="w-4 h-4" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                        <p className="mt-2 text-xs text-slate-500">
+                                            Sao chép mã này và nhập vào ứng dụng xác thực nếu không thể quét QR code
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -253,7 +303,7 @@ export default function Setup2FAPage() {
                         <Alert className="bg-amber-50 border-amber-200">
                             <AlertCircle className="h-4 w-4 text-amber-600" />
                             <AlertDescription className="text-amber-800">
-                                <strong>Lưu ý bảo mật:</strong> Lưu giữ mã bí mật ở nơi an toàn. Bạn sẽ cần nó nếu thay đổi thiết bị.
+                                <strong>Lưu ý bảo mật:</strong> Lưu giữ mã bí mật ở nơi an toàn. Bạn sẽ cần nó nếu thay đổi thiết bị hoặc mất quyền truy cập vào ứng dụng xác thực.
                             </AlertDescription>
                         </Alert>
                     </CardContent>

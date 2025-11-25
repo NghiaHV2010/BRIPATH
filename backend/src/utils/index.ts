@@ -1,7 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_API_KEY } from "../config/env.config";
-import { CAREERPATHPROMPT } from "../constants/prompt";
+import { GEMINI_API_KEY, OPENAI_API_KEY } from "../config/env.config";
+import { CAREERPATHPROMPT, EVENTVALIDATIONPROMPT } from "../constants/prompt";
 import axios from "axios";
+import OpenAI from "openai";
 
 export function convertDate(dateStr?: string): Date | undefined {
     if (!dateStr) return undefined;
@@ -81,7 +82,7 @@ export const createNotificationData = (
                 switch (status) {
                     case 'approved':
                         notification.title = 'Quản trị viên đã phê duyệt sự kiện của bạn!';
-                        notification.content = `Tin "${title}" đã được hiển thị công khai trên hệ thống. \n ${feedback}`;
+                        notification.content = `Tin "${title}" đã được hiển thị công khai trên hệ thống, tin sẽ có hiệu lực trong 30 ngày kể từ ngày được phê duyệt. \n ${feedback}`;
                         break;
                     case 'rejected':
                         notification.title = 'Quản trị viên đã từ chối sự kiện của bạn!';
@@ -259,6 +260,57 @@ export async function getCoordinatesFromAddress(address: {
         } else {
             console.error('Lỗi không mong muốn trong quá trình định vị địa lý:', error);
         }
+        throw error;
+    }
+}
+
+type EventValidationReturnType = {
+    isValid: boolean;
+    reason: string;
+    confidence: number;
+}
+
+export const validateEventContent = async (
+    title: string,
+    description: string
+): Promise<EventValidationReturnType> => {
+    const openai = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+    });
+
+    try {
+        const contentToValidate = `
+            Title: ${title}
+            Description: ${description}
+        `.trim();
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini", // hoặc "gpt-4o-mini" để tiết kiệm chi phí
+            messages: [
+                {
+                    role: "system",
+                    content: EVENTVALIDATIONPROMPT
+                },
+                {
+                    role: "user",
+                    content: contentToValidate
+                }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.3, // Lower temperature for more consistent results
+            max_tokens: 500,
+        });
+
+        const responseText = response.choices[0]?.message?.content;
+
+        if (!responseText) {
+            throw new Error("Empty response from OpenAI");
+        }
+
+        const data = JSON.parse(responseText);
+        return data as EventValidationReturnType;
+    } catch (error) {
+        console.error("Error validating event content with OpenAI:", error);
         throw error;
     }
 }

@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import SePayService from '../services/sepay.service';
 import { HTTP_ERROR, HTTP_SUCCESS } from '../constants/httpCode';
-import { PrismaClient } from '@prisma/client';
+import { PaymentGateway, PaymentMethod, PaymentStatus, NotificationsType, PrismaClient } from '@prisma/client';
 import { hasPaymentByTransactionId, saveSePayOrderMapping, getSePayOrderMapping, deleteSePayOrderMapping } from '../utils/payment.utils';
 import { generateSePayOrderId } from '../utils/sepay.utils';
 import { SePayWebhookData } from '../types/sepay.types';
 import { prisma } from '../libs/prisma';
 import { sendEmailWithRetry } from '../utils/emailHandler';
 import { invoiceEmailTemplate } from '../constants/emailTemplate';
-import { SEPAY_WEBHOOK_URL, SEPAY_RETURN_URL } from '../config/env.config';
+import { SEPAY_SECRET } from '../config/env.config';
 
 /**
  * Create SePay order
@@ -38,7 +38,6 @@ export const createSePayOrder = async (req: Request, res: Response, next: NextFu
     // Save order mapping FIRST before creating order
     try {
       await saveSePayOrderMapping(prisma, orderId, userId, Number(amount), Number(planId) || 0, companyId);
-      console.log('SePay order mapping saved:', { orderId, userId, amount, planId, companyId });
     } catch (mappingError) {
       console.error('SePay order mapping error:', mappingError);
       return res.status(HTTP_ERROR.INTERNAL_SERVER_ERROR).json({
@@ -100,16 +99,21 @@ export const querySePayOrder = async (req: Request, res: Response, next: NextFun
  * Handle SePay webhook - Optimized version
  */
 export const handleSePayWebhook = async (req: Request, res: Response, next: NextFunction) => {
+  // Verify API Key authentication (if configured)
+  if (SEPAY_SECRET) {
+    const authHeader = req.headers.authorization;
+    const expectedAuth = `Apikey ${SEPAY_SECRET}`;
+    if (!authHeader || authHeader !== expectedAuth) {
+      console.error('Webhook authentication failed');
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Invalid API Key'
+      });
+    }
+  }
   const webhookData: SePayWebhookData = req.body;
 
   try {
-    console.log('=== SePay Webhook Received ===');
-    console.log('Transaction ID:', webhookData.id);
-    console.log('Content:', webhookData.content);
-    console.log('Amount:', webhookData.transferAmount);
-    console.log('Type:', webhookData.transferType);
-    console.log('================================');
-
     // Early validation - fail fast
     if (!webhookData.id || !webhookData.transferType || !webhookData.transferAmount) {
       console.error('Invalid webhook data:', webhookData);
@@ -138,14 +142,14 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
       console.error('Background payment processing error:', error);
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('SePay webhook error:', error);
 
-    // If we haven't sent a response yet
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
-        message: 'Webhook processing failed'
+        message: 'Webhook processing failed',
+        error: process.env.NODE_ENV === 'development' ? error?.message : undefined
       });
     }
   }
@@ -156,12 +160,58 @@ export const handleSePayWebhook = async (req: Request, res: Response, next: Next
  */
 async function processSePayPayment(webhookData: SePayWebhookData): Promise<void> {
   try {
-    // Extract order ID and plan code
-    const orderId = extractOrderIdFromContent(webhookData.content) ||
+    let orderId = extractOrderIdFromContent(webhookData.content) ||
       extractOrderIdFromContent(webhookData.description);
 
     if (!orderId) {
-      console.log('No order ID found in webhook content');
+      console.error('No order ID found in webhook content');
+      return;
+    }
+
+    // Normalize order ID: webhook may return SEPAY17639169686517v2lzxa6i (no underscores)
+    // but database stores SEPAY_17639169686517_v2lzxa6i (with underscores)
+    let mapping = await getSePayOrderMapping(prisma, orderId);
+    
+    // If not found, try normalized version (add underscores if missing)
+    if (!mapping && !orderId.includes('_')) {
+      const normalizedOrderId = normalizeSePayOrderId(orderId);
+      mapping = await getSePayOrderMapping(prisma, normalizedOrderId);
+      if (mapping) {
+        orderId = normalizedOrderId;
+      }
+    }
+
+    // If still not found, try reverse normalization (remove underscores if present)
+    if (!mapping && orderId.includes('_')) {
+      const denormalizedOrderId = orderId.replace(/_/g, '');
+      mapping = await getSePayOrderMapping(prisma, denormalizedOrderId);
+      if (mapping) {
+        orderId = denormalizedOrderId;
+      }
+    }
+
+    // Check for duplicate payment (idempotency)
+    const exists = await hasPaymentByTransactionId(prisma, orderId) ||
+      (!orderId.includes('_') && await hasPaymentByTransactionId(prisma, normalizeSePayOrderId(orderId)));
+    if (exists) {
+      return;
+    }
+
+    if (!mapping) {
+      try {
+        const recentOrders = await prisma.sepayOrders.findMany({
+          take: 10,
+          orderBy: { created_at: 'desc' },
+          select: { order_id: true, created_at: true }
+        });
+        console.log('📋 Recent SePay orders in database:', recentOrders.map(o => ({
+          order_id: o.order_id,
+          created_at: o.created_at
+        })));
+      } catch (error) {
+        console.error('Error fetching recent orders:', error);
+      }
+      console.error('No mapping found for order:', orderId);
       return;
     }
 
@@ -170,28 +220,6 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
 
     console.log('🔄 Processing payment for order:', orderId);
     console.log('📋 Plan code:', planCode);
-
-    // Check for duplicate payment (idempotency)
-    const exists = await hasPaymentByTransactionId(prisma, orderId);
-    if (exists) {
-      console.log('⚠️ Payment already processed for order:', orderId);
-      return;
-    }
-
-    // Get order mapping
-    const mapping = await getSePayOrderMapping(prisma, orderId);
-    if (!mapping) {
-      console.log('❌ No mapping found for order:', orderId);
-      console.log('💡 This might mean the order was not created properly or already processed');
-      return;
-    }
-
-    console.log('✅ Found mapping:', {
-      user_id: mapping.user_id,
-      amount: mapping.amount,
-      plan_id: mapping.plan_id,
-      company_id: mapping.company_id
-    });
 
     // Process payment in a single transaction
     const result = await prisma.$transaction(async (tx: PrismaClient) => {
@@ -223,10 +251,10 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         data: {
           amount: BigInt(webhookData.transferAmount),
           currency: 'VND',
-          payment_gateway: 'SePay',
-          payment_method: 'bank_transfer',
+          payment_gateway: 'SePay' as PaymentGateway,
+          payment_method: 'bank_transfer' as PaymentMethod,
           transaction_id: orderId,
-          status: 'success',
+          status: 'success' as PaymentStatus,
           user_id: mapping.user_id
         },
       });
@@ -251,7 +279,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         tx.userActivitiesHistory.create({
           data: {
             user_id: mapping.user_id,
-            activity_name: `Thanh toán gói ${plan.plan_name} thành công qua SePay${planCode ? ` (${planCode})` : ''}`,
+            activity_name: `Thanh toán gói ${plan.plan_name} thành công qua SePay`,
           }
         }),
         // Create notification
@@ -259,7 +287,7 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
           data: {
             title: 'Gói dịch vụ đã được kích hoạt!',
             content: `Gói ${plan.plan_name} của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng các tính năng nâng cao ngay bây giờ.`,
-            type: 'pricing_plan',
+            type: 'pricing_plan' as NotificationsType,
             user_id: mapping.user_id
           } as any
         }),
@@ -296,14 +324,12 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
         amount_paid: subscription.amount_paid
       };
     }, {
-      maxWait: 15000, // Maximum time to wait for transaction to start
-      timeout: 30000, // Maximum time for entire transaction
+      maxWait: 10000, // Maximum time to wait for transaction to start
+      timeout: 20000, // Maximum time for entire transaction
     });
 
     // Clean up mapping after successful processing
     await deleteSePayOrderMapping(prisma, orderId);
-    console.log('✅ Payment processed successfully for order:', orderId);
-    console.log('📧 Invoice email will be sent to:', result.email);
 
     // Send email asynchronously (non-blocking)
     setImmediate(async () => {
@@ -320,14 +346,13 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
             'Chuyển khoản'
           )
         );
-        console.log('Invoice email sent successfully to:', result.email);
       } catch (emailError) {
         console.error('Failed to send invoice email:', emailError);
         // Don't throw - email failure shouldn't fail the payment
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('SePay payment processing error:', error);
     throw error;
   }
@@ -335,12 +360,22 @@ async function processSePayPayment(webhookData: SePayWebhookData): Promise<void>
 
 /**
  * Extract order ID from SePay transaction content - Optimized
+ * Supports both formats:
+ * - Old format: SEPAY_17639169686517_v2lzxa6i (with underscores)
+ * - New format: SEPAY17639169686517v2lzxa6i (without underscores)
  */
 const extractOrderIdFromContent = (content: string): string | null => {
   if (!content) return null;
 
-  // Use regex exec for better performance
-  const match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
+  // Try new format first (without underscores): SEPAY + timestamp + random
+  // Pattern: SEPAY followed by digits, then alphanumeric
+  let match = /SEPAY\d+[a-z0-9]+/i.exec(content);
+  if (match) {
+    return match[0];
+  }
+
+  // Fallback to old format (with underscores): SEPAY_timestamp_random
+  match = /SEPAY_\d+_[a-z0-9]+/i.exec(content);
   return match ? match[0] : null;
 };
 
@@ -358,6 +393,28 @@ const extractPlanCodeFromContent = (content: string): string | null => {
   if (secondSpace === -1) return null;
 
   return content.slice(secondSpace + 1).trim() || null;
+};
+
+/**
+ * Normalize SePay order ID format
+ * Format: SEPAY + timestamp (13 digits) + random (9 chars)
+ */
+const normalizeSePayOrderId = (orderId: string): string => {
+  if (orderId.includes('_')) {
+    return orderId;
+  }
+
+  const match = /^SEPAY(\d{13})([a-z0-9]{9})$/i.exec(orderId);
+  if (match) {
+    return `SEPAY_${match[1]}_${match[2]}`;
+  }
+
+  const fallbackMatch = /^SEPAY(\d+)([a-z0-9]+)$/i.exec(orderId);
+  if (fallbackMatch) {
+    return `SEPAY_${fallbackMatch[1]}_${fallbackMatch[2]}`;
+  }
+
+  return orderId; // Return as is if pattern doesn't match
 };
 
 /**
@@ -434,7 +491,7 @@ export const cancelSePayOrder = async (req: Request, res: Response, next: NextFu
     const existingPayment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay'
+        payment_gateway: 'SePay' as PaymentGateway
       }
     });
 
@@ -488,7 +545,7 @@ export const cancelAllPendingOrders = async (req: Request, res: Response, next: 
       const existingPayment = await prisma.payments.findFirst({
         where: {
           transaction_id: order.order_id,
-          payment_gateway: 'SePay'
+          payment_gateway: 'SePay' as PaymentGateway
         }
       });
 
@@ -529,7 +586,7 @@ export const checkPaymentStatus = async (req: Request, res: Response, next: Next
     const payment = await prisma.payments.findFirst({
       where: {
         transaction_id: orderId,
-        payment_gateway: 'SePay'
+        payment_gateway: 'SePay' as PaymentGateway
       },
       include: {
         subscriptions: true

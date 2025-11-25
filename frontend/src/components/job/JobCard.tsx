@@ -142,6 +142,7 @@ export default function JobCard({
               <img
                 src={job?.companies?.users?.avatar_url || job?.avatar_url}
                 alt="Company Avatar"
+                loading="lazy"
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-contain border border-gray-200 shadow-sm shrink-0"
               />
             ) : (

@@ -22,14 +22,14 @@ export const generateSePayQRUrl = (
 ): string => {
   // SePay VA format: TKP + VA number + order ID
   const description = `TKP${vaNumber} ${orderId}`;
-  
+
   // Use VietQR API for QR code generation
   // Format: https://img.vietqr.io/image/{bankCode}-{accountNumber}-compact.png?amount={amount}&addInfo={description}
   const params = new URLSearchParams({
     amount: amount.toString(),
     addInfo: description
   });
-  
+
   return `https://img.vietqr.io/image/${bankCode}-${vaNumber}-compact.png?${params.toString()}`;
 };
 
@@ -45,14 +45,14 @@ export const generateSePayPaymentUrl = (
 ): string => {
   // SePay VA format: TKP + VA number + order ID
   const description = `TKP${vaNumber} ${orderId}`;
-  
+
   // Use VietQR transfer URL format
   // Format: https://www.vietqr.io/transfer/{bankCode}-{accountNumber}?amount={amount}&addInfo={description}
   const params = new URLSearchParams({
     amount: amount.toString(),
     addInfo: description
   });
-  
+
   return `https://www.vietqr.io/transfer/${bankCode}-${vaNumber}?${params.toString()}`;
 };
 
@@ -71,7 +71,7 @@ export const verifySePayWebhookSignature = (
       .createHmac('sha256', apiSecret)
       .update(data)
       .digest('hex');
-    
+
     return signature === expectedSignature;
   } catch (error) {
     console.error('SePay signature verification error:', error);
@@ -113,14 +113,14 @@ export const parseSePayWebhookData = (body: any): any => {
  */
 export const validateSePayOrderData = (data: any): boolean => {
   const requiredFields = ['id', 'transferType', 'transferAmount', 'content'];
-  
+
   for (const field of requiredFields) {
     if (!data[field]) {
       console.error(`Missing required field: ${field}`);
       return false;
     }
   }
-  
+
   return true;
 };
 
@@ -140,9 +140,18 @@ export const isSePayTransactionSuccess = (data: any): boolean => {
  * Extract order ID from SePay transaction content
  */
 export const extractOrderIdFromContent = (content: string): string | null => {
-  // Look for order ID pattern in transaction content
-  const orderIdMatch = content.match(/SEPAY_\d+_[a-z0-9]+/i);
-  return orderIdMatch ? orderIdMatch[0] : null;
+  if (!content) return null;
+
+  // Try new format first (without underscores): SEPAY + timestamp + random
+  // Pattern: SEPAY followed by digits, then alphanumeric
+  let match = content.match(/SEPAY\d+[a-z0-9]+/i);
+  if (match) {
+    return match[0];
+  }
+
+  // Fallback to old format (with underscores): SEPAY_timestamp_random
+  match = content.match(/SEPAY_\d+_[a-z0-9]+/i);
+  return match ? match[0] : null;
 };
 
 /**
