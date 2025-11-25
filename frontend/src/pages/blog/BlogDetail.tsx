@@ -4,7 +4,7 @@ import { getBlogById } from "@/api/blog_api";
 import type { BlogPost } from "@/api/blog_api";
 import { getPostContentFromFirebase } from "@/utils/posts";
 import { Layout } from "@/components";
-import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BlogDetail() {
   const { id } = useParams();
@@ -39,9 +39,48 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-      </div>
+      <Layout>
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          {/* Title skeleton */}
+          <Skeleton className="h-10 w-3/4 mb-4" />
+
+          {/* Meta info skeleton */}
+          <div className="flex my-4 items-center justify-between w-full">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+
+          <Skeleton className="h-px w-full mb-4" />
+
+          {/* Content skeletons */}
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+
+            <div className="py-2" />
+
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+
+            <div className="py-2" />
+
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-full" />
+
+            <div className="py-2" />
+
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </div>
+      </Layout>
     );
   }
 

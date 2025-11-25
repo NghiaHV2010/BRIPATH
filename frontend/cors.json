@@ -2,7 +2,8 @@
   {
     "origin": [
       "http://localhost:5173",
-      "https://bripath.online"
+      "https://bripath.online",
+      "bripath.online"
     ],
     "method": [
       "GET",
