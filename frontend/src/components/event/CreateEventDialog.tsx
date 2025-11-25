@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { toast } from "sonner";
 import { createEvent } from "@/api/event_api";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "@/config/firebase.config";
@@ -27,6 +26,7 @@ import { useAuthStore } from "@/store/auth";
 import { LoginDialog } from "@/components/login/LoginDialog";
 import { SubscriptionRequiredDialog } from "@/components/subscription/SubscriptionRequiredDialog";
 import { getUserSubscription } from "@/api/user_api";
+import toast from "react-hot-toast";
 
 interface EventFormProps {
   onEventCreated: () => void;
@@ -139,9 +139,9 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
       if (fileInputRef.current) fileInputRef.current.value = "";
       setIsOpen(false);
       onEventCreated();
-    } catch (error) {
-      toast.error("Không thể tạo sự kiện");
-      console.error("Error creating event:", error);
+    } catch (error: any) {
+      toast.error(error.message || "Không thể tạo sự kiện");
+      // console.error("Error creating event:", error);
     } finally {
       setIsSubmitting(false);
       setIsUploading(false);
@@ -396,11 +396,10 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
               </Label>
               {!formData.banner_url ? (
                 <label
-                  className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-4 sm:p-6 cursor-pointer ${
-                    isUploading
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className={`border-2 border-dashed rounded-lg w-full flex flex-col items-center justify-center p-4 sm:p-6 cursor-pointer ${isUploading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-50"
+                    }`}
                 >
                   <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                   <span className="text-gray-600 text-xs sm:text-sm mt-2 text-center">
@@ -502,6 +501,7 @@ const CreateEventDialog = ({ onEventCreated }: EventFormProps) => {
         onOpenChange={setShowSubscriptionDialog}
         message="Bạn cần mua gói dịch vụ để tạo sự kiện mới"
       />
+
     </>
   );
 };

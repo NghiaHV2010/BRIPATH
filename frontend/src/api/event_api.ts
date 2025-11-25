@@ -80,8 +80,12 @@ export const applyEvent = async (eventId: string, description: string) => {
 
 // Create new event
 export const createEvent = async (event: EventCreateRequest) => {
-  const response = await axiosConfig.post('/event', event);
-  return response.data;
+  try {
+    const response = await axiosConfig.post('/event', event);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error;
+  }
 };
 
 // Update event
