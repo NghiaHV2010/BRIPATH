@@ -23,16 +23,6 @@ export default function BlogDetail() {
           const html = await getPostContentFromFirebase(resp.data.description_url);
           setContent(html);
 
-          // Heuristics: if content starts with an <img>, skip hero image
-          const trimmed = html.trim().toLowerCase();
-          const startsWithImg = /^<img\b/i.test(trimmed) || /^<p[^>]*>\s*<img\b/i.test(trimmed);
-          let hideHero = startsWithImg;
-          // If first image in content is same as cover, also hide hero
-          const firstImgMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-          if (firstImgMatch && resp.data.cover_image_url && firstImgMatch[1] === resp.data.cover_image_url) {
-            hideHero = true;
-          }
-
           // If the title already appears very early in content, hide separate heading
           const plain = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
           if (resp.data.title) {
