@@ -16,105 +16,114 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
         field: string
     }
 
-    // @ts-ignore
-    const { id, company_id } = req.user;
+    const { id, company_id } = req.user as AuthUserRequestDto;
     const { fax_code, business_certificate, company_type, field } = req.body as RequestBody;
 
+    if (!business_certificate) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng tải lên giấy phép kinh doanh!"));
+    }
+
     try {
-        const isFieldExisted = await prisma.fields.findUnique({
-            where: {
-                field_name: field
-            }
-        });
+        // ----------------------
+        // VALIDATION CHẠY SONG SONG
+        // ----------------------
+        await Promise.all([
+            // Validate mã số thuế (fax_code)
+            (async () => {
+                const response = await fetch(
+                    `https://api.vietqr.io/v2/business/${fax_code}`,
+                    { method: "GET", headers: { "Content-Type": "application/json" } }
+                );
+                const data = await response.json() as { data: any };
 
-        if (!isFieldExisted) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Lĩnh vực không hợp lệ!"));
-        }
-
-        const isPhoneVerified = await prisma.users.findUnique({
-            where: {
-                id: id
-            },
-            select: {
-                phone_verified: true,
-                companies: company_id ? {
-                    where: {
-                        id: company_id
-                    },
-                    select: {
-                        status: true,
-                    }
-                } : false
-            }
-        });
-
-        if (!isPhoneVerified?.phone_verified) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa xác thực số điện thoại!"));
-        }
-
-        if (isPhoneVerified.companies && (isPhoneVerified.companies.status === "pending" || isPhoneVerified.companies.status === "approved")) {
-            return next(errorHandler(HTTP_ERROR.FORBIDDEN, "Hồ sơ của bạn đang/đã được phê duyệt"));
-        }
-
-        const isFaxCodeExisted = await fetch(
-            `https://api.vietqr.io/v2/business/${fax_code}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
+                if (!data.data) {
+                    throw errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã số thuế không hợp lệ!");
                 }
-            }
+            })(),
+
+            // Validate lĩnh vực
+            (async () => {
+                const fieldData = await prisma.fields.findUnique({
+                    where: { field_name: field }
+                });
+
+                if (!fieldData) {
+                    throw errorHandler(HTTP_ERROR.BAD_REQUEST, "Lĩnh vực không hợp lệ!");
+                }
+            })(),
+
+            // Validate user (2FA + trạng thái hồ sơ)
+            (async () => {
+                const user = await prisma.users.findUnique({
+                    where: { id },
+                    select: {
+                        is_2fa_enabled: true,
+                        companies: company_id ? {
+                            where: { id: company_id },
+                            select: { status: true }
+                        } : false
+                    }
+                });
+
+                if (!user?.is_2fa_enabled) {
+                    throw errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa bật xác thực hai yếu tố!");
+                }
+
+                if (
+                    user.companies &&
+                    (user.companies.status === "pending" || user.companies.status === "approved")
+                ) {
+                    throw errorHandler(HTTP_ERROR.FORBIDDEN, "Hồ sơ của bạn đang hoặc đã được phê duyệt!");
+                }
+            })()
+        ]);
+
+        // ----------------------
+        // DỮ LIỆU HỢP LỆ → LƯU DB
+        // ----------------------
+
+        const notificationData = createNotificationData(
+            undefined,
+            undefined,
+            "system",
+            "company"
         );
 
-        const faxCodeData = (await isFaxCodeExisted.json()) as { data?: unknown };
-
-
-        if (!faxCodeData.data) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã số thuế không hợp lệ!"));
-        }
-
-        if (!business_certificate) {
-            return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng tải lên giấy phép kinh doanh!"));
-        }
         const result = await prisma.$transaction(async (tx) => {
-            const company = await tx.companies.upsert({
-                where: {
-                    id: company_id ? company_id : ''
-                },
-                update: {
-                    fax_code,
-                    business_certificate,
-                    company_type,
-                    status: "pending"
-                },
-                create: {
-                    fax_code,
-                    business_certificate,
-                    company_type,
-                    users: {
-                        connect: { id: id }
+            const [company] = await Promise.all([
+                tx.companies.upsert({
+                    where: { id: company_id ?? "" },
+                    update: {
+                        fax_code,
+                        business_certificate,
+                        company_type,
+                        status: "pending"
                     },
-                }
-            });
+                    create: {
+                        fax_code,
+                        business_certificate,
+                        company_type,
+                        users: { connect: { id } }
+                    }
+                }),
 
-            await tx.userActivitiesHistory.create({
-                data: {
-                    activity_name: "Bạn đã tạo tài khoản doanh nghiệp.",
-                    user_id: id
-                }
-            });
+                tx.userActivitiesHistory.create({
+                    data: {
+                        activity_name: "Bạn đã tạo tài khoản doanh nghiệp.",
+                        user_id: id
+                    }
+                }),
 
-            const notificationData = createNotificationData(undefined, undefined, "system", "company");
+                tx.userNotifications.create({
+                    data: {
+                        user_id: id,
+                        type: notificationData.type,
+                        title: notificationData.title,
+                        content: notificationData.content
+                    }
+                })
+            ]);
 
-
-            await tx.userNotifications.create({
-                data: {
-                    user_id: id,
-                    type: notificationData.type,
-                    title: notificationData.title,
-                    content: notificationData.content
-                }
-            });
             return company;
         });
 
@@ -124,9 +133,10 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
         });
 
     } catch (error) {
-        next(error);
+        return next(error);
     }
-}
+};
+
 
 export const getAllCompanies = async (req: Request, res: Response, next: NextFunction) => {
     let page: number = parseInt(req.query?.page as string);
