@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
@@ -11,7 +11,7 @@ import EmojiPicker from './EmojiPicker';
 import ImageResizeControls from './ImageResizeControls';
 import { ImageResize } from './ImageResizeExtension';
 import { Send, X } from 'lucide-react';
-import { uploadImageFileToStorage, savePostToBackend } from '@/utils/posts';
+import { uploadImageFileToStorage, savePostToBackend, generateBlogStoragePath } from '@/utils/posts';
 import { useToast } from '../use-toast';
 
 interface PostComposerProps {
@@ -19,6 +19,96 @@ interface PostComposerProps {
   userName?: string;
   placeholder?: string;
 }
+
+const revokeUrlSafely = (url: string) => {
+  if (!url || !url.startsWith('blob:')) return;
+  setTimeout(() => {
+    try {
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.warn('revokeObjectURL failed:', error);
+    }
+  }, 300);
+};
+
+// Hàm resize dùng chung để đảm bảo ảnh không vượt quá kích thước cho phép
+const resizeImage = (
+  file: File,
+  maxWidth: number = 1200,
+  maxHeight: number = 1200,
+  quality: number = 0.85
+): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+
+              if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = width * ratio;
+                height = height * ratio;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                reject(new Error('Could not get canvas context'));
+                return;
+              }
+
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const outputType = file.type || 'image/jpeg';
+
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob) {
+                    reject(new Error('Failed to create blob'));
+                    return;
+                  }
+                  const resizedFile = new File([blob], file.name, {
+                    type: outputType,
+                    lastModified: Date.now(),
+                  });
+                  resolve(resizedFile);
+                },
+                outputType,
+                quality
+              );
+            } catch (error) {
+              reject(error);
+            }
+          };
+          img.onerror = (error) => {
+            reject(new Error('Failed to load image: ' + error));
+          };
+
+          if (e.target?.result) {
+            img.src = e.target.result as string;
+          } else {
+            reject(new Error('FileReader result is empty'));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = (error) => {
+        reject(new Error('FileReader error: ' + error));
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 export default function PostComposer({ 
   userAvatar = '/default-avatar.png',
@@ -81,10 +171,9 @@ export default function PostComposer({
       // Remove images from state if they're not in editor anymore
       setImages(prev => {
         const remaining = prev.filter(img => editorImages.includes(img));
-        // Clean up blob URLs that are no longer in editor
         prev.forEach(img => {
           if (!editorImages.includes(img) && img.startsWith('blob:')) {
-            URL.revokeObjectURL(img);
+            revokeUrlSafely(img);
           }
         });
         return remaining;
@@ -115,7 +204,7 @@ export default function PostComposer({
 
   const handleRemoveCover = () => {
     if (coverPreview) {
-      URL.revokeObjectURL(coverPreview);
+      revokeUrlSafely(coverPreview);
     }
     setCoverPreview(null);
     setCoverFile(null);
@@ -125,124 +214,127 @@ export default function PostComposer({
     }
   };
 
-  // Resize image function (similar to Facebook - max width 1200px)
-  const resizeImage = (file: File, maxWidth: number = 1200, maxHeight: number = 1200, quality: number = 0.85): Promise<File> => {
-    return new Promise((resolve, reject) => {
+  const insertImageFromFile = useCallback(
+    async (file: File, options: { replaceExisting?: boolean } = {}) => {
+      if (!editor || !file.type.startsWith('image/')) return;
+      
+      const { replaceExisting = false } = options;
+      let processedFile: File = file;
+  
       try {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const img = new Image();
-            img.onload = () => {
-              try {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-
-                // Calculate new dimensions
-                if (width > maxWidth || height > maxHeight) {
-                  const ratio = Math.min(maxWidth / width, maxHeight / height);
-                  width = width * ratio;
-                  height = height * ratio;
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                  reject(new Error('Could not get canvas context'));
-                  return;
-                }
-
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Determine output type - default to jpeg if not specified
-                const outputType = file.type || 'image/jpeg';
-                
-                canvas.toBlob(
-                  (blob) => {
-                    if (!blob) {
-                      reject(new Error('Failed to create blob'));
-                      return;
-                    }
-                    const resizedFile = new File([blob], file.name, {
-                      type: outputType,
-                      lastModified: Date.now(),
-                    });
-                    resolve(resizedFile);
-                  },
-                  outputType,
-                  quality
-                );
-              } catch (error) {
-                reject(error);
-              }
-            };
-            img.onerror = (error) => {
-              reject(new Error('Failed to load image: ' + error));
-            };
-            
-            if (e.target?.result) {
-              img.src = e.target.result as string;
-            } else {
-              reject(new Error('FileReader result is empty'));
-            }
-          } catch (error) {
-            reject(error);
-          }
-        };
-        reader.onerror = (error) => {
-          reject(new Error('FileReader error: ' + error));
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        reject(error);
+        // Thu nhỏ ảnh để đảm bảo kích thước phù hợp trước khi upload
+        processedFile = await resizeImage(file, 1200, 1200, 0.85);
+      } catch (resizeError) {
+        console.warn('Resize failed, using original file:', resizeError);
+        processedFile = file;
       }
-    });
-  };
+  
+      const localUrl = URL.createObjectURL(processedFile);
+  
+      // Chèn ảnh vào editor trước để tránh việc cleanup chạy khi ảnh chưa kịp render
+      if (editor.can().setImage({ src: localUrl, width: '500px' })) {
+        editor
+          .chain()
+          .focus()
+          .setImage({
+            src: localUrl,
+            width: '500px',
+          })
+          .run();
+      }
+
+      setImages((prev) => {
+        if (replaceExisting) {
+          prev.forEach((url) => revokeUrlSafely(url));
+          return [localUrl];
+        }
+        return [...prev, localUrl];
+      });
+  
+      setPendingFiles((prev) => {
+        const base = replaceExisting ? [] : prev;
+        return [...base, { localUrl, file: processedFile }];
+      });
+    },
+    [editor]
+  );
 
   const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) {
       return;
     }
 
-    let processedFile: File = file;
-    
-    try {
-      // Resize image file if it's too large (max 1200px)
-      processedFile = await resizeImage(file, 1200, 1200, 0.85);
-    } catch (resizeError) {
-      console.warn('Resize failed, using original file:', resizeError);
-      processedFile = file;
+    for (const file of Array.from(fileList)) {
+      await insertImageFromFile(file, { replaceExisting: false });
     }
     
-    const localUrl = URL.createObjectURL(processedFile);
-    
-    // Clear previous images and set new one
-    images.forEach(url => URL.revokeObjectURL(url));
-    setImages([localUrl]);
-    setPendingFiles([{ localUrl, file: processedFile }]);
-    
-    // Insert image into editor with a small delay to ensure editor is ready
-    if (editor) {
-      // Use setTimeout to ensure editor state is stable
-      setTimeout(() => {
-        // Use setImage command
-        if (editor.can().setImage({ src: localUrl, width: '500px' })) {
-          editor.chain().focus().setImage({ 
-            src: localUrl, 
-            width: '500px' 
-          }).run();
-        }
-      }, 50);
-    }
-    
-    // Reset file input
     if (e.target) {
       e.target.value = '';
     }
   };
+
+  useEffect(() => {
+    if (!editor) return;
+    const dom = editor.view.dom as HTMLElement;
+    if (!dom) return;
+
+    // Bọc logic dùng chung để xử lý danh sách file cần chèn
+    const processFiles = async (files: FileList | File[]) => {
+      for (const file of Array.from(files)) {
+        await insertImageFromFile(file, { replaceExisting: false });
+      }
+    };
+
+    const extractClipboardImages = (event: ClipboardEvent): File[] => {
+      const results: File[] = [];
+      const clipboard = event.clipboardData;
+      if (!clipboard) return results;
+
+      const { files, items } = clipboard;
+      if (files && files.length > 0) {
+        return Array.from(files).filter((file) => file.type.startsWith('image/'));
+      }
+
+      if (items && items.length > 0) {
+        Array.from(items).forEach((item: DataTransferItem) => {
+          if (!item.type.startsWith('image/')) return;
+          const file = item.getAsFile();
+          if (file) results.push(file);
+        });
+      }
+
+      return results;
+    };
+
+    // Chặn dán ảnh base64, thay bằng upload file thực sự
+    const handlePaste = (event: ClipboardEvent) => {
+      const imageFiles = extractClipboardImages(event);
+      if (imageFiles.length === 0) return;
+
+      event.preventDefault();
+      void processFiles(imageFiles);
+    };
+
+    // Hỗ trợ kéo thả ảnh trực tiếp vào editor
+    const handleDrop = (event: DragEvent) => {
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+      const hasImage = Array.from(files).some((file) => file.type.startsWith('image/'));
+      if (!hasImage) return;
+
+      event.preventDefault();
+      void processFiles(files);
+    };
+
+    dom.addEventListener('paste', handlePaste);
+    dom.addEventListener('drop', handleDrop);
+
+    return () => {
+      dom.removeEventListener('paste', handlePaste);
+      dom.removeEventListener('drop', handleDrop);
+    };
+  }, [editor, insertImageFromFile]);
 
   const handleEmojiSelect = (emoji: string) => {
     if (editor) {
@@ -268,8 +360,8 @@ export default function PostComposer({
     // Update editor content
     editor.commands.setContent(updatedHtml);
     
-    // Clean up the URL
-    URL.revokeObjectURL(imageUrlToRemove);
+    // Clean up blob URL (delay một nhịp để TipTap render xong)
+    revokeUrlSafely(imageUrlToRemove);
     
     // Update state to remove the image
     setImages(prev => prev.filter((_, i) => i !== index));
@@ -293,11 +385,14 @@ export default function PostComposer({
         return;
       }
 
+      const resolvedTitle = title.trim().length > 0 ? title.trim() : textContent || "Bài viết mới";
+      const storagePath = generateBlogStoragePath(resolvedTitle);
+
       // Prepare attachments: cover first (if provided), then inline images
       const uploadedImageUrls: string[] = [];
       if (coverFile) {
         try {
-          const coverUrl = await uploadImageFileToStorage(coverFile, "posts");
+          const coverUrl = await uploadImageFileToStorage(coverFile, { storagePath });
           uploadedImageUrls.push(coverUrl);
         } catch (e) {
           console.error("Failed to upload cover image:", e);
@@ -307,7 +402,7 @@ export default function PostComposer({
         console.log(`Uploading ${pendingFiles.length} images...`);
         for (const item of pendingFiles) {
           try {
-            const remoteUrl = await uploadImageFileToStorage(item.file);
+            const remoteUrl = await uploadImageFileToStorage(item.file, { storagePath });
             html = html.replaceAll(item.localUrl, remoteUrl);
             uploadedImageUrls.push(remoteUrl);
             console.log("Image uploaded successfully:", remoteUrl);
@@ -325,9 +420,10 @@ export default function PostComposer({
       try {
         postId = await savePostToBackend({
           html,
-          title,
+          title: resolvedTitle,
           user: { name: userName, avatar: userAvatar },
           attachments: uploadedImageUrls,
+          storagePath,
         });
         console.log("Post saved using backend API");
       } catch (backendError) {
@@ -343,13 +439,13 @@ export default function PostComposer({
         console.log("Backend ID:", postId.id);
       }
       
-      // Clear editor and reset state
+      // Clear editor và thu hồi blob sau khi chắc chắn không dùng nữa
       editor.commands.clearContent();
-      images.forEach(u => URL.revokeObjectURL(u));
+      images.forEach(u => revokeUrlSafely(u));
       setImages([]);
       setPendingFiles([]);
       setTitle("");
-      if (coverPreview) URL.revokeObjectURL(coverPreview);
+      if (coverPreview) revokeUrlSafely(coverPreview);
       setCoverPreview(null);
       setCoverFile(null);
       
@@ -526,6 +622,7 @@ export default function PostComposer({
         ref={fileInputRef}
         type="file"
         accept="image/*"
+        multiple
         onChange={handleFileInputChange}
         className="hidden"
       />

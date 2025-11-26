@@ -71,17 +71,18 @@ export default function ImageResizeControls({ editor }: ImageResizeControlsProps
         let align = imageNode.attrs.align || '';
         
         // If align is not in attrs, try to get from HTML style
-        if (!align) {
-          const html = editor.getHTML();
-          const imgMatch = html.match(new RegExp(`<img[^>]*src=["']${imageNode.attrs.src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'i'));
-          if (imgMatch) {
-            const styleMatch = imgMatch[0].match(/style=["']([^"']+)["']/i);
-            if (styleMatch) {
-              const style = styleMatch[1];
-              if (style.includes('float: left')) align = 'left';
-              else if (style.includes('float: right')) align = 'right';
-              else if (style.includes('margin-left: auto') && style.includes('margin-right: auto')) align = 'center';
-            }
+        if (!align && typeof document !== 'undefined') {
+          const container = document.createElement('div');
+          container.innerHTML = editor.getHTML();
+          const targetImg = Array.from(container.getElementsByTagName('img')).find(
+            (img) => img.getAttribute('src') === imageNode.attrs.src,
+          );
+
+          if (targetImg) {
+            const style = targetImg.getAttribute('style') || '';
+            if (style.includes('float: left')) align = 'left';
+            else if (style.includes('float: right')) align = 'right';
+            else if (style.includes('margin-left: auto') && style.includes('margin-right: auto')) align = 'center';
           }
         }
         
