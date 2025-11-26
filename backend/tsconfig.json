@@ -32,6 +32,6 @@
   ],
   "exclude": [
     "node_modules",
-    "node_modules/effect"
+    "node_modules/effect",
   ]
 }

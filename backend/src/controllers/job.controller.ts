@@ -692,7 +692,7 @@ export const getRecommendedJobs = async (req: Request, res: Response, next: Next
         LEFT JOIN applicants a ON a.job_id = j.id
         WHERE jl.label_name = 'Việc chất' AND j."label_end_at" > NOW()
         ORDER BY RANDOM()
-        LIMIT 4;
+        LIMIT 3;
         `;
 
         return res.status(HTTP_SUCCESS.OK).json({

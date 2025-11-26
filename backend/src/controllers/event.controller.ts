@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { errorHandler } from "../utils/error";
 import { HTTP_ERROR, HTTP_SUCCESS } from "../constants/httpCode";
-import { createNotificationData } from "../utils";
+import { createNotificationData, validateEventContent } from "../utils";
 import { prisma } from "../libs/prisma";
 import { AuthUserRequestDto } from "../types/auth.types";
 
@@ -17,12 +17,20 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
 
     page -= 1;
 
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
     try {
         const total_events = await prisma.events.count();
         const events = await prisma.events.findMany({
             take: numberOfEvents,
             skip: page * numberOfEvents,
             include: {
+                users: {
+                    select: {
+                        username: true,
+                        avatar_url: true,
+                    }
+                },
                 volunteers: user_id ? {
                     where: {
                         user_id
@@ -30,7 +38,10 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
                 } : false
             },
             where: {
-                status: 'approved'
+                status: 'approved',
+                approved_at: {
+                    gte: thirtyDaysAgo
+                }
             }
         });
 
@@ -58,7 +69,8 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     const { id: user_id } = req.user as AuthUserRequestDto;
     const { id: subscription_id } = req.plan;
     const { title, description, start_date, end_date, quantity, working_time, banner_url }: RequestBody = req.body;
-
+    console.log(req.body);
+    
     if (title.length < 10) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Tiêu đề quá ngắn (tối thiểu 10 ký tự)"));
     }
@@ -87,51 +99,57 @@ export const createEvent = async (req: Request, res: Response, next: NextFunctio
     }
 
     try {
+        const validationResult = await validateEventContent(title, description);
+        const notificationData = createNotificationData(title, validationResult.isValid ? 'approved' : 'pending', "system", "user");
+
         const result = await prisma.$transaction(async (tx) => {
-            const event = await tx.events.create({
-                data: {
-                    title,
-                    description,
-                    start_date: convert_startDate,
-                    end_date: convert_endDate,
-                    quantity,
-                    working_time,
-                    banner_url,
-                    user_id: user_id
-                }
-            });
-
-            await tx.userActivitiesHistory.create({
-                data: {
-                    activity_name: `Bạn đã tạo sự kiện ${event.title} #${event.id}`,
-                    user_id
-                }
-            });
-
-            await tx.subscriptions.update({
-                where: { id: subscription_id },
-                data: {
-                    remaining_total_jobs: { decrement: 1 },
-                }
-            });
-
-            const notificationData = createNotificationData(event.title, undefined, "system", "user");
-
-            await tx.userNotifications.create({
-                data: {
-                    user_id,
-                    title: notificationData.title,
-                    content: notificationData.content,
-                    type: notificationData.type,
-                }
-            });
+            const [event, activity, subscription, notification] = await Promise.all([
+                tx.events.create({
+                    data: {
+                        title,
+                        description,
+                        start_date: convert_startDate,
+                        end_date: convert_endDate,
+                        quantity,
+                        working_time,
+                        banner_url,
+                        user_id: user_id,
+                        status: validationResult.isValid ? 'approved' : 'pending',
+                        approved_at: validationResult.isValid ? new Date() : null,
+                    }
+                }),
+                tx.userActivitiesHistory.create({
+                    data: {
+                        activity_name: `Bạn đã tạo sự kiện ${title} (đang chờ phê duyệt).`,
+                        user_id
+                    }
+                }),
+                tx.subscriptions.update({
+                    where: { id: subscription_id },
+                    data: {
+                        remaining_total_jobs: { decrement: 1 },
+                    }
+                }),
+                tx.userNotifications.create({
+                    data: {
+                        user_id,
+                        title: notificationData.title,
+                        content: notificationData.content,
+                        type: notificationData.type,
+                    }
+                })
+            ]);
 
             return event;
-        }).catch((e) => next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi, hãy thử lại!")));
+        }).catch((e) => {
+            console.error("Transaction error:", e);
+            return next(errorHandler(HTTP_ERROR.CONFLICT, "Đã xảy ra lỗi, hãy thử lại!"));
+        });
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             success: true,
-            data: result
+            data: result,
+            message: "Sự kiện đã được tạo và đang chờ phê duyệt từ quản trị viên."
         });
     } catch (error) {
         next(error);

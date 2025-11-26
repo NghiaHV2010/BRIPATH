@@ -92,6 +92,7 @@ export default function CompanyCard({
             {users?.avatar_url ? (
               <img
                 src={users.avatar_url}
+                loading="lazy"
                 alt={users.username || "Company"}
                 className="w-full h-full object-contain"
               />

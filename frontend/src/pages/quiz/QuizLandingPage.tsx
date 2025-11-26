@@ -148,11 +148,6 @@ export default function QuizLandingPage() {
             {hasCareerPath && (
               <>
                 <div className="mb-12 relative min-h-[200px] overflow-hidden">
-                  <img
-                    src="/animations/wave-haikei.svg"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover z-0 opacity-90"
-                  />
                   <div className="relative z-10 text-center mt-15">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                       Danh sách lộ trình nghề nghiệp bạn đã tạo
@@ -191,80 +186,6 @@ export default function QuizLandingPage() {
             </div>
 
             <div className="min-h-screen bg-transparent flex flex-col items-center p-0 w-full max-w-none">
-              {/* Section 1 */}
-              <div className="w-full py-10 px-4 md:px-12 lg:px-24 xl:px-40 bg-linear-to-b from-white via-emerald-100 to-white">
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">
-                  Các nhóm tính cách bạn nên biết
-                </h2>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                  {[
-                    {
-                      type: "ISTJ",
-                      color: "from-red-400 to-red-600",
-                      desc: "Người quản lý",
-                    },
-                    {
-                      type: "ISFP",
-                      color: "from-blue-400 to-blue-600",
-                      desc: "Người sáng tạo",
-                    },
-                    {
-                      type: "INFP",
-                      color: "from-pink-400 to-pink-600",
-                      desc: "Người mơ mộng",
-                    },
-                    {
-                      type: "INTJ",
-                      color: "from-purple-400 to-purple-600",
-                      desc: "Nhà chiến lược",
-                    },
-                    {
-                      type: "ISFJ",
-                      color: "from-orange-400 to-orange-600",
-                      desc: "Người chăm sóc",
-                    },
-                    {
-                      type: "ISTP",
-                      color: "from-amber-400 to-amber-600",
-                      desc: "Nhà thợ",
-                    },
-                    {
-                      type: "INFJ",
-                      color: "from-yellow-400 to-yellow-600",
-                      desc: "Người tư vấn",
-                    },
-                    {
-                      type: "INTP",
-                      color: "from-green-400 to-green-600",
-                      desc: "Nhà tư tưởng",
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.type}
-                      className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-transform hover:scale-[1.02]"
-                    >
-                      <div
-                        className={`bg-linear-to-br ${item.color} h-24 sm:h-28 md:h-32 rounded-lg mb-3 flex items-center justify-center`}
-                      >
-                        <div className="text-white text-center">
-                          <div className="text-xl sm:text-2xl font-bold">
-                            {item.type}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm md:text-base font-semibold text-gray-900">
-                        {item.type}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {item.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 2 */}
               <div className="w-full py-20 bg-linear-to-b from-white via-emerald-50 to-white">
                 <div className="max-w-5xl mx-auto px-6 text-center">
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -312,28 +233,6 @@ export default function QuizLandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Button */}
-            <div className="space-y-4 mb-20">
-              <Button
-                onClick={handleStartQuiz}
-                disabled={starting}
-                size="lg"
-                variant={"emerald"}
-                className="rounded-3xl"
-              >
-                {starting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                    Đang khởi tạo...
-                  </>
-                ) : hasCareerPath ? (
-                  "Khám phá thêm 🚀"
-                ) : (
-                  "Bắt đầu khám phá 🚀"
-                )}
-              </Button>
             </div>
           </div>
         </div>

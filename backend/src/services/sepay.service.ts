@@ -56,10 +56,10 @@ class SePayService {
           };
         }
       }
-      
+
       const orderId = params.orderId || generateSePayOrderId();
       const amount = formatSePayAmount(params.amount);
-      
+
       // Try to create dynamic QR from SePay using qr.sepay.vn service
       // This uses SePay's QR generation service (not SDK)
       try {
@@ -90,7 +90,7 @@ class SePayService {
         console.warn('⚠️ Failed to create dynamic QR from SePay, using fallback:', error.message);
         // Fall through to local generation
       }
-      
+
       // Fallback: Use local QR generation (VietQR)
       console.log('📱 Using local QR generation (VietQR)');
       const qrCodeUrl = generateSePayQRUrl(
@@ -99,7 +99,7 @@ class SePayService {
         amount,
         orderId
       );
-      
+
       const paymentUrl = generateSePayPaymentUrl(
         this.config.vaNumber,
         this.config.bankCode,
@@ -218,7 +218,7 @@ class SePayService {
     // Use VA number (account number) for QR generation
     // If merchant_id is provided and different from VA, you can use it
     const accountNumber = this.config.vaNumber;
-    
+
     if (!accountNumber || !this.config.bankCode) {
       console.warn('⚠️ Missing account number or bank code for SePay QR');
       return null;
@@ -236,7 +236,7 @@ class SePayService {
       });
 
       const qrCodeUrl = `https://qr.sepay.vn/img?${qrParams.toString()}`;
-      
+
       // Payment URL - SePay might have a transfer URL, or use the same QR URL
       // For now, we'll use the QR URL as payment URL
       const paymentUrl = qrCodeUrl;
@@ -250,7 +250,7 @@ class SePayService {
         qrCodeUrl,
         paymentUrl
       };
-      
+
     } catch (error: any) {
       console.error('❌ Error creating dynamic QR from SePay:', error);
       return null;

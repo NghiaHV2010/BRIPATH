@@ -12,6 +12,7 @@ export const prisma =
     new PrismaClient({
         // (Tùy chọn) Bật log để xem các query khi ở môi trường dev
         // log: ['query', 'info', 'warn', 'error'],
+
     });
 
 // Đây là một mẹo để tránh tạo nhiều instance khi

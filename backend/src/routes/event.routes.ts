@@ -7,7 +7,7 @@ const eventRouter = Router();
 
 eventRouter.get('/events', getAllEvents);
 
-eventRouter.post('/event', authenticationMiddleware, twoFactorMiddleware, subscriptionMiddleware, createEvent);
+eventRouter.post('/event', authenticationMiddleware, twoFactorMiddleware, subscriptionMiddleware(), createEvent);
 eventRouter.put('/event/:eventId', authenticationMiddleware, twoFactorMiddleware, updateEvent);
 eventRouter.delete('/event/:eventId', authenticationMiddleware, deleteEvent);
 

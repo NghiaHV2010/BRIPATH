@@ -499,7 +499,7 @@ export const enable2FAService = async (user_id: string, email: string): Promise<
             qrcode.toDataURL(secret.otpauth_url!)
         ])
 
-        return { qrCodeDataURL };
+        return { qrCodeDataURL, secret: secret.base32 };
     } catch (error) {
         throw error;
     }

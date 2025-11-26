@@ -13,6 +13,25 @@ export interface Event {
   approved_at?: string | null;
   user_id?: string;
   volunteers?: Volunteer[]; // For checking if user has applied
+  users?: {
+    username: string;
+    avatar_url?: string;
+  };
+  created_at?: string;
+  likes_count?: number;
+  bookmarks_count?: number;
+  is_liked?: boolean;
+  is_bookmarked?: boolean;
+}
+
+export interface EventCreateRequest {
+  title: string;
+  description: string;
+  start_date: string;
+  end_date?: string;
+  quantity?: number;
+  working_time?: string;
+  banner_url?: string;
 }
 
 export interface Volunteer {
@@ -60,7 +79,7 @@ export const applyEvent = async (eventId: string, description: string) => {
 };
 
 // Create new event
-export const createEvent = async (event: Event) => {
+export const createEvent = async (event: EventCreateRequest) => {
   const response = await axiosConfig.post('/event', event);
   return response.data;
 };
@@ -103,4 +122,50 @@ export const getVolunteerByStatus = async (
     params: { eventId, status },
   });
   return response.data;
+};
+
+// Like an event
+export const likeEvent = async (eventId: string) => {
+  const response = await axiosConfig.post(`/event/${eventId}/like`);
+  return response.data;
+};
+
+// Unlike an event
+export const unlikeEvent = async (eventId: string) => {
+  const response = await axiosConfig.delete(`/event/${eventId}/like`);
+  return response.data;
+};
+
+// Bookmark an event
+export const bookmarkEvent = async (eventId: string) => {
+  const response = await axiosConfig.post(`/event/${eventId}/bookmark`);
+  return response.data;
+};
+
+// Unbookmark an event
+export const unbookmarkEvent = async (eventId: string) => {
+  const response = await axiosConfig.delete(`/event/${eventId}/bookmark`);
+  return response.data;
+};
+
+// Get recommended jobs
+export const getRecommendedJobs = async () => {
+  try {
+    const response = await axiosConfig.get('/recommend-jobs');
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
+};
+
+// Get recommended companies
+export const getRecommendedCompanies = async (userId?: string) => {
+  try {
+    const response = await axiosConfig.get('/recommended-companies', {
+      params: userId ? { userId } : {},
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || error;
+  }
 };
