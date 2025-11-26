@@ -1,36 +1,188 @@
 import { useState, useEffect } from "react";
+
 import {
   Search,
-  X,
   MapPin,
   Briefcase,
   DollarSign,
   Loader2,
   SearchIcon,
 } from "lucide-react";
+
 import { useJobStore } from "../../store/job.store";
+
 import { Button } from "../ui/button";
-import type { Job } from "../../types/job";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+const VIETNAM_PROVINCES_JOB = [
+  "An Giang",
+
+  "Bà Rịa - Vũng Tàu",
+
+  "Bắc Giang",
+
+  "Bắc Kạn",
+
+  "Bạc Liêu",
+
+  "Bắc Ninh",
+
+  "Bến Tre",
+
+  "Bình Định",
+
+  "Bình Dương",
+
+  "Bình Phước",
+
+  "Bình Thuận",
+
+  "Cà Mau",
+
+  "Cao Bằng",
+
+  "Đắk Lắk",
+
+  "Đắk Nông",
+
+  "Điện Biên",
+
+  "Đồng Nai",
+
+  "Đồng Tháp",
+
+  "Gia Lai",
+
+  "Hà Giang",
+
+  "Hà Nam",
+
+  "Hà Tĩnh",
+
+  "Hải Dương",
+
+  "Hậu Giang",
+
+  "Hòa Bình",
+
+  "Hưng Yên",
+
+  "Khánh Hòa",
+
+  "Kiên Giang",
+
+  "Kon Tum",
+
+  "Lai Châu",
+
+  "Lâm Đồng",
+
+  "Lạng Sơn",
+
+  "Lào Cai",
+
+  "Long An",
+
+  "Nam Định",
+
+  "Nghệ An",
+
+  "Ninh Bình",
+
+  "Ninh Thuận",
+
+  "Phú Thọ",
+
+  "Quảng Bình",
+
+  "Quảng Nam",
+
+  "Quảng Ngãi",
+
+  "Quảng Ninh",
+
+  "Quảng Trị",
+
+  "Sóc Trăng",
+
+  "Sơn La",
+
+  "Tây Ninh",
+
+  "Thái Bình",
+
+  "Thái Nguyên",
+
+  "Thanh Hóa",
+
+  "Thừa Thiên Huế",
+
+  "Tiền Giang",
+
+  "Trà Vinh",
+
+  "Tuyên Quang",
+
+  "Vĩnh Long",
+
+  "Vĩnh Phúc",
+
+  "Yên Bái",
+
+  "Cần Thơ",
+
+  "Đà Nẵng",
+
+  "Hải Phòng",
+
+  "Hà Nội",
+
+  "Hồ Chí Minh (TP.HCM)",
+
+  "Remote",
+];
+
+// Định nghĩa các khoảng Lương (Dùng cho Salary)
+
+const SALARY_RANGES = [
+  { value: "5-10", label: "5 - 10 triệu" },
+
+  { value: "10-15", label: "10 - 15 triệu" },
+
+  { value: "15-20", label: "15 - 20 triệu" },
+
+  { value: "20-30", label: "20 - 30 triệu" },
+
+  { value: "30+", label: "Trên 30 triệu" },
+];
 
 interface JobFiltersProps {
-  onJobClick?: (job: Job) => void;
+  onSearch: (
+    name: string,
+    location: string,
+    label: string,
+    salary: string
+  ) => Promise<void>;
+  onReset?: () => void;
 }
 
-export default function JobFilters({ onJobClick }: JobFiltersProps) {
+export default function JobFilters({ onSearch, onReset }: JobFiltersProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedField, setSelectedField] = useState("");
-  const [selectedSalary, setSalaryRange] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
 
-  const {
-    filterJobs,
-    getAllJobs,
-    fetchJobLabels,
-    jobLabels,
-    isLoading,
-    clearFilteredJobs,
-  } = useJobStore();
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [selectedLabel, setSelectedLabel] = useState("");
+
+  const [selectedSalary, setSalaryRange] = useState("");
+
+  const { fetchJobLabels, jobLabels, isLoading } = useJobStore();
 
   useEffect(() => {
     fetchJobLabels();
@@ -38,41 +190,35 @@ export default function JobFilters({ onJobClick }: JobFiltersProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (
       !searchTerm.trim() &&
       !selectedLocation &&
-      !selectedField &&
+      !selectedLabel &&
       !selectedSalary
     )
       return;
 
-    setIsSearching(true);
-
-    await filterJobs({
-      page: 1,
-      name: searchTerm.trim() || undefined,
-      location: selectedLocation || undefined,
-      field: selectedField || undefined,
-      salary: selectedSalary || undefined,
-    });
+    await onSearch(
+      searchTerm.trim(),
+      selectedLocation,
+      selectedLabel,
+      selectedSalary
+    );
   };
 
-  const handleReset = async () => {
+  const handleReset = () => {
     setSearchTerm("");
     setSelectedLocation("");
-    setSelectedField("");
+    setSelectedLabel("");
     setSalaryRange("");
-    setIsSearching(false);
-    clearFilteredJobs();
-    await getAllJobs({ page: 1 });
+    onReset?.();
   };
-
-  // Suppress unused variable warning - onJobClick is part of interface for future use
-  void onJobClick;
 
   return (
     <div className="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8">
       {/* Header */}
+
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
           Bộ lọc công việc - Tìm việc nhanh chóng trên BriPath
@@ -80,18 +226,21 @@ export default function JobFilters({ onJobClick }: JobFiltersProps) {
       </div>
 
       {/* Search Form */}
+
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
         <div className="flex gap-3 mb-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+
             <input
               type="text"
               placeholder="Ví dụ: Software Engineer, Marketing..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-4 text-lg border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
             />
           </div>
+
           <Button
             type="submit"
             disabled={isLoading}
@@ -107,69 +256,104 @@ export default function JobFilters({ onJobClick }: JobFiltersProps) {
         </div>
 
         {/* Advanced Filters */}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {/* Location */}
+          {/* Location (Sử dụng Select shadcn) */}
+
           <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+
+            <Select
               value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
+              onValueChange={setSelectedLocation}
             >
-              <option value="">Tất cả địa điểm</option>
-              <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-              <option value="Hà Nội">Hà Nội</option>
-              <option value="Đà Nẵng">Đà Nẵng</option>
-              <option value="Remote">Remote</option>
-            </select>
+              {/* ✅ FIX: Thêm text-black vào SelectTrigger để đảm bảo màu chữ hiển thị */}
+
+              <SelectTrigger className="w-full pl-10 pr-4 py-3 h-auto border-slate-300 focus:ring-2 focus:ring-green-500 text-black">
+                <SelectValue
+                  placeholder="Tất cả địa điểm"
+                  className="text-gray-900"
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                {VIETNAM_PROVINCES_JOB.map(city => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Field */}
+          {/* Field (Sử dụng Select shadcn) */}
+
           <div className="relative">
-            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select
-              value={selectedField}
-              onChange={(e) => setSelectedField(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
-            >
-              <option value="">Tất cả lĩnh vực</option>
-              {jobLabels.map((label) => (
-                <option key={label.id} value={label.label_name}>
-                  {label.label_name}
-                </option>
-              ))}
-            </select>
+            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+
+            <Select value={selectedLabel} onValueChange={setSelectedLabel}>
+              {/* ✅ FIX: Thêm text-black vào SelectTrigger để đảm bảo màu chữ hiển thị */}
+
+              <SelectTrigger className="w-full pl-10 pr-4 py-3 h-auto border-slate-300 focus:ring-2 focus:ring-green-500 text-black">
+                <SelectValue
+                  placeholder="Loại công việc"
+                  className="text-gray-900"
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                {/* JobLabels đã được fetch từ store */}
+
+                {jobLabels.map(label => (
+                  <SelectItem key={label.id} value={label.label_name}>
+                    {label.label_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Salary */}
+          {/* Salary (Sử dụng Select shadcn) */}
+
           <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select
-              value={selectedSalary}
-              onChange={(e) => setSalaryRange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none bg-white"
-            >
-              <option value="">Tất cả mức lương</option>
-              <option value="5-10">5 - 10 triệu</option>
-              <option value="10-15">10 - 15 triệu</option>
-              <option value="15-20">15 - 20 triệu</option>
-              <option value="20-30">20 - 30 triệu</option>
-              <option value="30+">Trên 30 triệu</option>
-            </select>
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+
+            <Select value={selectedSalary} onValueChange={setSalaryRange}>
+              {/* ✅ FIX: Thêm text-black vào SelectTrigger để đảm bảo màu chữ hiển thị */}
+
+              <SelectTrigger className="w-full pl-10 pr-4 py-3 h-auto border-slate-300 focus:ring-2 focus:ring-green-500 text-black">
+                <SelectValue
+                  placeholder="Tất cả mức lương"
+                  className="text-gray-900"
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                {SALARY_RANGES.map(range => (
+                  <SelectItem key={range.value} value={range.value}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         {/* Reset Button */}
-        {isSearching && (
-          <div className="text-center">
-            <button
+
+        {(searchTerm ||
+          selectedLocation ||
+          selectedLabel ||
+          selectedSalary) && (
+          <div className="flex justify-center mt-2">
+            <Button
               type="button"
+              variant="custom"
               onClick={handleReset}
-              className="text-slate-600 hover:text-slate-900 flex items-center gap-2 mx-auto"
+              className="text-red-600 text-lg font-medium"
             >
-              <X className="w-4 h-4" />
               Xóa bộ lọc
-            </button>
+            </Button>
           </div>
         )}
       </form>

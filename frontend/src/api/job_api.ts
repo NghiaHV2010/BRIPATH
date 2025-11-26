@@ -78,6 +78,7 @@ export const filterJobs = async (
         userId: params.userId || undefined,
         name: params.name || undefined,
         field: params.field || undefined,
+        label: params.label || undefined,
         location: params.location || undefined,
         salary: params.salary || undefined,
       },

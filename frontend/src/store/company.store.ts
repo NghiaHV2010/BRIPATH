@@ -109,14 +109,22 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
       }));
 
       set({ filteredCompanies: companiesWithFollow });
+      
+      // Set flag to indicate filter has been applied
+      sessionStorage.setItem("companyFilterState", "active");
     } catch (err) {
       console.error("❌ Lỗi filterCompanies:", err);
+      set({ filteredCompanies: [] });
+      sessionStorage.setItem("companyFilterState", "active");
     } finally {
       set({ isLoading: false });
     }
   },
 
-  clearFilteredCompanies: () => set({ filteredCompanies: [] }),
+  clearFilteredCompanies: () => {
+    set({ filteredCompanies: [] });
+    sessionStorage.removeItem("companyFilterState");
+  },
 
   // ✅ Follow công ty
   followCompany: async (companyId) => {

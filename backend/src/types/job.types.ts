@@ -6,6 +6,7 @@ export type GetJobByIDRequestDto = {
 export type FilterJobsRequestDto = {
     name?: string;
     field?: string;
+    label?: string;
     location?: string;
     salary?: string[];
 }
