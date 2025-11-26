@@ -3,17 +3,91 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { storage, db } from "@/config/firebase.config";
 import axiosConfig from "@/config/axios.config";
 
+const DEFAULT_POST_FOLDER = "posts";
+
+interface UploadOptions {
+  pathPrefix?: string;
+  storagePath?: string;
+  subFolder?: string;
+}
+
 export interface SavePostPayload {
   html: string;
   title?: string;
   user?: { id?: string; name?: string; avatar?: string };
   attachments?: string[]; // image urls (first item will be used as cover)
+  storagePath?: string;
 }
 
-export async function uploadImageFileToStorage(file: File, pathPrefix = "posts") {
-  const filePath = `${pathPrefix}/${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}-${file.name}`;
+const removeVietnameseTone = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+
+const slugify = (text: string) => {
+  const safe = removeVietnameseTone(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return safe || "bai-viet";
+};
+
+const formatTimestamp = (date = new Date()) => {
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  return (
+    `${date.getFullYear()}` +
+    `${pad(date.getMonth() + 1)}` +
+    `${pad(date.getDate())}-` +
+    `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+  );
+};
+
+const sanitizeFileName = (fileName: string) => {
+  const normalized = removeVietnameseTone(fileName)
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9.-]/g, "");
+  return normalized || "image";
+};
+
+const extractPlainText = (html: string) =>
+  html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+export const generateBlogStoragePath = (titleOrText?: string, date = new Date()) => {
+  const slug = slugify(titleOrText || "bai-viet");
+  return `${slug}-${formatTimestamp(date)}`;
+};
+
+export async function uploadImageFileToStorage(
+  file: File,
+  options: UploadOptions | string = DEFAULT_POST_FOLDER
+) {
+  const resolvedOptions: UploadOptions =
+    typeof options === "string" ? { pathPrefix: options } : options || {};
+
+  const {
+    pathPrefix = DEFAULT_POST_FOLDER,
+    storagePath,
+    subFolder = "images",
+  } = resolvedOptions;
+
+  const baseFolder = storagePath ? `${pathPrefix}/${storagePath}` : pathPrefix;
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const sanitizedOriginal = sanitizeFileName(file.name);
+  const extensionMatch = sanitizedOriginal.match(/(\.[a-z0-9]+)$/i);
+  const extension = extensionMatch ? extensionMatch[1] : "";
+  const finalName = extension ? `${uniqueId}${extension}` : `${uniqueId}-${sanitizedOriginal}`;
+  const filePath = storagePath
+    ? `${baseFolder}/${subFolder}/${finalName}`
+    : `${baseFolder}/${finalName}`;
+
   const fileRef = ref(storage, filePath);
   await uploadBytes(fileRef, file);
   const url = await getDownloadURL(fileRef);
@@ -43,7 +117,13 @@ export async function getPostContentFromFirebase(htmlUrl: string): Promise<strin
 }
 
 // Hybrid approach: Save HTML to Firebase Storage, metadata to Backend
-export async function savePostToBackend({ html, title, user, attachments = [] }: SavePostPayload) {
+export async function savePostToBackend({
+  html,
+  title,
+  user,
+  attachments = [],
+  storagePath,
+}: SavePostPayload) {
   try {
     console.log("Attempting to save post using hybrid approach...");
     
@@ -54,16 +134,21 @@ export async function savePostToBackend({ html, title, user, attachments = [] }:
 
     // Clean and prepare data
     const cleanHtml = html.trim();
+    const plainText = extractPlainText(cleanHtml);
+    const resolvedTitle = (title && title.trim().length > 0 ? title.trim() : plainText) || "Bài viết mới";
     const cleanUser = user ? {
       name: user.name || 'Anonymous',
       avatar: user.avatar || null,
       id: user.id || null
     } : null;
 
+    const resolvedStoragePath =
+      (storagePath && storagePath.trim().length > 0 ? storagePath.trim() : generateBlogStoragePath(resolvedTitle));
+
     console.log("Step 1: Uploading HTML content to Firebase Storage...");
     
     // Step 1: Upload HTML content to Firebase Storage
-    const htmlFileName = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.html`;
+    const htmlFileName = `${DEFAULT_POST_FOLDER}/${resolvedStoragePath}/index.html`;
     const htmlRef = ref(storage, htmlFileName);
     
     // Create HTML document with proper structure
@@ -89,11 +174,8 @@ export async function savePostToBackend({ html, title, user, attachments = [] }:
     console.log("HTML content uploaded to Firebase Storage:", htmlUrl);
 
     // Step 2: Save metadata to Backend with Firebase link
-    const derivedTitle = cleanHtml.replace(/<[^>]*>/g, '').substring(0, 100) + (cleanHtml.length > 100 ? '...' : '');
-    const chosenTitle = (title && title.trim().length > 0) ? title.trim() : derivedTitle;
-
     const postData = {
-      title: chosenTitle,
+      title: resolvedTitle.substring(0, 100) + (resolvedTitle.length > 100 ? '...' : ''),
       cover_image_url: attachments.length > 0 ? attachments[0] : '/placeholder.svg',
       description_url: htmlUrl, // Firebase Storage URL instead of HTML content
     };
