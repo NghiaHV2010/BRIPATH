@@ -134,14 +134,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       });
 
       if (response && response.success) {
-        toast.success("Lưu mô tả thành công");
+        toast.success("Lưu cover letter thành công");
         await get().fetchSettings();
       } else {
-        toast.error("Không thể lưu mô tả");
+        toast.error("Không thể lưu cover letter");
       }
     } catch (error) {
       console.error("Error saving cover letter:", error);
-      toast.error("Có lỗi xảy ra khi lưu");
+      toast.error("Có lỗi xảy ra khi lưu cover letter");
     } finally {
       set({ updating: false });
     }
