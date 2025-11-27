@@ -21,24 +21,38 @@ export default function BlogDetail() {
         const resp = await getBlogById(Number(id));
         if (resp.success && resp.data) {
           setPost(resp.data);
-          const html = await getPostContentFromFirebase(resp.data.description_url);
+          const html = await getPostContentFromFirebase(
+            resp.data.description_url
+          );
           setContent(html);
 
           // Heuristics: if content starts with an <img>, skip hero image
           const trimmed = html.trim().toLowerCase();
-          const startsWithImg = /^<img\b/i.test(trimmed) || /^<p[^>]*>\s*<img\b/i.test(trimmed);
+          const startsWithImg =
+            /^<img\b/i.test(trimmed) || /^<p[^>]*>\s*<img\b/i.test(trimmed);
           let hideHero = startsWithImg;
           // If first image in content is same as cover, also hide hero
-          const firstImgMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-          if (firstImgMatch && resp.data.cover_image_url && firstImgMatch[1] === resp.data.cover_image_url) {
+          const firstImgMatch = html.match(
+            /<img[^>]+src=["']([^"']+)["'][^>]*>/i
+          );
+          if (
+            firstImgMatch &&
+            resp.data.cover_image_url &&
+            firstImgMatch[1] === resp.data.cover_image_url
+          ) {
             hideHero = true;
           }
           setShowHero(!hideHero);
 
           // If the title already appears very early in content, hide separate heading
-          const plain = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          const plain = html
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
           if (resp.data.title) {
-            const idx = plain.toLowerCase().indexOf(resp.data.title.trim().toLowerCase());
+            const idx = plain
+              .toLowerCase()
+              .indexOf(resp.data.title.trim().toLowerCase());
             setShowHeading(!(idx > -1 && idx < 80));
           }
         }
@@ -68,10 +82,15 @@ export default function BlogDetail() {
         {showHero && (
           <div className="rounded-xl overflow-hidden mb-6 bg-gray-100">
             <img
-              src={(post.cover_image_url && !post.cover_image_url.includes('via.placeholder.com')) ? post.cover_image_url : "/placeholder.svg"}
+              src={
+                post.cover_image_url &&
+                !post.cover_image_url.includes("via.placeholder.com")
+                  ? post.cover_image_url
+                  : "/placeholder.svg"
+              }
               alt={post.title}
-              className="w-full h-72 object-cover"
-              onError={(e) => {
+              className="w-full h-72 object-contain"
+              onError={e => {
                 const img = e.currentTarget as HTMLImageElement;
                 if (img.src !== window.location.origin + "/placeholder.svg") {
                   img.src = "/placeholder.svg";
@@ -80,10 +99,11 @@ export default function BlogDetail() {
             />
           </div>
         )}
-        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+        <div
+          className="prose max-w-none"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
       </div>
     </Layout>
   );
 }
-
-
