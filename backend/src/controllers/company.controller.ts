@@ -4,128 +4,22 @@ import { errorHandler } from "../utils/error";
 import { createNotificationData } from "../utils";
 import { prisma } from "../libs/prisma";
 import { redis } from "../libs/redis";
-import { AuthUserRequestDto } from "src/types/auth.types";
+import { AuthUserRequestDto } from "../types/auth.types";
+import { CreateCompanyRequestDto } from "../types/company.types";
+import { createCompanyService } from "../services/company.service";
 
 const numberOfCompanies = 12;
 
 export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
-    type RequestBody = {
-        fax_code: string,
-        business_certificate: string,
-        company_type: "business_househole" | "business",
-        field: string
-    }
-
     const { id, company_id } = req.user as AuthUserRequestDto;
-    const { fax_code, business_certificate, company_type, field } = req.body as RequestBody;
+    const data = req.body as CreateCompanyRequestDto;
 
-    if (!business_certificate) {
+    if (!data.business_certificate) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Vui lòng tải lên giấy phép kinh doanh!"));
     }
 
     try {
-        // ----------------------
-        // VALIDATION CHẠY SONG SONG
-        // ----------------------
-        await Promise.all([
-            // Validate mã số thuế (fax_code)
-            (async () => {
-                const response = await fetch(
-                    `https://api.vietqr.io/v2/business/${fax_code}`,
-                    { method: "GET", headers: { "Content-Type": "application/json" } }
-                );
-                const data = await response.json() as { data: any };
-
-                if (!data.data) {
-                    throw errorHandler(HTTP_ERROR.BAD_REQUEST, "Mã số thuế không hợp lệ!");
-                }
-            })(),
-
-            // Validate lĩnh vực
-            (async () => {
-                const fieldData = await prisma.fields.findUnique({
-                    where: { field_name: field }
-                });
-
-                if (!fieldData) {
-                    throw errorHandler(HTTP_ERROR.BAD_REQUEST, "Lĩnh vực không hợp lệ!");
-                }
-            })(),
-
-            // Validate user (2FA + trạng thái hồ sơ)
-            (async () => {
-                const user = await prisma.users.findUnique({
-                    where: { id },
-                    select: {
-                        is_2fa_enabled: true,
-                        companies: company_id ? {
-                            where: { id: company_id },
-                            select: { status: true }
-                        } : false
-                    }
-                });
-
-                if (!user?.is_2fa_enabled) {
-                    throw errorHandler(HTTP_ERROR.FORBIDDEN, "Bạn chưa bật xác thực hai yếu tố!");
-                }
-
-                if (
-                    user.companies &&
-                    (user.companies.status === "pending" || user.companies.status === "approved")
-                ) {
-                    throw errorHandler(HTTP_ERROR.FORBIDDEN, "Hồ sơ của bạn đang hoặc đã được phê duyệt!");
-                }
-            })()
-        ]);
-
-        // ----------------------
-        // DỮ LIỆU HỢP LỆ → LƯU DB
-        // ----------------------
-
-        const notificationData = createNotificationData(
-            undefined,
-            undefined,
-            "system",
-            "company"
-        );
-
-        const result = await prisma.$transaction(async (tx) => {
-            const [company] = await Promise.all([
-                tx.companies.upsert({
-                    where: { id: company_id ?? "" },
-                    update: {
-                        fax_code,
-                        business_certificate,
-                        company_type,
-                        status: "pending"
-                    },
-                    create: {
-                        fax_code,
-                        business_certificate,
-                        company_type,
-                        users: { connect: { id } }
-                    }
-                }),
-
-                tx.userActivitiesHistory.create({
-                    data: {
-                        activity_name: "Bạn đã tạo tài khoản doanh nghiệp.",
-                        user_id: id
-                    }
-                }),
-
-                tx.userNotifications.create({
-                    data: {
-                        user_id: id,
-                        type: notificationData.type,
-                        title: notificationData.title,
-                        content: notificationData.content
-                    }
-                })
-            ]);
-
-            return company;
-        });
+        const result = await createCompanyService(id, company_id, data);
 
         return res.status(HTTP_SUCCESS.CREATED).json({
             message: "Tạo công ty thành công! Vui lòng chờ duyệt.",

@@ -49,13 +49,16 @@ export const userRepository = {
     },
 
     //Find user by ID
-    findById: async (user_id: string) => {
+    findById: async (user_id: string, company_id?: string) => {
         return prisma.users.findUnique({
             where: {
                 id: user_id,
                 is_deleted: false
             },
             include: {
+                companies: company_id ? {
+                    where: { id: company_id }
+                } : false,
                 roles: {
                     select: {
                         role_name: true
