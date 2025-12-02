@@ -183,51 +183,76 @@ export const getRevenueStats = async (req: Request, res: Response) => {
 
 export const getPaymentStats = async (req: Request, res: Response) => {
     try {
-        const { period = '30' } = req.query; // days
+        const { period = '30', page = '1', limit = '20' } = req.query; 
         const days = parseInt(period as string);
+
+        const currentPage = Math.max(parseInt(page as string, 10) || 1, 1);
+        const pageSize = Math.max(parseInt(limit as string, 10) || 20, 1);
+        const skip = (currentPage - 1) * pageSize;
+
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - days);
 
-        // Thống kê theo trạng thái
+        // Thống kê theo trạng thái (trong khoảng period ngày)
         const statusStats = await prisma.payments.groupBy({
             by: ['status'],
-            _count: {
-                id: true
-            },
-            _sum: {
-                amount: true
-            }
-        });
-
-        // Thống kê theo payment gateway
-        const gatewayStats = await prisma.payments.groupBy({
-            by: ['payment_gateway'],
-            _count: {
-                id: true
-            },
-            _sum: {
-                amount: true
-            }
-        });
-
-        // Thống kê theo payment method
-        const methodStats = await prisma.payments.groupBy({
-            by: ['payment_method'],
-            _count: {
-                id: true
-            },
-            _sum: {
-                amount: true
-            }
-        });
-
-        // Giao dịch gần đây
-        const recentTransactions = await prisma.payments.findMany({
             where: {
                 created_at: {
                     gte: startDate
                 }
             },
+            _count: {
+                id: true
+            },
+            _sum: {
+                amount: true
+            }
+        });
+
+        // Thống kê theo payment gateway (trong khoảng period ngày)
+        const gatewayStats = await prisma.payments.groupBy({
+            by: ['payment_gateway'],
+            where: {
+                created_at: {
+                    gte: startDate
+                }
+            },
+            _count: {
+                id: true
+            },
+            _sum: {
+                amount: true
+            }
+        });
+
+        // Thống kê theo payment method (trong khoảng period ngày)
+        const methodStats = await prisma.payments.groupBy({
+            by: ['payment_method'],
+            where: {
+                created_at: {
+                    gte: startDate
+                }
+            },
+            _count: {
+                id: true
+            },
+            _sum: {
+                amount: true
+            }
+        });
+
+        const recentWhere = {
+            created_at: {
+                gte: startDate
+            }
+        };
+
+        const totalRecentTransactions = await prisma.payments.count({
+            where: recentWhere
+        });
+
+        const recentTransactions = await prisma.payments.findMany({
+            where: recentWhere,
             include: {
                 users: {
                     select: {
@@ -239,7 +264,8 @@ export const getPaymentStats = async (req: Request, res: Response) => {
             orderBy: {
                 created_at: 'desc'
             },
-            take: 10
+            skip,
+            take: pageSize
         });
 
         res.status(HTTP_SUCCESS.OK).json({
@@ -270,7 +296,13 @@ export const getPaymentStats = async (req: Request, res: Response) => {
                     status: transaction.status,
                     created_at: transaction.created_at,
                     user: transaction.users
-                }))
+                })),
+                recentTransactionsPagination: {
+                    page: currentPage,
+                    limit: pageSize,
+                    total: totalRecentTransactions,
+                    totalPages: Math.ceil(totalRecentTransactions / pageSize)
+                }
             }
         });
     } catch (error) {

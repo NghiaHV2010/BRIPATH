@@ -6,8 +6,12 @@ export const getRevenueStats = async () => {
   return response.data;
 };
 
-export const getPaymentStats = async (period: number = 30) => {
-  const response = await axiosConfig.get(`/dashboard/payments?period=${period}`);
+export const getPaymentStats = async (period: number = 30, page: number = 1, limit: number = 20) => {
+  const params = new URLSearchParams();
+  params.append('period', period.toString());
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
+  const response = await axiosConfig.get(`/dashboard/payments?${params.toString()}`);
   return response.data;
 };
 

@@ -73,6 +73,7 @@ export default function CompanyManagement() {
       return [...pendingCompanies, ...approvedCompanies, ...rejectedCompanies];
     } catch (error) {
       console.error("Error fetching companies:", error);
+      // Khi API lỗi, trả về mảng rỗng và giữ nguyên counts
       return [];
     }
   };
@@ -211,11 +212,11 @@ export default function CompanyManagement() {
                 <TableRow>
                   <TableHead>Công ty</TableHead>
                   <TableHead>Mã số thuế</TableHead>
-                  <TableHead>Loại hình</TableHead>
-                  <TableHead>Loại doanh nghiệp</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày đăng ký</TableHead>
-                  <TableHead>Hành động</TableHead>
+                  <TableHead className="whitespace-nowrap">Loại hình</TableHead>
+                  <TableHead className="whitespace-nowrap">Loại doanh nghiệp</TableHead>
+                  <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
+                  <TableHead className="whitespace-nowrap">Ngày đăng ký</TableHead>
+                  <TableHead className="whitespace-nowrap">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -256,11 +257,13 @@ export default function CompanyManagement() {
                           {getCompanyTypeLabel(company.company_type)}
                         </Badge>
                       </TableCell>
-                      <TableCell>{getStatusBadge(company.status)}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {getStatusBadge(company.status)}
+                      </TableCell>
                       <TableCell>
                         {new Date(company.created_at).toLocaleDateString('vi-VN')}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           {company.status === 'pending' && (
                             <>
@@ -353,17 +356,17 @@ export default function CompanyManagement() {
                                             <span className="text-sm break-all">{selectedCompany.business_certificate}</span>
                                           </div>
                                         )}
-                                        {selectedCompany.users.phone && (
+                                        {selectedCompany.users?.phone && (
                                           <div className="space-y-1">
                                             <p className="text-xs text-gray-500">Số điện thoại</p>
-                                            <span className="text-sm">{selectedCompany.users.phone}</span>
+                                            <span className="text-sm">{selectedCompany.users?.phone}</span>
                                           </div>
                                         )}
                                       </CardContent>
                                     </Card>
 
                                     {/* Address Information */}
-                                    {(selectedCompany.users.address_street || selectedCompany.users.address_city) && (
+                                    {(selectedCompany.users?.address_street || selectedCompany.users?.address_city) && (
                                       <Card>
                                         <CardHeader>
                                           <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -372,12 +375,14 @@ export default function CompanyManagement() {
                                           </CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                          <p className="text-sm">
-                                            {selectedCompany.users.address_street && `${selectedCompany.users.address_street}, `}
-                                            {selectedCompany.users.address_ward && `${selectedCompany.users.address_ward}, `}
-                                            {selectedCompany.users.address_city && `${selectedCompany.users.address_city}, `}
-                                            {selectedCompany.users.address_country && selectedCompany.users.address_country}
-                                          </p>
+                                          {selectedCompany.users && (
+                                            <p className="text-sm">
+                                              {selectedCompany.users.address_street && `${selectedCompany.users.address_street}, `}
+                                              {selectedCompany.users.address_ward && `${selectedCompany.users.address_ward}, `}
+                                              {selectedCompany.users.address_city && `${selectedCompany.users.address_city}, `}
+                                              {selectedCompany.users.address_country && selectedCompany.users.address_country}
+                                            </p>
+                                          )}
                                         </CardContent>
                                       </Card>
                                     )}

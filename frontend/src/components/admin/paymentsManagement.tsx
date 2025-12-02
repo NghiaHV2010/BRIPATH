@@ -40,17 +40,25 @@ interface PaymentStats {
       email: string;
     };
   }>;
+  recentTransactionsPagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export default function PaymentsManagement() {
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<number>(30);
+  const [transactionsPage, setTransactionsPage] = useState<number>(1);
+  const pageSize = 20;
 
-  const fetchPaymentStats = async (days: number) => {
+  const fetchPaymentStats = async (days: number, page: number = 1) => {
     try {
       setLoading(true);
-      const response = await getPaymentStats(days);
+      const response = await getPaymentStats(days, page, pageSize);
       setStats(response.data);
     } catch (error) {
       console.error("Error fetching payment stats:", error);
@@ -59,9 +67,15 @@ export default function PaymentsManagement() {
     }
   };
 
+  // Reset về trang 1 khi đổi kỳ thống kê
   useEffect(() => {
-    fetchPaymentStats(period);
+    setTransactionsPage(1);
   }, [period]);
+
+  // Gọi API mỗi khi kỳ hoặc trang thay đổi
+  useEffect(() => {
+    fetchPaymentStats(period, transactionsPage);
+  }, [period, transactionsPage]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -168,6 +182,12 @@ export default function PaymentsManagement() {
   const gatewayStats = stats.gatewayStats || [];
   const methodStats = stats.methodStats || [];
   const recentTransactions = stats.recentTransactions || [];
+  const recentPagination = stats.recentTransactionsPagination || {
+    page: transactionsPage,
+    limit: pageSize,
+    total: recentTransactions.length,
+    totalPages: 1,
+  };
 
   return (
     <div className="space-y-6">
@@ -360,11 +380,11 @@ export default function PaymentsManagement() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Người dùng</TableHead>
-                      <TableHead>Số tiền</TableHead>
-                      <TableHead>Cổng thanh toán</TableHead>
-                      <TableHead>Phương thức</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Thời gian</TableHead>
+                      <TableHead className="whitespace-nowrap">Số tiền</TableHead>
+                      <TableHead className="whitespace-nowrap">Cổng thanh toán</TableHead>
+                      <TableHead className="whitespace-nowrap">Phương thức</TableHead>
+                      <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
+                      <TableHead className="whitespace-nowrap">Thời gian</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -387,13 +407,13 @@ export default function PaymentsManagement() {
                               <p className="text-sm text-gray-500">{transaction.user.email}</p>
                             </div>
                           </TableCell>
-                          <TableCell className="font-semibold">
+                          <TableCell className="font-semibold whitespace-nowrap">
                             {formatCurrency(transaction.amount)}
                           </TableCell>
-                          <TableCell>{transaction.payment_gateway}</TableCell>
-                          <TableCell>{transaction.payment_method}</TableCell>
-                          <TableCell>{getStatusBadge(transaction.status)}</TableCell>
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap">{transaction.payment_gateway}</TableCell>
+                          <TableCell className="whitespace-nowrap">{transaction.payment_method}</TableCell>
+                          <TableCell className="whitespace-nowrap">{getStatusBadge(transaction.status)}</TableCell>
+                          <TableCell className="whitespace-nowrap">
                             {new Date(transaction.created_at).toLocaleDateString('vi-VN', {
                               year: 'numeric',
                               month: 'short',
@@ -408,6 +428,48 @@ export default function PaymentsManagement() {
                   </TableBody>
                 </Table>
               </div>
+              {recentTransactions.length > 0 && (
+                <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+                  <div>
+                    Hiển thị{" "}
+                    <span className="font-semibold">
+                      {(recentPagination.page - 1) * recentPagination.limit + 1}-
+                      {Math.min(recentPagination.page * recentPagination.limit, recentPagination.total)}
+                    </span>{" "}
+                    trên tổng số{" "}
+                    <span className="font-semibold">{recentPagination.total}</span> giao dịch
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={recentPagination.page <= 1 || loading}
+                      onClick={() => setTransactionsPage((prev) => Math.max(prev - 1, 1))}
+                    >
+                      Trang trước
+                    </Button>
+                    <span>
+                      Trang{" "}
+                      <span className="font-semibold">{recentPagination.page}</span>/
+                      <span className="font-semibold">{recentPagination.totalPages}</span>
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={
+                        recentPagination.page >= recentPagination.totalPages || loading
+                      }
+                      onClick={() =>
+                        setTransactionsPage((prev) =>
+                          Math.min(prev + 1, recentPagination.totalPages || prev + 1)
+                        )
+                      }
+                    >
+                      Trang sau
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </CardContent>
