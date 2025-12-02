@@ -119,6 +119,7 @@ export interface FilterJobParams {
   userId?: string;            // optional — để kiểm tra saved/applied jobs
   name?: string;              // optional — tìm kiếm theo tên job
   field?: string | string[];  // optional — thực chất là job category
+  label?: string;             // optional — Việc chất/hot/gấp
   location?: string;          // optional — địa điểm
   salary?: string;            // optional — mức lương
 }

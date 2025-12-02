@@ -65,7 +65,7 @@ export const getJobByID = async (req: Request, res: Response, next: NextFunction
 }
 
 export const getJobsByFilter = async (req: Request, res: Response, next: NextFunction) => {
-    const { name, field, location, salary } = req.query as FilterJobsRequestDto;
+    const { name, field, label, location, salary } = req.query as FilterJobsRequestDto;
     let page: number = parseInt(req.query?.page as string || '1');
     const userId = req.query?.userId as string | undefined;
     const filters: any[] = [];
@@ -99,6 +99,16 @@ export const getJobsByFilter = async (req: Request, res: Response, next: NextFun
             jobCategories: {
                 is: {
                     job_category: { equals: field }
+                }
+            }
+        });
+    }
+
+    if (label) {
+        filters.push({
+            jobLabels: {
+                is: {
+                    label_name: { equals: label }
                 }
             }
         });

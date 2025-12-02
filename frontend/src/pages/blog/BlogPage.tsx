@@ -176,7 +176,7 @@ export function BlogPage() {
                             : "/placeholder.svg"
                         }
                         alt={featuredPosts[0].title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out"
                         onError={e => {
                           const img = e.currentTarget as HTMLImageElement;
                           if (
@@ -250,7 +250,7 @@ export function BlogPage() {
                                 : "/placeholder.svg"
                             }
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                             onError={e => {
                               const img = e.currentTarget as HTMLImageElement;
                               if (
@@ -337,7 +337,7 @@ export function BlogPage() {
                           : "/placeholder.svg"
                       }
                       alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                       onError={e => {
                         const img = e.currentTarget as HTMLImageElement;
                         if (

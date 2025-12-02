@@ -20,13 +20,20 @@ export default function BlogDetail() {
         const resp = await getBlogById(Number(id));
         if (resp.success && resp.data) {
           setPost(resp.data);
-          const html = await getPostContentFromFirebase(resp.data.description_url);
+          const html = await getPostContentFromFirebase(
+            resp.data.description_url
+          );
           setContent(html);
 
           // If the title already appears very early in content, hide separate heading
-          const plain = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          const plain = html
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
           if (resp.data.title) {
-            const idx = plain.toLowerCase().indexOf(resp.data.title.trim().toLowerCase());
+            const idx = plain
+              .toLowerCase()
+              .indexOf(resp.data.title.trim().toLowerCase());
             setShowHeading(!(idx > -1 && idx < 80));
           }
         }
@@ -102,5 +109,3 @@ export default function BlogDetail() {
     </Layout>
   );
 }
-
-
