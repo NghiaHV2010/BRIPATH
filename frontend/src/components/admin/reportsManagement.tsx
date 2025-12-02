@@ -165,12 +165,12 @@ export default function ReportsManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Người báo cáo</TableHead>
+                  <TableHead className="whitespace-nowrap">Người báo cáo</TableHead>
                   <TableHead>Tiêu đề</TableHead>
                   <TableHead>Mô tả</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead>Hành động</TableHead>
+                  <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
+                  <TableHead className="whitespace-nowrap">Ngày tạo</TableHead>
+                  <TableHead className="whitespace-nowrap">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,8 +215,8 @@ export default function ReportsManagement() {
                           {report.description || 'Không có mô tả'}
                         </p>
                       </TableCell>
-                      <TableCell>{getStatusBadge(report.status)}</TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">{getStatusBadge(report.status)}</TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {new Date(report.created_at).toLocaleDateString('vi-VN', {
                           year: 'numeric',
                           month: 'short',

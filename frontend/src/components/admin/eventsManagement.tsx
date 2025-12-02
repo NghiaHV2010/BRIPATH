@@ -29,6 +29,11 @@ export default function EventsManagement() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [statusCounts, setStatusCounts] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
 
   const fetchEvents = async (status: 'pending' | 'approved' | 'rejected') => {
     try {
@@ -42,16 +47,38 @@ export default function EventsManagement() {
     }
   };
 
+  const fetchStatusCounts = async () => {
+    try {
+      const [pendingResponse, approvedResponse, rejectedResponse] = await Promise.all([
+        getEventsByStatus('pending'),
+        getEventsByStatus('approved'),
+        getEventsByStatus('rejected'),
+      ]);
+
+      setStatusCounts({
+        pending: pendingResponse.data?.length || 0,
+        approved: approvedResponse.data?.length || 0,
+        rejected: rejectedResponse.data?.length || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching event counts:", error);
+    }
+  };
+
   useEffect(() => {
     fetchEvents(status);
   }, [status]);
+
+  useEffect(() => {
+    fetchStatusCounts();
+  }, []);
 
   const handleStatusUpdate = async (eventId: string, newStatus: 'approved' | 'rejected') => {
     try {
       setActionLoading(eventId);
       await updateEventStatus(eventId, newStatus);
       // Refresh the list
-      await fetchEvents(status);
+      await Promise.all([fetchEvents(status), fetchStatusCounts()]);
     } catch (error) {
       console.error("Error updating event status:", error);
     } finally {
@@ -73,7 +100,7 @@ export default function EventsManagement() {
   };
 
   const getStatusCount = (statusType: string) => {
-    return events.filter(e => e.status === statusType).length;
+    return statusCounts[statusType as keyof typeof statusCounts] || 0;
   };
 
   const getStatusLabel = (statusType: 'pending' | 'approved' | 'rejected') => {
@@ -135,11 +162,11 @@ export default function EventsManagement() {
                 <TableRow>
                   <TableHead>Sự kiện</TableHead>
                   <TableHead>Địa điểm</TableHead>
-                  <TableHead>Thời gian</TableHead>
-                  <TableHead>Người tạo</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead>Hành động</TableHead>
+                  <TableHead className="whitespace-nowrap">Thời gian</TableHead>
+                  <TableHead className="whitespace-nowrap">Người tạo</TableHead>
+                  <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
+                  <TableHead className="whitespace-nowrap">Ngày tạo</TableHead>
+                  <TableHead className="whitespace-nowrap">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -182,7 +209,7 @@ export default function EventsManagement() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                             <Calendar className="h-4 w-4 text-blue-600" />
@@ -193,11 +220,13 @@ export default function EventsManagement() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(event.status)}</TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {getStatusBadge(event.status)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {new Date(event.created_at).toLocaleDateString('vi-VN')}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           {event.status === 'pending' && (
                             <>
