@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model answers {
@@ -556,7 +555,7 @@ model userSettings {
   user_id           String
   setting_id        Int
   setting_option_id Int?
-  custom_value      String? @db.Text
+  custom_value      String? @db.VarChar(255)
 
   users           users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
   settings        settings         @relation(fields: [setting_id], references: [id], onDelete: Cascade)
