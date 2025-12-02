@@ -137,6 +137,7 @@ export const getCompanyByID = async (req: Request, res: Response, next: NextFunc
                 description: true,
                 employees: true,
                 is_verified: true,
+                company_website: true,
                 latitude: true,
                 longitude: true,
                 users: {
@@ -891,7 +892,7 @@ export const updateCompanyProfile = async (req: Request, res: Response, next: Ne
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trang web không hợp lệ!"));
     }
 
-    if (description && !description?.includes("http")) {
+    if (description && description.length < 5) {
         return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Mô tả không hợp lệ!"));
     }
 

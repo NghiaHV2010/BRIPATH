@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Users, Briefcase, Building2, Copy, ArrowLeft, CircleChevronDown, UserRoundCheck, ChevronLeft, ChevronRight, AlertCircle, Star } from "lucide-react";
+import { MapPin, Users, Briefcase, Building2, Copy, ArrowLeft, CircleChevronDown, UserRoundCheck, ChevronLeft, ChevronRight, AlertCircle, Star, Globe, Share2, Menu, X } from "lucide-react";
 import { Layout } from "../../components/layout";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
@@ -15,6 +15,7 @@ import { useCompanyStore } from "../../store/company.store";
 import { LoginDialog } from "../../components/login/LoginDialog";
 import type { CompanyDetail } from "@/types/company";
 import { JobCard } from "@/components/job";
+import gsap from "gsap";
 
 export default function CompanyDetailsPage() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -24,6 +25,7 @@ export default function CompanyDetailsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isFollowed, setIsFollowed] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isNavExpanded, setIsNavExpanded] = useState(false);
 
   // Recommended companies state
   const [recommendedCompanies, setRecommendedCompanies] = useState<any[]>([]);
@@ -41,6 +43,11 @@ export default function CompanyDetailsPage() {
   const [benefitError, setBenefitError] = useState<string>("");
   const [workEnvError, setWorkEnvError] = useState<string>("");
 
+  // Refs for GSAP animation
+  const navMenuRef = useRef<HTMLDivElement>(null);
+  const navItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+
   const {
     followCompany: followCompanyStore,
     unfollowCompany: unfollowCompanyStore,
@@ -54,6 +61,61 @@ export default function CompanyDetailsPage() {
     scrollPosition?: number;
     preserveScroll?: boolean;
   } | null;
+
+  // GSAP Animation for expand/collapse
+  useEffect(() => {
+    if (isNavExpanded) {
+      // Expand animation
+      const items = navItemsRef.current.filter(item => item !== null);
+
+      gsap.fromTo(
+        items,
+        {
+          scale: 0,
+          opacity: 0,
+          y: 20,
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "back.out(1.7)",
+        }
+      );
+
+      // Rotate toggle button icon
+      if (toggleButtonRef.current) {
+        gsap.to(toggleButtonRef.current.querySelector('svg'), {
+          rotation: 180,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    } else {
+      // Collapse animation
+      const items = navItemsRef.current.filter(item => item !== null);
+
+      gsap.to(items, {
+        scale: 0,
+        opacity: 0,
+        y: 20,
+        duration: 0.2,
+        stagger: 0.03,
+        ease: "power2.in",
+      });
+
+      // Rotate toggle button icon back
+      if (toggleButtonRef.current) {
+        gsap.to(toggleButtonRef.current.querySelector('svg'), {
+          rotation: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    }
+  }, [isNavExpanded]);
 
   // Fetch company details
   useEffect(() => {
@@ -149,6 +211,29 @@ export default function CompanyDetailsPage() {
       title: "Đã sao chép",
       description: "Liên kết đã được sao chép vào clipboard",
     });
+    setIsNavExpanded(false);
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+      setIsNavExpanded(false);
+    }
+  };
+
+  const handleWebsiteClick = () => {
+    if (companyDetail?.company_website) {
+      window.open(companyDetail.company_website, "_blank", "noopener,noreferrer");
+      setIsNavExpanded(false);
+    }
   };
 
   // Star rating component
@@ -191,7 +276,7 @@ export default function CompanyDetailsPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
         {/* Header */}
         <div className="bg-white border-b sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
@@ -199,18 +284,18 @@ export default function CompanyDetailsPage() {
               variant="outline"
               size="sm"
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2"
+              className="hidden sm:flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Quay lại
             </Button>
 
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Link to="/" className="hover:text-blue-600">
+            <div className="flex items-center gap-2 text-sm text-slate-600 ">
+              <Link to="/" className="hover:text-blue-600 line-clamp-1">
                 Danh sách Công ty
               </Link>
               <span className="text-slate-400">›</span>
-              <span className="text-slate-900 font-medium">
+              <span className="text-slate-900 font-medium line-clamp-1">
                 {companyDetail.users?.username || "Company"}
               </span>
             </div>
@@ -247,7 +332,7 @@ export default function CompanyDetailsPage() {
 
           <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col lg:flex-row gap-8">
             {/* Logo */}
-            <div className="relative">
+            <div className="relative w-fit">
               {companyDetail.is_verified && (
                 <CircleChevronDown className="size-8 absolute -top-1 -right-2 text-white bg-cyan-400 rounded-full" />
               )}
@@ -269,7 +354,7 @@ export default function CompanyDetailsPage() {
             {/* Info */}
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <h1 className="text-5xl font-bold">
+                <h1 className="text-3xl! md:text-5xl! font-bold">
                   {companyDetail.users?.username}
                 </h1>
                 <div className="flex gap-4 items-center">
@@ -359,7 +444,7 @@ export default function CompanyDetailsPage() {
               </Card>
 
               {/* Jobs */}
-              <div className="space-y-8">
+              <div className="space-y-8" id="company-jobs">
                 <h2 className="text-3xl font-bold text-slate-900">
                   Vị trí tuyển dụng
                   <span className="ml-3 text-lg font-normal text-slate-500">
@@ -414,7 +499,7 @@ export default function CompanyDetailsPage() {
               </div>
 
               {/* Company Feedback */}
-              <div className="space-y-8">
+              <div className="space-y-8" id="company-rating">
                 {/* Feedback form */}
                 <Card className="bg-white shadow-lg rounded-2xl">
                   <CardHeader className="bg-blue-50 pb-6">
@@ -610,8 +695,37 @@ export default function CompanyDetailsPage() {
 
             {/* Right: Sidebar */}
             <div className="space-y-8">
+              {/* Company Website */}
+              {companyDetail.company_website && (
+                <Card className="bg-white shadow-lg rounded-2xl" id="company-website">
+                  <CardHeader className="bg-blue-50 pb-4">
+                    <h3 className="text-xl font-bold text-slate-900">
+                      Thông tin công ty
+                    </h3>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <a
+                      href={companyDetail.company_website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-blue-600 hover:text-blue-700 transition-colors group"
+                    >
+                      <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-slate-500">Website</div>
+                        <div className="font-medium truncate">
+                          {companyDetail.company_website.replace(/^https?:\/\//, '')}
+                        </div>
+                      </div>
+                    </a>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Company Map */}
-              <Card className="bg-white shadow-lg rounded-2xl z-0">
+              <Card className="bg-white shadow-lg rounded-2xl z-0" id="company-map">
                 <CompanyMap
                   companyName={companyDetail.users?.username || "Company"}
                   lat={companyDetail.latitude || 10.777108}
@@ -620,7 +734,7 @@ export default function CompanyDetailsPage() {
               </Card>
 
               {/* Share Company */}
-              <Card className="bg-white shadow-lg rounded-2xl">
+              <Card className="bg-white shadow-lg rounded-2xl" id="company-share">
                 <CardHeader className="bg-blue-50 pb-4">
                   <h3 className="text-xl font-bold text-slate-900">
                     Chia sẻ công ty
@@ -654,6 +768,94 @@ export default function CompanyDetailsPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Floating Navigation - Mobile & Tablet Only */}
+        <div className="lg:hidden fixed bottom-44 right-6 z-50 flex flex-col-reverse items-end gap-2">
+          {/* Expanded Menu - Icons stack vertically */}
+          {isNavExpanded && (
+            <div ref={navMenuRef} className="flex flex-col gap-2">
+              {/* Share */}
+              <button
+                ref={(el) => { navItemsRef.current[0] = el }}
+                onClick={handleCopyLink}
+                className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-slate-200"
+                aria-label="Chia sẻ"
+                style={{ opacity: 0, scale: 0 }}
+              >
+                <Share2 className="w-5 h-5 text-slate-700" />
+              </button>
+
+              {/* Jobs */}
+              <button
+                ref={(el) => { navItemsRef.current[1] = el }}
+                onClick={() => scrollToSection("company-jobs")}
+                className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-slate-200"
+                aria-label="Việc làm"
+                style={{ opacity: 0, scale: 0 }}
+              >
+                <Briefcase className="w-5 h-5 text-slate-700" />
+              </button>
+
+              {/* Rating */}
+              <button
+                ref={(el) => { navItemsRef.current[2] = el }}
+                onClick={() => scrollToSection("company-rating")}
+                className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-slate-200"
+                aria-label="Đánh giá"
+                style={{ opacity: 0, scale: 0 }}
+              >
+                <Star className="w-5 h-5 text-slate-700" />
+              </button>
+
+              {/* Website */}
+              {companyDetail.company_website && (
+                <button
+                  ref={(el) => { navItemsRef.current[3] = el }}
+                  onClick={handleWebsiteClick}
+                  className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-slate-200"
+                  aria-label="Website"
+                  style={{ opacity: 0, scale: 0 }}
+                >
+                  <Globe className="w-5 h-5 text-slate-700" />
+                </button>
+              )}
+
+              {/* Map */}
+              <button
+                ref={(el) => { navItemsRef.current[4] = el }}
+                onClick={() => scrollToSection("company-map")}
+                className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-slate-200"
+                aria-label="Bản đồ"
+                style={{ opacity: 0, scale: 0 }}
+              >
+                <MapPin className="w-5 h-5 text-slate-700" />
+              </button>
+
+              {/* Collapse button at bottom when expanded */}
+              <button
+                ref={(el) => { navItemsRef.current[5] = el }}
+                onClick={() => setIsNavExpanded(false)}
+                className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110"
+                aria-label="Thu gọn"
+                style={{ opacity: 0, scale: 0 }}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {/* Toggle Button - Only show when collapsed */}
+          {!isNavExpanded && (
+            <button
+              ref={toggleButtonRef}
+              onClick={() => setIsNavExpanded(true)}
+              className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+              aria-label="Điều hướng nhanh"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -407,19 +407,14 @@ export default function QuizLandingPage() {
             )}
 
             {hasCareerPath && (
-              <div ref={heroRef} className="pt-20 pb-16">
-                <div className="text-center mb-12">
-                  <div className="inline-block mb-6 px-4 py-2 bg-blue-100 rounded-full">
-                    <span className="text-blue-600 font-semibold text-sm">
-                      ✨ Lộ trình của bạn
-                    </span>
-                  </div>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+              <div ref={heroRef} className="pt-12 pb-16">
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl! md:text-5xl! lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
                     Lộ Trình Nghề Nghiệp
                     <br />
                     <span className="text-blue-600">Của Bạn</span>
                   </h1>
-                  <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+                  <p className="text-md md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
                     Xem lại các lộ trình nghề nghiệp bạn đã tạo hoặc khám phá
                     thêm nhiều cơ hội mới
                   </p>

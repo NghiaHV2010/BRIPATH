@@ -89,6 +89,7 @@ export interface CompanySummary {
 export interface CompanyDetail {
   id: string;
   background_url?: string | null;
+  company_website?: string | null;
   description?: string | null;
   employees?: number | null;
   users?: CompInfor | null;

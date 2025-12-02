@@ -18,11 +18,11 @@ const CompanyMap = ({ lat, lng, companyName }: { lat: number; lng: number; compa
     if (!lat || !lng) return <p>Không có thông tin vị trí công ty.</p>;
 
     return (
-        <div style={{ height: "400px", width: "100%", borderRadius: "8px", overflow: "hidden" }}>
+        <div style={{ height: "400px", width: "100%", borderRadius: "8px", overflow: "hidden", zIndex: '0' }}>
             <MapContainer
                 center={[lat, lng]}
                 zoom={15}
-                style={{ height: "100%", width: "100%" }}
+                style={{ height: "100%", width: "100%", zIndex: "10" }}
                 scrollWheelZoom={false}
             >
                 {/* Lớp nền bản đồ (nguồn từ OSM) */}

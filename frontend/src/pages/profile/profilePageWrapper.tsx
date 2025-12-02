@@ -95,6 +95,14 @@ export default function ProfilePageWrapper() {
 
   const isCompanyUser = userProfileData?.roles?.role_name === 'Company';
 
+  // Add these state variables after the existing state declarations (around line 50)
+  const [companyFormData, setCompanyFormData] = useState({
+    company_website: "",
+    description: "",
+    employees: 0,
+    background_url: "",
+  });
+
   useEffect(() => {
     const editParam = searchParams.get('edit');
     if (editParam === 'true') {
@@ -130,6 +138,16 @@ export default function ProfilePageWrapper() {
           address_country: userData?.address_country || "",
           gender: userData?.gender || "others",
         });
+
+        // Initialize company form data if user is a company
+        if (userData?.roles?.role_name === 'Company' && userData?.companies) {
+          setCompanyFormData({
+            company_website: userData.companies.company_website || "",
+            description: userData.companies.description || "",
+            employees: userData.companies.employees || 0,
+            background_url: userData.companies.background_url || "",
+          });
+        }
       }
     } catch (error) {
       console.error("Error loading user profile:", error);
@@ -203,6 +221,16 @@ export default function ProfilePageWrapper() {
       address_country: userProfileData?.address_country || "",
       gender: userProfileData?.gender || "others",
     });
+
+    // Reset company form data when editing
+    if (isCompanyUser && userProfileData?.companies) {
+      setCompanyFormData({
+        company_website: userProfileData.companies.company_website || "",
+        description: userProfileData.companies.description || "",
+        employees: userProfileData.companies.employees || 0,
+        background_url: userProfileData.companies.background_url || "",
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -217,6 +245,16 @@ export default function ProfilePageWrapper() {
       gender: userProfileData?.gender || "others",
     });
 
+    // Reset company form data
+    if (isCompanyUser && userProfileData?.companies) {
+      setCompanyFormData({
+        company_website: userProfileData.companies.company_website || "",
+        description: userProfileData.companies.description || "",
+        employees: userProfileData.companies.employees || 0,
+        background_url: userProfileData.companies.background_url || "",
+      });
+    }
+
     setShowPasswordForm(false);
     setPasswordData({
       currentPassword: "",
@@ -229,6 +267,7 @@ export default function ProfilePageWrapper() {
     try {
       setIsLoading(true);
 
+      // Update user profile
       const updateRequest: UpdateUserProfileRequest = {
         username: formData.username,
         avatar_url: formData.avatar_url,
@@ -242,13 +281,31 @@ export default function ProfilePageWrapper() {
       const response = await updateUserProfile(updateRequest);
 
       if (response?.success) {
-        setUserProfileData(response.data!);
-        // await checkAuth();
+        // If company user, also update company data
+        if (isCompanyUser && userProfileData?.company_id) {
+          const companyUpdateRequest = {
+            company_website: companyFormData.company_website,
+            description: companyFormData.description,
+            employees: companyFormData.employees,
+          };
+
+          const companyResponse = await updateCompanyProfile(
+            userProfileData.company_id,
+            companyUpdateRequest
+          );
+
+          if (!companyResponse?.success) {
+            throw new Error(companyResponse?.message || "Cập nhật thông tin công ty thất bại");
+          }
+        }
+
+        // Reload user profile data to get updated information
+        await loadUserProfileData();
         setIsEditing(false);
 
         toast.success(
           isCompanyUser
-            ? "Cập nhật thông tin công ty thành công! Tọa độ đã được cập nhật."
+            ? "Cập nhật thông tin công ty thành công!"
             : "Cập nhật thông tin thành công!",
           {
             duration: 3000,
@@ -270,6 +327,11 @@ export default function ProfilePageWrapper() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Add this function after handleInputChange
+  const handleCompanyInputChange = (field: string, value: string | number) => {
+    setCompanyFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePasswordChange = (field: string, value: string) => {
@@ -893,7 +955,14 @@ export default function ProfilePageWrapper() {
             </div>
 
             {/* Company Additional Information Component */}
-            {isCompanyUser && <CompanyInformation userProfileData={userProfileData} />}
+            {isCompanyUser && (
+              <CompanyInformation
+                userProfileData={userProfileData}
+                isEditing={isEditing}
+                companyFormData={companyFormData}
+                onCompanyInputChange={handleCompanyInputChange}
+              />
+            )}
 
             {/* Password Change Section */}
             <div className="mt-8 pt-6 border-t border-gray-200">
