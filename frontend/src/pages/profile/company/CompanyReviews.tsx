@@ -39,7 +39,7 @@ export function CompanyReviews() {
 
         fetchCompanyFeedbacks();
 
-    }, [authUser?.company_id]);
+    }, []);
 
     if (loading) {
         return (

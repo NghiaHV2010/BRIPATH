@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-screen flex">
         {/* Left Side - Gradient Background (Giống hệt ForgotPassword) */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 p-12 flex-col justify-center relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-orange-400 via-red-500 to-pink-600 p-12 flex-col justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10 text-white animate-fade-in">
             <h1 className="text-4xl font-bold mb-2 animate-slide-up">
