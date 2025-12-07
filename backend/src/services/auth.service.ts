@@ -329,7 +329,7 @@ export const forgotPasswordService = async (email: string, res: Response): Promi
         }
 
         const data = jwt.sign(
-            { email: user.email },
+            { id: user.id, email: user.email },
             ACCESS_SECRET,
             { expiresIn: "30m" }
         );
