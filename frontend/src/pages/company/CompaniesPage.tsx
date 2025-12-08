@@ -146,8 +146,17 @@ export default function CompaniesPage() {
     setFilterPage(1);
     setAllFilteredCompanies([]);
     setHasSearched(true);
-    setCurrentFilterParams({ name, location, field });
-    await filterCompanies(1, name, location, field);
+
+    // Normalize location để search linh hoạt hơn
+    const normalizedLocation = location
+      ? location
+          .replace(/^(TP\.|Tỉnh|Thành phố)\s*/gi, "") // Xóa "TP.", "Tỉnh", "Thành phố"
+          .replace(/\s+/g, " ") // Loại bỏ khoảng trắng thừa
+          .trim()
+      : "";
+
+    setCurrentFilterParams({ name, location: normalizedLocation, field });
+    await filterCompanies(1, name, normalizedLocation, field);
     setIsSearching(false);
   };
 

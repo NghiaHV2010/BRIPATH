@@ -230,11 +230,25 @@ export default function JobsPage() {
     setFilterPage(1);
     setAllFilteredJobs([]);
     setHasSearched(true);
-    setCurrentFilterParams({ name, location, label, salary });
+
+    // Normalize location để search linh hoạt hơn
+    const normalizedLocation = location
+      ? location
+          .replace(/^(TP\.|Tỉnh|Thành phố)\s*/gi, "") // Xóa "TP.", "Tỉnh", "Thành phố"
+          .replace(/\s+/g, " ") // Loại bỏ khoảng trắng thừa
+          .trim()
+      : "";
+
+    setCurrentFilterParams({
+      name,
+      location: normalizedLocation,
+      label,
+      salary,
+    });
     await filterJobs({
       page: 1,
       name: name || undefined,
-      location: location || undefined,
+      location: normalizedLocation || undefined,
       label: label || undefined,
       salary: salary || undefined,
     });
