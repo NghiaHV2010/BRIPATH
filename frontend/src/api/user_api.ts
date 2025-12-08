@@ -294,8 +294,8 @@ export const updateUserSettings = async (settingsData: any): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error updating user settings:", error);
-    return null;  
-  } 
+    return null;
+  }
 };
 
 
@@ -375,5 +375,57 @@ export const getUserReports = async (page: number = 1): Promise<GetUserReportsRe
       data: [],
       totalPages: 1,
     };
+  }
+};
+
+export interface AppliedJob {
+  job_id: string;
+  cv_id: number;
+  apply_date: string;
+  status: 'pending' | 'approved' | 'rejected';
+  description?: string;
+  jobs: {
+    id: string;
+    job_title: string;
+    salary: string[];
+    currency: string;
+    location: string;
+    status: string;
+    companies: {
+      users: {
+        avatar_url?: string;
+        username: string;
+      };
+    };
+    jobCategories: {
+      job_category: string;
+    } | null;
+    jobLabels: {
+      label_name: string;
+    } | null;
+  };
+  cvs: {
+    id: number;
+    fullname: string;
+  };
+}
+
+export interface AppliedJobsResponse {
+  success: boolean;
+  data: AppliedJob[];
+  totalPages: number;
+}
+
+export const getAppliedJobs = async (
+  page: number = 1,
+  status?: 'pending' | 'approved' | 'rejected'
+): Promise<AppliedJobsResponse> => {
+  try {
+    const statusParam = status ? `&status=${status}` : '';
+    const response = await axiosConfig.get(`/apply-jobs?page=${page}${statusParam}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching applied jobs:", error);
+    return { success: false, data: [], totalPages: 1 };
   }
 };

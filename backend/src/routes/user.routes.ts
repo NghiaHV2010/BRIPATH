@@ -1,9 +1,6 @@
 import { Router } from "express";
 import { authenticationMiddleware, twoFactorMiddleware } from "../middlewares/auth.middleware";
-import { applyEvent, applyJob, createMessage, createReport, feedbackCompany, feedbackJob, followCompany, getAllUserFollowedCompanies, getAllUserReports, getAllUserSavedJobs, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
-import OpenAI from "openai";
-import { OPENAI_API_KEY } from "../config/env.config";
-import fs from "fs";
+import { applyEvent, applyJob, createMessage, createReport, feedbackCompany, feedbackJob, followCompany, getAllUserAppliedJobs, getAllUserFollowedCompanies, getAllUserReports, getAllUserSavedJobs, getLastestUserChat, getUserActivityHistory, getUserNotification, getUserProfile, saveJob, unfollowCompany, unsaveJob, updateUserNotification, updateUserProfile } from "../controllers/user.controller";
 
 const userRouter = Router();
 userRouter.use(authenticationMiddleware);
@@ -17,7 +14,10 @@ userRouter.get('/followed-companies', getAllUserFollowedCompanies);
 userRouter.delete('/follow-company/:companyId', unfollowCompany);
 
 userRouter.post('/feedback/company/:companyId', twoFactorMiddleware, feedbackCompany);
+
 userRouter.post('/apply-job/:jobId', applyJob);
+userRouter.get('/apply-jobs', getAllUserAppliedJobs);
+
 userRouter.post('/apply-event/:eventId', applyEvent);
 
 userRouter.get('/agent-chat', getLastestUserChat);
@@ -35,24 +35,5 @@ userRouter.get('/user/history', getUserActivityHistory);
 
 userRouter.post('/report', createReport);
 userRouter.get('/reports', getAllUserReports);
-
-// userRouter.get('/test', async (req, res) => {
-//     const openai = new OpenAI({
-//         apiKey: OPENAI_API_KEY
-//     });
-
-//     const file = await openai.files.create({
-//         file: fs.createReadStream('training.jsonl'),
-//         purpose: 'fine-tune'
-//     })
-
-//     // @ts-ignore
-//     const fineTune = await openai.fineTuning.jobs.create({
-//         training_file: file.id,
-//         model: "gpt-4.1-mini-2025-04-14"
-//     });
-
-//     console.log(fineTune);
-// })
 
 export default userRouter;

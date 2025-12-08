@@ -1115,3 +1115,89 @@ export const getAllUserReports = async (req: Request, res: Response, next: NextF
         next(error);
     }
 }
+
+export const getAllUserAppliedJobs = async (req: Request, res: Response, next: NextFunction) => {
+    const { id: user_id } = req.user as AuthUserRequestDto;
+    const numberOfApplications = 20;
+    const status = req.query.status as 'pending' | 'approved' | 'rejected' | undefined;
+    let page: number = parseInt(req.query.page as string || '1');
+
+    if (page < 1 || isNaN(page)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Số trang không hợp lệ!"));
+    }
+    page -= 1;
+
+    if (status && !['pending', 'approved', 'rejected'].includes(status)) {
+        return next(errorHandler(HTTP_ERROR.BAD_REQUEST, "Trạng thái ứng tuyển không hợp lệ!"));
+    }
+
+    try {
+        const totalApplications = await prisma.applicants.count({
+            where: {
+                status: status || undefined,
+                cvs: {
+                    users_id: user_id
+                }
+            }
+        });
+
+        const applications = await prisma.applicants.findMany({
+            where: {
+                status: status || undefined,
+                cvs: {
+                    users_id: user_id
+                }
+            },
+            orderBy: {
+                apply_date: 'desc'
+            },
+            include: {
+                jobs: {
+                    select: {
+                        id: true,
+                        job_title: true,
+                        salary: true,
+                        currency: true,
+                        location: true,
+                        status: true,
+                        companies: {
+                            select: {
+                                users: {
+                                    select: {
+                                        avatar_url: true,
+                                        username: true,
+                                    }
+                                }
+                            }
+                        },
+                        jobCategories: {
+                            select: {
+                                job_category: true
+                            }
+                        },
+                        jobLabels: {
+                            select: {
+                                label_name: true
+                            }
+                        }
+                    }
+                },
+                cvs: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                    }
+                }
+            },
+            take: numberOfApplications,
+            skip: page * numberOfApplications,
+        });
+        return res.status(HTTP_SUCCESS.OK).json({
+            success: true,
+            data: applications,
+            totalPages: Math.ceil(totalApplications / numberOfApplications)
+        });
+    } catch (error) {
+        next(error);
+    }
+}

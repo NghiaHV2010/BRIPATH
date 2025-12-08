@@ -71,7 +71,7 @@ function UserDetailModal({ user, children }: { user: User; children: React.React
         <div className="space-y-6">
           {/* User Avatar & Basic Info */}
           <div className="flex items-start space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <User className="h-8 w-8 text-white" />
             </div>
             <div className="flex-1">
