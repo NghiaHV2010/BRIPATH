@@ -20,74 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
-const VIETNAM_PROVINCES_JOB = [
-  // Thành phố trực thuộc trung ương (ưu tiên)
-  "Hà Nội",
-  "Hồ Chí Minh",
-  "Đà Nẵng",
-  "Hải Phòng",
-  "Cần Thơ",
-  // Các tỉnh thành khác
-  "An Giang",
-  "Bà Rịa - Vũng Tàu",
-  "Bắc Giang",
-  "Bắc Kạn",
-  "Bạc Liêu",
-  "Bắc Ninh",
-  "Bến Tre",
-  "Bình Định",
-  "Bình Dương",
-  "Bình Phước",
-  "Bình Thuận",
-  "Cà Mau",
-  "Cao Bằng",
-  "Đắk Lắk",
-  "Đắk Nông",
-  "Điện Biên",
-  "Đồng Nai",
-  "Đồng Tháp",
-  "Gia Lai",
-  "Hà Giang",
-  "Hà Nam",
-  "Hà Tĩnh",
-  "Hải Dương",
-  "Hậu Giang",
-  "Hòa Bình",
-  "Hưng Yên",
-  "Khánh Hòa",
-  "Kiên Giang",
-  "Kon Tum",
-  "Lai Châu",
-  "Lâm Đồng",
-  "Lạng Sơn",
-  "Lào Cai",
-  "Long An",
-  "Nam Định",
-  "Nghệ An",
-  "Ninh Bình",
-  "Ninh Thuận",
-  "Phú Thọ",
-  "Phú Yên",
-  "Quảng Bình",
-  "Quảng Nam",
-  "Quảng Ngãi",
-  "Quảng Ninh",
-  "Quảng Trị",
-  "Sóc Trăng",
-  "Sơn La",
-  "Tây Ninh",
-  "Thái Bình",
-  "Thái Nguyên",
-  "Thanh Hóa",
-  "Thừa Thiên Huế",
-  "Tiền Giang",
-  "Trà Vinh",
-  "Tuyên Quang",
-  "Vĩnh Long",
-  "Vĩnh Phúc",
-  "Yên Bái",
-];
+import { VIETNAM_PROVINCES } from "@/constants/location";
 
 // Định nghĩa các khoảng Lương (Dùng cho Salary)
 
@@ -217,7 +150,7 @@ export default function JobFilters({ onSearch, onReset }: JobFiltersProps) {
               </SelectTrigger>
 
               <SelectContent>
-                {VIETNAM_PROVINCES_JOB.map(city => (
+                {VIETNAM_PROVINCES.map(city => (
                   <SelectItem key={city} value={city}>
                     {city}
                   </SelectItem>
@@ -285,17 +218,17 @@ export default function JobFilters({ onSearch, onReset }: JobFiltersProps) {
           selectedLocation ||
           selectedLabel ||
           selectedSalary) && (
-          <div className="flex justify-center mt-2">
-            <Button
-              type="button"
-              variant="custom"
-              onClick={handleReset}
-              className="text-red-600 text-lg font-medium"
-            >
-              Xóa bộ lọc
-            </Button>
-          </div>
-        )}
+            <div className="flex justify-center mt-2">
+              <Button
+                type="button"
+                variant="custom"
+                onClick={handleReset}
+                className="text-red-600 text-lg font-medium"
+              >
+                Xóa bộ lọc
+              </Button>
+            </div>
+          )}
       </form>
     </div>
   );
