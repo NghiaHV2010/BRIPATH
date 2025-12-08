@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { getPaymentStats } from "../../api/admin_api";
-import { CreditCard, DollarSign, TrendingUp, Users, Calendar } from "lucide-react";
+import { CreditCard, DollarSign, TrendingUp, Users, Calendar, Eye, Building2, User as UserIcon, Award } from "lucide-react";
 import { AdminCardSkeleton } from "./AdminCardSkeleton";
 import { AdminEmptyState } from "./AdminEmptyState";
 import { AdminTableSkeleton } from "./AdminTableSkeleton";
@@ -36,8 +37,19 @@ interface PaymentStats {
     status: string;
     created_at: string;
     user: {
+      avatar_url?: string;
       username: string;
       email: string;
+      roles?: {
+        role_name: string;
+      };
+    };
+    subscription?: {
+      status: string;
+      end_date: string;
+      membershipPlans: {
+        plan_name: string;
+      };
     };
   }>;
   recentTransactionsPagination?: {
@@ -53,6 +65,8 @@ export default function PaymentsManagement() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<number>(30);
   const [transactionsPage, setTransactionsPage] = useState<number>(1);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const pageSize = 20;
 
   const fetchPaymentStats = async (days: number, page: number = 1) => {
@@ -101,6 +115,21 @@ export default function PaymentsManagement() {
     }
   };
 
+  const getSubscriptionStatusBadge = (status?: string) => {
+    if (!status) return null;
+
+    switch (status) {
+      case 'on_going':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Đang hoạt động</Badge>;
+      case 'over_date':
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Đã hết hạn</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive" className="bg-red-100 text-red-800">Đã hủy</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success':
@@ -112,6 +141,50 @@ export default function PaymentsManagement() {
       default:
         return 'text-gray-600';
     }
+  };
+
+  const getRoleLabel = (roleName?: string) => {
+    if (!roleName) return '';
+
+    const roleLabels: Record<string, string> = {
+      'Company': 'Doanh nghiệp',
+      'User': 'Ứng viên',
+      'Admin': 'Quản trị viên',
+    };
+
+    return roleLabels[roleName] || roleName;
+  };
+
+  const getRoleBadge = (roleName?: string) => {
+    if (!roleName) return null;
+
+    const roleColors: Record<string, string> = {
+      'Company': 'bg-blue-100 text-blue-800',
+      'User': 'bg-gray-100 text-gray-800',
+      'Admin': 'bg-purple-100 text-purple-800',
+    };
+
+    return (
+      <Badge variant="outline" className={roleColors[roleName] || 'bg-gray-100 text-gray-800'}>
+        {getRoleLabel(roleName)}
+      </Badge>
+    );
+  };
+
+  const getPaymentMethodLabel = (method: string) => {
+    const labels: Record<string, string> = {
+      'e_wallet': 'Ví điện tử',
+      'bank_card': 'Thẻ ngân hàng',
+      'credit_card': 'Thẻ tín dụng',
+      'debit_card': 'Thẻ ghi nợ',
+      'bank_transfer': 'Chuyển khoản',
+    };
+    return labels[method] || method;
+  };
+
+  const handleViewDetails = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
   };
 
   if (loading) {
@@ -141,15 +214,17 @@ export default function PaymentsManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Người dùng</TableHead>
+                  <TableHead>Gói dịch vụ</TableHead>
                   <TableHead>Số tiền</TableHead>
                   <TableHead>Cổng thanh toán</TableHead>
                   <TableHead>Phương thức</TableHead>
                   <TableHead>Trạng thái</TableHead>
                   <TableHead>Thời gian</TableHead>
+                  <TableHead>Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <AdminTableSkeleton columns={6} rows={5} />
+                <AdminTableSkeleton columns={8} rows={5} />
               </TableBody>
             </Table>
           </div>
@@ -267,8 +342,8 @@ export default function PaymentsManagement() {
               <CardContent>
                 <div className="text-2xl font-bold">
                   {(() => {
-                  const total = statusStats.reduce((sum, item) => sum + item.count, 0) || 0;
-                  const success = statusStats.find(s => s.status === 'success')?.count || 0;
+                    const total = statusStats.reduce((sum, item) => sum + item.count, 0) || 0;
+                    const success = statusStats.find(s => s.status === 'success')?.count || 0;
                     return total > 0 ? ((success / total) * 100).toFixed(1) : 0;
                   })()}%
                 </div>
@@ -347,7 +422,7 @@ export default function PaymentsManagement() {
                   <div className="space-y-2">
                     {methodStats.map((item, index) => (
                       <div key={index} className="flex justify-between items-center">
-                        <span className="text-sm">{item.method}</span>
+                        <span className="text-sm">{getPaymentMethodLabel(item.method)}</span>
                         <div className="text-right">
                           <div className="font-semibold">{formatNumber(item.count)}</div>
                           <div className="text-xs text-gray-500">{formatCurrency(item.revenue)}</div>
@@ -375,22 +450,24 @@ export default function PaymentsManagement() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg">
+              <div className="border rounded-lg overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Người dùng</TableHead>
+                      <TableHead className="whitespace-nowrap">Gói dịch vụ</TableHead>
                       <TableHead className="whitespace-nowrap">Số tiền</TableHead>
                       <TableHead className="whitespace-nowrap">Cổng thanh toán</TableHead>
                       <TableHead className="whitespace-nowrap">Phương thức</TableHead>
                       <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
                       <TableHead className="whitespace-nowrap">Thời gian</TableHead>
+                      <TableHead className="whitespace-nowrap">Hành động</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentTransactions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6}>
+                        <TableCell colSpan={8}>
                           <AdminEmptyState
                             icon={Calendar}
                             title="Chưa có giao dịch gần đây"
@@ -402,16 +479,57 @@ export default function PaymentsManagement() {
                       recentTransactions.map((transaction) => (
                         <TableRow key={transaction.id}>
                           <TableCell>
-                            <div>
-                              <p className="font-medium">{transaction.user.username}</p>
-                              <p className="text-sm text-gray-500">{transaction.user.email}</p>
+                            <div className="flex items-center space-x-3">
+                              {transaction.user.avatar_url ? (
+                                <img
+                                  loading="lazy"
+                                  src={transaction.user.avatar_url}
+                                  alt={transaction.user.username}
+                                  className="w-8 h-8 rounded-full object-cover shrink-0"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                                  {transaction.user.roles?.role_name === 'Company' ? (
+                                    <Building2 className="h-4 w-4 text-blue-600" />
+                                  ) : (
+                                    <UserIcon className="h-4 w-4 text-blue-600" />
+                                  )}
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="font-medium truncate">{transaction.user.username}</p>
+                                <p className="text-sm text-gray-500 truncate">{transaction.user.email}</p>
+                                {transaction.user.roles && (
+                                  <div className="mt-1">
+                                    {getRoleBadge(transaction.user.roles.role_name)}
+                                  </div>
+                                )}
+                              </div>
                             </div>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {transaction.subscription ? (
+                              <div className="space-y-1">
+                                <Badge variant="outline" className="font-medium">
+                                  {transaction.subscription.membershipPlans.plan_name}
+                                </Badge>
+                                <div className="text-xs text-gray-500 italic">
+                                  Hết hạn: {new Date(transaction.subscription.end_date).toLocaleDateString('vi-VN')}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
                           </TableCell>
                           <TableCell className="font-semibold whitespace-nowrap">
                             {formatCurrency(transaction.amount)}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">{transaction.payment_gateway}</TableCell>
-                          <TableCell className="whitespace-nowrap">{transaction.payment_method}</TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <Badge variant="outline">{transaction.payment_gateway}</Badge>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {getPaymentMethodLabel(transaction.payment_method)}
+                          </TableCell>
                           <TableCell className="whitespace-nowrap">{getStatusBadge(transaction.status)}</TableCell>
                           <TableCell className="whitespace-nowrap">
                             {new Date(transaction.created_at).toLocaleDateString('vi-VN', {
@@ -422,6 +540,15 @@ export default function PaymentsManagement() {
                               minute: '2-digit',
                             })}
                           </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewDetails(transaction)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -429,7 +556,7 @@ export default function PaymentsManagement() {
                 </Table>
               </div>
               {recentTransactions.length > 0 && (
-                <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-4 text-sm text-gray-600">
                   <div>
                     Hiển thị{" "}
                     <span className="font-semibold">
@@ -474,6 +601,168 @@ export default function PaymentsManagement() {
           </Card>
         </CardContent>
       </Card>
+
+      {/* Transaction Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Chi tiết giao dịch
+            </DialogTitle>
+            <DialogDescription>
+              Xem thông tin chi tiết về giao dịch thanh toán
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="space-y-6">
+              {/* Transaction ID & Status */}
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div>
+                  <p className="text-xs text-gray-500">Mã giao dịch</p>
+                  <p className="font-mono text-sm mt-1">{selectedTransaction.id}</p>
+                </div>
+                {getStatusBadge(selectedTransaction.status)}
+              </div>
+
+              {/* User Info & Subscription */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <UserIcon className="h-4 w-4" />
+                      Thông tin người dùng
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {selectedTransaction.user.avatar_url && (
+                      <div className="flex justify-center">
+                        <img
+                          loading="lazy"
+                          src={selectedTransaction.user.avatar_url}
+                          alt={selectedTransaction.user.username}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs text-gray-500">Tên</p>
+                      <p className="text-sm font-medium">{selectedTransaction.user.username}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <p className="text-sm">{selectedTransaction.user.email}</p>
+                    </div>
+                    {selectedTransaction.user.roles && (
+                      <div>
+                        <p className="text-xs text-gray-500">Vai trò</p>
+                        <div className="mt-1">
+                          {getRoleBadge(selectedTransaction.user.roles.role_name)}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Subscription Info */}
+                {selectedTransaction.subscription && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Award className="h-4 w-4" />
+                        Thông tin gói dịch vụ
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div>
+                        <p className="text-xs text-gray-500">Tên gói</p>
+                        <Badge variant="outline" className="mt-1 font-medium">
+                          {selectedTransaction.subscription.membershipPlans.plan_name}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Trạng thái gói</p>
+                        <div className="mt-1">
+                          {getSubscriptionStatusBadge(selectedTransaction.subscription.status)}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Ngày hết hạn</p>
+                        <p className="text-sm mt-1">
+                          {new Date(selectedTransaction.subscription.end_date).toLocaleString('vi-VN', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Payment Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Thông tin thanh toán
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Số tiền</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {formatCurrency(selectedTransaction.amount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Đơn vị tiền tệ</p>
+                    <p className="text-sm mt-1">{selectedTransaction.currency}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Cổng thanh toán</p>
+                    <Badge variant="outline" className="mt-1">
+                      {selectedTransaction.payment_gateway}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Phương thức</p>
+                    <p className="text-sm mt-1">
+                      {getPaymentMethodLabel(selectedTransaction.payment_method)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Timeline */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Thời gian giao dịch
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">
+                    {new Date(selectedTransaction.created_at).toLocaleString('vi-VN', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

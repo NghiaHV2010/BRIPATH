@@ -183,7 +183,7 @@ export const getRevenueStats = async (req: Request, res: Response) => {
 
 export const getPaymentStats = async (req: Request, res: Response) => {
     try {
-        const { period = '30', page = '1', limit = '20' } = req.query; 
+        const { period = '30', page = '1', limit = '20' } = req.query;
         const days = parseInt(period as string);
 
         const currentPage = Math.max(parseInt(page as string, 10) || 1, 1);
@@ -256,8 +256,25 @@ export const getPaymentStats = async (req: Request, res: Response) => {
             include: {
                 users: {
                     select: {
+                        avatar_url: true,
                         username: true,
-                        email: true
+                        email: true,
+                        roles: {
+                            select: {
+                                role_name: true
+                            }
+                        }
+                    }
+                },
+                subscriptions: {
+                    select: {
+                        status: true,
+                        end_date: true,
+                        membershipPlans: {
+                            select: {
+                                plan_name: true,
+                            }
+                        }
                     }
                 }
             },
@@ -295,7 +312,8 @@ export const getPaymentStats = async (req: Request, res: Response) => {
                     payment_method: transaction.payment_method,
                     status: transaction.status,
                     created_at: transaction.created_at,
-                    user: transaction.users
+                    user: transaction.users,
+                    subscription: transaction.subscriptions
                 })),
                 recentTransactionsPagination: {
                     page: currentPage,

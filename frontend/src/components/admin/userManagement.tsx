@@ -264,11 +264,11 @@ export default function UserManagement() {
 
   const getStatusColor = (lastLoggedIn?: string) => {
     if (!lastLoggedIn) return 'text-gray-500';
-    
+
     const lastLogin = new Date(lastLoggedIn);
     const now = new Date();
     const diffInHours = (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 24) return 'text-green-600';
     if (diffInHours < 168) return 'text-yellow-600'; // 7 days
     return 'text-red-600';
@@ -276,11 +276,11 @@ export default function UserManagement() {
 
   const getStatusText = (lastLoggedIn?: string) => {
     if (!lastLoggedIn) return 'Chưa đăng nhập';
-    
+
     const lastLogin = new Date(lastLoggedIn);
     const now = new Date();
     const diffInHours = (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 1) return 'Vừa hoạt động';
     if (diffInHours < 24) return 'Hoạt động hôm nay';
     if (diffInHours < 168) return 'Hoạt động tuần này';
@@ -294,9 +294,46 @@ export default function UserManagement() {
         <VisitorChart title="Tổng số người dùng" subtitle="Tăng trưởng người dùng theo thời gian" />
         <VisitorChart title="Hoạt động người dùng" subtitle="Mức độ hoạt động theo từng giai đoạn" />
       </div>
-      
+
       <Card>
         <CardHeader>
+          <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
+                    <p className="text-2xl font-bold">{roleCounts.all}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Ứng viên</p>
+                    <p className="text-2xl font-bold">{roleCounts.candidate}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Công ty</p>
+                    <p className="text-2xl font-bold">{roleCounts.company}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Quản lý người dùng
@@ -379,7 +416,7 @@ export default function UserManagement() {
                               className="w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                               <User className="h-5 w-5 text-white" />
                             </div>
                           )}
@@ -412,7 +449,7 @@ export default function UserManagement() {
                         <UserDetailModal user={user}>
                           <Button size="sm" variant="outline" className="flex items-center gap-2">
                             <Eye className="h-4 w-4" />
-                            Xem chi tiết
+                            Chi tiết
                           </Button>
                         </UserDetailModal>
                       </TableCell>
@@ -479,43 +516,7 @@ export default function UserManagement() {
           )}
 
           {/* Summary Stats */}
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
-                    <p className="text-2xl font-bold">{roleCounts.all}</p>
-                  </div>
-                  <Users className="h-8 w-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Ứng viên</p>
-                    <p className="text-2xl font-bold">{roleCounts.candidate}</p>
-                  </div>
-                  <Users className="h-8 w-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Công ty</p>
-                    <p className="text-2xl font-bold">{roleCounts.company}</p>
-                  </div>
-                  <Users className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </CardContent>
       </Card>
     </div>

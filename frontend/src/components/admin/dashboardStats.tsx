@@ -101,7 +101,7 @@ export default function DashboardStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Total Revenue */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Card className="border-0 shadow-lg bg-linear-to-br from-blue-50 to-indigo-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700 flex items-center justify-between w-full">
             <span>TỔNG DOANH THU</span>
@@ -129,7 +129,7 @@ export default function DashboardStats() {
       </Card>
 
       {/* New Users */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
+      <Card className="border-0 shadow-lg bg-linear-to-br from-green-50 to-emerald-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">NGƯỜI DÙNG MỚI</CardTitle>
           <div className="p-2 bg-green-500 rounded-full">
@@ -150,7 +150,7 @@ export default function DashboardStats() {
       </Card>
 
       {/* Sales */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-orange-100">
+      <Card className="border-0 shadow-lg bg-linear-to-br from-yellow-50 to-orange-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">GIAO DỊCH</CardTitle>
           <div className="p-2 bg-yellow-500 rounded-full">
@@ -171,7 +171,7 @@ export default function DashboardStats() {
       </Card>
 
       {/* Performance */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+      <Card className="border-0 shadow-lg bg-linear-to-br from-purple-50 to-violet-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">HIỆU SUẤT</CardTitle>
           <div className="p-2 bg-purple-500 rounded-full">
@@ -190,6 +190,6 @@ export default function DashboardStats() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 }

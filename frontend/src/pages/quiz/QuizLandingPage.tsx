@@ -276,16 +276,11 @@ export default function QuizLandingPage() {
             {/* Hero Section */}
             {!hasCareerPath && (
               <>
-                <div ref={heroRef} className="pt-20 pb-16 text-center">
-                  <div className="inline-block mb-6 px-4 py-2 bg-blue-100 rounded-full">
-                    <span className="text-blue-600 font-semibold text-sm">
-                      🎯 Khám phá tiềm năng của bạn
-                    </span>
-                  </div>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+                <div ref={heroRef} className="pt-12 pb-16 text-center">
+                  <h1 className="text-4xl! md:text-5xl! lg:text-6xl! font-extrabold text-gray-900 mb-6 leading-tight">
                     Định Hướng
-                    <span className="text-blue-600"> Nghề Nghiệp</span>
-                    <br />
+                    <span className="text-blue-600 max-sm:block"> Nghề Nghiệp</span>
+                    <br className="max-sm:hidden" />
                     Cho Tương Lai
                   </h1>
                   <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">

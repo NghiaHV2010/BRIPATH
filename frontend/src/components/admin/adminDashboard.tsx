@@ -13,45 +13,44 @@ import LabelManagement from "./labelManagement";
 import RecentActivity from "./recentActivity";
 import QuickStats from "./quickStats";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { 
-  Settings
-} from "lucide-react";
+import { Settings } from "lucide-react";
 import { PostComposer } from "../ui/PostComposer";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
-            case "dashboard":
-              return (
-                <div className="space-y-6">
-                  <DashboardStats />
-                  <RevenueCharts />
-                  
-                  {/* Recent Activity and Quick Stats */}
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <RecentActivity />
-                    <QuickStats />
-                  </div>
-                </div>
+      case "dashboard":
+        return (
+          <div className="space-y-6">
+            <DashboardStats />
+            <RevenueCharts />
+
+            {/* Recent Activity and Quick Stats */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <RecentActivity />
+              <QuickStats />
+            </div>
+          </div>
         );
-      
+
       case "companies":
         return <CompanyManagement />;
-      
+
       case "users":
         return <UserManagement />;
-      
+
       case "events":
         return <EventsManagement />;
-      
+
       case "reports":
         return <ReportsManagement />;
-      
+
       case "payments":
         return <PaymentsManagement />;
-      
+
       case "post-composer":
         return (
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
@@ -80,13 +79,13 @@ export default function AdminDashboard() {
             </div>
           </div>
         );
-      
+
       case "labels":
         return <LabelManagement />;
-      
+
       case "analytics":
         return <Analytics />;
-      
+
       case "settings":
         return (
           <Card>
@@ -101,7 +100,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         );
-      
+
       default:
         return (
           <Card>
@@ -117,20 +116,28 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      
+    <div className="flex h-screen bg-linear-to-br from-gray-50 to-blue-50">
+      <AdminSidebar
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          setSidebarOpen(false); // Close sidebar after selecting a tab on mobile
+        }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader />
-        
-        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-50 to-blue-50">
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto p-6 bg-linear-to-br from-gray-50 to-blue-50">
           <div className="max-w-7xl mx-auto space-y-6">
-            {activeTab === "dashboard" && (
+            {/* {activeTab === "dashboard" && (
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                <h1 className="text-3xl! font-bold text-gray-900 mb-1">Dashboard</h1>
                 <p className="text-gray-600">Tổng quan về hoạt động của hệ thống</p>
               </div>
-            )}
+            )} */}
             {renderContent()}
           </div>
         </main>

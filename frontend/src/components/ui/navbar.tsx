@@ -77,6 +77,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
           <div className="shrink-0">
             <Link to="/" className="text-xl font-bold">
               <img
+                loading="lazy"
                 src="/assets/images/app_logo.png"
                 alt="BRIPATH Logo"
                 className="h-12"

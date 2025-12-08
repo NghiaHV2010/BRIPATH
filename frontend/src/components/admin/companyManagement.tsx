@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { getCompaniesByStatus, updateCompanyStatus } from "../../api/admin_api";
-import { Building2, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, MapPin, Calendar } from "lucide-react";
+import { Building2, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, MapPin, Calendar, FileImage, X } from "lucide-react";
 import { AdminTableSkeleton } from "./AdminTableSkeleton";
 import { AdminEmptyState } from "./AdminEmptyState";
 
@@ -47,6 +47,8 @@ export default function CompanyManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const fetchAllCompaniesAndCounts = async () => {
@@ -135,6 +137,11 @@ export default function CompanyManagement() {
     setIsModalOpen(true);
   };
 
+  const handleImageClick = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -176,6 +183,102 @@ export default function CompanyManagement() {
     }
   };
 
+  const renderCompanyCard = (company: Company) => (
+    <Card key={company.id} className="mb-4">
+      <CardContent className="p-4 space-y-4">
+        {/* Header with avatar and basic info */}
+        <div className="flex items-start space-x-3">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+            <Building2 className="h-6 w-6 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-gray-900 truncate">{company.users?.username}</p>
+            <p className="text-sm text-gray-500 truncate">{company.users?.email}</p>
+            <div className="flex items-center gap-2 mt-2">
+              {getStatusBadge(company.status)}
+            </div>
+          </div>
+        </div>
+
+        {/* Details Grid */}
+        <div className="space-y-3 pt-3 border-t">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">Mã số thuế:</span>
+            <span className="text-sm font-mono font-medium">{company.fax_code}</span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">Loại:</span>
+            <Badge variant="outline" className="text-xs">
+              {getCompanyTypeLabel(company.company_type)}
+            </Badge>
+          </div>
+
+          {company.business_certificate && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Giấy phép:</span>
+              <button
+                onClick={() => handleImageClick(company.business_certificate!)}
+                className="relative group cursor-pointer"
+              >
+                <img
+                  src={company.business_certificate}
+                  alt="Business Certificate"
+                  className="w-16 h-16 object-cover rounded border blur-sm group-hover:blur-none transition-all"
+                />
+                <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0 transition-opacity">
+                  <FileImage className="h-6 w-6 text-gray-600" />
+                </div>
+              </button>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">Ngày đăng ký:</span>
+            <span className="text-sm">{new Date(company.created_at).toLocaleDateString('vi-VN')}</span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-2 pt-3 border-t">
+          {company.status === 'pending' && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 text-green-600 hover:text-green-700"
+                onClick={() => handleStatusUpdate(company.id, 'approved')}
+                disabled={actionLoading === company.id}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Duyệt
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 text-red-600 hover:text-red-700"
+                onClick={() => handleStatusUpdate(company.id, 'rejected')}
+                disabled={actionLoading === company.id}
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Từ chối
+              </Button>
+            </>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full"
+            onClick={() => handleViewCompany(company)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Xem chi tiết
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6">
       {/* Status Tabs */}
@@ -187,291 +290,348 @@ export default function CompanyManagement() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-4 mb-6">
+          {/* Responsive Status Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
             {(['pending', 'approved', 'rejected'] as const).map((tabStatus) => (
               <Button
                 key={tabStatus}
                 variant={status === tabStatus ? "default" : "outline"}
                 onClick={() => handleStatusChange(tabStatus)}
-                className="capitalize"
+                className="w-full justify-between"
               >
-                {tabStatus === 'pending' && 'Chờ duyệt'}
-                {tabStatus === 'approved' && 'Đã duyệt'}
-                {tabStatus === 'rejected' && 'Từ chối'}
-                <Badge variant="secondary" className="ml-2">
+                <span>
+                  {tabStatus === 'pending' && 'Chờ duyệt'}
+                  {tabStatus === 'approved' && 'Đã duyệt'}
+                  {tabStatus === 'rejected' && 'Từ chối'}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className={status === tabStatus ? "bg-white/20" : ""}
+                >
                   {getStatusCount(tabStatus)}
                 </Badge>
               </Button>
             ))}
           </div>
 
-          {/* Companies Table */}
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Công ty</TableHead>
-                  <TableHead>Mã số thuế</TableHead>
-                  <TableHead className="whitespace-nowrap">Loại hình</TableHead>
-                  <TableHead className="whitespace-nowrap">Loại doanh nghiệp</TableHead>
-                  <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
-                  <TableHead className="whitespace-nowrap">Ngày đăng ký</TableHead>
-                  <TableHead className="whitespace-nowrap">Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <AdminTableSkeleton columns={7} rows={5} />
-                ) : companies.length === 0 ? (
+          {loading ? (
+            // Wrap skeleton in proper table structure
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7}>
-                      <AdminEmptyState
-                        icon={Building2}
-                        title="Chưa có công ty nào"
-                        description={`Chưa có hồ sơ ${getStatusLabel(status)} nào trong danh sách. Vui lòng kiểm tra lại sau.`}
-                      />
-                    </TableCell>
+                    <TableHead>Công ty</TableHead>
+                    <TableHead>Mã số thuế</TableHead>
+                    <TableHead>Giấy phép</TableHead>
+                    <TableHead>Loại doanh nghiệp</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày đăng ký</TableHead>
+                    <TableHead>Hành động</TableHead>
                   </TableRow>
-                ) : (
-                  companies.map((company) => (
-                    <TableRow key={company.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-blue-600" />
+                </TableHeader>
+                <TableBody>
+                  <AdminTableSkeleton columns={7} rows={5} />
+                </TableBody>
+              </Table>
+            </div>
+          ) : companies.length === 0 ? (
+            <AdminEmptyState
+              icon={Building2}
+              title="Chưa có công ty nào"
+              description={`Chưa có hồ sơ ${getStatusLabel(status)} nào trong danh sách. Vui lòng kiểm tra lại sau.`}
+            />
+          ) : (
+            <>
+              {/* Mobile/Tablet Card View */}
+              <div className="block lg:hidden">
+                {companies.map((company) => renderCompanyCard(company))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block border rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Công ty</TableHead>
+                      <TableHead>Mã số thuế</TableHead>
+                      <TableHead className="whitespace-nowrap">Giấy phép</TableHead>
+                      <TableHead className="whitespace-nowrap">Loại doanh nghiệp</TableHead>
+                      <TableHead className="whitespace-nowrap">Trạng thái</TableHead>
+                      <TableHead className="whitespace-nowrap">Ngày đăng ký</TableHead>
+                      <TableHead className="whitespace-nowrap">Hành động</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {companies.map((company) => (
+                      <TableRow key={company.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <Building2 className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{company.users?.username}</p>
+                              <p className="text-sm text-gray-500">{company.users?.email}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{company.users?.username}</p>
-                            <p className="text-sm text-gray-500">{company.users?.email}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {company.fax_code}
-                      </TableCell>
-                      <TableCell>
-                        {company.business_certificate || 'Chưa cập nhật'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {getCompanyTypeLabel(company.company_type)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {getStatusBadge(company.status)}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(company.created_at).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          {company.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-green-600 hover:text-green-700"
-                                onClick={() => handleStatusUpdate(company.id, 'approved')}
-                                disabled={actionLoading === company.id}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Duyệt
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => handleStatusUpdate(company.id, 'rejected')}
-                                disabled={actionLoading === company.id}
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Từ chối
-                              </Button>
-                            </>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {company.fax_code}
+                        </TableCell>
+                        <TableCell>
+                          {company.business_certificate ? (
+                            <button
+                              onClick={() => handleImageClick(company.business_certificate!)}
+                              className="relative group cursor-pointer"
+                            >
+                              <img
+                                loading="lazy"
+                                src={company.business_certificate}
+                                alt="Business Certificate"
+                                className="w-20 h-20 object-cover rounded border blur-sm transition-all"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center transition-opacity">
+                                <FileImage className="h-6 w-6 text-gray-600" />
+                              </div>
+                            </button>
+                          ) : (
+                            'Chưa cập nhật'
                           )}
-                          <Dialog open={isModalOpen && selectedCompany?.id === company.id} onOpenChange={setIsModalOpen}>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleViewCompany(company)}
-                                className="flex items-center gap-2"
-                              >
-                                <Eye className="h-4 w-4" />
-                                Xem chi tiết
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                  <Building2 className="h-5 w-5" />
-                                  Chi tiết công ty
-                                </DialogTitle>
-                                <DialogDescription>
-                                  Xem thông tin chi tiết và quản lý trạng thái của công ty
-                                </DialogDescription>
-                              </DialogHeader>
-                              {selectedCompany && (
-                                <div className="space-y-6">
-                                  {/* Company Avatar & Basic Info */}
-                                  <div className="flex items-start space-x-4">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                      <Building2 className="h-8 w-8 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                      <h3 className="text-xl font-semibold">{selectedCompany.users?.username}</h3>
-                                      <p className="text-gray-600">{selectedCompany.users?.email}</p>
-                                      <div className="flex items-center gap-2 mt-2">
-                                        <Building2 className="h-4 w-4 text-gray-500" />
-                                        {getStatusBadge(selectedCompany.status)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {getCompanyTypeLabel(company.company_type)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {getStatusBadge(company.status)}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(company.created_at).toLocaleDateString('vi-VN')}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            {company.status === 'pending' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-green-600 hover:text-green-700"
+                                  onClick={() => handleStatusUpdate(company.id, 'approved')}
+                                  disabled={actionLoading === company.id}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Duyệt
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600 hover:text-red-700"
+                                  onClick={() => handleStatusUpdate(company.id, 'rejected')}
+                                  disabled={actionLoading === company.id}
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Từ chối
+                                </Button>
+                              </>
+                            )}
+                            <Dialog open={isModalOpen && selectedCompany?.id === company.id} onOpenChange={setIsModalOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewCompany(company)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  Chi tiết
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    <Building2 className="h-5 w-5" />
+                                    Chi tiết công ty
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    Xem thông tin chi tiết và quản lý trạng thái của công ty
+                                  </DialogDescription>
+                                </DialogHeader>
+                                {selectedCompany && (
+                                  <div className="space-y-6">
+                                    {/* Company Avatar & Basic Info */}
+                                    <div className="flex items-start space-x-4">
+                                      <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                        <Building2 className="h-8 w-8 text-white" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <h3 className="text-xl font-semibold">{selectedCompany.users?.username}</h3>
+                                        <p className="text-gray-600">{selectedCompany.users?.email}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <Building2 className="h-4 w-4 text-gray-500" />
+                                          {getStatusBadge(selectedCompany.status)}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
 
-                                  {/* Detailed Information Grid */}
-                                  <div className="grid gap-4 md:grid-cols-2">
-
-                                    {/* Company Information */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                          <Building2 className="h-4 w-4" />
-                                          Thông tin công ty
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent className="space-y-3">
-                                        <div className="space-y-1">
-                                          <p className="text-xs text-gray-500">Loại doanh nghiệp</p>
-                                          <Badge variant="outline">
-                                            {getCompanyTypeLabel(selectedCompany.company_type)}
-                                          </Badge>
-                                        </div>
-                                        <div className="space-y-1">
-                                          <p className="text-xs text-gray-500">Mã số thuế</p>
-                                          <span className="text-sm font-mono">{selectedCompany.fax_code}</span>
-                                        </div>
-                                        {selectedCompany.business_certificate && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-500">Giấy tờ kinh doanh</p>
-                                            <span className="text-sm break-all">{selectedCompany.business_certificate}</span>
-                                          </div>
-                                        )}
-                                        {selectedCompany.users?.phone && (
-                                          <div className="space-y-1">
-                                            <p className="text-xs text-gray-500">Số điện thoại</p>
-                                            <span className="text-sm">{selectedCompany.users?.phone}</span>
-                                          </div>
-                                        )}
-                                      </CardContent>
-                                    </Card>
-
-                                    {/* Address Information */}
-                                    {(selectedCompany.users?.address_street || selectedCompany.users?.address_city) && (
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                            <MapPin className="h-4 w-4" />
-                                            Địa chỉ
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                          {selectedCompany.users && (
-                                            <p className="text-sm">
-                                              {selectedCompany.users.address_street && `${selectedCompany.users.address_street}, `}
-                                              {selectedCompany.users.address_ward && `${selectedCompany.users.address_ward}, `}
-                                              {selectedCompany.users.address_city && `${selectedCompany.users.address_city}, `}
-                                              {selectedCompany.users.address_country && selectedCompany.users.address_country}
-                                            </p>
-                                          )}
-                                        </CardContent>
-                                      </Card>
-                                    )}
-
-                                    {/* Fields */}
-                                    {selectedCompany.fields && (
+                                    {/* Detailed Information Grid */}
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                      {/* Company Information */}
                                       <Card>
                                         <CardHeader>
                                           <CardTitle className="text-sm font-medium flex items-center gap-2">
                                             <Building2 className="h-4 w-4" />
-                                            Lĩnh vực hoạt động
+                                            Thông tin công ty
                                           </CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                          <Badge variant="outline">
-                                            {selectedCompany.fields.field_name}
-                                          </Badge>
+                                        <CardContent className="space-y-3">
+                                          <div className="space-y-1">
+                                            <p className="text-xs text-gray-500">Loại doanh nghiệp</p>
+                                            <Badge variant="outline">
+                                              {getCompanyTypeLabel(selectedCompany.company_type)}
+                                            </Badge>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs text-gray-500">Mã số thuế</p>
+                                            <span className="text-sm font-mono">{selectedCompany.fax_code}</span>
+                                          </div>
+                                          {selectedCompany.business_certificate && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs text-gray-500">Giấy tờ kinh doanh</p>
+                                              <button
+                                                onClick={() => handleImageClick(selectedCompany.business_certificate!)}
+                                                className="relative group cursor-pointer w-full"
+                                              >
+                                                <img
+                                                  loading="lazy"
+                                                  src={selectedCompany.business_certificate}
+                                                  alt="Business Certificate"
+                                                  className="w-full h-32 object-cover rounded border blur-sm group-hover:blur-none transition-all"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0 transition-opacity">
+                                                  <FileImage className="h-8 w-8 text-gray-600" />
+                                                  <span className="ml-2 text-sm text-gray-600">Click để xem</span>
+                                                </div>
+                                              </button>
+                                            </div>
+                                          )}
+                                          {selectedCompany.users?.phone && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs text-gray-500">Số điện thoại</p>
+                                              <span className="text-sm">{selectedCompany.users?.phone}</span>
+                                            </div>
+                                          )}
                                         </CardContent>
                                       </Card>
-                                    )}
 
-                                    {/* Timeline Information */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                          <Calendar className="h-4 w-4" />
-                                          Thời gian
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                          <Calendar className="h-4 w-4 text-gray-500" />
-                                          <span className="text-sm">Đăng ký: {new Date(selectedCompany.created_at).toLocaleDateString('vi-VN')}</span>
-                                        </div>
-                                        {selectedCompany.approved_at && (
+                                      {/* Address Information */}
+                                      {(selectedCompany.users?.address_street || selectedCompany.users?.address_city) && (
+                                        <Card>
+                                          <CardHeader>
+                                            <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                              <MapPin className="h-4 w-4" />
+                                              Địa chỉ
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent>
+                                            {selectedCompany.users && (
+                                              <p className="text-sm">
+                                                {selectedCompany.users.address_street && `${selectedCompany.users.address_street}, `}
+                                                {selectedCompany.users.address_ward && `${selectedCompany.users.address_ward}, `}
+                                                {selectedCompany.users.address_city && `${selectedCompany.users.address_city}, `}
+                                                {selectedCompany.users.address_country && selectedCompany.users.address_country}
+                                              </p>
+                                            )}
+                                          </CardContent>
+                                        </Card>
+                                      )}
+
+                                      {/* Fields */}
+                                      {selectedCompany.fields && (
+                                        <Card>
+                                          <CardHeader>
+                                            <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                              <Building2 className="h-4 w-4" />
+                                              Lĩnh vực hoạt động
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent>
+                                            <Badge variant="outline">
+                                              {selectedCompany.fields.field_name}
+                                            </Badge>
+                                          </CardContent>
+                                        </Card>
+                                      )}
+
+                                      {/* Timeline Information */}
+                                      <Card>
+                                        <CardHeader>
+                                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                            <Calendar className="h-4 w-4" />
+                                            Thời gian
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2">
                                           <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-gray-500" />
-                                            <span className="text-sm">Duyệt: {new Date(selectedCompany.approved_at).toLocaleDateString('vi-VN')}</span>
+                                            <span className="text-sm">Đăng ký: {new Date(selectedCompany.created_at).toLocaleDateString('vi-VN')}</span>
                                           </div>
-                                        )}
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-
-                                  {/* Actions */}
-                                  {selectedCompany.status === 'pending' && (
-                                    <div className="flex gap-2 pt-4 border-t">
-                                      <Button
-                                        variant="outline"
-                                        className="text-green-600 hover:text-green-700"
-                                        onClick={async () => {
-                                          await handleStatusUpdate(selectedCompany.id, 'approved');
-                                          setIsModalOpen(false);
-                                        }}
-                                        disabled={actionLoading === selectedCompany.id}
-                                      >
-                                        <CheckCircle className="h-4 w-4 mr-1" />
-                                        Duyệt công ty
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        className="text-red-600 hover:text-red-700"
-                                        onClick={async () => {
-                                          await handleStatusUpdate(selectedCompany.id, 'rejected');
-                                          setIsModalOpen(false);
-                                        }}
-                                        disabled={actionLoading === selectedCompany.id}
-                                      >
-                                        <XCircle className="h-4 w-4 mr-1" />
-                                        Từ chối
-                                      </Button>
+                                          {selectedCompany.approved_at && (
+                                            <div className="flex items-center gap-2">
+                                              <Calendar className="h-4 w-4 text-gray-500" />
+                                              <span className="text-sm">Duyệt: {new Date(selectedCompany.approved_at).toLocaleDateString('vi-VN')}</span>
+                                            </div>
+                                          )}
+                                        </CardContent>
+                                      </Card>
                                     </div>
-                                  )}
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+
+                                    {/* Actions */}
+                                    {selectedCompany.status === 'pending' && (
+                                      <div className="flex gap-2 pt-4 border-t">
+                                        <Button
+                                          variant="outline"
+                                          className="text-green-600 hover:text-green-700"
+                                          onClick={async () => {
+                                            await handleStatusUpdate(selectedCompany.id, 'approved');
+                                            setIsModalOpen(false);
+                                          }}
+                                          disabled={actionLoading === selectedCompany.id}
+                                        >
+                                          <CheckCircle className="h-4 w-4 mr-1" />
+                                          Duyệt công ty
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          className="text-red-600 hover:text-red-700"
+                                          onClick={async () => {
+                                            await handleStatusUpdate(selectedCompany.id, 'rejected');
+                                            setIsModalOpen(false);
+                                          }}
+                                          disabled={actionLoading === selectedCompany.id}
+                                        >
+                                          <XCircle className="h-4 w-4 mr-1" />
+                                          Từ chối
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
               <div className="text-sm text-gray-500">
                 Trang {currentPage} / {totalPages}
               </div>
@@ -483,33 +643,35 @@ export default function CompanyManagement() {
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Trước
                 </Button>
 
                 {/* Page numbers */}
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
 
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNum)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
 
                 <Button
                   variant="outline"
@@ -517,7 +679,6 @@ export default function CompanyManagement() {
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
-                  Sau
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -525,6 +686,28 @@ export default function CompanyManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Image Preview Modal */}
+      <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <div className="relative">
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Business Certificate Full View"
+                className="w-full h-auto max-h-[90vh] object-contain"
+                loading="lazy"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
