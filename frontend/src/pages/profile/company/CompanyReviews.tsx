@@ -41,7 +41,7 @@ export function CompanyReviews() {
     };
 
     fetchCompanyFeedbacks();
-  }, [authUser?.company_id, authUser?.username]);
+  }, []);
 
   if (loading) {
     return (
