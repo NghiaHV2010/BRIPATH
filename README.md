@@ -1,4 +1,4 @@
-# BriPath - AI-Driven Recruitment Platform
+# BRIPATH - ONLINE RECRUITMENT PLATFORM
 
 ![Project Status](https://img.shields.io/badge/status-active-success)
 ![Node Version](https://img.shields.io/badge/node-v18%2B-blue)
@@ -7,7 +7,6 @@
 **BriPath** là nền tảng tuyển dụng tích hợp AI, giải quyết bài toán khớp lệnh (matching) giữa hồ sơ ứng viên và tin tuyển dụng bằng công nghệ RAG và Vector Search.
 
 🔗 **Live Demo:** [https://bripath.online](https://bripath.online)
-🎥 **Demo Video:** [Link Youtube/Drive nếu có]
 
 ## 🚀 Key Features
 
@@ -25,7 +24,7 @@
 
 | Component | Technology |
 | :--- | :--- |
-| **Frontend** | React (Vite), TypeScript, TailwindCSS, Zustand |
+| **Frontend** | React (Vite), TypeScript, TailwindCSS, Shadcn, Zustand |
 | **Backend** | Node.js, Express.js, Prisma ORM |
 | **Database** | PostgreSQL, VectorDB (pgvector), Redis |
 | **AI/ML** | OpenAI API, Gemini API |
